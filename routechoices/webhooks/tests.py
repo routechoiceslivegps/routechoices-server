@@ -68,8 +68,10 @@ class WebHookTestCase(EssentialApiBase):
             url,
             {
                 "data": {
-                    "id": "abc123",
-                    "attributes": {"first_order_item": {"variant_id": 154372}},
+                    "id": "123456",
+                    "attributes": {
+                        "first_order_item": {"variant_id": 154372, "order_id": 123456}
+                    },
                 },
                 "meta": {"custom_data": {"club": "kiilat"}},
             },
@@ -79,18 +81,18 @@ class WebHookTestCase(EssentialApiBase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.club.refresh_from_db()
         self.assertTrue(self.club.upgraded)
-        self.assertEqual(self.club.order_id, "abc123")
+        self.assertEqual(self.club.order_id, "123456")
 
     def test_downgrade_club(self):
         url = self.reverse_and_check(
             "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
         )
         self.club.upgraded = True
-        self.club.order_id = "abc123"
+        self.club.order_id = "123456"
         self.club.save()
         res = self.ls_client.post(
             url,
-            {"data": {"attributes": {"order_id": "abc123", "variant_id": 154372}}},
+            {"data": {"attributes": {"order_id": 123456, "variant_id": 154372}}},
             HTTP_X_EVENT_NAME="subscription_expired",
             content_type="json",
         )

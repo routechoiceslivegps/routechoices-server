@@ -28,7 +28,7 @@ def lemonsqueezy_webhook(request):
     try:
         variant_id = str(
             data["data"]["attributes"].get("variant_id")
-            or data["data"]["attributes"]["first_order_item"].get("variant_id")
+            or data["data"]["attributes"].get("first_order_item", {}).get("variant_id")
         )
     except Exception:
         pass
@@ -40,6 +40,11 @@ def lemonsqueezy_webhook(request):
     ):
         club = None
         try:
+            order_id = str(data["data"]["attributes"]["first_order_item"]["order_id"])
+        except KeyError:
+            # Could not find order_id info
+            raise BadRequest("Missing order id")
+        try:
             slug = str(data["meta"]["custom_data"]["club"])
         except KeyError:
             pass
@@ -50,7 +55,7 @@ def lemonsqueezy_webhook(request):
 
         club.upgraded = True
         club.upgraded_date = now()
-        club.order_id = data["data"]["id"]
+        club.order_id = order_id
         club.save()
         return HttpResponse(f"Upgraded {club}")
 
@@ -61,7 +66,7 @@ def lemonsqueezy_webhook(request):
     ):
         club = None
         try:
-            order_id = data["data"]["attributes"]["order_id"]
+            order_id = str(data["data"]["attributes"]["order_id"])
         except KeyError:
             # Could not find order_id info
             raise BadRequest("Missing order id")
