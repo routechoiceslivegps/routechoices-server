@@ -26,7 +26,10 @@ def lemonsqueezy_webhook(request):
 
     variant_id = None
     try:
-        variant_id = str(data["data"]["attributes"]["variant_id"])
+        variant_id = str(
+            data["data"]["attributes"].get("variant_id")
+            or data["data"]["attributes"]["first_order_item"].get("variant_id")
+        )
     except Exception:
         pass
 
