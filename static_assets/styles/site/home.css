@@ -12,7 +12,6 @@
   transition: 1s opacity;
   object-fit: contain;
   vertical-align: baseline;
-  background: transparent url("../../background.jpg") 50% 50% / cover no-repeat;
 }
 
 [data-bs-theme="light"] {
