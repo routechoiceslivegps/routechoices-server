@@ -227,6 +227,7 @@ Follow our events live or replay them later.
                 F("slug_changed_at").desc(),
                 name="core_club_changed_slug_idx",
             ),
+            models.Index("frontpage_featured", name="core_on_frontpage_idx"),
         ]
 
     def __str__(self):
