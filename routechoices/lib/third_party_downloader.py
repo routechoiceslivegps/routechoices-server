@@ -117,6 +117,85 @@ class ThirdPartyTrackingSolution:
         return event
 
 
+class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
+    def get_competitor_device_id_prefix(self):
+        raise NotImplementedError()
+
+    def get_event(self):
+        raise NotImplementedError()
+
+    def get_map(self, download_map=False):
+        raise NotImplementedError()
+
+    def get_competitor_devices_data(self, uid, event):
+        raise NotImplementedError()
+
+    def get_competitors_data(self):
+        raise NotImplementedError()
+
+    def get_or_create_event(self, uid):
+        tmp_event = self.get_event()
+        event, _ = Event.objects.get_or_create(
+            club=self.club,
+            slug=tmp_event.slug,
+            defaults={
+                "name": tmp_event.name,
+                "privacy": PRIVACY_SECRET,
+                "start_date": tmp_event.start_date,
+                "end_date": tmp_event.end_date,
+            },
+        )
+        return event
+
+    def get_or_create_event_maps(self, event, uid):
+        tmp_map = self.get_map(download_map=True)
+        if not tmp_map:
+            raise MapsImportError("Error importing map")
+        map_obj, _ = Map.objects.get_or_create(
+            name=event.name,
+            club=self.club,
+            defaults={
+                "image": tmp_map.image,
+                "width": tmp_map.width,
+                "height": tmp_map.height,
+                "corners_coordinates": tmp_map.corners_coordinates,
+            },
+        )
+        return [map_obj]
+
+    def get_or_create_event_competitors(self, event, uid):
+        devices_data = self.get_competitor_devices_data(uid, event)
+        device_map = {}
+        for dev_id, locations in devices_data.items():
+            dev_hash = safe64encodedsha(f"{dev_id}:{uid}")[:8]
+            dev_hash = f"{self.get_competitor_device_id_prefix()}{dev_hash}"
+            dev_obj, created = Device.objects.get_or_create(
+                aid=dev_hash,
+                defaults={"is_gpx": True},
+            )
+            if not created:
+                dev_obj.locations_series = []
+            dev_obj.locations_series = locations
+            device_map[dev_id] = dev_obj
+
+        competitors = self.get_competitors_data()
+        for cid, tmp_competitor in competitors.items():
+            competitor, _ = Competitor.objects.get_or_create(
+                name=tmp_competitor.name,
+                short_name=tmp_competitor.short_name,
+                start_time=tmp_competitor.start_time,
+                event=event,
+            )
+            device = device_map.get(cid)
+            if device:
+                device.save()
+                competitor.device = device
+            competitor.save()
+            competitors.append(competitor)
+
+        return competitors
+
+
 class Livelox(ThirdPartyTrackingSolution):
     slug = "livelox"
     name = "Livelox"
@@ -673,7 +752,7 @@ class OTracker(ThirdPartyTrackingSolution):
         return competitors
 
 
-class GpsSeurantaNet(ThirdPartyTrackingSolution):
+class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
     GPSSEURANTA_EVENT_URL = "http://www.tulospalvelu.fi/gps/"
     name = "GPS Seuranta"
     slug = "gpsseuranta"
@@ -695,6 +774,9 @@ class GpsSeurantaNet(ThirdPartyTrackingSolution):
             except ValueError:
                 continue
         self.init_data = event_data
+
+    def get_competitor_device_id_prefix(self):
+        return "SEU_"
 
     def is_live(self):
         return self.init_data["LIVE"] == "1"
@@ -719,20 +801,6 @@ class GpsSeurantaNet(ThirdPartyTrackingSolution):
         event.start_date = self.get_start_time()
         event.end_date = self.get_end_time()
         event.send_interval = int(self.init_data.get("GRABINTERVAL", 10))
-        return event
-
-    def get_or_create_event(self, uid):
-        tmp_event = self.get_event()
-        event, _ = Event.objects.get_or_create(
-            club=self.club,
-            slug=tmp_event.slug,
-            defaults={
-                "name": tmp_event.name,
-                "privacy": PRIVACY_SECRET,
-                "start_date": tmp_event.start_date,
-                "end_date": tmp_event.end_date,
-            },
-        )
         return event
 
     def get_map_url(self):
@@ -764,22 +832,6 @@ class GpsSeurantaNet(ThirdPartyTrackingSolution):
                 map_file = ContentFile(r.content)
                 map_obj.image.save("map", map_file, save=False)
         return map_obj
-
-    def get_or_create_event_maps(self, event, uid):
-        tmp_map = self.get_map(download_map=True)
-        if not tmp_map:
-            raise MapsImportError("Error importing map")
-        map_obj, _ = Map.objects.get_or_create(
-            name=event.name,
-            club=self.club,
-            defaults={
-                "image": tmp_map.image,
-                "width": tmp_map.width,
-                "height": tmp_map.height,
-                "corners_coordinates": tmp_map.corners_coordinates,
-            },
-        )
-        return [map_obj]
 
     def get_competitor_devices_data(self, uid, event):
         devices_data = {}
@@ -836,36 +888,6 @@ class GpsSeurantaNet(ThirdPartyTrackingSolution):
             )
         return competitors
 
-    def get_or_create_event_competitors(self, event, uid):
-        devices_data = self.get_competitor_devices_data(uid, event)
-        device_map = {}
-        for dev_id, locations in devices_data.items():
-            dev_obj, created = Device.objects.get_or_create(
-                aid="SEU_" + safe64encodedsha(f"{dev_id}:{uid}")[:8],
-                defaults={"is_gpx": True},
-            )
-            if not created:
-                dev_obj.locations_series = []
-            dev_obj.locations_series = locations
-            device_map[dev_id] = dev_obj
-
-        competitors = self.get_competitors_data()
-        for cid, tmp_competitor in competitors.items():
-            competitor, _ = Competitor.objects.get_or_create(
-                name=tmp_competitor.name,
-                short_name=tmp_competitor.short_name,
-                start_time=tmp_competitor.start_time,
-                event=event,
-            )
-            device = device_map.get(cid)
-            if device:
-                device.save()
-                competitor.device = device
-            competitor.save()
-            competitors.append(competitor)
-
-        return competitors
-
     @classmethod
     def decode_data_line(cls, data):
         if not data:
@@ -913,10 +935,13 @@ class GpsSeurantaNet(ThirdPartyTrackingSolution):
         return locs
 
 
-class Loggator(ThirdPartyTrackingSolution):
+class Loggator(ThirdPartyTrackingSolutionWithProxy):
     LOGGATOR_EVENT_URL = "https://loggator.com/api/events/"
     name = "Loggator"
     slug = "loggator"
+
+    def get_competitor_device_id_prefix(self):
+        return "LOG_"
 
     def parse_init_data(self, uid):
         event_url = f"{self.LOGGATOR_EVENT_URL}{uid}.json"
@@ -933,20 +958,6 @@ class Loggator(ThirdPartyTrackingSolution):
         event.start_date = arrow.get(self.init_data["event"]["start_date"]).datetime
         event.end_date = arrow.get(self.init_data["event"]["end_date"]).datetime
         event.send_interval = 10
-        return event
-
-    def get_or_create_event(self, uid):
-        tmp_event = self.get_event()
-        event, _ = Event.objects.get_or_create(
-            club=self.club,
-            slug=tmp_event.slug,
-            defaults={
-                "name": tmp_event.name,
-                "privacy": PRIVACY_SECRET,
-                "start_date": tmp_event.start_date,
-                "end_date": tmp_event.end_date,
-            },
-        )
         return event
 
     def get_map_url(self):
@@ -982,22 +993,6 @@ class Loggator(ThirdPartyTrackingSolution):
                 map_obj.image.save("map", map_file, save=False)
         return map_obj
 
-    def get_or_create_event_maps(self, event, uid):
-        tmp_map = self.get_map(download_map=True)
-        if not tmp_map:
-            raise MapsImportError("Error importing map")
-        map_obj, _ = Map.objects.get_or_create(
-            name=event.name,
-            club=self.club,
-            defaults={
-                "image": tmp_map.image,
-                "width": tmp_map.width,
-                "height": tmp_map.height,
-                "corners_coordinates": tmp_map.corners_coordinates,
-            },
-        )
-        return [map_obj]
-
     def get_competitor_devices_data(self, uid, event):
         devices_data = {}
         r = requests.get(self.init_data["tracks"], timeout=20)
@@ -1031,36 +1026,6 @@ class Loggator(ThirdPartyTrackingSolution):
             )
             device_id = f"{c_data['device_id']}"
             competitors[device_id] = competitor
-        return competitors
-
-    def get_or_create_event_competitors(self, event, uid):
-        devices_data = self.get_competitor_devices_data(uid, event)
-        device_map = {}
-        for dev_id, locations in devices_data.items():
-            dev_obj, created = Device.objects.get_or_create(
-                aid="LOG_" + safe64encodedsha(f"{dev_id}:{uid}")[:8],
-                defaults={"is_gpx": True},
-            )
-            if not created:
-                dev_obj.locations_series = []
-            dev_obj.locations_series = locations
-            device_map[dev_id] = dev_obj
-
-        competitors = self.get_competitors_data()
-        for cid, tmp_competitor in competitors.items():
-            competitor, _ = Competitor.objects.get_or_create(
-                name=tmp_competitor.name,
-                short_name=tmp_competitor.short_name,
-                start_time=tmp_competitor.start_time,
-                event=event,
-            )
-            device = device_map.get(cid)
-            if device:
-                device.save()
-                competitor.device = device
-            competitor.save()
-            competitors.append(competitor)
-
         return competitors
 
 
