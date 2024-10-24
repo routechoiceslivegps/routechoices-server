@@ -266,36 +266,40 @@ const PositionArchive = function () {
     }
     return result;
   };
+  this.decode = function(encoded) {
+    const YEAR2010 = 1262304000; // = Date.parse("2010-01-01T00:00:00Z")/1e3,
+    const vals = [];
+    const prev_vals = [YEAR2010, 0, 0];
+    const enc_len = encoded.length;
+    let r;
+    let is_first = true;
+    let offset = 0;
+    positions = [];
+    while (offset < enc_len) {
+      for (let i = 0; i < 3; i++) {
+        if (i === 0) {
+          if (is_first) {
+            is_first = false;
+            r = intValCodec.decodeSignedValueFromString(encoded, offset);
+          } else {
+            r = intValCodec.decodeUnsignedValueFromString(encoded, offset);
+          }
+        } else {
+          r = intValCodec.decodeSignedValueFromString(encoded, offset);
+        }
+        offset += r[1];
+        const new_val = prev_vals[i] + r[0];
+        vals[i] = new_val;
+        prev_vals[i] = new_val;
+      }
+      positions.push([vals[0] * 1e3, vals[1] / 1e5, vals[2] / 1e5]);
+    }
+    return this
+  }
 };
 
 PositionArchive.fromEncoded = function (encoded) {
-  const YEAR2010 = 1262304000; // = Date.parse("2010-01-01T00:00:00Z")/1e3,
-  const vals = [];
-  const prev_vals = [YEAR2010, 0, 0];
-  const enc_len = encoded.length;
   const pts = new PositionArchive();
-  let r;
-  let is_first = true;
-  let offset = 0;
-
-  while (offset < enc_len) {
-    for (let i = 0; i < 3; i++) {
-      if (i === 0) {
-        if (is_first) {
-          is_first = false;
-          r = intValCodec.decodeSignedValueFromString(encoded, offset);
-        } else {
-          r = intValCodec.decodeUnsignedValueFromString(encoded, offset);
-        }
-      } else {
-        r = intValCodec.decodeSignedValueFromString(encoded, offset);
-      }
-      offset += r[1];
-      const new_val = prev_vals[i] + r[0];
-      vals[i] = new_val;
-      prev_vals[i] = new_val;
-    }
-    pts.push([vals[0] * 1e3, vals[1] / 1e5, vals[2] / 1e5]);
-  }
+  pts.decode(encoded)
   return pts;
 };
