@@ -275,26 +275,28 @@ const PositionArchive = function () {
     let is_first = true;
     let offset = 0;
     positions = [];
-    while (offset < enc_len) {
+    if (enc_len > 0) {
       for (let i = 0; i < 3; i++) {
-        if (i === 0) {
-          if (is_first) {
-            is_first = false;
-            r = intValCodec.decodeSignedValueFromString(encoded, offset);
-          } else {
-            r = intValCodec.decodeUnsignedValueFromString(encoded, offset);
-          }
-        } else {
-          r = intValCodec.decodeSignedValueFromString(encoded, offset);
-        }
-        offset += r[1];
-        const new_val = prev_vals[i] + r[0];
+        const decoder = i === 0 ? intValCodec.decodeSignedValueFromString : intValCodec.decodeUnsignedValueFromString;
+        const [decodedVal, len] = decoder(encoded, offset);
+        offset += len;
+        const new_val = prev_vals[i] + decodedVal;
         vals[i] = new_val;
         prev_vals[i] = new_val;
       }
       positions.push([vals[0] * 1e3, vals[1] / 1e5, vals[2] / 1e5]);
     }
-    return this
+    while (offset < enc_len) {
+      for (let i = 0; i < 3; i++) {
+        const [decodedVal, len] = intValCodec.decodeUnsignedValueFromString(encoded, offset);
+        offset += len;
+        const new_val = prev_vals[i] + decodedVal;
+        vals[i] = new_val;
+        prev_vals[i] = new_val;
+      }
+      positions.push([vals[0] * 1e3, vals[1] / 1e5, vals[2] / 1e5]);
+    }
+    return this;
   }
 };
 
