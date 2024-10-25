@@ -272,32 +272,19 @@ const PositionArchive = function () {
     const prev_vals = [YEAR2010, 0, 0];
     const enc_len = encoded.length;
     let offset = 0;
+    let isFirst = true;
     positions = [];
-    if (enc_len > 0) {
-      for (let i = 0; i < 3; i++) {
-        const [decodedVal, len] = intValCodec.decodeSignedValueFromString(encoded, offset);
-        offset += len;
-        const new_val = prev_vals[i] + decodedVal;
-        vals[i] = new_val;
-        prev_vals[i] = new_val;
-      }
-      positions.push([vals[0] * 1e3, vals[1] / 1e5, vals[2] / 1e5]);
-    }
+
     while (offset < enc_len) {
-      {
-        const [decodedVal, len] = intValCodec.decodeUnsignedValueFromString(encoded, offset);
-        offset += len;
-        const new_val = prev_vals[0] + decodedVal;
-        vals[0] = new_val;
-        prev_vals[0] = new_val;
-      }
-      for (let i = 1; i < 3; i++) {
-        const [decodedVal, len] = intValCodec.decodeSignedValueFromString(encoded, offset);
+      for (let i = 0; i < 3; i++) {
+        const decoder = (i === 0 && !isFirst) ? intValCodec.decodeUnsignedValueFromString : intValCodec.decodeSignedValueFromString
+        const [decodedVal, len] = decoder(encoded, offset);
         offset += len;
         const new_val = prev_vals[i] + decodedVal;
         vals[i] = new_val;
         prev_vals[i] = new_val;
       }
+      isFirst = false;
       positions.push([vals[0] * 1e3, vals[1] / 1e5, vals[2] / 1e5]);
     }
     return this;

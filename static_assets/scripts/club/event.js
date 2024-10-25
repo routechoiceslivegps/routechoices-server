@@ -1906,7 +1906,7 @@ function RCEvent(infoURL, clockURL) {
           return;
         }
         const runnerPoints = [];
-
+        const aaaa = performance.now();
         response.competitors.forEach(function (competitor) {
           let route = null;
           if (competitor.encoded_data) {
@@ -1930,7 +1930,7 @@ function RCEvent(infoURL, clockURL) {
             competitorBatteyLevels[competitor.id] = null;
           }
         });
-
+        console.log(performance.now() - aaaa);
         updateCompetitorList(response.competitors);
         displayCompetitorList();
         routesLastFetched = performance.now();
