@@ -272,19 +272,17 @@ const PositionArchive = function () {
     const prev_vals = [YEAR2010, 0, 0];
     const enc_len = encoded.length;
     let offset = 0;
-    let isFirst = true;
     positions = [];
 
     while (offset < enc_len) {
       for (let i = 0; i < 3; i++) {
-        const decoder = (i === 0 && !isFirst) ? intValCodec.decodeUnsignedValueFromString : intValCodec.decodeSignedValueFromString
+        const decoder = (i === 0 && offset) ? intValCodec.decodeUnsignedValueFromString : intValCodec.decodeSignedValueFromString
         const [decodedVal, len] = decoder(encoded, offset);
         offset += len;
         const new_val = prev_vals[i] + decodedVal;
         vals[i] = new_val;
         prev_vals[i] = new_val;
       }
-      isFirst = false;
       positions.push([vals[0] * 1e3, vals[1] / 1e5, vals[2] / 1e5]);
     }
     return this;
