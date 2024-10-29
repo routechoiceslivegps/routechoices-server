@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="tcpdevicecommand",
             name="comment",
-            field=models.CharField(blank=True, default=""),
+            field=models.CharField(blank=True, default="", max_length=512),
         ),
     ]
