@@ -9,6 +9,7 @@ from .helpers import (
     compute_corners_from_kml_latlonbox,
     three_point_calibration_to_corners,
 )
+from .mtb_decoder import MtbDecoder
 
 
 @override_settings(ANALYTICS_API_KEY=True)
@@ -125,3 +126,10 @@ class HelperTestCase(TestCase):
     def test_check_dns(self):
         self.assertTrue(check_cname_record("live.kiilat.com"))
         self.assertTrue(check_txt_record("live.kiilat.com"))
+
+
+class MtbDecoderTestCase(TestCase):
+    def test_decode(self):
+        with open("cypress/fixtures/test.mtb", "rb") as lf:
+            device_map = MtbDecoder(lf).decode()
+        self.assertEqual(len(device_map), 11)
