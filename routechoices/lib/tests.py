@@ -5,11 +5,12 @@ from django.test import TestCase, override_settings
 from . import plausible
 from .helpers import (
     check_cname_record,
-    check_txt_record,
     compute_corners_from_kml_latlonbox,
     three_point_calibration_to_corners,
 )
+from .kmz import extract_ground_overlay_info
 from .mtb_decoder import MtbDecoder
+from .slippy_tiles import latlon_to_tile_xy, tile_xy_to_north_west_latlon
 
 
 @override_settings(ANALYTICS_API_KEY=True)
@@ -125,7 +126,24 @@ class HelperTestCase(TestCase):
 
     def test_check_dns(self):
         self.assertTrue(check_cname_record("live.kiilat.com"))
-        self.assertTrue(check_txt_record("live.kiilat.com"))
+
+    def test_slippy_map(self):
+        xy = latlon_to_tile_xy(60, 20, 10)
+        self.assertEqual(xy, (568, 297))
+        lat_lon = tile_xy_to_north_west_latlon(xy[0], xy[1], 10)
+        self.assertEqual(lat_lon, (60.064840460104506, 19.6875))
+
+    def test_import_kml(self):
+        kml = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Folder><name>Ground Overlays</name><description>Examples of ground overlays</description><GroundOverlay><name>Large-scale overlay on terrain</name><description>Overlay shows Mount Etna erupting on July 13th, 2001.</description><Icon><href>https://developers.google.com/kml/documentation/images/etna.jpg</href></Icon><LatLonBox><north>37.91904192681665</north><south>37.46543388598137</south><east>15.35832653742206</east><west>14.60128369746704</west><rotation>-0.1556640799496235</rotation></LatLonBox></GroundOverlay></Folder></kml>'
+        name, url, coordinates = extract_ground_overlay_info(kml)[0]
+        self.assertEqual(name, "Ground Overlays - Large-scale overlay on terrain")
+        self.assertEqual(
+            url, "https://developers.google.com/kml/documentation/images/etna.jpg"
+        )
+        self.assertEqual(
+            coordinates,
+            "37.91985,14.60206,37.91823,15.3591,37.46462,15.35755,37.46625,14.60051",
+        )
 
 
 class MtbDecoderTestCase(TestCase):

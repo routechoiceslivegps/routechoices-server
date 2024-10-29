@@ -120,6 +120,13 @@ class MapApiTestCase(EssentialApiBase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res["content-type"], "image/avif")
 
+        # serve jxl if asked
+        res = client.get(
+            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&" f"format=image%2Fjxl")
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res["content-type"], "image/jxl")
+
         # return error if gif is asked
         res = client.get(
             (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&" f"format=image%2Fgif")

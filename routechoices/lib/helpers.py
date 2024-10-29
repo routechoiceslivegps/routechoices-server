@@ -58,18 +58,6 @@ def get_current_site():
     return MySite()
 
 
-def int_to_alpha(i, alphabet=None):
-    if alphabet is None:
-        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    alphabet_len = len(alphabet)
-    out = ""
-    while i > 0:
-        i -= 1
-        out += alphabet[i % alphabet_len]
-        i = i // alphabet_len
-    return out[::-1]
-
-
 def get_best_image_mime(request, default=None):
     accepted_mimes = request.COOKIES.get("accept-image", "").split(",")
     accepted_mimes += request.META.get("HTTP_ACCEPT", "").split(",")
@@ -376,38 +364,6 @@ def initial_of_name(name):
     parts = name.split()
     initials = [part[0].upper() for part in parts[:-1]]
     return ".".join(initials + [parts[-1]])
-
-
-def check_txt_record(domain):
-    if not domain:
-        return False
-
-    try:
-        resp = requests.get(
-            f"https://cloudflare-dns.com/dns-query?type=TXT&name={urllib.parse.quote(domain)}",
-            headers={"accept": "application/dns-json"},
-            timeout=10,
-        )
-    except Exception:
-        return False
-
-    if resp.status_code != 200:
-        return False
-
-    try:
-        data = resp.json()
-    except Exception:
-        return False
-
-    if data.get("Status") != 0:
-        return False
-
-    answer = data.get("Answer", [])
-    for ans in answer:
-        if ans.get("data") == '"full-speed-no-mistakes"' and ans.get("type") == 16:
-            return True
-
-    return False
 
 
 def check_cname_record(domain):

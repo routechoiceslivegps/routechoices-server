@@ -418,6 +418,17 @@ class ClubViewsTestCase(EssentialApiBase):
         response = client.get("/")
         self.assertEqual(response.status_code, 200)
 
+        self.club.domain = ""
+        self.club.save()
+        cache.clear()
+
+        response = client.get("/")
+        self.assertIn(
+            "This domain has not been associated with a club...",
+            response.content.decode(),
+        )
+        self.assertEqual(response.status_code, 404)
+
     def test_no_club_pages_loads(self):
         client = APIClient(HTTP_HOST="haldensk.routechoices.dev")
 

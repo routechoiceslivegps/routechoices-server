@@ -45,8 +45,8 @@ def extract_ground_overlay_info(kml):
                 nw, ne, se, sw = compute_corners_from_kml_latlonbox(
                     north, east, south, west, rot
                 )
-                corners_coords = (
-                    f"{nw[0]},{nw[1]},{ne[0]},{ne[1]},{se[0]},{se[1]},{sw[0]},{sw[1]}"
+                corners_coords = corners_coords = (
+                    f"{round(float(nw[0]), 5)},{round(float(nw[1]), 5)},{round(float(ne[0]), 5)},{round(float(ne[1]), 5)},{round(float(se[0]), 5)},{round(float(se[1]), 5)},{round(float(sw[0]), 5)},{round(float(sw[1]), 5)}"
                 )
             elif len(latlon_quad_nodes) > 0:
                 latlon_quad = latlon_quad_nodes[0]
