@@ -1098,7 +1098,7 @@ class Map(models.Model):
             3,
         )
 
-    def merge(self, other_maps):
+    def merge(self, *other_maps):
         width, height = self.quick_size
 
         min_x = 0
