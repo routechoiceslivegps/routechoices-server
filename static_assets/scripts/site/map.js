@@ -1,3 +1,33 @@
+function deg2rad(deg) {
+  return (deg * Math.PI) / 180;
+}
+
+function computeBoundsFromLatLonBox(n, e, s, w, rot) {
+  const a = (e + w) / 2;
+  const b = (n + s) / 2;
+  const squish = Math.cos(deg2rad(b));
+  const x = (squish * (e - w)) / 2;
+  const y = (n - s) / 2;
+
+  const ne = [
+    b + x * Math.sin(deg2rad(rot)) + y * Math.cos(deg2rad(rot)),
+    a + (x * Math.cos(deg2rad(rot)) - y * Math.sin(deg2rad(rot))) / squish,
+  ];
+  const nw = [
+    b - x * Math.sin(deg2rad(rot)) + y * Math.cos(deg2rad(rot)),
+    a - (x * Math.cos(deg2rad(rot)) + y * Math.sin(deg2rad(rot))) / squish,
+  ];
+  const sw = [
+    b - x * Math.sin(deg2rad(rot)) - y * Math.cos(deg2rad(rot)),
+    a - (x * Math.cos(deg2rad(rot)) - y * Math.sin(deg2rad(rot))) / squish,
+  ];
+  const se = [
+    b + x * Math.sin(deg2rad(rot)) - y * Math.cos(deg2rad(rot)),
+    a + (x * Math.cos(deg2rad(rot)) + y * Math.sin(deg2rad(rot))) / squish,
+  ];
+  return [nw, ne, se, sw];
+}
+
 (function () {
   var map = L.map("map", { tap: false }).setView([0, 0], 2);
   // geocoder (map search)
@@ -142,38 +172,42 @@
   const extractKMZInfo = async (kmlText, kmz) => {
     const parser = new DOMParser();
     const parsedText = parser.parseFromString(kmlText, "text/xml");
-    const go = parsedText.getElementsByTagName("GroundOverlay")[0];
-    if (go) {
+    let maps = [];
+    for (go of parsedText.getElementsByTagName("GroundOverlay")) {
       try {
         const latLonboxElNodes = go.getElementsByTagName("LatLonBox");
         const latLonQuadElNodes = go.getElementsByTagName("gx:LatLonQuad");
         const filePath = go.getElementsByTagName("href")[0].innerHTML;
-        const fileU8 = await kmz.file(filePath).async("uint8array");
-        const filename = kmz.file(filePath).name;
-        const extension = filename.toLowerCase().split(".").pop();
-        let mime = "";
-        if (extension === "jpg") {
-          mime = "image/jpeg";
-        } else if (
-          ["png", "gif", "jpeg", "webp", "avif", "jxl"].includes(extension)
-        ) {
-          mime = "image/" + extension;
+        let imageDataURI;
+        if (filePath.startsWith("http")) {
+          imageDataURI = filePath;
+        } else {
+          const fileU8 = await kmz.file(filePath).async("uint8array");
+          const filename = kmz.file(filePath).name;
+          const extension = filename.toLowerCase().split(".").pop();
+          let mime = "";
+          if (extension === "jpg") {
+            mime = "image/jpeg";
+          } else if (
+            ["png", "gif", "jpeg", "webp", "avif", "jxl"].includes(extension)
+          ) {
+            mime = "image/" + extension;
+          }
+          imageDataURI =
+            "data:" +
+            mime +
+            ";base64," +
+            btoa(
+              [].reduce.call(
+                fileU8,
+                function (p, c) {
+                  return p + String.fromCharCode(c);
+                },
+                ""
+              )
+            );
         }
-        const imageDataURI =
-          "data:" +
-          mime +
-          ";base64," +
-          btoa(
-            [].reduce.call(
-              fileU8,
-              function (p, c) {
-                return p + String.fromCharCode(c);
-              },
-              ""
-            )
-          );
         let bounds;
-        var maps = [];
         for (var i = 0; i < latLonboxElNodes.length; i++) {
           const latLonboxEl = latLonboxElNodes[i];
           bounds = computeBoundsFromLatLonBox(
@@ -207,20 +241,21 @@
           ];
           maps.push({ imageDataURI, bounds });
         }
-        return maps;
       } catch (e) {
         alert("Error parsing your KMZ file!");
         return;
       }
-    } else {
-      alert("Error parsing your KMZ file!");
-      return;
     }
+    return maps;
   };
   const onKmzLoaded = async (file) => {
     const zip = await JSZip.loadAsync(file);
-    if (zip.files && zip.files["doc.kml"]) {
-      const kml = await zip.file("doc.kml").async("string");
+    if ((zip.files && zip.files["doc.kml"]) || zip.files["Doc.kml"]) {
+      let filename = "Doc.kml";
+      if (zip.files["doc.kml"]) {
+        filename = "doc.kml";
+      }
+      const kml = await zip.file(filename).async("string");
       const maps = await extractKMZInfo(kml, zip);
       if (maps) {
         for (var data of maps) {
