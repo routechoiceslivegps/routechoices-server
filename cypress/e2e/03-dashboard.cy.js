@@ -92,17 +92,23 @@ context("Dashboard actions", () => {
     cy.visit("/dashboard/maps/upload-kmz");
     cy.get("#id_file").selectFile("cypress/fixtures/Jukola_1st_leg.kmz");
     cy.get("button:not([type]),button[type=submit]").click();
-    cy.get("#django-messages").contains("The import of the map was successful");
+    cy.get("#django-messages", { timeout: 10000 }).contains(
+      "The import of the map was successful"
+    );
 
     cy.visit("/dashboard/maps/upload-kmz");
     cy.get("#id_file").selectFile("cypress/fixtures/multiground.kml");
     cy.get("button:not([type]),button[type=submit]").click();
-    cy.get("#django-messages").contains("The import of the map was successful");
+    cy.get("#django-messages", { timeout: 10000 }).contains(
+      "The import of the map was successful"
+    );
 
     cy.visit("/dashboard/maps/upload-kmz");
     cy.get("#id_file").selectFile("cypress/fixtures/tiled.kmz");
     cy.get("button:not([type]),button[type=submit]").click();
-    cy.get("#django-messages", { timeout: 60000 }).contains("The import of the map was successful");
+    cy.get("#django-messages", { timeout: 10000 }).contains(
+      "The import of the map was successful"
+    );
   });
 
   it("Create Map from Image", function () {
