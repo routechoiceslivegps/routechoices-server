@@ -1098,97 +1098,76 @@ class Map(models.Model):
             3,
         )
 
-    def merge(self, other_map):
+    def merge(self, other_maps):
         width, height = self.quick_size
-        widthb, heightb = other_map.quick_size
-        bound_b = other_map.bound
-        tl_b = self.wsg84_to_map_xy(
-            bound_b["topLeft"]["lat"], bound_b["topLeft"]["lon"]
-        )
-        tr_b = self.wsg84_to_map_xy(
-            bound_b["topRight"]["lat"], bound_b["topRight"]["lon"]
-        )
-        br_b = self.wsg84_to_map_xy(
-            bound_b["bottomRight"]["lat"], bound_b["bottomRight"]["lon"]
-        )
-        bl_b = self.wsg84_to_map_xy(
-            bound_b["bottomLeft"]["lat"], bound_b["bottomLeft"]["lon"]
-        )
-        min_x = min(
-            0,
-            tl_b[0],
-            tr_b[0],
-            br_b[0],
-            bl_b[0],
-        )
-        max_x = max(
-            width,
-            tl_b[0],
-            tr_b[0],
-            br_b[0],
-            bl_b[0],
-        )
-        min_y = min(
-            0,
-            tl_b[1],
-            tr_b[1],
-            br_b[1],
-            bl_b[1],
-        )
-        max_y = max(
-            height,
-            tl_b[1],
-            tr_b[1],
-            br_b[1],
-            bl_b[1],
-        )
+        min_x = 0
+        min_y = 0
+        max_x = width
+        max_y = height
+
+        all_corners = []
+        for i, other_map in enumerate(other_maps):
+            bound = other_map.bound
+            corners = [
+                self.wsg84_to_map_xy(bound[xx]["lat"], bound[xx]["lon"])
+                for xx in ("topLeft", "topRight", "bottomRight", "bottomLeft")
+            ]
+            all_corners.append(corners)
+
+        all_x = [xy[0] for xy in corners for corners in all_corners]
+        all_y = [xy[1] for xy in corners for corners in all_corners]
+
+        min_x = min(min_x, *all_x)
+        min_y = min(min_y, *all_y)
+        max_x = max(max_x, *all_x)
+        max_y = max(max_y, *all_y)
+
         new_width = int(max_x - min_x)
         new_height = int(max_y - min_y)
-
         new_image = Image.new(
             mode="RGBA", size=(new_width, new_height), color=(0, 0, 0, 0)
         )
-        img_a = Image.open(BytesIO(self.data)).convert("RGBA")
-        new_image.alpha_composite(img_a, (int(-min_x), int(-min_y)))
-        p1 = np.float32(
-            [
-                [0, 0],
-                [widthb, 0],
-                [widthb, heightb],
-                [0, heightb],
-            ]
-        )
-        p2 = np.float32(
-            [
-                [tl_b[0] - min_x, tl_b[1] - min_y],
-                [tr_b[0] - min_x, tr_b[1] - min_y],
-                [br_b[0] - min_x, br_b[1] - min_y],
-                [bl_b[0] - min_x, bl_b[1] - min_y],
-            ]
-        )
-        coeffs = cv2.getPerspectiveTransform(p1, p2)
-
-        b_data = other_map.data
-        b_mime_type = magic.from_buffer(b_data, mime=True)
-        if b_mime_type == "image/gif":
-            img = Image.open(BytesIO(b_data)).convert("RGBA")
-            img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGRA)
-        else:
-            img_nparr = np.fromstring(b_data, np.uint8)
-            img = cv2.imdecode(img_nparr, cv2.IMREAD_UNCHANGED)
-            img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2BGRA)
-        img_b = cv2.warpPerspective(
-            img_alpha,
-            coeffs,
-            (new_width, new_height),
-            flags=cv2.INTER_AREA,
-            borderMode=cv2.BORDER_CONSTANT,
-            borderValue=(255, 255, 255, 0),
-        )
-        color_converted = cv2.cvtColor(img_b, cv2.COLOR_BGRA2RGBA)
-        pil_image = Image.fromarray(color_converted)
-        new_image.alpha_composite(pil_image, (0, 0))
-
+        img = Image.open(BytesIO(self.data)).convert("RGBA")
+        new_image.alpha_composite(img, (int(-min_x), int(-min_y)))
+        for i, other_map in enumerate(other_maps):
+            w, h = other_map.quick_size
+            p1 = np.float32(
+                [
+                    [0, 0],
+                    [w, 0],
+                    [w, h],
+                    [0, h],
+                ]
+            )
+            p2 = np.float32(
+                [
+                    [all_corners[i][0][0] - min_x, all_corners[i][0][1] - min_y],
+                    [all_corners[i][1][0] - min_x, all_corners[i][1][1] - min_y],
+                    [all_corners[i][2][0] - min_x, all_corners[i][2][1] - min_y],
+                    [all_corners[i][3][0] - min_x, all_corners[i][3][1] - min_y],
+                ]
+            )
+            coeffs = cv2.getPerspectiveTransform(p1, p2)
+            img_data = other_map.data
+            img_mime_type = magic.from_buffer(img_data, mime=True)
+            if img_mime_type == "image/gif":
+                img = Image.open(BytesIO(img_data)).convert("RGBA")
+                img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGRA)
+            else:
+                img_nparr = np.fromstring(img_data, np.uint8)
+                img = cv2.imdecode(img_nparr, cv2.IMREAD_UNCHANGED)
+                img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2BGRA)
+            img = cv2.warpPerspective(
+                img_alpha,
+                coeffs,
+                (new_width, new_height),
+                flags=cv2.INTER_AREA,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=(255, 255, 255, 0),
+            )
+            color_converted = cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
+            img_pil = Image.fromarray(color_converted)
+            new_image.alpha_composite(img_pil, (0, 0))
         params = {
             "dpi": (72, 72),
             "quality": 40,

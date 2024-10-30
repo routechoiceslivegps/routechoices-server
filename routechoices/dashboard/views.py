@@ -787,8 +787,7 @@ def map_kmz_upload_view(request):
                 messages.error(request, error)
             elif new_maps:
                 out_map = new_maps[0]
-                for new_map in new_maps[1:]:
-                    out_map = out_map.merge(new_map)
+                out_map = out_map.merge(new_maps[1:])
                 out_map.save()
                 messages.success(
                     request,
