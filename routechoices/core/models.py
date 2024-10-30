@@ -1100,6 +1100,7 @@ class Map(models.Model):
 
     def merge(self, other_maps):
         width, height = self.quick_size
+
         min_x = 0
         min_y = 0
         max_x = width
@@ -1129,16 +1130,10 @@ class Map(models.Model):
         )
         img = Image.open(BytesIO(self.data)).convert("RGBA")
         new_image.alpha_composite(img, (int(-min_x), int(-min_y)))
+
         for i, other_map in enumerate(other_maps):
             w, h = other_map.quick_size
-            p1 = np.float32(
-                [
-                    [0, 0],
-                    [w, 0],
-                    [w, h],
-                    [0, h],
-                ]
-            )
+            p1 = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
             p2 = np.float32(
                 [
                     [all_corners[i][0][0] - min_x, all_corners[i][0][1] - min_y],
@@ -1175,6 +1170,7 @@ class Map(models.Model):
         out_buffer = BytesIO()
         new_image.save(out_buffer, "WEBP", **params)
         out_file = ContentFile(out_buffer.getvalue())
+
         map_obj = Map(name=self.name, club=self.club)
         map_obj.image.save("imported_image", out_file, save=False)
         map_obj.width = new_image.width
@@ -1183,7 +1179,7 @@ class Map(models.Model):
         new_tr = self.map_xy_to_wsg84(max_x, min_y)
         new_br = self.map_xy_to_wsg84(max_x, max_y)
         new_bl = self.map_xy_to_wsg84(min_x, max_y)
-        map_obj.corners_coordinates = f'{new_tl["lat"]},{new_tl["lon"]},{new_tr["lat"]},{new_tr["lon"]},{new_br["lat"]},{new_br["lon"]},{new_bl["lat"]},{new_bl["lon"]}'
+        map_obj.corners_coordinates = f'{round(new_tl["lat"], 5)},{round(new_tl["lon"], 5)},{round(new_tr["lat"], 5)},{round(new_tr["lon"], 5)},{round(new_br["lat"], 5)},{round(new_br["lon"], 5)},{round(new_bl["lat"], 5)},{round(new_bl["lon"], 5)}'
         return map_obj
 
 
