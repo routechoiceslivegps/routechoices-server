@@ -12,34 +12,55 @@
       this.value = "";
     }
     if (this.files.length > 0) {
+      let kml;
+      let zip;
       try {
-        var zip = await JSZip.loadAsync(this.files[0]);
-        if (zip.files && zip.files["doc.kml"]) {
-          const kml = await zip.file("doc.kml").async("string");
-          const parser = new DOMParser();
-          const parsedText = parser.parseFromString(kml, "text/xml");
-          const nLayers =
-            parsedText.getElementsByTagName("GroundOverlay").length;
-          swal({
-            title: "Info",
-            text:
-              "File contains " +
-              nLayers +
-              " map" +
-              (nLayers != 1 ? "s" : "") +
-              "!",
-            type: "info",
-            confirmButtonText: "OK",
-          });
-        }
+        zip = await JSZip.loadAsync(this.files[0]);
       } catch {
+        kml = await this.files[0].text();
+      }
+      if (!kml && zip && zip.files && zip.files["doc.kml"]) {
+        kml = await zip.file("doc.kml").async("string");
+      }
+      if (!kml) {
         swal({
           title: "Error!",
-          text: "Invalid KMZ!",
+          text: "Invalid file!",
           type: "error",
           confirmButtonText: "OK",
         });
         this.value = "";
+        return;
+      }
+      let parsedText;
+      try {
+        const parser = new DOMParser();
+        parsedText = parser.parseFromString(kml, "text/xml");
+        const errorNode = parsedText.querySelector("parsererror");
+        if (errorNode) {
+          console.log(errorNode);
+          throw Error(errorNode);
+        }
+      } catch {
+        swal({
+          title: "Error!",
+          text: "Could not parse XML data!",
+          type: "error",
+          confirmButtonText: "OK",
+        });
+        this.value = "";
+        return;
+      }
+      const nLayers = parsedText.getElementsByTagName("GroundOverlay").length;
+      if (nLayers === 0) {
+        swal({
+          title: "Error!",
+          text: "Couldn't find maps in this file!",
+          type: "error",
+          confirmButtonText: "OK",
+        });
+        this.value = "";
+        return;
       }
     }
   });

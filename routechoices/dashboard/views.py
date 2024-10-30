@@ -35,7 +35,6 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.timezone import now
 from hijack.views import ReleaseUserView
 from kagi.views.backup_codes import BackupCodesView
-from PIL import Image
 from user_sessions.views import SessionDeleteOtherView
 
 from invitations.forms import InviteForm
@@ -787,19 +786,13 @@ def map_kmz_upload_view(request):
             if error:
                 messages.error(request, error)
             elif new_maps:
-                for new_map in new_maps:
-                    try:
-                        new_map.strip_exif()
-                    except Image.DecompressionBombError:
-                        error = "Image is too large, try to use lower resolution."
-                    else:
-                        new_map.save()
+                out_map = new_maps[0]
+                for new_map in new_maps[1:]:
+                    out_map = out_map.merge(new_map)
+                out_map.save()
                 messages.success(
                     request,
-                    (
-                        f"The import of the map{'s' if len(new_maps) > 1 else ''}"
-                        " was successful"
-                    ),
+                    ("The import of the map was successful"),
                 )
                 return redirect("dashboard:map_list_view")
             else:

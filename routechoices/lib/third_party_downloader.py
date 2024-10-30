@@ -432,8 +432,7 @@ class Livelox(ThirdPartyTrackingSolution):
         map_drawing = map_drawing.resize(img.size, resample=Image.Resampling.BICUBIC)
         out = Image.alpha_composite(img, map_drawing)
         out.save(out_buffer, "PNG", **params)
-        out_buffer.seek(0)
-        f_new = ContentFile(out_buffer.read())
+        f_new = ContentFile(out_buffer.getvalue())
         map_obj.image.save("imported_image", f_new)
         map_obj.width = out.width
         map_obj.height = out.height

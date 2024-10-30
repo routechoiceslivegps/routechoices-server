@@ -39,7 +39,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django_hosts.resolvers import reverse
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFile
 from pillow_heif import register_avif_opener
 
 from routechoices.lib import plausible
@@ -480,6 +480,14 @@ class Map(models.Model):
         )
         return coords
 
+    @cached_property
+    def quick_size(self):
+        if self.width:
+            return self.width, self.height
+        p = ImageFile.Parser()
+        p.feed(self.data)
+        return p.image.size
+
     @property
     def kmz(self):
         doc_img = self.data
@@ -540,7 +548,8 @@ class Map(models.Model):
 
     @property
     def size(self):
-        return {"width": self.width, "height": self.height}
+        width, height = self.quick_size
+        return {"width": width, "height": height}
 
     @property
     def min_lon(self):
@@ -592,13 +601,14 @@ class Map(models.Model):
 
     @property
     def alignment_points(self):
+        width, height = self.quick_size
         a1 = Point(0, 0)
         b1 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["topLeft"]))
-        a2 = Point(0, self.height)
+        a2 = Point(0, height)
         b2 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["bottomLeft"]))
-        a3 = Point(self.width, 0)
+        a3 = Point(width, 0)
         b3 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["topRight"]))
-        a4 = Point(self.width, self.height)
+        a4 = Point(width, height)
         b4 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["bottomRight"]))
         return a1, a2, a3, a4, b1, b2, b3, b4
 
@@ -639,15 +649,16 @@ class Map(models.Model):
     @property
     def resolution(self):
         """Return map image resolution in pixels/meters"""
+        width, height = self.quick_size
         ll_a = self.map_xy_to_wsg84(0, 0)
-        ll_b = self.map_xy_to_wsg84(self.width, 0)
-        ll_c = self.map_xy_to_wsg84(self.width, self.height)
-        ll_d = self.map_xy_to_wsg84(0, self.height)
+        ll_b = self.map_xy_to_wsg84(width, 0)
+        ll_c = self.map_xy_to_wsg84(width, height)
+        ll_d = self.map_xy_to_wsg84(0, height)
         resolution = (
-            distance_xy(0, 0, 0, self.height)
-            + distance_xy(0, self.height, self.width, self.height)
-            + distance_xy(self.width, self.height, self.width, 0)
-            + distance_xy(self.width, 0, 0, 0)
+            distance_xy(0, 0, 0, height)
+            + distance_xy(0, height, width, height)
+            + distance_xy(width, height, width, 0)
+            + distance_xy(width, 0, 0, 0)
         ) / (
             distance_latlon(ll_a, ll_b)
             + distance_latlon(ll_b, ll_c)
@@ -658,7 +669,8 @@ class Map(models.Model):
 
     @property
     def center(self):
-        return self.map_xy_to_wsg84(self.width / 2, self.height / 2)
+        width, height = self.quick_size
+        return self.map_xy_to_wsg84(width / 2, height / 2)
 
     @property
     def max_zoom(self):
@@ -671,10 +683,11 @@ class Map(models.Model):
 
     @property
     def rotation(self):
+        width, height = self.quick_size
         tl = self.map_xy_to_spherical_mercator(0, 0)
-        tr = self.map_xy_to_spherical_mercator(self.width, 0)
-        br = self.map_xy_to_spherical_mercator(self.width, self.height)
-        bl = self.map_xy_to_spherical_mercator(0, self.height)
+        tr = self.map_xy_to_spherical_mercator(width, 0)
+        br = self.map_xy_to_spherical_mercator(width, height)
+        bl = self.map_xy_to_spherical_mercator(0, height)
 
         rot_vert_left = (
             (math.atan2(tl[1] - bl[1], tl[0] - bl[0]) - math.pi / 2) * 180 / math.pi
@@ -809,17 +822,18 @@ class Map(models.Model):
             if use_cache and not cache.has_key(f"img_data_{self.image.name}_raw"):
                 cache.set(f"img_data_{self.image.name}_raw", img_alpha, 3600 * 24 * 30)
 
+        width, height = self.quick_size
         tl = self.map_xy_to_spherical_mercator(0, 0)
-        tr = self.map_xy_to_spherical_mercator(self.width, 0)
-        br = self.map_xy_to_spherical_mercator(self.width, self.height)
-        bl = self.map_xy_to_spherical_mercator(0, self.height)
+        tr = self.map_xy_to_spherical_mercator(width, 0)
+        br = self.map_xy_to_spherical_mercator(width, height)
+        bl = self.map_xy_to_spherical_mercator(0, height)
 
         p1 = np.float32(
             [
                 [0, 0],
-                [self.width, 0],
-                [self.width, self.height],
-                [0, self.height],
+                [width, 0],
+                [width, height],
+                [0, height],
             ]
         )
 
@@ -886,6 +900,7 @@ class Map(models.Model):
         return data_out, NOT_CACHED_TILE
 
     def intersects_with_tile(self, min_x, max_x, min_y, max_y):
+        width, height = self.quick_size
         tile_bounds_poly = Polygon(
             LinearRing(
                 (min_x, min_y),
@@ -898,9 +913,9 @@ class Map(models.Model):
         map_bounds_poly = Polygon(
             LinearRing(
                 self.map_xy_to_spherical_mercator(0, 0),
-                self.map_xy_to_spherical_mercator(0, self.height),
-                self.map_xy_to_spherical_mercator(self.width, self.height),
-                self.map_xy_to_spherical_mercator(self.width, 0),
+                self.map_xy_to_spherical_mercator(0, height),
+                self.map_xy_to_spherical_mercator(width, height),
+                self.map_xy_to_spherical_mercator(width, 0),
                 self.map_xy_to_spherical_mercator(0, 0),
             )
         )
@@ -1068,10 +1083,11 @@ class Map(models.Model):
     @property
     def area(self):
         # Area in km^2
+        width, height = self.quick_size
         ll_a = self.map_xy_to_wsg84(0, 0)
-        ll_b = self.map_xy_to_wsg84(self.width, 0)
-        ll_c = self.map_xy_to_wsg84(self.width, self.height)
-        ll_d = self.map_xy_to_wsg84(0, self.height)
+        ll_b = self.map_xy_to_wsg84(width, 0)
+        ll_c = self.map_xy_to_wsg84(width, height)
+        ll_d = self.map_xy_to_wsg84(0, height)
         return round(
             (distance_latlon(ll_a, ll_b) + distance_latlon(ll_c, ll_d))
             / 2
@@ -1081,6 +1097,114 @@ class Map(models.Model):
             / 1000,
             3,
         )
+
+    def merge(self, other_map):
+        width, height = self.quick_size
+        bound_b = other_map.bound
+        tl_b = self.wsg84_to_map_xy(
+            bound_b["topLeft"]["lat"], bound_b["topLeft"]["lon"]
+        )
+        tr_b = self.wsg84_to_map_xy(
+            bound_b["topRight"]["lat"], bound_b["topRight"]["lon"]
+        )
+        br_b = self.wsg84_to_map_xy(
+            bound_b["bottomRight"]["lat"], bound_b["bottomRight"]["lon"]
+        )
+        bl_b = self.wsg84_to_map_xy(
+            bound_b["bottomLeft"]["lat"], bound_b["bottomLeft"]["lon"]
+        )
+        min_x = min(
+            0,
+            tl_b[0],
+            tr_b[0],
+            br_b[0],
+            bl_b[0],
+        )
+        max_x = max(
+            width,
+            tl_b[0],
+            tr_b[0],
+            br_b[0],
+            bl_b[0],
+        )
+        min_y = min(
+            0,
+            tl_b[1],
+            tr_b[1],
+            br_b[1],
+            bl_b[1],
+        )
+        max_y = max(
+            height,
+            tl_b[1],
+            tr_b[1],
+            br_b[1],
+            bl_b[1],
+        )
+        new_width = int(max_x - min_x)
+        new_height = int(max_y - min_y)
+
+        new_image = Image.new(
+            mode="RGBA", size=(new_width, new_height), color=(0, 0, 0, 0)
+        )
+        img_a = Image.open(BytesIO(self.data)).convert("RGBA")
+        new_image.alpha_composite(img_a, (int(-min_x), int(-min_y)))
+        p1 = np.float32(
+            [
+                [-min_x, -min_y],
+                [width - min_x, -min_y],
+                [width - min_x, height - min_y],
+                [-min_x, height - min_y],
+            ]
+        )
+        p2 = np.float32(
+            [
+                [tl_b[0], tl_b[1]],
+                [tr_b[0], tr_b[1]],
+                [br_b[0], br_b[1]],
+                [bl_b[0], bl_b[1]],
+            ]
+        )
+        coeffs = cv2.getPerspectiveTransform(p2, p1)
+
+        b_data = other_map.data
+        b_mime_type = magic.from_buffer(b_data, mime=True)
+        if b_mime_type == "image/gif":
+            img = Image.open(BytesIO(b_data)).convert("RGBA")
+            img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGRA)
+        else:
+            img_nparr = np.fromstring(b_data, np.uint8)
+            img = cv2.imdecode(img_nparr, cv2.IMREAD_UNCHANGED)
+            img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2BGRA)
+        img_b = cv2.warpPerspective(
+            img_alpha,
+            coeffs,
+            (new_width, new_height),
+            flags=cv2.INTER_AREA,
+            borderMode=cv2.BORDER_CONSTANT,
+            borderValue=(255, 255, 255, 0),
+        )
+        color_converted = cv2.cvtColor(img_b, cv2.COLOR_BGRA2RGBA)
+        pil_image = Image.fromarray(color_converted)
+        new_image.alpha_composite(pil_image, (0, 0))
+
+        params = {
+            "dpi": (72, 72),
+            "quality": 40,
+        }
+        out_buffer = BytesIO()
+        new_image.save(out_buffer, "WEBP", **params)
+        out_file = ContentFile(out_buffer.getvalue())
+        map_obj = Map(name=self.name, club=self.club)
+        map_obj.image.save("imported_image", out_file, save=False)
+        map_obj.width = new_image.width
+        map_obj.height = new_image.height
+        new_tl = self.map_xy_to_wsg84(min_x, min_y)
+        new_tr = self.map_xy_to_wsg84(max_x, min_y)
+        new_br = self.map_xy_to_wsg84(max_x, max_y)
+        new_bl = self.map_xy_to_wsg84(min_x, max_y)
+        map_obj.corners_coordinates = f'{new_tl["lat"]},{new_tl["lon"]},{new_tr["lat"]},{new_tr["lon"]},{new_br["lat"]},{new_br["lon"]},{new_bl["lat"]},{new_bl["lon"]}'
+        return map_obj
 
 
 PRIVACY_PUBLIC = "public"
