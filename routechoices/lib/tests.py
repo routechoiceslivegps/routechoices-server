@@ -148,6 +148,6 @@ class HelperTestCase(TestCase):
 
 class MtbDecoderTestCase(TestCase):
     def test_decode(self):
-        with open("cypress/fixtures/test.mtb", "rb") as lf:
+        with open("cypress/fixtures/tractrac.mtb", "rb") as lf:
             device_map = MtbDecoder(lf).decode()
         self.assertEqual(len(device_map), 11)

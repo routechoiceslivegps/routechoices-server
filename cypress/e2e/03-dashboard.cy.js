@@ -98,6 +98,11 @@ context("Dashboard actions", () => {
     cy.get("#id_file").selectFile("cypress/fixtures/multiground.kml");
     cy.get("button:not([type]),button[type=submit]").click();
     cy.get("#django-messages").contains("The import of the map was successful");
+
+    cy.visit("/dashboard/maps/upload-kmz");
+    cy.get("#id_file").selectFile("cypress/fixtures/tiled.kmz");
+    cy.get("button:not([type]),button[type=submit]").click();
+    cy.get("#django-messages").contains("The import of the map was successful");
   });
 
   it("Create Map from Image", function () {
