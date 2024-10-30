@@ -1100,6 +1100,7 @@ class Map(models.Model):
 
     def merge(self, other_map):
         width, height = self.quick_size
+        widthb, heightb = other_map.quick_size
         bound_b = other_map.bound
         tl_b = self.wsg84_to_map_xy(
             bound_b["topLeft"]["lat"], bound_b["topLeft"]["lon"]
@@ -1151,21 +1152,21 @@ class Map(models.Model):
         new_image.alpha_composite(img_a, (int(-min_x), int(-min_y)))
         p1 = np.float32(
             [
-                [-min_x, -min_y],
-                [width - min_x, -min_y],
-                [width - min_x, height - min_y],
-                [-min_x, height - min_y],
+                [0, 0],
+                [widthb, 0],
+                [widthb, heightb],
+                [0, heightb],
             ]
         )
         p2 = np.float32(
             [
-                [tl_b[0], tl_b[1]],
-                [tr_b[0], tr_b[1]],
-                [br_b[0], br_b[1]],
-                [bl_b[0], bl_b[1]],
+                [tl_b[0] - min_x, tl_b[1] - min_y],
+                [tr_b[0] - min_x, tr_b[1] - min_y],
+                [br_b[0] - min_x, br_b[1] - min_y],
+                [bl_b[0] - min_x, bl_b[1] - min_y],
             ]
         )
-        coeffs = cv2.getPerspectiveTransform(p2, p1)
+        coeffs = cv2.getPerspectiveTransform(p1, p2)
 
         b_data = other_map.data
         b_mime_type = magic.from_buffer(b_data, mime=True)

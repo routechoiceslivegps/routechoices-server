@@ -10,6 +10,8 @@
         confirmButtonText: "OK",
       });
       this.value = "";
+      u(this).removeClass("is-valid");
+      return;
     }
     if (this.files.length > 0) {
       let kml;
@@ -30,6 +32,7 @@
           confirmButtonText: "OK",
         });
         this.value = "";
+        u(this).removeClass("is-valid");
         return;
       }
       let parsedText;
@@ -49,6 +52,7 @@
           confirmButtonText: "OK",
         });
         this.value = "";
+        u(this).removeClass("is-valid");
         return;
       }
       const nLayers = parsedText.getElementsByTagName("GroundOverlay").length;
@@ -60,7 +64,10 @@
           confirmButtonText: "OK",
         });
         this.value = "";
+        u(this).removeClass("is-valid");
         return;
+      } else {
+        u(this).addClass("is-valid");
       }
     }
   });
