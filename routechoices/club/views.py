@@ -68,9 +68,19 @@ def handle_legacy_request(request, view_name, club_slug=None, **kwargs):
 
 
 def serve_image_from_s3(
-    request, image_field, output_filename, default_mime="image/png", img_mode=None
+    request,
+    image_field,
+    output_filename,
+    mime=None,
+    default_mime="image/png",
+    img_mode=None,
 ):
-    mime = get_best_image_mime(request, default_mime)
+    if not mime:
+        mime = get_best_image_mime(request, default_mime)
+
+    if mime[:6] != "image/":
+        raise ValueError("Invalid mime type requested")
+
     cache_key = f"s3:image:{image_field.name}:{mime}"
 
     headers = {}
@@ -88,14 +98,14 @@ def serve_image_from_s3(
         cv2_image = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
         color_corrected_img = cv2.cvtColor(np.array(cv2_image), cv2.COLOR_BGR2RGBA)
         pil_image = Image.fromarray(color_corrected_img)
-        if img_mode and pil_image.mode != img_mode:
+        if (img_mode and pil_image.mode != img_mode) or mime == "image/jpeg":
             pil_image = pil_image.convert("RGB")
 
         pil_image.save(
             out_buffer,
             mime[6:].upper(),
             optimize=True,
-            quality=(40 if mime in ("image/avif", "image/jxl") else 80),
+            quality=(40 if mime in ("image/webp", "image/avif", "image/jxl") else 80),
         )
         image = out_buffer.getvalue()
         cache.set(cache_key, image, 31 * 24 * 3600)
@@ -171,7 +181,19 @@ def club_logo(request, **kwargs):
     if club.domain and not request.use_cname:
         return redirect(club.logo_url)
 
-    return serve_image_from_s3(request, club.logo, f"{club.name} Logo")
+    mime = None
+    if requested_image_format := kwargs.get("format"):
+        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
+            raise Http404()
+        mime = f"image/{requested_image_format}"
+
+    return serve_image_from_s3(
+        request,
+        club.logo,
+        f"{club.name} Logo",
+        mime=mime,
+        default_mime="image/webp",
+    )
 
 
 def club_banner(request, **kwargs):
@@ -185,10 +207,17 @@ def club_banner(request, **kwargs):
     if club.domain and not request.use_cname:
         return redirect(club.banner_url)
 
+    mime = None
+    if requested_image_format := kwargs.get("format"):
+        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
+            raise Http404()
+        mime = f"image/{requested_image_format}"
+
     return serve_image_from_s3(
         request,
         club.banner,
         f"{club.name} Banner",
+        mime=mime,
         default_mime="image/jpeg",
         img_mode="RGB",
     )
@@ -209,6 +238,10 @@ def club_thumbnail(request, **kwargs):
         return redirect(f"{club.nice_url}thumbnail")
 
     mime = get_best_image_mime(request, "image/jpeg")
+    if requested_image_format := kwargs.get("format"):
+        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
+            raise Http404()
+        mime = f"image/{requested_image_format}"
     data_out = club.thumbnail(mime)
 
     resp = StreamingHttpRangeResponse(request, data_out)
@@ -477,7 +510,7 @@ def event_map_view(request, slug, index="1", **kwargs):
         club = get_object_or_404(Club, slug__iexact=club_slug)
         if club.domain and not request.use_cname:
             return redirect(
-                f"{club.nice_url}{slug}/map/{index if index != '1' else ''}"
+                f"{club.nice_url}{slug}/map{('_' + index) if index != '1' else ''}"
             )
         return render(
             request,
@@ -486,7 +519,7 @@ def event_map_view(request, slug, index="1", **kwargs):
             status=status.HTTP_404_NOT_FOUND,
         )
     if event.club.domain and not request.use_cname:
-        return redirect(f"{event.club.nice_url}{event.slug}/map/{index}")
+        return redirect(f"{event.club.nice_url}{event.slug}/map_{index}")
     return redirect(
         reverse(
             "event_map_download",
@@ -516,7 +549,7 @@ def event_kmz_view(request, slug, index="1", **kwargs):
         club = get_object_or_404(Club, slug__iexact=club_slug)
         if club.domain and not request.use_cname:
             return redirect(
-                f"{club.nice_url}{slug}/kmz/{index if index != '1' else ''}"
+                f"{club.nice_url}{slug}/kmz{('_' + index) if index != '1' else ''}"
             )
         return render(
             request,
@@ -525,7 +558,7 @@ def event_kmz_view(request, slug, index="1", **kwargs):
             status=status.HTTP_404_NOT_FOUND,
         )
     if event.club.domain and not request.use_cname:
-        return redirect(f"{event.club.nice_url}{event.slug}/kmz/{index}")
+        return redirect(f"{event.club.nice_url}{event.slug}/kmz_{index}")
     return redirect(
         reverse(
             "event_kmz_download",

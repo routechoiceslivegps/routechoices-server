@@ -602,7 +602,7 @@ def event_detail(request, event_id):
                 "id": event.map.aid,
                 "url": request.build_absolute_uri(
                     reverse(
-                        "event_map_download",
+                        "event_main_map_download",
                         host="api",
                         kwargs={"event_id": event.aid},
                     )

@@ -71,7 +71,7 @@ class EssentialApiTestCase1(EssentialApiBase):
         self.assertTrue(res.data.get("device_id") != self.get_device_id())
 
     def test_create_device_id(self):
-        url = self.reverse_and_check("device_api", "/device")
+        url = self.reverse_and_check("device_api", "/device/")
         res = self.client.post(url)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -131,7 +131,7 @@ class EssentialApiTestCase1(EssentialApiBase):
         e = Event.get_by_url("https://google.com/abc")
         self.assertIsNone(e)
 
-        url = self.reverse_and_check("event_list", "/events")
+        url = self.reverse_and_check("event_list", "/events/")
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         res_json = json.loads(res.content)
@@ -157,7 +157,7 @@ class EssentialApiTestCase1(EssentialApiBase):
 class ImeiApiTestCase(EssentialApiBase):
     def setUp(self):
         super().setUp()
-        self.url = self.reverse_and_check("device_api", "/device")
+        self.url = self.reverse_and_check("device_api", "/device/")
 
     def test_get_imei_invalid(self):
         res = self.client.post(self.url, {"imei": "abcd"})
@@ -265,7 +265,7 @@ class EventSetCreationApiTestCase(EssentialApiBase):
 class EventCreationApiTestCase(EssentialApiBase):
     def setUp(self):
         super().setUp()
-        self.url = self.reverse_and_check("event_list", "/events")
+        self.url = self.reverse_and_check("event_list", "/events/")
         self.club = Club.objects.create(name="Test club", slug="club")
         self.club.admins.set([self.user])
         self.client.force_login(self.user)
@@ -456,7 +456,7 @@ class EventApiTestCase(EssentialApiBase):
             end_date=arrow.get().shift(hours=1).datetime,
         )
         url = self.reverse_and_check(
-            "event_detail", f"/events/{event.aid}", "api", {"event_id": event.aid}
+            "event_detail", f"/events/{event.aid}/", "api", {"event_id": event.aid}
         )
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -673,7 +673,7 @@ class EventApiTestCase(EssentialApiBase):
         uid = "20240911AVPR"
         url = self.reverse_and_check(
             "third_party_event_detail",
-            f"/gpsseuranta/{uid}",
+            f"/gpsseuranta/{uid}/",
             "api",
             {"provider": "gpsseuranta", "uid": uid},
         )
@@ -694,7 +694,7 @@ def test_loggator_proxy(self):
     uid = "TC24F12M"
     url = self.reverse_and_check(
         "third_party_event_detail",
-        f"/loggator/{uid}",
+        f"/loggator/{uid}/",
         "api",
         {"provider": "loggator", "uid": uid},
     )

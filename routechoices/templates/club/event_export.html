@@ -68,9 +68,9 @@
                                             Main map
                                         {% endif %}
                                     </h5>
-                                    <a href="{{ event.club.nice_url }}{{ event.slug }}/map/"
+                                    <a href="{{ event.club.nice_url }}{{ event.slug }}/map"
                                        class="btn btn-sm btn-primary mb-1 me-1"><i class="fa-solid fa-download"></i> Image</a>
-                                    <a href="{{ event.club.nice_url }}{{ event.slug }}/kmz/"
+                                    <a href="{{ event.club.nice_url }}{{ event.slug }}/kmz"
                                        class="btn btn-sm btn-primary mb-1 me-1"><i class="fa-solid fa-download"></i> KMZ</a>
                                     {% if event.ended and event.privacy != "private" %}
                                         {# djlint:off H022 #}<a href="http://3drerun.worldofo.com/2d/?server={{ site.domain }}/api/woo&eventid={{ event.aid }}&liveid=-"
@@ -86,9 +86,9 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <h5 class="card-title">{{ map.title }}</h5>
-                                        <a href="{{ event.club.nice_url }}{{ event.slug }}/map/{{ forloop.counter|add:1 }}"
+                                        <a href="{{ event.club.nice_url }}{{ event.slug }}/map_{{ forloop.counter|add:1 }}"
                                            class="btn btn-sm btn-primary mb-1 me-1"><i class="fa-solid fa-download"></i> Image</a>
-                                        <a href="{{ event.club.nice_url }}{{ event.slug }}/kmz/{{ forloop.counter|add:1 }}"
+                                        <a href="{{ event.club.nice_url }}{{ event.slug }}/kmz_{{ forloop.counter|add:1 }}"
                                            class="btn btn-sm btn-primary mb-1 me-1"><i class="fa-solid fa-download"></i> KMZ</a>
                                         {% if event.ended and event.privacy != "private" %}
                                             {# djlint:off H022 #}<a href="http://3drerun.worldofo.com/2d/?server={{ site.domain }}/api/woo&eventid={{ event.aid }}/{{ forloop.counter|add:1 }}&liveid=-"
@@ -115,7 +115,7 @@
                                         <a href="{{ competitor.get_absolute_gpx_url }}"
                                            class="btn btn-sm btn-primary mb-1 me-1"><i class="fa-solid fa-download"></i> GPX</a>
                                         {% if event.map and event.privacy != "private" %}
-                                            <a href="https://mapdump.com/new#title={{ event.name|urlencode }}%20-%20{{ competitor.name|urlencode }}&kmz=https:{% host_url 'event_kmz_download' event_id=event.aid host 'api' %}&gpx=https:{% host_url 'competitor_gpx_download' competitor_id=competitor.aid host 'api' %}"
+                                            <a href="https://mapdump.com/new#title={{ event.name|urlencode }}%20-%20{{ competitor.name|urlencode }}&kmz=https:{% host_url 'event_main_kmz_download' event_id=event.aid host 'api' %}&gpx=https:{% host_url 'competitor_gpx_download' competitor_id=competitor.aid host 'api' %}"
                                                class="btn btn-sm btn-primary mb-1"
                                                target="_blank"
                                                rel="noopener noreferrer"><i class="fa-solid fa-arrow-up-right-from-square"></i> MapDump.com</a>

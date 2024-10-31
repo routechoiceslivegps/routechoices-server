@@ -195,7 +195,7 @@ function onEventSelect() {
   }
 }
 function fetchEvents() {
-  fetch(window.local.apiRoot + "events", { method: "GET" })
+  fetch(window.local.apiRoot + "events/", { method: "GET" })
     .then(function (r) {
       return r.json();
     })

@@ -134,7 +134,7 @@ class ClubViewsTestCase(EssentialApiBase):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
         url = self.reverse_and_check(
             "event_view",
-            "/kiila-cup",
+            "/kiila-cup/",
             host="clubs",
             extra_kwargs={"slug": "kiila-cup"},
             host_kwargs={"club_slug": "kiilat"},
@@ -219,7 +219,7 @@ class ClubViewsTestCase(EssentialApiBase):
         )
         url = self.reverse_and_check(
             "event_map_view",
-            "/kiila-cup-1/map/",
+            "/kiila-cup-1/map",
             host="clubs",
             host_kwargs={"club_slug": "kiilat"},
             extra_kwargs={"slug": "kiila-cup-1"},
@@ -242,7 +242,7 @@ class ClubViewsTestCase(EssentialApiBase):
         # event kmz
         url = self.reverse_and_check(
             "event_kmz_view",
-            "/kiila-cup-1/kmz/",
+            "/kiila-cup-1/kmz",
             host="clubs",
             host_kwargs={"club_slug": "kiilat"},
             extra_kwargs={"slug": "kiila-cup-1"},
@@ -300,7 +300,7 @@ class ClubViewsTestCase(EssentialApiBase):
 
         url = self.reverse_and_check(
             "event_view",
-            "/kiila-cup-1",
+            "/kiila-cup-1/",
             host="clubs",
             extra_kwargs={"slug": "kiila-cup-1"},
             host_kwargs={"club_slug": "kiilat"},
@@ -357,7 +357,7 @@ class ClubViewsTestCase(EssentialApiBase):
 
         url = self.reverse_and_check(
             "event_view",
-            "/kiila-cup-1",
+            "/kiila-cup-1/",
             host="clubs",
             extra_kwargs={"slug": "kiila-cup-1"},
             host_kwargs={"club_slug": "kiilat"},
@@ -383,7 +383,7 @@ class ClubViewsTestCase(EssentialApiBase):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
         url = self.reverse_and_check(
             "event_view",
-            "/kiila-cup-69",
+            "/kiila-cup-69/",
             host="clubs",
             extra_kwargs={"slug": "kiila-cup-69"},
             host_kwargs={"club_slug": "kiilat"},
@@ -392,13 +392,13 @@ class ClubViewsTestCase(EssentialApiBase):
         response = client.get(url)
         self.assertEqual(response.status_code, 404)
         self.assertIn("Event not found", response.content.decode())
-        response = client.get(f"{url}/export")
+        response = client.get(f"{url}export")
         self.assertEqual(response.status_code, 404)
         self.assertIn("Event not found", response.content.decode())
-        response = client.get(f"{url}/contribute")
+        response = client.get(f"{url}contribute")
         self.assertEqual(response.status_code, 404)
         self.assertIn("Event not found", response.content.decode())
-        response = client.get(f"{url}/does-not-exist")
+        response = client.get(f"{url}does-not-exist")
         self.assertEqual(response.status_code, 404)
         self.assertIn("This page does not exist", response.content.decode())
 
@@ -453,7 +453,7 @@ class ClubViewsTestCase(EssentialApiBase):
             allow_route_upload=True,
         )
 
-        response = client.get("/kiila-cup-2")
+        response = client.get("/kiila-cup-2/")
         self.assertEqual(response.status_code, 200)
 
         response = client.get("/kiila-cup-2/export")
@@ -478,7 +478,7 @@ class ClubViewsTestCase(EssentialApiBase):
             allow_route_upload=True,
         )
 
-        response = client.get("/kiila-cup-3")
+        response = client.get("/kiila-cup-3/")
         self.assertEqual(response.status_code, 200)
 
         response = client.get("/kiila-cup-3/export")
@@ -504,7 +504,7 @@ class ClubViewsTestCase(EssentialApiBase):
             allow_route_upload=True,
         )
 
-        response = client.get("/kiila-cup-4")
+        response = client.get("/kiila-cup-4/")
         self.assertEqual(response.status_code, 403)
 
         response = client.get("/kiila-cup-4/export")
@@ -514,7 +514,7 @@ class ClubViewsTestCase(EssentialApiBase):
         self.assertEqual(response.status_code, 200)
 
         client.login(username="alice", password="pa$$word123")
-        response = client.get("/kiila-cup-4")
+        response = client.get("/kiila-cup-4/")
         self.assertEqual(response.status_code, 200)
 
         response = client.get("/kiila-cup-4/export")
