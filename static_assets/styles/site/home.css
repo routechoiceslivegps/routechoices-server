@@ -12,6 +12,7 @@
   transition: 1s opacity;
   object-fit: contain;
   vertical-align: baseline;
+  background-color: #505050;
 }
 
 [data-bs-theme="light"] {
