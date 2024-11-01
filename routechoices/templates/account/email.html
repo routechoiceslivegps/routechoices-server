@@ -33,7 +33,7 @@
                             {% endif %}
                         </td>
                         <td {% if emailaddress.primary %}class="collapsed-none"{% endif %}>
-                            <form action="{% url 'dashboard:account_emails' %}"  method="post">
+                            <form action="{% url 'dashboard:account:email_list' %}"  method="post">
                                 {% csrf_token %}
                                 <input id="email_radio_{{ forloop.counter }}"
                                        type="hidden"
@@ -70,7 +70,7 @@
     <br />
     <h3>{% translate "Add E-mail Address" %}</h3>
     <form method="post"
-          action="{% url 'dashboard:account_emails' %}"
+          action="{% url 'dashboard:account:email_list' %}"
           class="add_email">
         {% csrf_token %}
         {% bootstrap_form form %}

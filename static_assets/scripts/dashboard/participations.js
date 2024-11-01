@@ -175,7 +175,7 @@ function parseGpx(xmlstr) {
     const shortName = u("#id_short_name").val();
     const competitorId = u("#id_id").val();
     reqwest({
-      url: window.local.apiBaseUrl + "competitors/" + competitorId,
+      url: window.local.apiBaseUrl + "competitors/" + competitorId + "/",
       method: "PATCH",
       withCredentials: true,
       crossOrigin: true,
@@ -202,9 +202,9 @@ function parseGpx(xmlstr) {
   u("#upload-form").on("submit", function (e) {
     e.preventDefault();
     u(".upload-btn").addClass("disabled");
-    var cmp_aid = u("#id_competitor_aid").val();
+    var competitorId = u("#id_competitor_aid").val();
     reqwest({
-      url: window.local.apiBaseUrl + "competitors/" + cmp_aid + "/route",
+      url: window.local.apiBaseUrl + "competitors/" + competitorId + "/route",
       method: "post",
       type: "json",
       withCredentials: true,

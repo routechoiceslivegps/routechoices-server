@@ -1,8 +1,8 @@
-{% extends "dashboard/home.html" %}
+{% extends "dashboard/club_view.html" %}
 {% load compress django_bootstrap5 hosts static %}
-{% block sub_content %}
+{% block pre_menu_content %}
     <content>
-        <h4>Hey {{ club.name }}!</h4>
+        <h4>Hey!</h4>
         {% if not club.upgraded and club.o_club %}
             <h4>You are registered as an orienteering club. You can enjoy {{ site.name }} for free!</h4>
             <p class="fw-bold">However, if you want, you can upgrade to our paid plan and help the site running.</p>
@@ -116,7 +116,7 @@
             <h4>You are already using {{ site.name }} Paid plan. We thank you sincerly!</h4>
         {% endif %}
     </content>
-{% endblock sub_content %}
+{% endblock pre_menu_content %}
 
 {% block extra_body %}
     {% compress js %}

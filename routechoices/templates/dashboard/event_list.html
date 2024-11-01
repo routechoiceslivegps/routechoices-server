@@ -13,9 +13,9 @@
         <div class="col-12">
             <div class="mb-3">
                 {% if not events %}<p>You haven't created any events.</p>{% endif %}
-                <a href="{% url 'dashboard:event_create_view' %}"
+                <a href="{% url 'dashboard:club:event:create_view' club_slug=request.club.slug %}"
                    class="btn btn-primary mb-1 me-1"><i class="fa-solid fa-circle-plus"></i> Create new event</a>
-                <a href="{% url 'dashboard:quick_event_view' %}"
+                <a href="{% url 'dashboard:club:event:quick_start_view' club_slug=request.club.slug %}"
                    class="btn btn-secondary mb-1"
                    data-bs-toggle="tooltip"
                    data-bs-title="Single person GPS tracking without custom maps starting immediately"><i class="fa-solid fa-circle-plus"></i> Quick tracking</a>
@@ -46,7 +46,7 @@
                         {% for event in events %}
                             <tr class="collapsable">
                                 <td>
-                                    <a href="{% url 'dashboard:event_edit_view' event_id=event.aid %}">{{ event.name }}</a>
+                                    <a href="{% url 'dashboard:club:event:edit_view' event_id=event.aid club_slug=request.club.slug club_slug=request.club.slug %}">{{ event.name }}</a>
                                 </td>
                                 <td>
                                     {% if event.event_set %}

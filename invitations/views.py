@@ -84,7 +84,7 @@ class AcceptInvite(SingleObjectMixin, View):
                     request=self.request,
                     signal_sender=self.__class__,
                 )
-                return redirect("dashboard:club_select_view")
+                return redirect("dashboard:club:select_view")
             get_invitations_adapter().stash_verified_email(
                 self.request, invitation.email
             )

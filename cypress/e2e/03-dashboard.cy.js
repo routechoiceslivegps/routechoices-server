@@ -8,7 +8,7 @@ context("Dashboard actions", () => {
     cy.wait(100);
   });
 
-  it("Manage Participations", function () {
+  it("Manage participations", function () {
     cy.login();
     cy.forceVisit("/halden-sk/open-registration-upload-allowed/contribute");
     cy.contains("Enter yourself");
@@ -42,6 +42,7 @@ context("Dashboard actions", () => {
 
   it("Manage devices", function () {
     cy.login();
+    cy.visit("/dashboard/clubs/");
     cy.contains("Halden SK").click();
     cy.contains("Devices").click();
     cy.contains("Add new device").click();
@@ -62,11 +63,12 @@ context("Dashboard actions", () => {
     cy.get("button.confirm").click();
   });
 
-  it("Upgrade Account", function () {
+  it("Upgrade account", function () {
     cy.login();
+    cy.visit("/dashboard/clubs/");
     cy.contains("Halden SK").click();
     cy.contains("Upgrade to our paid plan!").click();
-    cy.url().should("match", /\/upgrade$/);
+    cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/upgrade");
     cy.contains("Upgrade my subscription").click();
     cy.get("#price-per-month").focus().clear().type("9.99");
     cy.contains("Proceed to payment").click();
@@ -75,11 +77,12 @@ context("Dashboard actions", () => {
     });
   });
 
-  it("Map importers", function () {
+  it("Import map", function () {
     cy.login();
+    cy.visit("/dashboard/clubs/");
     cy.contains("Halden SK").click();
     ["trk", "waypoint", "waypoint+trk"].forEach((gpxFileName) => {
-      cy.visit("/dashboard/maps/upload-gpx");
+      cy.visit("/dashboard/clubs/halden-sk/maps/upload-gpx");
       cy.get("#id_gpx_file").selectFile(
         "cypress/fixtures/" + gpxFileName + ".gpx"
       );
@@ -89,21 +92,21 @@ context("Dashboard actions", () => {
       );
     });
 
-    cy.visit("/dashboard/maps/upload-kmz");
+    cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
     cy.get("#id_file").selectFile("cypress/fixtures/Jukola_1st_leg.kmz");
     cy.get("button:not([type]),button[type=submit]").click();
     cy.get("#django-messages", { timeout: 10000 }).contains(
       "The import of the map was successful"
     );
 
-    cy.visit("/dashboard/maps/upload-kmz");
+    cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
     cy.get("#id_file").selectFile("cypress/fixtures/multiground.kml");
     cy.get("button:not([type]),button[type=submit]").click();
     cy.get("#django-messages", { timeout: 10000 }).contains(
       "The import of the map was successful"
     );
 
-    cy.visit("/dashboard/maps/upload-kmz");
+    cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
     cy.get("#id_file").selectFile("cypress/fixtures/tiled.kmz");
     cy.get("button:not([type]),button[type=submit]").click();
     cy.get("#django-messages", { timeout: 10000 }).contains(
@@ -111,11 +114,12 @@ context("Dashboard actions", () => {
     );
   });
 
-  it("Create Map from Image", function () {
+  it("Create map from image", function () {
     cy.login();
+    cy.visit("/dashboard/clubs/");
     cy.contains("Halden SK").click();
 
-    cy.visit("/dashboard/maps/new");
+    cy.visit("/dashboard/clubs/halden-sk/maps/new");
 
     cy.get("#id_name").type("Jukola 2019 - 1st Leg (manual calibration)");
 
@@ -151,14 +155,12 @@ context("Dashboard actions", () => {
   it("Create a club", function () {
     cy.login();
 
-    cy.url().should("match", /\/dashboard\/clubs\?next=\/dashboard\/$/);
-
     // Create club
     cy.createClub();
     cy.contains("Kangasala SK");
+    cy.location("pathname").should("eq", "/dashboard/clubs/kangasala-sk/");
 
     // modify club
-    cy.url().should("match", /\/dashboard\/club$/);
     cy.get("#id_website").type("https://www.kangasalask.fi");
     cy.get("#id_description")
       .clear()
@@ -173,16 +175,20 @@ context("Dashboard actions", () => {
 
   it("Create events", function () {
     cy.login();
+    cy.visit("/dashboard/clubs/");
     cy.contains("Halden SK").click();
 
     // Create Map
     cy.createMap();
 
     // Create Event with minimal info
-    cy.visit("/dashboard/events");
-    cy.url().should("match", /\/dashboard\/events$/);
+    cy.visit("/dashboard/clubs/halden-sk/events/");
+
     cy.get("a").contains("Create new event").click();
-    cy.url().should("match", /\/dashboard\/events\/new$/);
+    cy.location("pathname").should(
+      "eq",
+      "/dashboard/clubs/halden-sk/events/new"
+    );
 
     cy.get("#id_name").type("Jukola 2019 - 1st Leg");
     cy.get("#id_start_date").focus().realType("2019-06-15 20:00:00");
@@ -191,7 +197,7 @@ context("Dashboard actions", () => {
 
     cy.get("button:not([type]),button[type=submit]").first().click();
 
-    cy.url().should("match", /\/dashboard\/events$/);
+    cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
 
     cy.get("a").contains("Jukola 2019 - 1st Leg").click();
     const startListFileName = "startlist.csv";
@@ -252,10 +258,7 @@ context("Dashboard actions", () => {
     cy.wait(1000);
 
     // Create Event with all fields info
-    cy.visit("/dashboard/events");
-    cy.url().should("match", /\/dashboard\/events$/);
-    cy.get("a").contains("Create new event").click();
-    cy.url().should("match", /\/dashboard\/events\/new$/);
+    cy.visit("/dashboard/clubs/halden-sk/events/new");
 
     cy.get("#id_name").type("Jukola 2019 - 2nd Leg");
     cy.get("#id_start_date").focus().realType("2019-06-15 21:00:00");
@@ -268,39 +271,38 @@ context("Dashboard actions", () => {
       .focus()
       .realType("2019-06-15 21:00:10");
 
-    cy.intercept("POST", "/dashboard/events/new").as("eventSubmit");
+    cy.intercept("POST", "/dashboard/clubs/halden-sk/events/new").as(
+      "eventSubmit"
+    );
     cy.get("button:not([type]),button[type=submit]").first().click();
     cy.wait("@eventSubmit").then(({ request, response }) => {
       expect(response.statusCode).to.eq(302);
       expect(request.body).to.contain("&competitors-0-device=2&");
     });
-    cy.url().should("match", /\/dashboard\/events$/);
+    cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
     cy.forceVisit("/halden-sk/Jukola-2019-2nd-leg");
     cy.contains("Haldin", { timeout: 20000 });
 
     // check event can handle multiple maps
     cy.createMap("Another map");
-    cy.visit("/dashboard/events");
-    cy.get('table a[href*="dashboard/events/"]')
-      .contains("Jukola 2019 - 2nd Leg")
-      .click();
+    cy.visit("/dashboard/clubs/halden-sk/events/");
+    cy.get("table a").contains("Jukola 2019 - 2nd Leg").click();
     cy.get("#id_map_assignations-0-map").select("Another map");
     cy.get("#id_map_assignations-0-title").type("Alt route");
-    cy.intercept("POST", "/dashboard/events/*").as("eventSubmit");
+    cy.intercept("POST", "/dashboard/clubs/halden-sk/events/*").as(
+      "eventSubmit"
+    );
     cy.get("button:not([type]),button[type=submit]").first().click();
     cy.wait("@eventSubmit").then(({ request, response }) => {
       expect(response.statusCode).to.eq(302);
     });
-    cy.url().should("match", /\/dashboard\/events$/);
+    cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
     cy.forceVisit("/halden-sk/Jukola-2019-2nd-leg");
 
     cy.contains("Alt route", { timeout: 20000 });
 
     // Trigger as many errors has possible
-    cy.visit("/dashboard/events");
-    cy.url().should("match", /\/dashboard\/events$/);
-    cy.get("a").contains("Create new event").click();
-    cy.url().should("match", /\/dashboard\/events\/new$/);
+    cy.visit("/dashboard/clubs/halden-sk/events/new");
 
     cy.get("#id_name").type("Jukola 2019 - 2nd Leg");
     cy.get("#id_start_date").focus().realType("2019-06-15 20:00:00");
@@ -311,7 +313,10 @@ context("Dashboard actions", () => {
       .focus()
       .realType("2019-06-16 21:00:10");
     cy.get("button:not([type]),button[type=submit]").first().click();
-    cy.url().should("match", /\/dashboard\/events\/new$/);
+    cy.location("pathname").should(
+      "eq",
+      "/dashboard/clubs/halden-sk/events/new"
+    );
     cy.contains("Start Date must be before End Date");
     cy.contains(
       "An Event with this Club, Event Set, and Name already exists."
@@ -328,7 +333,10 @@ context("Dashboard actions", () => {
     cy.get("#id_map_assignations-0-title").type("Alt route");
 
     cy.get("button:not([type]),button[type=submit]").first().click();
-    cy.url().should("match", /\/dashboard\/events\/new$/);
+    cy.location("pathname").should(
+      "eq",
+      "/dashboard/clubs/halden-sk/events/new"
+    );
 
     cy.contains("Map assigned more than once in this event");
     cy.contains("Map title given more than once in this event");

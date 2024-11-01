@@ -57,8 +57,6 @@ def pricing_page(request):
 @csrf_exempt
 def pay_view(request):
     if request.method != "POST":
-        if request.user.is_authenticated:
-            return redirect(reverse("dashboard:upgrade"))
         return redirect(reverse("site:pricing_view"))
     price = request.POST.get("price-per-month", "4.99")
     try:
