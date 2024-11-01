@@ -29,6 +29,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
+from routechoices.club.views import serve_image_from_s3
 from routechoices.core.models import (
     EVENT_CACHE_INTERVAL,
     LOCATION_LATITUDE_INDEX,
@@ -624,7 +625,7 @@ def event_detail(request, event_id):
                     reverse(
                         "event_map_download",
                         host="api",
-                        kwargs={"event_id": event.aid, "map_index": (i + 2)},
+                        kwargs={"event_id": event.aid, "index": (i + 2)},
                     )
                 ),
                 "wms": True,
@@ -1662,30 +1663,31 @@ def device_ownership_api_view(request, club_slug, device_id):
     auto_schema=None,
 )
 @api_GET_HEAD_view
-def event_map_download(request, event_id, map_index="1"):
+def event_map_download(request, event_id, index="1", **kwargs):
     event, raster_map, title = Event.get_public_map_at_index(
-        request.user, event_id, map_index
+        request.user, event_id, index
     )
-    file_path = raster_map.path
-    mime_type = raster_map.mime_type
-
     headers = {}
     if event.privacy == PRIVACY_PRIVATE:
         headers["Cache-Control"] = "Private"
 
-    return serve_from_s3(
-        settings.AWS_S3_BUCKET,
+    mime = raster_map.mime_type
+    if requested_image_format := kwargs.get("format"):
+        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
+            raise Http404()
+        mime = f"image/{requested_image_format}"
+
+    resp = serve_image_from_s3(
         request,
-        file_path,
-        filename=(
+        raster_map.image,
+        (
             f"{event.name} - {title}_"
             f"{raster_map.corners_coordinates_short.replace(',', '_')}_."
-            f"{mime_type[6:]}"
+            f"{mime[6:]}"
         ),
-        mime=mime_type,
-        headers=headers,
-        dl=False,
+        mime=mime,
     )
+    return resp
 
 
 @swagger_auto_schema(
@@ -1693,9 +1695,9 @@ def event_map_download(request, event_id, map_index="1"):
     auto_schema=None,
 )
 @api_GET_HEAD_view
-def event_kmz_download(request, event_id, map_index="1"):
+def event_kmz_download(request, event_id, index="1"):
     event, raster_map, title = Event.get_public_map_at_index(
-        request.user, event_id, map_index
+        request.user, event_id, index
     )
     kmz_data = raster_map.kmz
 

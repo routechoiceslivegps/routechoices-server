@@ -68,7 +68,7 @@ urlpatterns = [
                     name="event_startlist_view",
                 ),
                 re_path(
-                    r"^thumbnail$",  # TODO: Allow format selection
+                    r"^thumbnail(\.(?P<format>png|webp|avif|jxl|jpeg))?$",
                     views.event_map_thumbnail,
                     name="event_map_thumbnail",
                 ),
@@ -78,12 +78,12 @@ urlpatterns = [
                     name="event_zip_view",
                 ),
                 re_path(
-                    r"map_?(?P<index>(?<=_)[1-9]\d*)?$",  # TODO: Allow format selection
+                    r"map(_(?=[1-9]))?(?P<index>(?<=_)[1-9]\d*)?(\.(?P<format>png|webp|avif|jxl|jpeg))?$",
                     views.event_map_view,
                     name="event_map_view",
                 ),
                 re_path(
-                    r"kmz(/(?P<index>[1-9]\d*))?$",
+                    r"kmz(_(?=[1-9]))?(?P<index>(?<=_)[1-9]\d*)?$",
                     views.event_kmz_view,
                     name="event_kmz_view",
                 ),

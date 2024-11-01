@@ -257,7 +257,9 @@ def club_live_event_feed(request, *args, **kwargs):
     club = get_object_or_404(Club, slug__iexact=club_slug)
     if club.domain and not request.use_cname:
         return redirect(f"{club.nice_url}feed")
-    return feeds.club_live_event_feed(request, *args, **kwargs)
+    resp = feeds.club_live_event_feed(request, *args, **kwargs)
+    resp["Content-Type"] = "application/rss+xml"
+    return resp
 
 
 @cache_page(5 if not settings.DEBUG else 0)
@@ -520,12 +522,19 @@ def event_map_view(request, slug, index="1", **kwargs):
         )
     if event.club.domain and not request.use_cname:
         return redirect(f"{event.club.nice_url}{event.slug}/map_{index}")
+
+    ext = None
+    if requested_image_format := kwargs.get("format"):
+        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
+            raise Http404()
+        ext = requested_image_format
     return redirect(
         reverse(
             "event_map_download",
             host="api",
-            kwargs={"event_id": event.aid, "map_index": index},
+            kwargs={"event_id": event.aid, "index": index},
         )
+        + (f".{ext}" if ext else "")
     )
 
 
@@ -563,7 +572,7 @@ def event_kmz_view(request, slug, index="1", **kwargs):
         reverse(
             "event_kmz_download",
             host="api",
-            kwargs={"event_id": event.aid, "map_index": index},
+            kwargs={"event_id": event.aid, "index": index},
         )
     )
 
@@ -642,7 +651,13 @@ def event_map_thumbnail(request, slug, **kwargs):
     event.check_user_permission(request.user)
 
     display_logo = request.GET.get("no-logo", False) is False
+
     mime = get_best_image_mime(request, "image/jpeg")
+    if requested_image_format := kwargs.get("format"):
+        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
+            raise Http404()
+        mime = f"image/{requested_image_format}"
+
     data_out = event.thumbnail(display_logo, mime)
     headers = {"ETag": f'W/"{safe64encodedsha(data_out)}"'}
     if event.privacy == PRIVACY_PRIVATE:
