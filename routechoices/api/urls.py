@@ -181,16 +181,16 @@ urlpatterns = [
         ),
     ),
     path(
-        "woo/",
+        "woo/race_status/",
         include(
             [
                 path(
-                    "race_status/get_info.json",
+                    "get_info.json",
                     views.two_d_rerun_race_status,
                     name="2d_rerun_race_status",
                 ),
                 path(
-                    "race_status/get_data.json",
+                    "get_data.json",
                     views.two_d_rerun_race_data,
                     name="2d_rerun_race_data",
                 ),
