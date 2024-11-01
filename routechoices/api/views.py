@@ -52,6 +52,7 @@ from routechoices.core.models import (
 from routechoices.lib.globalmaptiles import GlobalMercator
 from routechoices.lib.helpers import (
     epoch_to_datetime,
+    get_image_mime_from_request,
     git_master_hash,
     initial_of_name,
     random_device_id,
@@ -1648,11 +1649,7 @@ def event_map_download(request, event_id, index="1", **kwargs):
     if event.privacy == PRIVACY_PRIVATE:
         headers["Cache-Control"] = "Private"
 
-    mime = raster_map.mime_type
-    if requested_image_format := kwargs.get("extension"):
-        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
-            raise Http404()
-        mime = f"image/{requested_image_format}"
+    mime = get_image_mime_from_request(kwargs.get("extension"), raster_map.mime_type)
 
     resp = serve_image_from_s3(
         request,

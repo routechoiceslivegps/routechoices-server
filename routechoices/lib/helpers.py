@@ -14,6 +14,7 @@ from math import cos, pi, sin
 
 from curl_cffi import requests
 from django.conf import settings
+from django.http.response import Http404
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_aware, make_aware
 from PIL import ImageFile
@@ -56,6 +57,15 @@ def avg_angles(a, b):
 
 def get_current_site():
     return MySite()
+
+
+def get_image_mime_from_request(requested_extension=None, default_mime=None):
+    mime = default_mime
+    if requested_extension:
+        if requested_extension not in ("png", "webp", "avif", "jxl", "jpeg"):
+            raise Http404()
+        mime = f"image/{requested_extension}"
+    return mime
 
 
 def get_best_image_mime(request, default=None):

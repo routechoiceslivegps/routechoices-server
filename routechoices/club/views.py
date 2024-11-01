@@ -20,6 +20,7 @@ from routechoices.core.models import PRIVACY_PRIVATE, Club, Event, EventSet
 from routechoices.lib.helpers import (
     get_best_image_mime,
     get_current_site,
+    get_image_mime_from_request,
     safe64encodedsha,
 )
 from routechoices.lib.s3 import serve_image_from_s3
@@ -118,11 +119,7 @@ def club_logo(request, **kwargs):
     if club.domain and not request.use_cname:
         return redirect(club.logo_url)
 
-    mime = None
-    if requested_image_format := kwargs.get("extension"):
-        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
-            raise Http404()
-        mime = f"image/{requested_image_format}"
+    mime = get_image_mime_from_request(kwargs.get("extension"))
 
     return serve_image_from_s3(
         request,
@@ -144,11 +141,7 @@ def club_banner(request, **kwargs):
     if club.domain and not request.use_cname:
         return redirect(club.banner_url)
 
-    mime = None
-    if requested_image_format := kwargs.get("extension"):
-        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
-            raise Http404()
-        mime = f"image/{requested_image_format}"
+    mime = get_image_mime_from_request(kwargs.get("extension"))
 
     return serve_image_from_s3(
         request,
@@ -174,11 +167,10 @@ def club_thumbnail(request, **kwargs):
     if club.domain and not request.use_cname:
         return redirect(f"{club.nice_url}thumbnail")
 
-    mime = get_best_image_mime(request, "image/jpeg")
-    if requested_image_format := kwargs.get("extension"):
-        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
-            raise Http404()
-        mime = f"image/{requested_image_format}"
+    mime = get_image_mime_from_request(
+        kwargs.get("extension"), get_best_image_mime(request, "image/jpeg")
+    )
+
     data_out = club.thumbnail(mime)
 
     resp = StreamingHttpRangeResponse(request, data_out)
@@ -467,11 +459,11 @@ def event_map_view(request, slug, index="1", **kwargs):
         redirect_view = "event_map_download"
         redirect_kwargs["index"] = index
 
-    if requested_image_format := kwargs.get("extension"):
-        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
-            raise Http404()
+    mime = get_image_mime_from_request(kwargs.get("extension"))
+
+    if mime:
         redirect_view += "_with_format"
-        redirect_kwargs["extension"] = requested_image_format
+        redirect_kwargs["extension"] = mime[6:]
 
     return redirect(
         reverse(
@@ -596,11 +588,9 @@ def event_map_thumbnail(request, slug, **kwargs):
 
     display_logo = request.GET.get("no-logo", False) is False
 
-    mime = get_best_image_mime(request, "image/jpeg")
-    if requested_image_format := kwargs.get("extension"):
-        if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
-            raise Http404()
-        mime = f"image/{requested_image_format}"
+    mime = get_image_mime_from_request(
+        kwargs.get("extension"), get_best_image_mime(request, "image/jpeg")
+    )
 
     data_out = event.thumbnail(display_logo, mime)
     headers = {"ETag": f'W/"{safe64encodedsha(data_out)}"'}
