@@ -70,6 +70,22 @@ class EssentialApiTestCase1(EssentialApiBase):
         self.assertTrue(len(res.data.get("device_id")) == 8)
         self.assertTrue(res.data.get("device_id") != self.get_device_id())
 
+    def test_id_is_registered(self):
+        did = self.get_device_id()
+        url = self.reverse_and_check(
+            "device_info_api", f"/device/{did}/", extra_kwargs={"device_id": did}
+        )
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        url = self.reverse_and_check(
+            "device_registrations_api",
+            f"/device/{did}/registrations",
+            extra_kwargs={"device_id": did},
+        )
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
     def test_create_device_id(self):
         url = self.reverse_and_check("device_api", "/device/")
         res = self.client.post(url)
