@@ -1,7 +1,3 @@
-from io import BytesIO
-
-import cv2
-import numpy as np
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.sitemaps.views import (
@@ -9,7 +5,6 @@ from django.contrib.sitemaps.views import (
     _get_latest_lastmod,
     x_robots_tag,
 )
-from django.core.cache import cache
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -18,7 +13,6 @@ from django.utils.http import http_date
 from django.utils.timezone import now
 from django.views.decorators.cache import cache_page
 from django_hosts.resolvers import reverse
-from PIL import Image
 from rest_framework import status
 
 from routechoices.club import feeds
@@ -27,9 +21,8 @@ from routechoices.lib.helpers import (
     get_best_image_mime,
     get_current_site,
     safe64encodedsha,
-    set_content_disposition,
 )
-from routechoices.lib.s3 import get_s3_client
+from routechoices.lib.s3 import serve_image_from_s3
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
 from routechoices.lib.third_party_downloader import GpsSeurantaNet, Loggator
 from routechoices.site.forms import CompetitorUploadGPXForm, RegisterForm
@@ -65,62 +58,6 @@ def handle_legacy_request(request, view_name, club_slug=None, **kwargs):
     ):
         request.club_slug = club_slug
     return False
-
-
-def serve_image_from_s3(
-    request,
-    image_field,
-    output_filename,
-    mime=None,
-    default_mime="image/png",
-    img_mode=None,
-):
-    if not mime:
-        mime = get_best_image_mime(request, default_mime)
-
-    if mime[:6] != "image/":
-        raise ValueError("Invalid mime type requested")
-
-    cache_key = f"s3:image:{image_field.name}:{mime}"
-
-    headers = {}
-    image = None
-    if cache.has_key(cache_key):
-        image = cache.get(cache_key)
-        headers["X-Cache-Hit"] = 1
-    else:
-        file_path = image_field.name
-        s3_buffer = BytesIO()
-        out_buffer = BytesIO()
-        s3_client = get_s3_client()
-        s3_client.download_fileobj(settings.AWS_S3_BUCKET, file_path, s3_buffer)
-        nparr = np.fromstring(s3_buffer.getvalue(), np.uint8)
-        cv2_image = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-        color_corrected_img = cv2.cvtColor(np.array(cv2_image), cv2.COLOR_BGR2RGBA)
-        pil_image = Image.fromarray(color_corrected_img)
-        if (img_mode and pil_image.mode != img_mode) or mime == "image/jpeg":
-            pil_image = pil_image.convert("RGB")
-
-        pil_image.save(
-            out_buffer,
-            mime[6:].upper(),
-            optimize=True,
-            quality=(40 if mime in ("image/webp", "image/avif", "image/jxl") else 80),
-        )
-        image = out_buffer.getvalue()
-        cache.set(cache_key, image, 31 * 24 * 3600)
-
-    resp = StreamingHttpRangeResponse(
-        request,
-        image,
-        content_type=mime,
-        headers=headers,
-    )
-    resp["ETag"] = f'W/"{safe64encodedsha(image)}"'
-    resp["Content-Disposition"] = set_content_disposition(
-        f"{output_filename}.{mime[6:]}", dl=False
-    )
-    return resp
 
 
 def club_view(request, **kwargs):

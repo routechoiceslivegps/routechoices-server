@@ -1,8 +1,22 @@
 import os.path
+import urllib.parse
+from io import BytesIO
 
 import boto3
 import botocore
+import cv2
+import numpy as np
 from django.conf import settings
+from django.core.cache import cache
+from django.http import HttpResponse
+from PIL import Image
+
+from routechoices.lib.helpers import (
+    get_best_image_mime,
+    safe64encodedsha,
+    set_content_disposition,
+)
+from routechoices.lib.streaming_response import StreamingHttpRangeResponse
 
 
 def bytes_to_str(b):
@@ -47,3 +61,81 @@ def s3_rename_object(bucket, src, dest):
     s3 = get_s3_client()
     s3.copy_object(Bucket=bucket, CopySource=os.path.join(bucket, src), Key=dest)
     s3.delete_object(Bucket=bucket, Key=src)
+
+
+def serve_from_s3(
+    bucket,
+    request,
+    path,
+    filename="",
+    mime="application/force-download",
+    headers=None,
+    dl=True,
+):
+    if request.method not in ("GET", "HEAD"):
+        raise NotImplementedError()
+
+    url = s3_object_url(request.method, path, bucket)
+    url = url[len(settings.AWS_S3_ENDPOINT_URL) :]
+
+    response = HttpResponse("", headers=headers, content_type=mime)
+    response["X-Accel-Redirect"] = urllib.parse.quote(f"/s3{url}".encode("utf-8"))
+    response["X-Accel-Buffering"] = "no"
+    response["Content-Disposition"] = set_content_disposition(filename, dl=dl)
+    return response
+
+
+def serve_image_from_s3(
+    request,
+    image_field,
+    output_filename,
+    mime=None,
+    default_mime="image/png",
+    img_mode=None,
+):
+    if not mime:
+        mime = get_best_image_mime(request, default_mime)
+
+    if mime[:6] != "image/":
+        raise ValueError("Invalid mime type requested")
+
+    cache_key = f"s3:image:{image_field.name}:{mime}"
+
+    headers = {}
+    image = None
+    if cache.has_key(cache_key):
+        image = cache.get(cache_key)
+        headers["X-Cache-Hit"] = 1
+    else:
+        file_path = image_field.name
+        s3_buffer = BytesIO()
+        out_buffer = BytesIO()
+        s3_client = get_s3_client()
+        s3_client.download_fileobj(settings.AWS_S3_BUCKET, file_path, s3_buffer)
+        nparr = np.fromstring(s3_buffer.getvalue(), np.uint8)
+        cv2_image = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+        color_corrected_img = cv2.cvtColor(np.array(cv2_image), cv2.COLOR_BGR2RGBA)
+        pil_image = Image.fromarray(color_corrected_img)
+        if (img_mode and pil_image.mode != img_mode) or mime == "image/jpeg":
+            pil_image = pil_image.convert("RGB")
+
+        pil_image.save(
+            out_buffer,
+            mime[6:].upper(),
+            optimize=True,
+            quality=(40 if mime in ("image/webp", "image/avif", "image/jxl") else 80),
+        )
+        image = out_buffer.getvalue()
+        cache.set(cache_key, image, 31 * 24 * 3600)
+
+    resp = StreamingHttpRangeResponse(
+        request,
+        image,
+        content_type=mime,
+        headers=headers,
+    )
+    resp["ETag"] = f'W/"{safe64encodedsha(image)}"'
+    resp["Content-Disposition"] = set_content_disposition(
+        f"{output_filename}.{mime[6:]}", dl=False
+    )
+    return resp

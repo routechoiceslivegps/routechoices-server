@@ -38,7 +38,6 @@ from kagi.views.backup_codes import BackupCodesView
 from user_sessions.views import SessionDeleteOtherView
 
 from invitations.forms import InviteForm
-from routechoices.api.views import serve_from_s3
 from routechoices.core.models import (
     Club,
     Competitor,
@@ -73,6 +72,7 @@ from routechoices.lib.helpers import (
     short_random_key,
 )
 from routechoices.lib.kmz import extract_ground_overlay_info
+from routechoices.lib.s3 import serve_from_s3
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
 
 DEFAULT_PAGE_SIZE = 25

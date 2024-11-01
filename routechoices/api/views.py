@@ -29,7 +29,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from routechoices.club.views import serve_image_from_s3
 from routechoices.core.models import (
     EVENT_CACHE_INTERVAL,
     LOCATION_LATITUDE_INDEX,
@@ -61,7 +60,7 @@ from routechoices.lib.helpers import (
     short_random_key,
     short_random_slug,
 )
-from routechoices.lib.s3 import s3_object_url
+from routechoices.lib.s3 import serve_image_from_s3
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
 from routechoices.lib.third_party_downloader import GpsSeurantaNet, Loggator
 from routechoices.lib.validators import (
@@ -87,28 +86,6 @@ class PostDataThrottle(AnonRateThrottle):
         if request.method == "GET":
             return True
         return super().allow_request(request, view)
-
-
-def serve_from_s3(
-    bucket,
-    request,
-    path,
-    filename="",
-    mime="application/force-download",
-    headers=None,
-    dl=True,
-):
-    if request.method not in ("GET", "HEAD"):
-        raise NotImplementedError()
-
-    url = s3_object_url(request.method, path, bucket)
-    url = url[len(settings.AWS_S3_ENDPOINT_URL) :]
-
-    response = HttpResponse("", headers=headers, content_type=mime)
-    response["X-Accel-Redirect"] = urllib.parse.quote(f"/s3{url}".encode("utf-8"))
-    response["X-Accel-Buffering"] = "no"
-    response["Content-Disposition"] = set_content_disposition(filename, dl=dl)
-    return response
 
 
 club_param = openapi.Parameter(
