@@ -53,7 +53,7 @@ urlpatterns = [
             [
                 path("", views.create_device_id, name="device_api"),
                 re_path(
-                    r"^(?P<device_id>[^/]+)/?$",
+                    r"^(?P<device_id>[^/]+)/",
                     include(
                         [
                             path(

@@ -6,6 +6,14 @@ from routechoices.dashboard import views
 
 urlpatterns = [
     re_path(r"^$", views.home_view, name="home_view"),
+    re_path(
+        r"^request-invite/?$",
+        views.club_request_invite_view,
+        name="club_request_invite_view",
+    ),
+    re_path(
+        r"^participations/?$", views.participations_view, name="participations_view"
+    ),
     re_path(r"^account/?$", views.account_edit_view, name="account_edit_view"),
     re_path(r"^account/emails/?$", views.email_view, name="account_emails"),
     re_path(
@@ -26,14 +34,11 @@ urlpatterns = [
         view=views.CustomSessionDeleteOtherView.as_view(),
         name="account_session_delete_other",
     ),
+    re_path(r"^clubs/?$", views.club_select_view, name="club_select_view"),
+    re_path(r"^clubs/new/?$", views.club_create_view, name="club_create_view"),
     re_path(r"^club/?$", views.club_view, name="club_view"),
     re_path(
         r"^club/send-invite/?$", views.club_invite_add_view, name="club_invite_add_view"
-    ),
-    re_path(
-        r"^request-invite/?$",
-        views.club_request_invite_view,
-        name="club_request_invite_view",
     ),
     re_path(
         r"^club/custom-domain/?$",
@@ -49,11 +54,6 @@ urlpatterns = [
         r"^club/(?P<club_id>[A-Za-z0-9_-]+)/?$",
         views.club_set_view,
         name="club_set_view",
-    ),
-    re_path(r"^clubs/?$", views.club_select_view, name="club_select_view"),
-    re_path(r"^clubs/new/?$", views.club_create_view, name="club_create_view"),
-    re_path(
-        r"^participations/?$", views.participations_view, name="participations_view"
     ),
     re_path(r"^devices/?$", views.device_list_view, name="device_list_view"),
     re_path(r"^devices/new/?$", views.device_add_view, name="device_add_view"),
