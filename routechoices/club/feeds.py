@@ -27,7 +27,7 @@ class RssXslFeed(Rss201rev2Feed):
 class ClubLiveEventsFeed(Feed):
     feed_type = RssXslFeed
 
-    def get_object(self, request, **kwargs):
+    def get_object(self, request, *args, **kwargs):
         return Club.objects.get(slug__iexact=request.club_slug)
 
     def title(self, obj):

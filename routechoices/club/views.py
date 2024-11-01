@@ -249,7 +249,7 @@ def club_thumbnail(request, **kwargs):
     return resp
 
 
-def club_live_event_feed(request, **kwargs):
+def club_live_event_feed(request, *args, **kwargs):
     bypass_resp = handle_legacy_request(request, "club_feed", kwargs.get("club_slug"))
     if bypass_resp:
         return bypass_resp
@@ -257,7 +257,7 @@ def club_live_event_feed(request, **kwargs):
     club = get_object_or_404(Club, slug__iexact=club_slug)
     if club.domain and not request.use_cname:
         return redirect(f"{club.nice_url}feed")
-    return feeds.club_live_event_feed(request, **kwargs)
+    return feeds.club_live_event_feed(request, *args, **kwargs)
 
 
 @cache_page(5 if not settings.DEBUG else 0)
