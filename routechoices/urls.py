@@ -27,22 +27,46 @@ sitemaps = {
 }
 
 urlpatterns = [
-    path("account/login/", RedirectView.as_view(url="/login")),
-    path("account/logout/", RedirectView.as_view(url="/logout")),
-    path("account/signup/", RedirectView.as_view(url="/signup")),
-    path("account/email/", RedirectView.as_view(url="/dashboard/account/emails")),
     path(
-        "account/password/change/",
-        RedirectView.as_view(url="/dashboard/account/change-password"),
+        "account/",
+        include(
+            [
+                path("login/", RedirectView.as_view(url="/login")),
+                path("logout/", RedirectView.as_view(url="/logout")),
+                path("signup/", RedirectView.as_view(url="/signup")),
+                path("email/", RedirectView.as_view(url="/dashboard/account/emails")),
+                path(
+                    "password/change/",
+                    RedirectView.as_view(url="/dashboard/account/change-password"),
+                ),
+                path("", include("allauth.urls")),
+            ]
+        ),
     ),
-    path("account/", include("allauth.urls")),
     path("api/", include(("routechoices.api.urls", "api"), namespace="api")),
-    path("dashboard/account/mfa/login/", RedirectView.as_view(url="/login")),
-    path("dashboard/account/mfa/backup-codes/", backup_codes, name="backup-codes"),
-    path("dashboard/account/mfa/", include("kagi.urls", namespace="kagi")),
     path(
         "dashboard/",
-        include(("routechoices.dashboard.urls", "dashboard"), namespace="dashboard"),
+        include(
+            [
+                path(
+                    "account/mfa/",
+                    include(
+                        [
+                            path("login/", RedirectView.as_view(url="/login")),
+                            path("backup-codes/", backup_codes, name="backup-codes"),
+                            path("", include("kagi.urls", namespace="kagi")),
+                        ]
+                    ),
+                ),
+                path(
+                    "",
+                    include(
+                        ("routechoices.dashboard.urls", "dashboard"),
+                        namespace="dashboard",
+                    ),
+                ),
+            ]
+        ),
     ),
     path("invitations/", include("invitations.urls", namespace="invitations")),
     path(
