@@ -1672,7 +1672,7 @@ def event_map_download(request, event_id, index="1", **kwargs):
         headers["Cache-Control"] = "Private"
 
     mime = raster_map.mime_type
-    if requested_image_format := kwargs.get("format"):
+    if requested_image_format := kwargs.get("extension"):
         if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
             raise Http404()
         mime = f"image/{requested_image_format}"

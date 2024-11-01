@@ -182,7 +182,7 @@ def club_logo(request, **kwargs):
         return redirect(club.logo_url)
 
     mime = None
-    if requested_image_format := kwargs.get("format"):
+    if requested_image_format := kwargs.get("extension"):
         if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
             raise Http404()
         mime = f"image/{requested_image_format}"
@@ -208,7 +208,7 @@ def club_banner(request, **kwargs):
         return redirect(club.banner_url)
 
     mime = None
-    if requested_image_format := kwargs.get("format"):
+    if requested_image_format := kwargs.get("extension"):
         if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
             raise Http404()
         mime = f"image/{requested_image_format}"
@@ -238,7 +238,7 @@ def club_thumbnail(request, **kwargs):
         return redirect(f"{club.nice_url}thumbnail")
 
     mime = get_best_image_mime(request, "image/jpeg")
-    if requested_image_format := kwargs.get("format"):
+    if requested_image_format := kwargs.get("extension"):
         if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
             raise Http404()
         mime = f"image/{requested_image_format}"
@@ -523,18 +523,25 @@ def event_map_view(request, slug, index="1", **kwargs):
     if event.club.domain and not request.use_cname:
         return redirect(f"{event.club.nice_url}{event.slug}/map_{index}")
 
-    ext = None
-    if requested_image_format := kwargs.get("format"):
+    redirect_view = "event_main_map_download"
+    redirect_kwargs = {"event_id": event.aid}
+
+    if index != "1":
+        redirect_view = "event_map_download"
+        redirect_kwargs["index"] = index
+
+    if requested_image_format := kwargs.get("extension"):
         if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
             raise Http404()
-        ext = requested_image_format
+        redirect_view += "_with_format"
+        redirect_kwargs["extension"] = requested_image_format
+
     return redirect(
         reverse(
-            "event_map_download",
+            redirect_view,
             host="api",
-            kwargs={"event_id": event.aid, "index": index},
+            kwargs=redirect_kwargs,
         )
-        + (f".{ext}" if ext else "")
     )
 
 
@@ -653,7 +660,7 @@ def event_map_thumbnail(request, slug, **kwargs):
     display_logo = request.GET.get("no-logo", False) is False
 
     mime = get_best_image_mime(request, "image/jpeg")
-    if requested_image_format := kwargs.get("format"):
+    if requested_image_format := kwargs.get("extension"):
         if requested_image_format not in ("png", "webp", "avif", "jxl", "jpeg"):
             raise Http404()
         mime = f"image/{requested_image_format}"

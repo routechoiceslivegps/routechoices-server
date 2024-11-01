@@ -123,14 +123,31 @@ urlpatterns = [
                                 include(
                                     [
                                         path(
-                                            "",  # TODO: Allow format selection
+                                            "",
                                             views.event_map_download,
                                             name="event_main_map_download",
                                         ),
                                         re_path(
-                                            r"^_(?P<index>[1-9]\d*)$",
+                                            r"^\.(?P<extension>png|webp|avif|jxl|jpeg)$",
                                             views.event_map_download,
-                                            name="event_map_download",
+                                            name="event_main_map_download_with_format",
+                                        ),
+                                        re_path(
+                                            r"^_(?P<index>[1-9]\d*)",
+                                            include(
+                                                [
+                                                    path(
+                                                        "",
+                                                        views.event_map_download,
+                                                        name="event_map_download",
+                                                    ),
+                                                    re_path(
+                                                        r"^\.(?P<extension>png|webp|avif|jxl|jpeg)$",
+                                                        views.event_map_download,
+                                                        name="event_map_download_with_format",
+                                                    ),
+                                                ]
+                                            ),
                                         ),
                                     ]
                                 ),
@@ -139,8 +156,8 @@ urlpatterns = [
                                 "kmz",
                                 include(
                                     [
-                                        re_path(
-                                            "^$",
+                                        path(
+                                            "",
                                             views.event_kmz_download,
                                             name="event_main_kmz_download",
                                         ),

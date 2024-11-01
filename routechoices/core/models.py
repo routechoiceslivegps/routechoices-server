@@ -531,7 +531,7 @@ class Map(models.Model):
         if not value:
             raise ValueError("Value can not be null")
         data_matched = re.match(
-            r"^data:image/(?P<format>jpeg|png|gif|webp);base64,"
+            r"^data:image/(?P<extension>jpeg|png|gif|webp);base64,"
             r"(?P<data_b64>(?:[A-Za-z0-9+/]{4})*"
             r"(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)$",
             value,

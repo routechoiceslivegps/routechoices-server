@@ -218,7 +218,7 @@ class ClubViewsTestCase(EssentialApiBase):
             end_date=arrow.now().shift(hours=1).datetime,
         )
         url = self.reverse_and_check(
-            "event_map_view",
+            "event_main_map_view",
             "/kiila-cup-1/map",
             host="clubs",
             host_kwargs={"club_slug": "kiilat"},

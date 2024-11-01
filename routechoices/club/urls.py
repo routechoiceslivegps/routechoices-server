@@ -17,17 +17,17 @@ urlpatterns = [
     ),
     re_path(r"^feed(\.rss)?$", views.club_live_event_feed, name="club_feed"),
     re_path(
-        r"^thumbnail(\.(?P<format>png|webp|avif|jxl|jpeg))?$",
+        r"^thumbnail(\.(?P<extension>png|webp|avif|jxl|jpeg))?$",
         views.club_thumbnail,
         name="club_thumbnail",
     ),
     re_path(
-        r"^logo(\.(?P<format>png|webp|avif|jxl|jpeg))?$",
+        r"^logo(\.(?P<extension>png|webp|avif|jxl|jpeg))?$",
         views.club_logo,
         name="club_logo",
     ),
     re_path(
-        r"^banner(\.(?P<format>png|webp|avif|jxl|jpeg))?$",
+        r"^banner(\.(?P<extension>png|webp|avif|jxl|jpeg))?$",
         views.club_banner,
         name="club_banner",
     ),
@@ -67,25 +67,78 @@ urlpatterns = [
                     views.event_startlist_view,
                     name="event_startlist_view",
                 ),
-                re_path(
-                    r"^thumbnail(\.(?P<format>png|webp|avif|jxl|jpeg))?$",
-                    views.event_map_thumbnail,
-                    name="event_map_thumbnail",
+                path(
+                    "thumbnail",
+                    include(
+                        [
+                            path(
+                                "",
+                                views.event_map_thumbnail,
+                                name="event_map_thumbnail",
+                            ),
+                            re_path(
+                                r"\.(?P<extension>png|webp|avif|jxl|jpeg)$",
+                                views.event_map_thumbnail,
+                                name="event_map_thumbnail_with_format",
+                            ),
+                        ]
+                    ),
                 ),
                 path(
                     "zip",
                     views.event_zip_view,
                     name="event_zip_view",
                 ),
-                re_path(
-                    r"map(_(?=[1-9]))?(?P<index>(?<=_)[1-9]\d*)?(\.(?P<format>png|webp|avif|jxl|jpeg))?$",
-                    views.event_map_view,
-                    name="event_map_view",
+                path(
+                    "map",
+                    include(
+                        [
+                            path(
+                                "",
+                                views.event_map_view,
+                                name="event_main_map_view",
+                            ),
+                            re_path(
+                                r"^\.(?P<extension>png|webp|avif|jxl|jpeg)$",
+                                views.event_map_view,
+                                name="event_main_map_view_with_format",
+                            ),
+                            re_path(
+                                r"_(?P<index>(?<=_)[1-9]\d*)",
+                                include(
+                                    [
+                                        path(
+                                            "",
+                                            views.event_map_view,
+                                            name="event_map_view",
+                                        ),
+                                        re_path(
+                                            r"^\.(?P<extension>png|webp|avif|jxl|jpeg)$",
+                                            views.event_map_view,
+                                            name="event_map_view_with_format",
+                                        ),
+                                    ]
+                                ),
+                            ),
+                        ]
+                    ),
                 ),
-                re_path(
-                    r"kmz(_(?=[1-9]))?(?P<index>(?<=_)[1-9]\d*)?$",
-                    views.event_kmz_view,
-                    name="event_kmz_view",
+                path(
+                    "kmz",
+                    include(
+                        [
+                            path(
+                                "",
+                                views.event_kmz_view,
+                                name="event_main_kmz_view",
+                            ),
+                            re_path(
+                                r"_(?P<index>(?<=_)[1-9]\d*)$",
+                                views.event_kmz_view,
+                                name="event_kmz_view",
+                            ),
+                        ]
+                    ),
                 ),
             ]
         ),
