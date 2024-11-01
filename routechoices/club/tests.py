@@ -241,7 +241,7 @@ class ClubViewsTestCase(EssentialApiBase):
 
         # event kmz
         url = self.reverse_and_check(
-            "event_kmz_view",
+            "event_main_kmz_view",
             "/kiila-cup-1/kmz",
             host="clubs",
             host_kwargs={"club_slug": "kiilat"},

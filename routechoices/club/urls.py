@@ -16,20 +16,56 @@ urlpatterns = [
         "sitemap.xml", views.sitemap_index, {"sitemaps": sitemaps}, name="club_sitemap"
     ),
     re_path(r"^feed(\.rss)?$", views.club_live_event_feed, name="club_feed"),
-    re_path(
-        r"^thumbnail(\.(?P<extension>png|webp|avif|jxl|jpeg))?$",
-        views.club_thumbnail,
-        name="club_thumbnail",
+    path(
+        "thumbnail",
+        include(
+            [
+                path(
+                    "",
+                    views.club_thumbnail,
+                    name="club_thumbnail",
+                ),
+                re_path(
+                    r"\.(?P<extension>png|webp|avif|jxl|jpeg)$",
+                    views.club_thumbnail,
+                    name="club_thumbnail_with_format",
+                ),
+            ]
+        ),
     ),
-    re_path(
-        r"^logo(\.(?P<extension>png|webp|avif|jxl|jpeg))?$",
-        views.club_logo,
-        name="club_logo",
+    path(
+        "logo",
+        include(
+            [
+                path(
+                    "",
+                    views.club_logo,
+                    name="club_logo",
+                ),
+                re_path(
+                    r"\.(?P<extension>png|webp|avif|jxl|jpeg)$",
+                    views.club_logo,
+                    name="club_logo_with_format",
+                ),
+            ]
+        ),
     ),
-    re_path(
-        r"^banner(\.(?P<extension>png|webp|avif|jxl|jpeg))?$",
-        views.club_banner,
-        name="club_banner",
+    path(
+        "banner",
+        include(
+            [
+                path(
+                    "",
+                    views.club_banner,
+                    name="club_banner",
+                ),
+                re_path(
+                    r"\.(?P<extension>png|webp|avif|jxl|jpeg)$",
+                    views.club_banner,
+                    name="club_banner_with_format",
+                ),
+            ]
+        ),
     ),
     re_path(
         r"(?P<icon_name>favicon\.ico|apple-touch-icon\.png|icon-192\.png|icon-512\.png)",
