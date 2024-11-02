@@ -441,7 +441,7 @@ def event_map_view(request, slug, index="1", **kwargs):
         club = get_object_or_404(Club, slug__iexact=club_slug)
         if club.domain and not request.use_cname:
             return redirect(
-                f"{club.nice_url}{slug}/map{('_' + index) if index != '1' else ''}"
+                f"{club.nice_url}{slug}/map{('-' + index) if index != '1' else ''}"
             )
         return render(
             request,
@@ -450,7 +450,9 @@ def event_map_view(request, slug, index="1", **kwargs):
             status=status.HTTP_404_NOT_FOUND,
         )
     if event.club.domain and not request.use_cname:
-        return redirect(f"{event.club.nice_url}{event.slug}/map_{index}")
+        return redirect(
+            f"{event.club.nice_url}{event.slug}/map{('-' + index) if index != '1' else ''}"
+        )
 
     redirect_view = "event_main_map_download"
     redirect_kwargs = {"event_id": event.aid}
@@ -494,7 +496,7 @@ def event_kmz_view(request, slug, index="1", **kwargs):
         club = get_object_or_404(Club, slug__iexact=club_slug)
         if club.domain and not request.use_cname:
             return redirect(
-                f"{club.nice_url}{slug}/kmz{('_' + index) if index != '1' else ''}"
+                f"{club.nice_url}{slug}/kmz{('-' + index) if index != '1' else ''}"
             )
         return render(
             request,
@@ -503,7 +505,9 @@ def event_kmz_view(request, slug, index="1", **kwargs):
             status=status.HTTP_404_NOT_FOUND,
         )
     if event.club.domain and not request.use_cname:
-        return redirect(f"{event.club.nice_url}{event.slug}/kmz_{index}")
+        return redirect(
+            f"{event.club.nice_url}{event.slug}/kmz{('-' + index) if index != '1' else ''}"
+        )
     return redirect(
         reverse(
             "event_kmz_download",
