@@ -133,7 +133,7 @@ urlpatterns = [
                                             name="event_main_map_download_with_format",
                                         ),
                                         re_path(
-                                            r"^_(?P<index>[1-9]\d*)",
+                                            r"^-(?P<index>[1-9]\d*)",
                                             include(
                                                 [
                                                     path(
@@ -162,7 +162,7 @@ urlpatterns = [
                                             name="event_main_kmz_download",
                                         ),
                                         re_path(
-                                            r"^_(?P<index>[1-9]\d*)$",
+                                            r"^-(?P<index>[1-9]\d*)$",
                                             views.event_kmz_download,
                                             name="event_kmz_download",
                                         ),
