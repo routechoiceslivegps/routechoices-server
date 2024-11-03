@@ -36,7 +36,7 @@ urlpatterns = [
                                         name="list_view",
                                     ),
                                     path(
-                                        "delete-others/?$",
+                                        "delete-others",
                                         view=views.CustomSessionDeleteOtherView.as_view(),
                                         name="delete_other_view",
                                     ),

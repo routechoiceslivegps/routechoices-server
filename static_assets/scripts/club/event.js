@@ -1463,10 +1463,12 @@ function RCEvent(infoURL, clockURL) {
         currentTime = 0;
         maxCTime = 0;
       } else {
-        currentTime = Math.max(
-          getCompetitionStartDate(),
-          prevShownTime + (ts - prevDisplayRefresh) * actualPlaybackRate
-        );
+        if (!isMapMoving) {
+          currentTime = Math.max(
+            getCompetitionStartDate(),
+            prevShownTime + (ts - prevDisplayRefresh) * actualPlaybackRate
+          );
+        }
         let maxCTime = getCompetitionStartDate() + getCompetitorsMaxDuration();
         if (isCustomStart) {
           maxCTime =
