@@ -2558,10 +2558,12 @@ function RCEvent(infoURL, clockURL) {
 
       const widgetContent = u("<p/>").addClass("text-center");
 
-      const qrImage = u("<img/>").attr({
-        src: qr.toDataURL(),
-        alt: "QR code for this event",
-      });
+      const qrImage = u("<img/>")
+        .attr({
+          src: qr.toDataURL(),
+          alt: "QR code for this event",
+        })
+        .addClass("qr-code");
 
       const qrText = u("<a/>")
         .addClass("small", "fw-bold")

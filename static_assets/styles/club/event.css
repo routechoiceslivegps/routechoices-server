@@ -380,3 +380,12 @@
   user-select: none;
   -webkit-user-select: none;
 }
+
+.qr-code {
+  mix-blend-mode: color-burn;
+}
+
+[data-bs-theme="dark"] .qr-code {
+  mix-blend-mode: exclusion;
+  filter: invert(1);
+}
