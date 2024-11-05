@@ -3064,7 +3064,11 @@ function RCEvent(infoURL, clockURL) {
           });
           cluster.name = `${banana.i18n("group")} ${alphabetizeNumber(d - 1)}`;
           cluster.short_name = cluster.name;
-          const clusterLoc = { coords: clusterCenter.location };
+          const clusterLoc = [
+            0,
+            clusterCenter.location.latitude,
+            clusterCenter.location.longitude,
+          ];
           redrawCompetitorMarker(cluster, clusterLoc, false);
           redrawCompetitorNametag(cluster, clusterLoc, false);
           clusters[d] = cluster;
