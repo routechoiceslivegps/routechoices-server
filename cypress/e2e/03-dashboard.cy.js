@@ -38,6 +38,14 @@ context("Dashboard actions", () => {
     cy.get("#id_gpx_file").selectFile("cypress/fixtures/Jukola_1st_leg.gpx");
     cy.get(".upload-btn:not(.disabled)").click();
     cy.contains("Data uploaded!");
+
+    cy.forceVisit("https://registration.routechoices.dev");
+    cy.get("#name").type("Veijo");
+    cy.get("#sname").type("V");
+    cy.get("#devid").type(this.devId + "{enter}");
+    cy.get("#events").select(1);
+    cy.get("#register-btn").click();
+    cy.get("#p4").contains("You have been registered.");
   });
 
   it("Manage devices", function () {
