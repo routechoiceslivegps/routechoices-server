@@ -18,6 +18,7 @@ class Command(BaseCommand):
         s.name = "Routechoices.com"
         s.save()
         Device.objects.create(aid=12345678)
+        Device.objects.create(aid=10000000)
         admin_user = User.objects.create_user(
             "admin", "admin@routechoices.com", "pa$$word123"
         )

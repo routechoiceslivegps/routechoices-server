@@ -1,6 +1,5 @@
 context("Dashboard actions", () => {
   before(() => {
-    cy.getDeviceId();
     cy.visit("/");
   });
 
@@ -42,7 +41,7 @@ context("Dashboard actions", () => {
     cy.forceVisit("https://registration.routechoices.dev");
     cy.get("#name").type("Veijo");
     cy.get("#sname").type("V");
-    cy.get("#devid").type(this.devId + "{enter}");
+    cy.get("#devid").type("10000000{enter}");
     cy.get("#events").select(1);
     cy.get("#register-btn").click();
     cy.get("#p4").contains("You have been registered.");
@@ -54,7 +53,7 @@ context("Dashboard actions", () => {
     cy.contains("Halden SK").click();
     cy.contains("Devices").click();
     cy.contains("Add new device").click();
-    cy.get("#id_device-ts-control").type(this.devId).wait(1000);
+    cy.get("#id_device-ts-control").type("10000000").wait(1000);
     cy.get("#id_nickname").type("MyDevice");
     cy.get("input").contains("Add").click();
     cy.get("#django-messages").contains("Device added successfully");
@@ -272,7 +271,7 @@ context("Dashboard actions", () => {
     cy.get("#id_start_date").focus().realType("2019-06-15 21:00:00");
     cy.get("#id_end_date").focus().realType("2019-06-16 00:00:00");
     cy.get("#id_map").select("Jukola 2019 - 1st Leg"); // doesnt matter
-    cy.get("#id_competitors-0-device-ts-control").type(this.devId).wait(1000);
+    cy.get("#id_competitors-0-device-ts-control").type("10000000").wait(1000);
     cy.get("#id_competitors-0-name").type("Mats Haldin");
     cy.get("#id_competitors-0-short_name").type("Halden");
     cy.get("#id_competitors-0-start_time")
@@ -316,7 +315,7 @@ context("Dashboard actions", () => {
     cy.get("#id_start_date").focus().realType("2019-06-15 20:00:00");
     cy.get("#id_end_date").focus().realType("2019-06-14 00:00:00");
     cy.get("#id_map_assignations-0-map").select("Jukola 2019 - 1st Leg");
-    cy.get("#id_competitors-0-device-ts-control").type(this.devId).wait(1000);
+    cy.get("#id_competitors-0-device-ts-control").type("10000000").wait(1000);
     cy.get("#id_competitors-0-start_time")
       .focus()
       .realType("2019-06-16 21:00:10");

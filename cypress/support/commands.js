@@ -41,22 +41,6 @@ Cypress.Commands.add("createClub", (name = "Kangasala SK") => {
   cy.contains("successfully");
 });
 
-Cypress.Commands.add("getDeviceId", () => {
-  cy.clearCookies();
-  return cy
-    .request({
-      method: "POST",
-      url: "/api/device_id/",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        cookie: "",
-      },
-    })
-    .then((response) => {
-      cy.wrap(response.body.device_id).as("devId");
-    });
-});
-
 Cypress.Commands.add(
   "createMap",
   (name = "Jukola 2019 - 1st Leg", club = "halden-sk") => {

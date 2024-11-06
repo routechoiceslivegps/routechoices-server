@@ -26,7 +26,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     re_path(r"^$", schema_view.with_ui("redoc", cache_timeout=0), name="api_doc"),
     re_path(r"^check-latlon/?$", views.ip_latlon, name="ip_latlon"),
-    re_path(r"^device_id/?$", views.get_device_id, name="device_id_api"),  # deprecated
     re_path(r"^event-set/?$", views.event_set_creation, name="event_set"),
     re_path(r"^locations/?$", views.locations_api_gw, name="locations_api_gw"),
     re_path(
