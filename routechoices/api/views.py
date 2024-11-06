@@ -1397,16 +1397,6 @@ def get_version(request):
 
 @swagger_auto_schema(
     method="post",
-    auto_schema=None,
-)
-@api_POST_view
-def get_device_id(request):
-    device = Device.objects.create(user_agent=request.session.user_agent[:200])
-    return Response({"status": "ok", "device_id": device.aid})
-
-
-@swagger_auto_schema(
-    method="post",
     operation_id="create_device_id",
     operation_description="Create a device id",
     tags=["Devices"],
