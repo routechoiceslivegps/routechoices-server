@@ -840,14 +840,14 @@ function RCEvent(infoURL, clockURL) {
 
   function CountDown() {
     const duration = dayjs.duration(dayjs(eventStart).diff(dayjs()));
-    let durationInSeconds = Math.max(duration.asSeconds(), 0);
+    let durationInSeconds = Math.max(Math.ceil(duration.asSeconds()), 0);
     const days = Math.floor(durationInSeconds / (24 * 3600));
     durationInSeconds -= days * (24 * 3600);
     const hours = Math.floor(durationInSeconds / 3600);
     durationInSeconds -= hours * 3600;
     const minutes = Math.floor(durationInSeconds / 60);
     durationInSeconds -= minutes * 60;
-    const seconds = Math.floor(durationInSeconds);
+    const seconds = durationInSeconds;
 
     const daysText = dayjs
       .duration(2, "days")
