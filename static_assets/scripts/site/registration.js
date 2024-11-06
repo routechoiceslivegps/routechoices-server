@@ -121,19 +121,16 @@ document.getElementById("form2").onsubmit = function (ev) {
   if (!ev_id) {
     return;
   }
-  fetch(
-    window.local.apiRoot + "events/" + ev_id + "/register/?lang=" + locale,
-    {
-      method: "POST",
-      credentials: "include",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": window.local.csrfToken,
-      },
-      body: JSON.stringify(data),
-    }
-  )
+  fetch(window.local.apiRoot + "events/" + ev_id + "/register?lang=" + locale, {
+    method: "POST",
+    credentials: "include",
+    mode: "cors",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": window.local.csrfToken,
+    },
+    body: JSON.stringify(data),
+  })
     .then(function (r) {
       return r.json();
     })
