@@ -63,13 +63,6 @@ class EssentialApiTestCase1(EssentialApiBase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertTrue(t1 < res.data.get("time") < t2)
 
-    def test_get_device_id_legacy(self):
-        url = self.reverse_and_check("device_id_api", "/device_id")
-        res = self.client.post(url)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertTrue(len(res.data.get("device_id")) == 8)
-        self.assertTrue(res.data.get("device_id") != self.get_device_id())
-
     def test_id_is_registered(self):
         did = self.get_device_id()
         url = self.reverse_and_check(
