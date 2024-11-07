@@ -264,6 +264,10 @@ context("Dashboard actions", () => {
     cy.get("#mass_start_button").click();
     cy.wait(1000);
 
+    // Show grouping
+    cy.get("#options_show_button").click();
+    cy.get("#toggleClusterSwitch").click();
+    cy.get(".leaflet-control-grouping").first().contains("No groups");
     // Create Event with all fields info
     cy.visit("/dashboard/clubs/halden-sk/events/new");
 
