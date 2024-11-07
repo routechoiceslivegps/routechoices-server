@@ -1467,36 +1467,6 @@ def create_device_id(request):
 
 
 @swagger_auto_schema(
-    method="post",
-    auto_schema=None,
-)
-@api_POST_view
-def get_device_for_imei(request):
-    imei = request.data.get("imei")
-    if not imei:
-        raise ValidationError("No IMEI")
-    try:
-        validate_imei(imei)
-    except Exception as e:
-        raise ValidationError(str(e.message))
-    try:
-        idevice = (
-            ImeiDevice.objects.select_related("device")
-            .defer("device__locations_encoded")
-            .get(imei=imei)
-        )
-    except ImeiDevice.DoesNotExist:
-        device = Device.objects.create()
-        idevice = ImeiDevice.objects.create(imei=imei, device=device)
-    else:
-        device = idevice.device
-        if re.search(r"[^0-9]", device.aid):
-            if not device.competitor_set.filter(event__end_date__gte=now()).exists():
-                device.aid = random_device_id()
-    return Response({"status": "ok", "device_id": device.aid, "imei": imei})
-
-
-@swagger_auto_schema(
     method="get",
     operation_id="server_time",
     operation_description="Return the server epoch time",
