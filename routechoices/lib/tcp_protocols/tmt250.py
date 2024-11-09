@@ -1,5 +1,7 @@
 from struct import pack, unpack
 
+from tornado.iostream import StreamClosedError
+
 from routechoices.lib.helpers import random_key, safe64encode
 from routechoices.lib.tcp_protocols.commons import (
     GenericTCPServer,
@@ -83,26 +85,12 @@ class TMT250Connection:
         self.db_device = None
         self.logger = logger
 
-    async def start_listening(self):
-        print("Start listening from %s", self.address)
-        data = bytearray(b"\x00" * 1024)
-        data_len = await self.stream.read_into(data, partial=True)
-
-        while data_len == 1 and data[0] == b"\xff":
-            print("heartbeat", flush=True)
-            data_len = await self.stream.read_into(data, partial=True)
-
-        if data_len < 3:
-            print("too little data", flush=True)
-            await self.stream.write(b"\x00")
-            self.stream.close()
-            return
-        data = data[:data_len]
+    async def parse_imei(self, data):
         imei_len = (data[0] << 8) + data[1]
         imei = ""
         is_valid_imei = True
         try:
-            imei = data[2:].decode("ascii")
+            imei = data[2:17].decode("ascii")
             validate_imei(imei)
         except Exception:
             is_valid_imei = False
@@ -113,12 +101,14 @@ class TMT250Connection:
             await self.stream.write(b"\x00")
             self.stream.close()
             return
+
         self.db_device = await get_device_by_imei(imei)
         if not self.db_device:
             print(f"imei {imei} not registered ({self.address})", flush=True)
             await self.stream.write(b"\x00")
             self.stream.close()
             return
+
         self.imei = imei
         await self.stream.write(b"\x01")
         self.logger.info(
@@ -126,34 +116,42 @@ class TMT250Connection:
         )
         print(f"{self.imei} is connected", flush=True)
 
-        while await self._on_write_complete():
-            pass
+    async def start_listening(self):
+        print("Start listening from", self.address)
 
-    async def _on_read_line(self, data):
+        while True:
+            try:
+                data = bytearray(b"\x00" * 2048)
+                data_len = await self.stream.read_into(data, partial=True)
+                if self.imei:
+                    print(f"{self.imei} is sending {data_len} bytes")
+                    self.logger.info(
+                        f"TMT250 DATA, {self.aid}, {self.address}, {self.imei}: "
+                        f"{safe64encode(bytes(data[:data_len]))}"
+                    )
+                else:
+                    print(f"{self.address} is sending {data_len} bytes")
+
+                if data_len == 1 and data[0] == b"\xff":
+                    print("heartbeat", flush=True)
+                elif data_len > 2:
+                    imei_len = (data[0] << 8) + data[1]
+                    if imei_len > 0:
+                        await self.parse_imei(data)
+                    else:
+                        await self.decode_data(data)
+            except StreamClosedError:
+                break
+
+    async def decode_data(self, data):
+        if not self.imei:
+            pass
         zeroes = unpack(">i", data[:4])[0]
         if zeroes != 0:
             raise Exception("zeroes should be 0")
         self.packet_length = unpack(">i", data[4:8])[0] + 4
         self.buffer = bytes(data)
         await self._on_full_data()
-
-    async def _on_write_complete(self):
-        if not self.stream.reading():
-            data = bytearray(b"\x00" * 2048)
-            try:
-                data_len = await self.stream.read_into(data, partial=True)
-                while data_len == 1 and data[0] == b"\xff":
-                    data_len = await self.stream.read_into(data, partial=True)
-                print(f"{self.imei} is sending {data_len} bytes")
-                self.logger.info(
-                    f"TMT250 DATA, {self.aid}, {self.address}, {self.imei}: "
-                    f"{safe64encode(bytes(data[:data_len]))}"
-                )
-                await self._on_read_line(data[:data_len])
-            except Exception as e:
-                print("exception reading data " + str(e))
-                return False
-        return True
 
     def _on_close(self):
         print("Client quit", self.address)
