@@ -148,13 +148,10 @@ class TMT250Connection:
             pass
         zeroes = unpack(">i", data[:4])[0]
         if zeroes != 0:
-            raise Exception("zeroes should be 0")
+            return
         self.packet_length = unpack(">i", data[4:8])[0] + 4
         self.buffer = bytes(data)
-        try:
-            await self._on_full_data()
-        except Exception:
-            pass
+        await self._on_full_data()
 
     def _on_close(self):
         print("Client quit", self.address)
