@@ -151,7 +151,10 @@ class TMT250Connection:
             raise Exception("zeroes should be 0")
         self.packet_length = unpack(">i", data[4:8])[0] + 4
         self.buffer = bytes(data)
-        await self._on_full_data()
+        try:
+            await self._on_full_data()
+        except Exception:
+            pass
 
     def _on_close(self):
         print("Client quit", self.address)
