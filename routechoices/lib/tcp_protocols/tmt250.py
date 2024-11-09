@@ -85,8 +85,13 @@ class TMT250Connection:
 
     async def start_listening(self):
         print("Start listening from %s", self.address)
-        data = bytearray(b"0" * 1024)
+        data = bytearray(b"\x00" * 1024)
         data_len = await self.stream.read_into(data, partial=True)
+
+        while data_len == 1 and data[0] == b"\xff":
+            print("heartbeat", flush=True)
+            data_len = await self.stream.read_into(data, partial=True)
+
         if data_len < 3:
             print("too little data", flush=True)
             await self.stream.write(b"\x00")
@@ -134,9 +139,11 @@ class TMT250Connection:
 
     async def _on_write_complete(self):
         if not self.stream.reading():
-            data = bytearray(b"0" * 2048)
+            data = bytearray(b"\x00" * 2048)
             try:
                 data_len = await self.stream.read_into(data, partial=True)
+                while data_len == 1 and data[0] == b"\xff":
+                    data_len = await self.stream.read_into(data, partial=True)
                 print(f"{self.imei} is sending {data_len} bytes")
                 self.logger.info(
                     f"TMT250 DATA, {self.aid}, {self.address}, {self.imei}: "
