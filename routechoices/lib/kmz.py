@@ -45,23 +45,22 @@ def extract_ground_overlay_info(kml):
                 nw, ne, se, sw = compute_corners_from_kml_latlonbox(
                     north, east, south, west, rot
                 )
-                corners_coords = corners_coords = (
-                    f"{round(nw[0], 5)},{round(nw[1], 5)},{round(ne[0], 5)},{round(ne[1], 5)},{round(se[0], 5)},{round(se[1], 5)},{round(sw[0], 5)},{round(sw[1], 5)}"
-                )
             elif len(latlon_quad_nodes) > 0:
                 latlon_quad = latlon_quad_nodes[0]
-                sw, se, ne, nw = (
+                sw_lonlat, se_lonlat, ne_lonlat, nw_lonlat = (
                     latlon_quad.getElementsByTagName("coordinates")[0]
                     .firstChild.nodeValue.strip()
                     .split(" ")
                 )
-                nw = nw.split(",")[::-1]
-                ne = ne.split(",")[::-1]
-                se = se.split(",")[::-1]
-                sw = sw.split(",")[::-1]
-                corners_coords = f"{round(float(nw[0]), 5)},{round(float(nw[1]), 5)},{round(float(ne[0]), 5)},{round(float(ne[1]), 5)},{round(float(se[0]), 5)},{round(float(se[1]), 5)},{round(float(sw[0]), 5)},{round(float(sw[1]), 5)}"
+                nw, ne, se, sw = list(
+                    list(float(x) for x in cc.split(",", 1)[::-1])
+                    for cc in (nw_lonlat, ne_lonlat, se_lonlat, sw_lonlat)
+                )
             else:
                 raise Exception("Invalid GroundOverlay")
+            corners_coords = ",".join(
+                [f"{c[0]:.5f},{c[1]:.5f}" for c in (nw, ne, se, sw)]
+            )
         except Exception:
             raise BadKMLException("Could not find proper GroundOverlay.")
         out.append((f"{main_name} - {name}", href, corners_coords))

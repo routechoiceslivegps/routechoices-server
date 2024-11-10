@@ -257,7 +257,7 @@ class MapForm(ModelForm):
         if len(cs) != 8:
             raise ValidationError("Invalid format")
         try:
-            return ",".join([f"{round(float(c), 5)}" for c in cs])
+            return ",".join([f"{float(c):.5f}" for c in cs])
         except Exception:
             raise ValidationError("Invalid format")
 

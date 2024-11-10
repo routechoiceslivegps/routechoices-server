@@ -476,7 +476,7 @@ class Map(models.Model):
     @property
     def corners_coordinates_short(self):
         coords = ",".join(
-            [str(round(Decimal(x), 5)) for x in self.corners_coordinates.split(",")]
+            [f"{Decimal(x):.5f}" for x in self.corners_coordinates.split(",")]
         )
         return coords
 
