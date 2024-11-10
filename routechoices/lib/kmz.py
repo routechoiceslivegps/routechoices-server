@@ -47,14 +47,14 @@ def extract_ground_overlay_info(kml):
                 )
             elif len(latlon_quad_nodes) > 0:
                 latlon_quad = latlon_quad_nodes[0]
-                sw_lonlat, se_lonlat, ne_lonlat, nw_lonlat = (
+                corners_lonlat = (
                     latlon_quad.getElementsByTagName("coordinates")[0]
                     .firstChild.nodeValue.strip()
                     .split(" ")
                 )
                 nw, ne, se, sw = list(
                     list(float(x) for x in cc.split(",", 1)[::-1])
-                    for cc in (nw_lonlat, ne_lonlat, se_lonlat, sw_lonlat)
+                    for cc in corners_lonlat
                 )
             else:
                 raise Exception("Invalid GroundOverlay")
