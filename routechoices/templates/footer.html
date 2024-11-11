@@ -46,29 +46,36 @@
             <div class="col-sm-3 info">
                 <h5>Information</h5>
                 <p>{{ site.name }} is an easy to use and powerful live GPS tracking solution designed for orienteering events.</p>
-            </div>
+                <h5>Service provided by</h5>
+                <b>OneHertz</b>
+                <br />
+                FI-34130655
+                <br />
+                Rippitie 7, 20660 Littoinen, Finland
+            </p>
         </div>
     </div>
-    <div class="second-bar">
-        <div class="container">
-            <div class="logo site-name">
-                <a href="{% host_url 'site:landing_page' host 'www' %}"
-                   class="d-inline-flex ">
-                    <div class="p-0">
-                        <img src="{% static 'img/logo.svg' %}"
-                             alt="Site logo"
-                             height="35"
-                             width="48.52"
-                             style="vertical-align: baseline">
-                    </div>
-                    <div class="px-2 py-0">
-                        <div style="line-height:1.4em">{{ site.name }}</div>
-                        <div style="font-size: 0.67em;line-height:0">Live GPS Tracking Solution</div>
-                    </div>
-                </a>
-            </div>
-            <div class="social-icons"></div>
+</div>
+<div class="second-bar">
+    <div class="container">
+        <div class="logo site-name">
+            <a href="{% host_url 'site:landing_page' host 'www' %}"
+               class="d-inline-flex ">
+                <div class="p-0">
+                    <img src="{% static 'img/logo.svg' %}"
+                         alt="Site logo"
+                         height="35"
+                         width="48.52"
+                         style="vertical-align: baseline">
+                </div>
+                <div class="px-2 py-0">
+                    <div style="line-height:1.4em">{{ site.name }}</div>
+                    <div style="font-size: 0.67em;line-height:0">Live GPS Tracking Solution</div>
+                </div>
+            </a>
         </div>
+        <div class="social-icons"></div>
     </div>
+</div>
 </footer>
 <!-- Footer -->
