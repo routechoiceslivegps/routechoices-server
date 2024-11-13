@@ -121,6 +121,43 @@ function parseGpx(xmlstr) {
 }
 
 (function () {
+  var tsDevId = null;
+  function selectizeDeviceInput() {
+    tsDevId = new TomSelect("select[name='device_id']", {
+      valueField: "device_id",
+      labelField: "device_id",
+      searchField: "device_id",
+      create: false,
+      createOnBlur: false,
+      persist: false,
+      plugins: ["preserve_on_blur"],
+      load: function (query, callback) {
+        if (query.length < 4) {
+          return callback();
+        }
+        reqwest({
+          url:
+            window.local.apiBaseUrl +
+            "search/device?q=" +
+            encodeURIComponent(query),
+          method: "get",
+          type: "json",
+          withCredentials: true,
+          crossOrigin: true,
+          success: function (res) {
+            callback(res.results);
+          },
+          error: function () {
+            callback();
+          },
+        });
+      },
+    });
+  }
+
+  selectizeDeviceInput();
+  u("#id_device_id").attr("required", true);
+
   var thisUrl = window.location.href;
   if (
     thisUrl.includes("name-edited=1") ||
@@ -159,6 +196,8 @@ function parseGpx(xmlstr) {
     u("#id_name").val(el.attr("data-competitor-name"));
     u("#id_short_name").val(el.attr("data-competitor-short-name"));
     u("#id_id").val(el.attr("data-competitor-id"));
+    tsDevId.addOption({ device_id: el.attr("data-device-id") });
+    tsDevId.setValue(el.attr("data-device-id"));
     editModal.show();
   });
 
@@ -174,6 +213,8 @@ function parseGpx(xmlstr) {
     const name = u("#id_name").val();
     const shortName = u("#id_short_name").val();
     const competitorId = u("#id_id").val();
+    const deviceId = u("#id_device_id").val();
+
     reqwest({
       url: window.local.apiBaseUrl + "competitors/" + competitorId + "/",
       method: "PATCH",
@@ -185,6 +226,7 @@ function parseGpx(xmlstr) {
       data: {
         name,
         short_name: shortName,
+        device_id: deviceId,
       },
       success: () => {
         window.location.href = window.location.href + "?name-edited=1";

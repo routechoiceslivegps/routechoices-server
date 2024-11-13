@@ -904,11 +904,18 @@ def competitor_api(request, competitor_id):
     if new_short_name == "":
         competitor.short_name = initial_of_name(competitor.name)[:32]
 
-    if new_name or new_short_name:
+    new_device_id = request.data.get("device_id")
+    if new_device_id:
+        dev = Device.objects.filter(aid=new_device_id).first()
+        if not dev:
+            raise ValidationError("Invalid device ID")
+        competitor.device = dev
+
+    if new_name or new_short_name or new_device_id:
         competitor.save()
         return Response({"status": "ok"})
     else:
-        raise ValidationError("No name given")
+        raise ValidationError("No data submitted")
 
 
 @swagger_auto_schema(

@@ -1,5 +1,11 @@
 {% extends "dashboard/home.html" %}
 {% load compress django_bootstrap5 hosts static %}
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet"
+          href="{% static '/vendor/tom-select-2.0.1/tom-select.bootstrap5.min.css' %}" />
+{% endblock extra_head %}
+
 {% block sub_content %}
     {% if participations %}
         <div class="row">
@@ -20,10 +26,11 @@
                                         <button data-competitor-name="{{ p.name }}"
                                                 data-competitor-short-name="{{ p.short_name }}"
                                                 data-competitor-id="{{ p.aid }}"
-                                                class="me-2 mb-1 btn btn-secondary edit-name-btn">Edit name</button>
+                                                data-device-id="{{ p.device.aid }}"
+                                                class="me-2 mb-1 btn btn-secondary edit-name-btn">Edit info</button>
                                         {% if p.event.allow_route_upload %}
                                             <button data-competitor-id="{{ p.aid }}"
-                                                    class="btn btn-secondary open-upload-btn">Submit new GPS</button>
+                                                    class="btn btn-secondary open-upload-btn">Upload GPS</button>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -43,7 +50,7 @@
             <div class="modal-content">
                 <form id="name-form">
                     <div class="modal-header">
-                        <h5 class="modal-title">Edit Name</h5>
+                        <h5 class="modal-title">Edit Info</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
@@ -66,6 +73,10 @@
                                    id="id_short_name"
                                    maxlength="32"
                                    name="short_name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="id_device_id">Device ID</label>
+                            <select class="form-select" id="id_device_id" name="device_id"></select>
                         </div>
                         <input type="hidden" id="id_id" />
                     </div>
@@ -122,6 +133,7 @@
     {% compress js %}
         <script src="{% static '/vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
         <script src="{% static '/vendor/reqwest-2.0.5/reqwest.min.js' %}"></script>
+        <script src="{% static '/vendor/tom-select-2.0.1/tom-select.custom.js' %}"></script>
         <script src="{% static '/scripts/dashboard/participations.js' %}"></script>
     {% endcompress %}
 {% endblock extra_body %}
