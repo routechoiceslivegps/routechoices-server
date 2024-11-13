@@ -28,7 +28,7 @@ context("Dashboard actions", () => {
     cy.get(".edit-info-btn").first().click();
     cy.get("#id_name").clear().type("Kasper Harlem Fosser");
     cy.get("#id_short_name").clear().type("🇳🇴 K.H.Fosser{enter}");
-    cy.contains("Name updated!");
+    cy.contains("Info updated!");
     cy.contains(
       "My event with open registration and upload allowed by Halden SK as Kasper Harlem Fosser (🇳🇴 K.H.Fosser)"
     );
