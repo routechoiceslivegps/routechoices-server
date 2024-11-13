@@ -1610,7 +1610,7 @@ class MyReleaseUserView(ReleaseUserView):
 @login_required
 def participations_view(request):
     participations = request.user.participations.select_related(
-        "event", "event__club"
+        "event", "event__club", "device"
     ).order_by("-event__start_date")
 
     if request.GET.get("name-edited", None):
