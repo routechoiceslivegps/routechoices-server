@@ -47,7 +47,7 @@ const backdropMaps = {
       attribution: "&copy; Ordnance Survey",
       className: "wms256",
       minZoom: 7,
-      maxZoom: 15,
+      maxNativeZoom: 15,
       bounds: [
         [49.75, -9.01],
         [61.01, 2.01],
