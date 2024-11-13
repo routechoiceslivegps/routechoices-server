@@ -42,10 +42,16 @@ const backdropMaps = {
     }
   ),
   "topo-uk": L.tileLayer(
-    "https://api.os.uk/maps/raster/v1/zxy/Outdoor_3857/{z}/{x}/{y}.png?key=5T04qXvNDxLX1gCEAXS0INCgLvczGRYw",
+    "https://tile-proxy.routechoices.com/uk/{z}/{x}/{y}.webp",
     {
       attribution: "&copy; Ordnance Survey",
       className: "wms256",
+      minZoom: 7,
+      maxZoom: 15,
+      bounds: [
+        [49.75, -9.01],
+        [61.01, 2.01],
+      ],
     }
   ),
   "mapant-no": L.tileLayer("https://mapant.no/osm-tiles/{z}/{x}/{y}.png", {
