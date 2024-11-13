@@ -25,7 +25,7 @@ context("Dashboard actions", () => {
     cy.contains(
       "My event with open registration and upload allowed by Halden SK as Thierry Gueorgiou (🇫🇷 T.Gueorgiou)"
     );
-    cy.get(".edit-name-btn").first().click();
+    cy.get(".edit-info-btn").first().click();
     cy.get("#id_name").clear().type("Kasper Harlem Fosser");
     cy.get("#id_short_name").clear().type("🇳🇴 K.H.Fosser{enter}");
     cy.contains("Name updated!");
