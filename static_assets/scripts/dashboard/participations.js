@@ -160,7 +160,7 @@ function parseGpx(xmlstr) {
 
   var thisUrl = window.location.href;
   if (
-    thisUrl.includes("name-edited=1") ||
+    thisUrl.includes("info-edited=1") ||
     thisUrl.includes("route-uploaded=1")
   ) {
     window.history.pushState("-", null, window.location.pathname);
@@ -191,11 +191,13 @@ function parseGpx(xmlstr) {
     }
   });
 
-  u(".edit-name-btn").on("click", function (e) {
+  u(".edit-info-btn").on("click", function (e) {
     const el = u(e.target);
     u("#id_name").val(el.attr("data-competitor-name"));
     u("#id_short_name").val(el.attr("data-competitor-short-name"));
     u("#id_id").val(el.attr("data-competitor-id"));
+    tsDevId.clear();
+    tsDevId.clearOptions();
     tsDevId.addOption({ device_id: el.attr("data-device-id") });
     tsDevId.setValue(el.attr("data-device-id"));
     editModal.show();
@@ -208,7 +210,7 @@ function parseGpx(xmlstr) {
     uploadModal.show();
   });
 
-  u("#name-form").on("submit", function (e) {
+  u("#info-form").on("submit", function (e) {
     e.preventDefault();
     const name = u("#id_name").val();
     const shortName = u("#id_short_name").val();
@@ -229,7 +231,7 @@ function parseGpx(xmlstr) {
         device_id: deviceId,
       },
       success: () => {
-        window.location.href = window.location.href + "?name-edited=1";
+        window.location.href = window.location.href + "?info-edited=1";
       },
       error: (e) => {
         swal({

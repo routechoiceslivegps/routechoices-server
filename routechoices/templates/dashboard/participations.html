@@ -27,7 +27,7 @@
                                                 data-competitor-short-name="{{ p.short_name }}"
                                                 data-competitor-id="{{ p.aid }}"
                                                 data-device-id="{{ p.device.aid }}"
-                                                class="me-2 mb-1 btn btn-secondary edit-name-btn">Edit info</button>
+                                                class="me-2 mb-1 btn btn-secondary edit-info-btn">Edit info</button>
                                         {% if p.event.allow_route_upload %}
                                             <button data-competitor-id="{{ p.aid }}"
                                                     class="mb-1 btn btn-secondary open-upload-btn">Upload GPS</button>
@@ -48,7 +48,7 @@
     <div class="modal" tabindex="-1" id="editNameModal" style="top: 100px">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="name-form">
+                <form id="info-form">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Info</h5>
                         <button type="button"
