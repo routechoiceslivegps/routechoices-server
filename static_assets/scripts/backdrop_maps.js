@@ -59,14 +59,14 @@ const backdropMaps = {
     className: "wms256",
   }),
   "mapant-ch": L.tileLayer(
-    "https://tile-proxy.routechoices.com/ch/{z}/{x}/{y}.jpg",
+    "https://tile-proxy.routechoices.com/ch/{z}/{x}/{y}.webp",
     {
       attribution: "&copy; MapAnt.ch",
       className: "wms256",
     }
   ),
   "mapant-se": L.tileLayer(
-    "https://tile-proxy.routechoices.com/se/{z}/{x}/{y}.jpg",
+    "https://tile-proxy.routechoices.com/se/{z}/{x}/{y}.webp",
     {
       attribution: "&copy; gokartor.se",
       className: "wms256",
