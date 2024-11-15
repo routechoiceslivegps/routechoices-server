@@ -1939,7 +1939,7 @@ function RCEvent(infoURL, clockURL) {
         isCurrentlyFetchingRoutes = false;
         if (zoomOnRunners && runnerPoints.length) {
           map.fitBounds(runnerPoints, { maxZoom: 15 });
-          map.zoomOnRunners = false;
+          zoomOnRunners = false;
         }
         cb && cb();
       })
