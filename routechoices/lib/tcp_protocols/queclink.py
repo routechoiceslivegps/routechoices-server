@@ -68,8 +68,11 @@ class QueclinkConnection:
 
         await self.process_line(data)
 
-        while await self.read_line():
-            pass
+        while True:
+            try:
+                await self.read_line()
+            except Exception:
+                break
 
     async def send_pending_commands(self):
         if not self.imei:
