@@ -112,9 +112,6 @@ class QueclinkConnection:
             "IGL",
             "LOC",
         ):
-            imei = parts[2]
-            if imei != self.imei:
-                raise Exception("Cannot change IMEI while connected")
             nb_pts = int(parts[6])
             print(f"Contains {nb_pts} pts")
             if 12 * nb_pts + 10 == len(parts):
@@ -157,9 +154,6 @@ class QueclinkConnection:
                 f"+SACK:GTHBD,{parts[1]},{parts[5]}".encode("ascii")
             )
         elif parts[0][:8] == "+RESP:GT" and parts[0][8:] == "INF":
-            imei = parts[2]
-            if imei != self.imei:
-                raise Exception("Cannot change IMEI while connected")
             try:
                 print(f"Battery level at {parts[18]}%", flush=True)
                 batt = int(parts[18])
