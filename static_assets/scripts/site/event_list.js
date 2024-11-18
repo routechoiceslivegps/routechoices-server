@@ -41,7 +41,7 @@
         event.style.background =
           "linear-gradient(to right, var(--rc-color-from-trans), var(--rc-color-to-trans)), url('" +
           header.dataset.bgImg +
-          "') 50% 50% / cover";
+          "') 100%";
       }
     });
   }
