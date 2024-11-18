@@ -1,118 +1,118 @@
 .bg_video {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  z-index: -100;
-  transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
-  transition: 1s opacity;
-  object-fit: contain;
-  vertical-align: baseline;
-  background-color: #505050;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	min-width: 100%;
+	min-height: 100%;
+	width: auto;
+	height: auto;
+	z-index: -100;
+	transform: translate(-50%, -50%);
+	-webkit-transform: translate(-50%, -50%);
+	transition: 1s opacity;
+	object-fit: contain;
+	vertical-align: baseline;
+	background-color: #505050;
 }
 
 [data-bs-theme="light"] {
-  color-scheme: light;
-  --rc-opacity: 0.5;
-  --rc-opacity-cover: rgba(20, 30, 50, 0.5);
+	color-scheme: light;
+	--rc-opacity: 0.5;
+	--rc-opacity-cover: rgba(20, 30, 50, 0.5);
 }
 
 [data-bs-theme="dark"] {
-  color-scheme: dark;
-  --rc-opacity: 0.9;
-  --rc-opacity-cover: rgba(120, 130, 150, 0.5);
+	color-scheme: dark;
+	--rc-opacity: 0.9;
+	--rc-opacity-cover: rgba(120, 130, 150, 0.5);
 }
 
 .video_cover {
-  position: fixed;
-  top: 0;
-  left: 0;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  z-index: -100;
-  background: var(--rc-opacity-cover);
+	position: fixed;
+	top: 0;
+	left: 0;
+	min-width: 100%;
+	min-height: 100%;
+	width: auto;
+	height: auto;
+	z-index: -100;
+	background: var(--rc-opacity-cover);
 }
 
 .video_text_overlay {
-  color: var(--bs-body-bg);
+	color: var(--bs-body-bg);
 }
 
 .frontpage_text {
-  font-family: "Atkinson Hyperlegible", sans-serif;
-  font-size: 18.5pt;
+	font-family: "Atkinson Hyperlegible", sans-serif;
+	font-size: 18.5pt;
 }
 
 .frontpage_text_bold {
-  font-family: "Atkinson Hyperlegible", sans-serif;
-  font-weight: 700;
-  font-size: 30pt;
+	font-family: "Atkinson Hyperlegible", sans-serif;
+	font-weight: 700;
+	font-size: 30pt;
 }
 
 .image-banner {
-  background-image: url("../../img/banner4.jpg"); /* fallback for non image-set browser */
-  background-image: -webkit-image-set(
-    url("../../img/banner4.avif") 1x /* type("image/avif") */,
-    url("../../img/banner4.webp") 1x /* type("image/webp") */,
-    url("../../img/banner4.jpg") 1x /* type("image/png") */
-  );
-  background-image: image-set(
-    url("../../img/banner4.avif") 1x,
-    url("../../img/banner4.webp") 1x,
-    url("../../img/banner4.jpg") 1x
-  );
-  margin: 0;
-  padding: 0;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+	background-image: url("../../img/banner4.jpg"); /* fallback for non image-set browser */
+	background-image: -webkit-image-set(
+		url("../../img/banner4.avif") 1x /* type("image/avif") */,
+		url("../../img/banner4.webp") 1x /* type("image/webp") */,
+		url("../../img/banner4.jpg") 1x /* type("image/png") */
+	);
+	background-image: image-set(
+		url("../../img/banner4.avif") 1x,
+		url("../../img/banner4.webp") 1x,
+		url("../../img/banner4.jpg") 1x
+	);
+	margin: 0;
+	padding: 0;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
 }
 
 .image-banner > div {
-  background: var(--rc-opacity-cover);
+	background: var(--rc-opacity-cover);
 }
 .image-banner .container {
-  margin-top: 40px;
+	margin-top: 40px;
 }
 
 .image-banner h3 {
-  color: var(--bs-body-bg);
+	color: var(--bs-body-bg);
 }
 .image-banner svg {
-  position: relative;
-  top: 0;
+	position: relative;
+	top: 0;
 }
 
 .intro-prefix {
-  font-size: 11pt;
+	font-size: 11pt;
 }
 
 .intro-bottom {
-  margin-bottom: -9pt;
+	margin-bottom: -9pt;
 }
 
 .image-hero {
-  max-width: 100%;
-  max-height: 600px;
-  width: auto;
-  height: auto;
+	max-width: 100%;
+	max-height: 600px;
+	width: auto;
+	height: auto;
 }
 
 .engage-link {
-  font-size: 1em;
-  background: rgb(0, 0, 0, calc(var(--rc-opacity) - 0.3));
-  border-radius: 5px;
+	font-size: 1em;
+	background: rgb(0, 0, 0, calc(var(--rc-opacity) - 0.3));
+	border-radius: 5px;
 }
 
 .sponsors-block {
-  background-color: var(--bs-body-bg);
+	background-color: var(--bs-body-bg);
 }
 
 .screenshots-block {
-  background-color: var(--bs-body-bg);
+	background-color: var(--bs-body-bg);
 }

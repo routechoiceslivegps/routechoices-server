@@ -1,18 +1,19 @@
 {
-  "scripts": {
-    "preinstall": "npx only-allow pnpm"
-  },
-  "engines": {
-    "npm": "Please use pnpm",
-    "yarn": "Please use pnpm"
-  },
-  "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.6.0",
-    "cypress-real-events": "^1.13.0",
-    "fontawesome-subset": "^4.4.0",
-    "sass": "^1.79.4"
-  },
-  "devDependencies": {
-    "cypress": "^13.15.2"
-  }
+	"scripts": {
+		"preinstall": "npx only-allow pnpm"
+	},
+	"engines": {
+		"npm": "Please use pnpm",
+		"yarn": "Please use pnpm"
+	},
+	"dependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@fortawesome/fontawesome-free": "^6.6.0",
+		"cypress-real-events": "^1.13.0",
+		"fontawesome-subset": "^4.4.0",
+		"sass": "^1.79.4"
+	},
+	"devDependencies": {
+		"cypress": "^13.15.2"
+	}
 }

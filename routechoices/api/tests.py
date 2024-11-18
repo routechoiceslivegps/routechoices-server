@@ -946,7 +946,7 @@ class RouteUploadApiTestCase(EssentialApiBase):
             {
                 "latitudes": "1.1,1.2",
                 "longitudes": "3.1,3.2",
-                "timestamps": f"{ t },{t + 1}",
+                "timestamps": f"{t},{t + 1}",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)

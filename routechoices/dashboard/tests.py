@@ -571,12 +571,12 @@ class TestInviteFlow(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
         self.assertEqual(len(mail.outbox), 1)
         self.assertTrue(
-            f"Request for an invitation to manage club { self.club }"
+            f"Request for an invitation to manage club {self.club}"
             in mail.outbox[0].subject
         )
         self.assertTrue(
             mail.outbox[0].body.startswith(
-                f"Hello,\n\nA user ({ self.user2.email }) has requested an invite to manage the club"
+                f"Hello,\n\nA user ({self.user2.email}) has requested an invite to manage the club"
             )
         )
 
@@ -589,5 +589,5 @@ class TestInviteFlow(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
         self.assertEqual(len(mail.outbox), 1)
         self.assertTrue(
-            f"Invitation to manage club { self.club } on " in mail.outbox[0].subject
+            f"Invitation to manage club {self.club} on " in mail.outbox[0].subject
         )

@@ -1,52 +1,52 @@
 .header-multiline {
-  line-height: 1.4;
-  padding: 2px 0;
-  margin: 0;
-  max-width: 100%;
+	line-height: 1.4;
+	padding: 2px 0;
+	margin: 0;
+	max-width: 100%;
 }
 
 .header-multiline span {
-  font-weight: bold;
-  display: inline;
-  padding: 0.45rem 0px;
-  /* Needs prefixing */
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+	font-weight: bold;
+	display: inline;
+	padding: 0.45rem 0px;
+	/* Needs prefixing */
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
 }
 
 .fa-box-archive {
-  background-color: rgb(77, 77, 77);
-  background-image: linear-gradient(30deg, #afafaf, #808080);
-  background-size: 100%;
-  background-repeat: repeat;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-background-clip: text;
-  -moz-text-fill-color: transparent;
+	background-color: rgb(77, 77, 77);
+	background-image: linear-gradient(30deg, #afafaf, #808080);
+	background-size: 100%;
+	background-repeat: repeat;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	-moz-background-clip: text;
+	-moz-text-fill-color: transparent;
 }
 
 .fa-bolt {
-  background-color: rgb(243, 80, 35);
-  background-image: linear-gradient(30deg, #d8962c, #e40000);
-  background-size: 100%;
-  background-repeat: repeat;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-background-clip: text;
-  -moz-text-fill-color: transparent;
+	background-color: rgb(243, 80, 35);
+	background-image: linear-gradient(30deg, #d8962c, #e40000);
+	background-size: 100%;
+	background-repeat: repeat;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	-moz-background-clip: text;
+	-moz-text-fill-color: transparent;
 }
 
 .fa-bell {
-  background-color: rgb(224, 201, 84);
-  background-image: linear-gradient(30deg, #eef167, #d4880d);
-  background-size: 100%;
-  background-repeat: repeat;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-background-clip: text;
-  -moz-text-fill-color: transparent;
+	background-color: rgb(224, 201, 84);
+	background-image: linear-gradient(30deg, #eef167, #d4880d);
+	background-size: 100%;
+	background-repeat: repeat;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	-moz-background-clip: text;
+	-moz-text-fill-color: transparent;
 }
 
 .link-primary-alt {
-  color: var(--bs-body-color);
+	color: var(--bs-body-color);
 }

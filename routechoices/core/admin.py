@@ -910,7 +910,7 @@ class MyUserAdmin(HijackUserAdminMixin, UserAdmin):
     @property
     def media(self):
         return super(UserAdmin, self).media + forms.Media(
-            js=["scripts/admin/hijack.min.js"]
+            js=["vendor/hijack/hijack.min.js"]
         )
 
     def get_list_filter(self, request):
