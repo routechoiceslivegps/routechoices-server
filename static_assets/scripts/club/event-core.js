@@ -80,11 +80,11 @@ L.Control.EventState = L.Control.extend({
 	},
 	setTailLength(v) {
 		this.tl = v;
-		u(this._div).find("#tail-length-display").text(printTime(v));
+		u(this._div).find(".tail-length-display").text(printTime(v));
 	},
 	setClockEl(el) {
 		this.t = el;
-		u(this._div).find("#big-clock").html(el);
+		u(this._div).find(".big-clock").html(el);
 	},
 	refresh() {
 		if (this.isLive) {
@@ -128,7 +128,7 @@ L.Control.EventState = L.Control.extend({
 			</g>
 		</svg>
 	</span>
-	<span id="tail-length-display" style="text-transform: none;">${printTime(this.tl)}</span>
+	<span class="tail-length-display" style="text-transform: none;">${printTime(this.tl)}</span>
 </div>`;
 		u(this._div).css({
 			display: "block",
@@ -148,7 +148,7 @@ L.Control.EventState = L.Control.extend({
 		${banana.i18n("replay-mode")}
 	</span>
 </div>
-<div id="big-clock" class="py-0 px-2" style="font-size:1rem;color: #000;text-shadow: -1px -1px 0 #fff,-1px 0px 0 #fff,-1px 1px 0 #fff,0px -1px 0 #fff,0px 0px 0 #fff,0px 1px 0 #fff,1px -1px 0 #fff,1px 0px 0 #fff,1px 1px 0 #fff"">
+<div class="big-clock py-0 px-2" style="font-size:1rem;color: #000;text-shadow: -1px -1px 0 #fff,-1px 0px 0 #fff,-1px 1px 0 #fff,0px -1px 0 #fff,0px 0px 0 #fff,0px 1px 0 #fff,1px -1px 0 #fff,1px 0px 0 #fff,1px 1px 0 #fff"">
 	${this.t}
 </div>
 <div class="m-0 py-0 px-2" style="font-size:0.7rem;color: #09F;text-shadow: -1px -1px 0 #fff,-1px 0px 0 #fff,-1px 1px 0 #fff,0px -1px 0 #fff,0px 0px 0 #fff,0px 1px 0 #fff,1px -1px 0 #fff,1px 0px 0 #fff,1px 1px 0 #fff">
@@ -166,7 +166,7 @@ L.Control.EventState = L.Control.extend({
 			</g>
 		</svg>
 	</span>
-	<span id="tail-length-display" style="text-transform: none;">${printTime(this.tl)}</span>
+	<span class="tail-length-display" style="text-transform: none;">${printTime(this.tl)}</span>
 </div>`;
 		u(this._div).css({
 			display: "block",
