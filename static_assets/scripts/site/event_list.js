@@ -20,7 +20,7 @@
             entry.target.style.background =
               "linear-gradient(to right, var(--rc-color-from-trans), var(--rc-color-to-trans)), url('" +
               entry.target.dataset.bgImg +
-              "')";
+              "') 100%";
             // Job done for this item - no need to watch it!
             observer.unobserve(entry.target);
           }
