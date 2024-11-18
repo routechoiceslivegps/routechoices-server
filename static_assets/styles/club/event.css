@@ -13,13 +13,13 @@
 	src: url("../../fonts/KodeMono-Bold.woff2") format("woff2");
 }
 
-#big-clock {
+.big-clock {
 	font-family: "KodeMono", monospace;
 	font-variant-numeric: tabular-nums;
 	line-height: 1em;
 }
 
-#big-clock > .time {
+.big-clock > .time {
 	font-size: 0.9em;
 }
 
