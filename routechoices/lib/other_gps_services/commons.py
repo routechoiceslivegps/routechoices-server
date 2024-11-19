@@ -155,8 +155,9 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
             dev_obj.locations_series = locations
             device_map[dev_id] = dev_obj
 
-        competitors = self.get_competitors_data()
-        for cid, tmp_competitor in competitors.items():
+        competitors_map = self.get_competitors_data()
+        competitors = []
+        for cid, tmp_competitor in competitors_map.items():
             competitor, _ = Competitor.objects.get_or_create(
                 name=tmp_competitor.name,
                 short_name=tmp_competitor.short_name,
