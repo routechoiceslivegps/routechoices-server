@@ -81,14 +81,10 @@ class GT06Connection:
         except ValidationError:
             is_valid_imei = False
         if not is_valid_imei:
-            print("Invalid imei", flush=True)
-            self.stream.close()
-            return
+            raise Exception("Invalid imei")
         self.db_device = await get_device_by_imei(imei)
         if not self.db_device:
-            print(f"Imei {imei} not registered  ({self.address})", flush=True)
-            self.stream.close()
-            return
+            raise Exception("Imei not registered")
         if not self.db_device.user_agent:
             self.db_device.user_agent = "GT06"
         self.imei = imei
