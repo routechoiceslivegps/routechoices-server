@@ -2035,18 +2035,18 @@ function RCEvent(infoURL, clockURL, locale) {
 		}).on("color:change", (c) => {
 			color = c.hexString;
 		});
-		colorModal.show();
 		u("#save-color").on("click", () => {
+			u("#save-color").off("click");
+			colorModal.hide();
 			competitor.color = color;
 			competitor.isColorDark = getContrastYIQ(competitor.color);
-			colorModal.hide();
 			for (const layerName of ["mapMarker", "nameMarker", "tail"]) {
 				competitor[layerName]?.remove();
 				competitor[layerName] = null;
 			}
 			displayCompetitorList();
-			u("#save-color").off("click");
 		});
+		colorModal.show();
 	}
 
 	function filterCompetitorList(e) {

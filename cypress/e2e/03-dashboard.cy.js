@@ -233,7 +233,6 @@ context("Dashboard actions", () => {
 		cy.get(".color-tag").first().click();
 		cy.contains("Select new color for Frederic Tranchand");
 		cy.get(".IroWheel").first().should("be.visible").click(50, 50);
-		cy.wait(200);
 		cy.get("#save-color").click();
 
 		// center on runner
