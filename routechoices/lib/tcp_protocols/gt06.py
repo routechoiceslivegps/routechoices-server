@@ -1,7 +1,6 @@
 from struct import pack, unpack
 
 import arrow
-from django.core.exceptions import ValidationError
 
 from routechoices.lib.crc_itu import crc16
 from routechoices.lib.helpers import random_key, safe64encode
@@ -78,13 +77,7 @@ class GT06Connection:
             f"GT06 CONN, {self.aid}, {self.address}: {safe64encode(data_bin)}"
         )
         imei = data_bin[4:12].hex()[1:]
-        is_valid_imei = True
-        try:
-            validate_imei(imei)
-        except ValidationError:
-            is_valid_imei = False
-        if not is_valid_imei:
-            raise Exception("Invalid imei")
+        validate_imei(imei)
         self.db_device = await get_device_by_imei(imei)
         if not self.db_device:
             raise Exception("Imei not registered")

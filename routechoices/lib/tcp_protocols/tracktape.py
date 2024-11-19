@@ -81,9 +81,10 @@ class TrackTapeConnection:
                 tim = arrow.get(loc.get("timestamp")).int_timestamp
                 lon = float(loc.get("lon"))
                 lat = float(loc.get("lat"))
-                loc_array.append((tim, lat, lon))
             except Exception:
                 continue
+            else:
+                loc_array.append((tim, lat, lon))
         if loc_array:
             await add_locations(self.db_device, loc_array)
             print(f"{len(loc_array)} locations wrote to DB", flush=True)

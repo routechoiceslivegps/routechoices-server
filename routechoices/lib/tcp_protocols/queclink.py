@@ -1,7 +1,6 @@
 import math
 
 import arrow
-from django.core.exceptions import ValidationError
 
 from routechoices.lib.helpers import random_key
 from routechoices.lib.tcp_protocols.commons import (
@@ -27,6 +26,18 @@ class QueclinkConnection:
         self.db_device = None
         self.logger = logger
 
+    async def process_identification(self, imei):
+        if self.imei and imei != self.imei:
+            raise Exception("Cannot change IMEI")
+        validate_imei(imei)
+        self.db_device = await get_device_by_imei(imei)
+        if not self.db_device.user_agent:
+            self.db_device.user_agent = "Queclink"
+        if not self.db_device:
+            raise Exception("Imei not registered")
+        self.imei = imei
+        print(f"{self.imei} is connected")
+
     async def start_listening(self):
         print(f"Start listening from {self.address}")
         while True:
@@ -46,41 +57,22 @@ class QueclinkConnection:
                 self.stream.close()
                 return
 
-            if not imei:
-                print("No imei", flush=True)
-                self.stream.close()
-                return
-
-            if not self.imei:
-                is_valid_imei = True
-                try:
-                    validate_imei(imei)
-                except ValidationError:
-                    is_valid_imei = False
-                if not is_valid_imei:
-                    print("Invalid imei", flush=True)
-                    self.stream.close()
-                    return
-                self.db_device = await get_device_by_imei(imei)
-                if not self.db_device:
-                    print(f"Imei {imei} not registered ({self.address})", flush=True)
-                    self.stream.close()
-                    return
-                self.imei = imei
-
-            if imei != self.imei:
-                print("Cannot change IMEI while connected")
-                self.stream.close()
-                return
-
             self.logger.info(
                 f"GL300 DATA, {self.aid}, {self.address}, {self.imei}: {data}"
             )
-            print(f"{self.imei} is connected")
+
+            try:
+                await self.process_identification(imei)
+            except Exception as e:
+                print(f"Could not identify device {e}", flush=True)
+                self.stream.close()
+                return
+
             try:
                 await self.send_pending_commands()
             except Exception:
                 print("Could not send pending command")
+
             try:
                 await self.process_line(data)
             except Exception:
@@ -163,8 +155,6 @@ class QueclinkConnection:
             await save_device(self.db_device)
 
     async def on_data(self, pts, batt=None):
-        if not self.db_device.user_agent:
-            self.db_device.user_agent = "Queclink"
         if batt:
             self.db_device.battery_level = batt
         loc_array = pts
