@@ -64,7 +64,9 @@ function RCEvent(infoURL, clockURL, locale) {
 	let rankingToSplit = null;
 	let showClusters = false;
 	let showControls = false;
-	const colorModal = new bootstrap.Modal(document.getElementById("colorModal"));
+	const colorModal = new bootstrap.Modal(
+		document.getElementById("color-modal"),
+	);
 	let mapSelectorLayer = null;
 	let sidebarShown = true;
 	let isMapMoving = false;
@@ -898,17 +900,17 @@ function RCEvent(infoURL, clockURL, locale) {
 						map.remove();
 					} catch {}
 					u(".event-tool").hide();
-					u("#eventLoadingModal").remove();
+					u("#loading-event-modal").remove();
 					u("#permanent-sidebar").remove();
 					u("#export-nav-item").remove();
 					hideSidebar();
 					u("#map").removeClass("no-sidebar");
 					const preRaceModal = new bootstrap.Modal(
-						document.getElementById("eventNotStartedModal"),
+						document.getElementById("future-event-modal"),
 						{ backdrop: "static", keyboard: false },
 					);
 					document
-						.getElementById("eventNotStartedModal")
+						.getElementById("future-event-modal")
 						.addEventListener("hide.bs.modal", (e) => {
 							e.preventDefault();
 						});
@@ -1001,7 +1003,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					}
 
 					fetchCompetitorRoutes(() => {
-						u("#eventLoadingModal").remove();
+						u("#loading-event-modal").remove();
 						if (isLiveEvent) {
 							onSwitchToLive();
 						} else {
@@ -1014,7 +1016,7 @@ function RCEvent(infoURL, clockURL, locale) {
 				setInterval(refreshData, 25 * 1e3);
 			})
 			.catch(() => {
-				u("#eventLoadingModal").remove();
+				u("#loading-event-modal").remove();
 				swal({ text: "Something went wrong", title: "error", type: "error" });
 			});
 	})();
@@ -2024,7 +2026,7 @@ function RCEvent(infoURL, clockURL, locale) {
 	}
 	function onChangeCompetitorColor(competitor) {
 		let color = competitor.color;
-		u("#colorModalLabel").text(
+		u("#color-modal-label").text(
 			banana.i18n("select-color-for", competitor.name),
 		);
 		u("#color-picker").html("");
@@ -2035,9 +2037,12 @@ function RCEvent(infoURL, clockURL, locale) {
 		}).on("color:change", (c) => {
 			color = c.hexString;
 		});
-		u("#save-color").on("click", () => {
-			u("#save-color").off("click");
+
+		function saveColor() {
 			colorModal.hide();
+			u("#save-color").off("click");
+			u("#color-modal").off("keypress");
+
 			competitor.color = color;
 			competitor.isColorDark = getContrastYIQ(competitor.color);
 			for (const layerName of ["mapMarker", "nameMarker", "tail"]) {
@@ -2045,7 +2050,19 @@ function RCEvent(infoURL, clockURL, locale) {
 				competitor[layerName] = null;
 			}
 			displayCompetitorList();
+		}
+
+		u("#save-color").on("click", () => {
+			saveColor();
 		});
+
+		u("#color-modal").on("keypress", (e) => {
+			e.preventDefault();
+			if (e.which === 13) {
+				saveColor();
+			}
+		});
+
 		colorModal.show();
 	}
 

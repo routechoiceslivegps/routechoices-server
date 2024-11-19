@@ -233,9 +233,9 @@
 }
 
 .modal-backdrop,
-#eventNotStartedModal,
-#eventLoadingModal,
-#colorModal {
+#future-event-modal,
+#loading-event-modal,
+#color-modal {
 	top: var(--navbar-size);
 }
 
