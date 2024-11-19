@@ -1948,7 +1948,7 @@ def third_party_event_data(request, provider, uid):
         raise Http404()
 
     event = proxy.get_event()
-    dev_data = proxy.get_competitor_devices_data(uid, event)
+    dev_data = proxy.get_competitor_devices_data(event)
     competitors_data = proxy.get_competitors_data()
     output = {"competitors": []}
     for c_id, competitor in competitors_data.items():

@@ -34,12 +34,13 @@ class SportRec(ThirdPartyTrackingSolution):
         if r.status_code != 200:
             raise EventImportError("Cannot fetch event data")
         self.init_data = r.json()
+        self.uid = uid
 
-    def get_or_create_event(self, uid):
+    def get_or_create_event(self):
         event_name = self.init_data["competition"]["title"]
         event, _ = Event.objects.get_or_create(
             club=self.club,
-            slug=uid,
+            slug=self.uid,
             defaults={
                 "name": event_name[:255],
                 "privacy": PRIVACY_SECRET,
@@ -53,7 +54,7 @@ class SportRec(ThirdPartyTrackingSolution):
         )
         return event
 
-    def get_or_create_event_maps(self, event, uid):
+    def get_or_create_event_maps(self, event):
         if not self.init_data["hasMap"]:
             return []
         map_url = f"https://sportrec.eu/gps/map/{self.init_data['competition']['hashlink']}/{self.init_data['competition']['id']}.png"
@@ -86,7 +87,7 @@ class SportRec(ThirdPartyTrackingSolution):
         else:
             return [map_obj]
 
-    def get_or_create_event_competitors(self, event, uid):
+    def get_or_create_event_competitors(self, event):
         data_url = f"https://sportrec.eu/gps/competitionhistory2/{self.init_data['competition']['hashlink']}?live=0"
         response = requests.get(data_url, stream=True)
         if response.status_code != 200:

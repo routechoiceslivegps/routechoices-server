@@ -76,8 +76,9 @@ class Livelox(ThirdPartyTrackingSolution):
         self.init_data["xtra"] = r.json()
         self.init_data["relay_leg"] = int(relay_leg) if relay_leg else ""
         self.init_data["class_id"] = int(class_id)
+        self.uid = uid
 
-    def get_or_create_event(self, uid):
+    def get_or_create_event(self):
         event_name = (
             f"{self.init_data['class']['event']['name']} - "
             f"{self.init_data['class']['name']}"
@@ -114,7 +115,7 @@ class Livelox(ThirdPartyTrackingSolution):
         )
         return event
 
-    def get_or_create_event_maps(self, event, uid):
+    def get_or_create_event_maps(self, event):
         try:
             map_data = self.init_data["xtra"]["map"]
             map_bounds = map_data["boundingQuadrilateral"]["vertices"]
@@ -260,7 +261,7 @@ class Livelox(ThirdPartyTrackingSolution):
         map_obj.save()
         return [map_obj]
 
-    def get_or_create_event_competitors(self, event, uid):
+    def get_or_create_event_competitors(self, event):
         participant_data = [
             d for d in self.init_data["xtra"]["participants"] if d.get("routeData")
         ]
@@ -299,7 +300,7 @@ class Livelox(ThirdPartyTrackingSolution):
                         (int((pt[0] - time_offset) / 1e3), pt[1] / 1e6, pt[2] / 1e6)
                     )
             dev_obj, created = Device.objects.get_or_create(
-                aid="LLX_" + safe64encodedsha(f"{p['id']}:{uid}")[:8], is_gpx=True
+                aid="LLX_" + safe64encodedsha(f"{p['id']}:{self.uid}")[:8], is_gpx=True
             )
             if not created:
                 dev_obj.location_series = []

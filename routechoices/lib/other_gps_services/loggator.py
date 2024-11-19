@@ -26,6 +26,7 @@ class Loggator(ThirdPartyTrackingSolutionWithProxy):
         if r.status_code != 200:
             raise EventImportError("API returned error code")
         self.init_data = r.json()
+        self.uid = uid
 
     def get_event(self):
         event = Event()
@@ -70,7 +71,7 @@ class Loggator(ThirdPartyTrackingSolutionWithProxy):
                 map_obj.image.save("map", map_file, save=False)
         return map_obj
 
-    def get_competitor_devices_data(self, uid, event):
+    def get_competitor_devices_data(self, event):
         devices_data = {}
         r = requests.get(self.init_data["tracks"], timeout=20)
         if r.status_code == 200:

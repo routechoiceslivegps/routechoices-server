@@ -46,13 +46,14 @@ class ThirdPartyTrackingSolution:
     def parse_init_data(self, uid):
         raise NotImplementedError()
 
-    def get_or_create_event(self, uid):
+    def get_or_create_event(self):
         raise NotImplementedError()
 
-    def get_or_create_event_maps(self, event, uid):
+    def get_or_create_event_maps(self, event):
         raise NotImplementedError()
 
-    def assign_maps_to_event(self, event, maps):
+    def assign_maps_to_event(self, event):
+        maps = self.get_or_create_event_maps(event)
         if maps:
             event.map = maps[0]
             for xtra_map in maps[1:]:
@@ -61,14 +62,14 @@ class ThirdPartyTrackingSolution:
                     map=xtra_map,
                     event=event,
                 )
-        return event
 
-    def get_or_create_event_competitors(self, event, uid):
+    def get_or_create_event_competitors(self, event):
         raise NotImplementedError()
 
-    def assign_competitors_to_event(self, event, competitors):
+    def assign_competitors_to_event(self, event):
         start_date = None
         end_date = None
+        competitors = self.get_or_create_event_competitors(event)
         for competitor in competitors:
             if competitor.device and competitor.device.location_count > 0:
                 locations = competitor.device.locations_series
@@ -81,15 +82,12 @@ class ThirdPartyTrackingSolution:
         if start_date and end_date:
             event.start_date = epoch_to_datetime(start_date)
             event.end_date = epoch_to_datetime(end_date)
-        return event
 
     def import_event(self, uid):
         self.parse_init_data(uid)
-        event = self.get_or_create_event(uid)
-        maps = self.get_or_create_event_maps(event, uid)
-        event = self.assign_maps_to_event(event, maps)
-        competitors = self.get_or_create_event_competitors(event, uid)
-        event = self.assign_competitors_to_event(event, competitors)
+        event = self.get_or_create_event()
+        self.assign_maps_to_event(event)
+        self.assign_competitors_to_event(event, competitors)
         event.save()
         return event
 
@@ -104,13 +102,13 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
     def get_map(self, download_map=False):
         raise NotImplementedError()
 
-    def get_competitor_devices_data(self, uid, event):
+    def get_competitor_devices_data(self, event):
         raise NotImplementedError()
 
     def get_competitors_data(self):
         raise NotImplementedError()
 
-    def get_or_create_event(self, uid):
+    def get_or_create_event(self):
         tmp_event = self.get_event()
         event, _ = Event.objects.get_or_create(
             club=self.club,
@@ -124,7 +122,7 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
         )
         return event
 
-    def get_or_create_event_maps(self, event, uid):
+    def get_or_create_event_maps(self, event):
         tmp_map = self.get_map(download_map=True)
         if not tmp_map:
             raise MapsImportError("Error importing map")
@@ -140,11 +138,11 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
         )
         return [map_obj]
 
-    def get_or_create_event_competitors(self, event, uid):
-        devices_data = self.get_competitor_devices_data(uid, event)
+    def get_or_create_event_competitors(self, event):
+        devices_data = self.get_competitor_devices_data(event)
         device_map = {}
         for dev_id, locations in devices_data.items():
-            dev_hash = safe64encodedsha(f"{dev_id}:{uid}")[:8]
+            dev_hash = safe64encodedsha(f"{dev_id}:{self.uid}")[:8]
             dev_hash = f"{self.get_competitor_device_id_prefix()}{dev_hash}"
             dev_obj, created = Device.objects.get_or_create(
                 aid=dev_hash,

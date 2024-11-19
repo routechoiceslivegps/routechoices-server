@@ -97,9 +97,9 @@ class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
                 map_obj.image.save("map", map_file, save=False)
         return map_obj
 
-    def get_competitor_devices_data(self, uid, event):
+    def get_competitor_devices_data(self, event):
         devices_data = {}
-        data_url = f"{self.GPSSEURANTA_EVENT_URL}{uid}/data.lst"
+        data_url = f"{self.GPSSEURANTA_EVENT_URL}{self.uid}/data.lst"
         r = requests.get(data_url)
         if r.status_code == 200:
             data_raw = r.text

@@ -29,8 +29,9 @@ class Tractrac(ThirdPartyTrackingSolution):
         if r.status_code != 200:
             raise EventImportError("API returned error code")
         self.init_data = r.json()
+        self.uid = uid
 
-    def get_or_create_event(self, uid):
+    def get_or_create_event(self):
         event_name = f'{self.init_data["eventName"]} - {self.init_data["raceName"]}'
         slug = safe64encodedsha(self.init_data["raceId"])[:50]
         event, _ = Event.objects.get_or_create(
@@ -47,7 +48,7 @@ class Tractrac(ThirdPartyTrackingSolution):
         )
         return event
 
-    def get_or_create_event_maps(self, event, uid):
+    def get_or_create_event_maps(self, event):
         maps = []
         for map_data in self.init_data["maps"]:
             map_obj, _ = Map.objects.get_or_create(
@@ -102,7 +103,7 @@ class Tractrac(ThirdPartyTrackingSolution):
         sorted_maps = list(sorted(maps, key=lambda obj: (not obj.is_main, obj.name)))
         return sorted_maps
 
-    def get_or_create_event_competitors(self, event, uid):
+    def get_or_create_event_competitors(self, event):
         device_map = None
         mtb_url = self.init_data["parameters"].get("stored-uri")
         if mtb_url and isinstance(mtb_url, dict):
@@ -150,7 +151,7 @@ class Tractrac(ThirdPartyTrackingSolution):
             competitor.start_time = arrow.get(st).datetime
             if dev_data:
                 dev_obj, created = Device.objects.get_or_create(
-                    aid="TRC_" + safe64encodedsha(f"{dev_id}:{uid}")[:8],
+                    aid="TRC_" + safe64encodedsha(f"{dev_id}:{self.uid}")[:8],
                     defaults={
                         "is_gpx": True,
                     },

@@ -33,15 +33,16 @@ class OTracker(ThirdPartyTrackingSolution):
             raise EventImportError("API returned error code")
         self.init_data = r.json()
         self.init_data["event"]["name"] = name
+        self.uid = uid
 
-    def get_or_create_event(self, uid):
+    def get_or_create_event(self):
         start_date = arrow.get(
             self.init_data["event"]["replay_time"]["from_ts"]
         ).datetime
         end_date = arrow.get(self.init_data["event"]["replay_time"]["to_ts"]).datetime
         event, _ = Event.objects.get_or_create(
             club=self.club,
-            slug=safe64encodedsha(uid)[:50],
+            slug=safe64encodedsha(self.uid)[:50],
             defaults={
                 "name": self.init_data["event"]["name"][:255],
                 "privacy": PRIVACY_SECRET,
@@ -51,7 +52,7 @@ class OTracker(ThirdPartyTrackingSolution):
         )
         return event
 
-    def get_or_create_event_maps(self, event, uid):
+    def get_or_create_event_maps(self, event):
         map_data = self.init_data["event"]["map_image"]
         map_url = map_data["url"]
         if not map_url:
@@ -86,9 +87,9 @@ class OTracker(ThirdPartyTrackingSolution):
         else:
             return [map_obj]
 
-    def get_or_create_event_competitors(self, event, uid):
+    def get_or_create_event_competitors(self, event):
         data_url = (
-            f"https://otracker.lt/data/locations/history/{uid}?map_type=tileimage"
+            f"https://otracker.lt/data/locations/history/{self.uid}?map_type=tileimage"
         )
         response = requests.get(data_url, stream=True)
         if response.status_code != 200:
@@ -130,7 +131,7 @@ class OTracker(ThirdPartyTrackingSolution):
             dev_obj = None
             if dev_data:
                 dev_obj, created = Device.objects.get_or_create(
-                    aid="OTR_" + safe64encodedsha(f"{dev_id}:{uid}")[:8],
+                    aid="OTR_" + safe64encodedsha(f"{dev_id}:{self.uid}")[:8],
                     defaults={
                         "is_gpx": True,
                     },
