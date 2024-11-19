@@ -87,7 +87,7 @@ class ThirdPartyTrackingSolution:
         self.parse_init_data(uid)
         event = self.get_or_create_event()
         self.assign_maps_to_event(event)
-        self.assign_competitors_to_event(event, competitors)
+        self.assign_competitors_to_event(event)
         event.save()
         return event
 
