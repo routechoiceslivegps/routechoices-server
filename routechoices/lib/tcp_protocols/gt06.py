@@ -27,21 +27,46 @@ class GT06Connection:
 
     async def start_listening(self):
         print(f"Start listening from {self.address}")
-        imei = None
-        try:
-            data_bin = b""
-            while not data_bin:
-                data_bin = await self.stream.read_until(b"\r\n", 255)
-            # First packet is login info packet
-            if data_bin[:4] != b"\x78\x78\x11\x01":
-                print("Invalid start")
+
+        while True:
+            try:
+                data_bin = b""
+                while not data_bin:
+                    data_bin = await self.stream.read_until(b"\r\n", 255)
+            except Exception:
                 self.stream.close()
                 return
-            imei = data_bin[4:12].hex()[1:]
-        except Exception as e:
-            print(e, flush=True)
-            self.stream.close()
-            return
+
+            if data_bin[:4] == b"\x78\x78\x11\x01":
+                # IDENTIFICATION
+                try:
+                    await self.process_identification(data_bin)
+                except Exception:
+                    print(
+                        f"Error parsing identification data ({self.address})",
+                        flush=True,
+                    )
+                    self.stream.close()
+                    return
+            elif data_bin[:4] == b"\x78\x78\x0a\x13":
+                # HEARTBEAT
+                try:
+                    await self.process_heartbeat(data_bin)
+                except Exception:
+                    print(f"Error parsing heartbeat data ({self.address})", flush=True)
+                    self.stream.close()
+                    return
+            elif data_bin[:3] in (b"\x78\x78\x22", b"\x78\x78\x26"):
+                # GPS AND ALARM DATA
+                try:
+                    await self.process_data(data_bin)
+                except Exception:
+                    print(f"Error parsing data ({self.address})", flush=True)
+                    self.stream.close()
+                    return
+
+    async def process_identification(self, data_bin):
+        imei = data_bin[4:12].hex()[1:]
         is_valid_imei = True
         try:
             validate_imei(imei)
@@ -56,24 +81,32 @@ class GT06Connection:
             print(f"Imei {imei} not registered  ({self.address})", flush=True)
             self.stream.close()
             return
+        if not self.db_device.user_agent:
+            self.db_device.user_agent = "GT06"
         self.imei = imei
         print(f"{self.imei} is connected")
-
         serial_number = data_bin[16:18]
         data_to_send = b"\x05\x01" + serial_number
         checksum = pack(">H", crc16(data_to_send))
         await self.stream.write(b"\x78\x78" + data_to_send + checksum + b"\r\n")
 
-        while await self._read_line():
-            pass
+    async def process_heartbeat(self, data_bin):
+        if not self.imei:
+            raise Exception(f"Heartbeat from unknown device ({self.address})")
+        serial_number = data_bin[9:11]
+        battery_level = int(min(100, data_bin[5] * 100 / 6))
+        data_to_send = b"\x05\x13" + serial_number
+        checksum = pack(">H", crc16(data_to_send))
+        await self.stream.write(b"\x78\x78" + data_to_send + checksum + b"\r\n")
+        self.db_device.battery_level = battery_level
+        await save_device(self.db_device)
 
-    async def _process_data(self, data_bin):
+    async def process_data(self, data_bin):
+        if not self.imei:
+            raise Exception(f"Data from unknown device ({self.address})")
         self.logger.info(
             f"GT06 DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_bin)}"
         )
-        if not self.db_device.user_agent:
-            self.db_device.user_agent = "Gt06"
-
         date_bin = data_bin[4:10]
         lat_bin = data_bin[11:15]
         lon_bin = data_bin[15:19]
@@ -97,30 +130,6 @@ class GT06Connection:
             loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
             await add_locations(self.db_device, loc_array)
             print("1 locations wrote to DB", flush=True)
-
-    async def _read_line(self):
-        try:
-            data_bin = b""
-            while not data_bin:
-                data_bin = await self.stream.read_until(b"\r\n", 255)
-            # GPS AND ALARM DATA
-            if data_bin[:2] == b"\x78\x78" and data_bin[3] in (0x22, 0x26):
-                await self._process_data(data_bin)
-            # HEARTBEAT
-            if data_bin[:4] == b"\x78\x78\x0a\x13":
-                serial_number = data_bin[9:11]
-                battery_level = int(min(100, data_bin[5] * 100 / 6))
-                data_to_send = b"\x05\x13" + serial_number
-                checksum = pack(">H", crc16(data_to_send))
-                await self.stream.write(b"\x78\x78" + data_to_send + checksum + b"\r\n")
-                self.db_device.battery_level = battery_level
-                await save_device(self.db_device)
-
-        except Exception as e:
-            print(f"Error parsing data: {str(e)}")
-            self.stream.close()
-            return False
-        return True
 
     def _on_close(self):
         print("Client quit", flush=True)
