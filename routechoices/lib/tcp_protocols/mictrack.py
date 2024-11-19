@@ -1,5 +1,4 @@
 import arrow
-from django.core.exceptions import ValidationError
 
 from routechoices.lib.helpers import random_key, safe64encode
 from routechoices.lib.tcp_protocols.commons import (
@@ -21,114 +20,113 @@ class MicTrackConnection:
         self.stream.set_close_callback(self._on_close)
         self.db_device = None
         self.logger = logger
+        self.protocol_version = None
 
     async def start_listening(self):
         print(f"Start listening from {self.address}")
-        imei = None
-        try:
-            data_bin = await self.stream.read_bytes(2)
-            data_raw = data_bin.decode("ascii")
-            if data_raw == "MT":
-                self.protocol_version = 2
-            elif data_raw.startswith("#"):
-                self.protocol_version = 1
-            else:
-                print("Unknown protocol", flush=True)
+        while True:
+            imei = None
+            try:
+                data_bin = await self.stream.read_bytes(2)
+                data_raw = data_bin.decode("ascii")
+
+                protocol = None
+                if data_raw.startswith("#"):
+                    protocol = 1
+                elif data_raw == "MT":
+                    protocol = 2
+                else:
+                    raise Exception("Unknown protocol")
+
+                if not self.protocol_version:
+                    self.protocol_version = protocol
+                elif self.protocol_version != protocol:
+                    raise Exception("Cannot change protocol")
+            except Exception as e:
+                print(f"Invalid protocol {e}", flush=True)
                 self.stream.close()
                 return
-            if self.protocol_version == 1:
-                data_bin = await self.stream.read_until(b"\r\n##", 1000)
-                data_raw += data_bin.decode("ascii").strip()
-            else:
-                data_bin = await self.stream.read_bytes(22)
-                data_raw += data_bin.decode("ascii")
-            if self.protocol_version == 1:
-                data = data_raw.split("#")
-                imei = data[1]
-            else:
-                data = data_raw.split(";")
-                imei = data[2]
-                if data[3] == "R0":
-                    while len(data_raw.split("+")) < 9:
+
+            try:
+                if self.protocol_version == 1:
+                    data_bin = await self.stream.read_until(b"\r\n##", 1000)
+                    data_raw += data_bin.decode("ascii").strip()
+                else:
+                    data_bin = await self.stream.read_bytes(22)
+                    data_raw += data_bin.decode("ascii")
+
+                imei = None
+                if self.protocol_version == 1:
+                    data = data_raw.split("#")
+                    imei = data[1]
+                else:
+                    data = data_raw.split(";")
+                    imei = data[2]
+                    if data[3] == "R0":
+                        while len(data_raw.split("+")) < 9:
+                            data_bin = await self.stream.read_bytes(90, partial=True)
+                            data_raw += data_bin.decode("ascii")
+                        data = data_raw.split(";")
+                    else:
                         data_bin = await self.stream.read_bytes(90, partial=True)
                         data_raw += data_bin.decode("ascii")
-                    data = data_raw.split(";")
-                else:
-                    data_bin = await self.stream.read_bytes(90, partial=True)
-                    data_raw += data_bin.decode("ascii")
-            print(f"Received data ({data_raw})", flush=True)
-        except Exception as e:
-            print(e, flush=True)
-            self.stream.close()
-            return
-        if not imei:
-            print("No imei", flush=True)
-            self.stream.close()
-            return
-        is_valid_imei = True
-        try:
-            validate_imei(imei)
-        except ValidationError:
-            is_valid_imei = False
-        if not is_valid_imei:
-            print("Invalid imei", flush=True)
-            self.stream.close()
-            return
-        self.db_device = await get_device_by_imei(imei)
-        if not self.db_device:
-            print(f"Imei {imei} not registered ({self.address})", flush=True)
-            self.stream.close()
-            return
-        self.imei = imei
-        if self.protocol_version == 1:
-            self.logger.info(
-                f"MICTRK DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_raw)}"
-            )
-        else:
-            self.logger.info(
-                f"MICTRK DATA2, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_raw)}"
-            )
-        print(f"{self.imei} is connected")
-        if self.protocol_version == 1:
-            await self._process_data(data)
-            while await self._read_line():
-                pass
-        else:
-            await self._process_data2(data)
-            while await self._read_line2():
-                pass
+                print(f"Received data ({data_raw})", flush=True)
+            except Exception:
+                print("Cannot read data", flush=True)
+                self.stream.close()
+                return
+            try:
+                await self.process_identification(imei)
+            except Exception as e:
+                print(f"Invalid identification {e}", flush=True)
+                self.stream.close()
+                return
+            try:
+                self.logger.info(
+                    f"MICTRK {self.protocol_version} DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_raw)}"
+                )
+                await self.process_data(data)
+            except Exception as e:
+                print(f"Couldn't parse data {e}", flush=True)
+                self.stream.close()
+                return
 
-    async def _process_data(self, data):
-        imei = data[1]
-        sos_triggered = data[4] == "SOS"
-        if imei != self.imei:
-            return False
-        gps_data = data[6].split(",")
-        try:
-            batt_volt, msg_type = gps_data[0].split("$")
-        except Exception:
-            print("Invalid format", flush=True)
-            return False
-        if msg_type != "GPRMC" or gps_data[2] not in ("A", "L"):
-            print("Not GPS data or invalid data", flush=True)
-            return False
-        try:
-            tim = arrow.get(
-                f"{gps_data[9]} {gps_data[1]}", "DDMMYY HHmmss.S"
-            ).int_timestamp
-            lat_minute = float(gps_data[3])
-            lat = lat_minute // 100 + (lat_minute % 100) / 60
-            if gps_data[4] == "S":
-                lat *= -1
-            lon_minute = float(gps_data[5])
-            lon = lon_minute // 100 + (lon_minute % 100) / 60
-            if gps_data[6] == "W":
-                lon *= -1
-        except Exception:
-            print("Could not parse GPS data", flush=True)
-            return False
+    async def process_identification(self, imei):
+        if self.imei and imei != self.imei:
+            raise Exception("Cannot change IMEI")
+        validate_imei(imei)
+        self.db_device = await get_device_by_imei(imei)
         if not self.db_device.user_agent:
-            self.db_device.user_agent = "MicTrack V1"
+            self.db_device.user_agent = f"MicTrack V{self.protocol_version}"
+        if not self.db_device:
+            raise Exception("Unknown IMEI")
+        self.imei = imei
+        print(f"{self.imei} is connected")
+
+    async def process_data(self, data):
+        if self.protocol_version == 1:
+            await self.process_data_protocol_v1(data)
+        if self.protocol_version == 2:
+            await self.process_data_protocol_v2(data)
+
+    async def process_data_protocol_v1(self, data):
+        gps_data = data[6].split(",")
+        batt_volt, msg_type = gps_data[0].split("$")
+        if msg_type != "GPRMC" or gps_data[2] not in ("A", "L"):
+            raise Exception("Not GPS data or invalid data", flush=True)
+
+        tim = arrow.get(f"{gps_data[9]} {gps_data[1]}", "DDMMYY HHmmss.S").int_timestamp
+
+        lat_minute = float(gps_data[3])
+        lat = lat_minute // 100 + (lat_minute % 100) / 60
+        if gps_data[4] == "S":
+            lat *= -1
+
+        lon_minute = float(gps_data[5])
+        lon = lon_minute // 100 + (lon_minute % 100) / 60
+        if gps_data[6] == "W":
+            lon *= -1
+
         try:
             # https://help.mictrack.com/articles/how-to-calculate-battery-voltage-into-percentage-for-mictrack-devices/
             # we assume 4.2V battery going empty at 3.3V
@@ -137,9 +135,11 @@ class MicTrackConnection:
             )
         except Exception:
             print("Invalid battery level value", flush=True)
-            pass
+
         await add_locations(self.db_device, [(tim, lat, lon)])
         print("1 location wrote to DB", flush=True)
+
+        sos_triggered = data[4] == "SOS"
         if sos_triggered:
             sos_device_aid, sos_lat, sos_lon, sos_sent_to = await send_sos(
                 self.db_device
@@ -152,26 +152,18 @@ class MicTrackConnection:
                 flush=True,
             )
 
-    async def _process_data2(self, data):
-        imei = data[2]
-        if imei != self.imei:
-            return False
+    async def process_data_protocol_v2(self, data):
         msg_type = data[3]
         if msg_type != "R0":
-            print("Not GPS data", flush=True)
-            return False
+            return
+
         gps_data = data[4].split("+")
-        sos_triggered = gps_data[6] == "5"
         batt_volt = gps_data[7]
-        try:
-            tim = arrow.get(gps_data[1], "YYMMDDHHmmss").int_timestamp
-            lat = float(gps_data[2])
-            lon = float(gps_data[3])
-        except Exception:
-            print("Could not parse GPS data", flush=True)
-            return False
-        if not self.db_device.user_agent:
-            self.db_device.user_agent = "MicTrack V2"
+
+        tim = arrow.get(gps_data[1], "YYMMDDHHmmss").int_timestamp
+        lat = float(gps_data[2])
+        lon = float(gps_data[3])
+
         try:
             # https://help.mictrack.com/articles/how-to-calculate-battery-voltage-into-percentage-for-mictrack-devices/
             # we assume 4.2V battery going empty at 3.5V
@@ -180,9 +172,11 @@ class MicTrackConnection:
             )
         except Exception:
             print("Invalid battery level value", flush=True)
-            pass
+
         await add_locations(self.db_device, [(tim, lat, lon)])
         print("1 location wrote to DB", flush=True)
+
+        sos_triggered = gps_data[6] == "5"
         if sos_triggered:
             sos_device_aid, sos_lat, sos_lon, sos_sent_to = await send_sos(
                 self.db_device
@@ -194,58 +188,6 @@ class MicTrackConnection:
                 ),
                 flush=True,
             )
-
-    async def _read_line(self):
-        try:
-            data_raw = ""
-            while not data_raw:
-                data_bin = await self.stream.read_until(b"\r\n##")
-                data_raw = data_bin.decode("ascii").strip()
-            if not data_raw.startswith("#"):
-                print("Invalid protocol")
-                self.stream.close()
-                return False
-            print(f"Received data ({data_raw})")
-            self.logger.info(
-                f"MICTRK DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_raw)}"
-            )
-            data = data_raw.split("#")
-            await self._process_data(data)
-        except Exception as e:
-            print(f"Error parsing data: {str(e)}")
-            self.stream.close()
-            return False
-        return True
-
-    async def _read_line2(self):
-        try:
-            data_raw = ""
-            while not data_raw:
-                data_bin = await self.stream.read_bytes(24)
-                data_raw = data_bin.decode("ascii")
-            if not data_raw.startswith("MT;"):
-                print("Invalid protocol")
-                self.stream.close()
-                return False
-            data = data_raw.split(";")
-            if data[3] == "R0":
-                while len(data_raw.split("+")) < 9:
-                    data_bin = await self.stream.read_bytes(90, partial=True)
-                    data_raw += data_bin.decode("ascii")
-                data = data_raw.split(";")
-            else:
-                data_bin = await self.stream.read_bytes(90, partial=True)
-                data_raw += data_bin.decode("ascii")
-            print(f"Received data ({data_raw})")
-            self.logger.info(
-                f"MICTRK DATA2, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_raw)}"
-            )
-            await self._process_data2(data)
-        except Exception as e:
-            print(f"Error parsing data: {str(e)}")
-            self.stream.close()
-            return False
-        return True
 
     def _on_close(self):
         print("Client quit", flush=True)
