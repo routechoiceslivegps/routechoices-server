@@ -8,7 +8,7 @@ from routechoices.core.bg_tasks import (
     import_single_event_from_sportrec,
     import_single_event_from_tractrac,
 )
-from routechoices.lib.third_party_downloader import EventImportError
+from routechoices.lib.other_gps_services.commons import EventImportError
 
 
 class Command(BaseCommand):
