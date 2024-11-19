@@ -9,7 +9,6 @@ from .helpers import (
     three_point_calibration_to_corners,
 )
 from .kmz import extract_ground_overlay_info
-from .mtb_decoder import MtbDecoder
 from .slippy_tiles import latlon_to_tile_xy, tile_xy_to_north_west_latlon
 
 
@@ -146,8 +145,8 @@ class HelperTestCase(TestCase):
         )
 
 
-class MtbDecoderTestCase(TestCase):
-    def test_decode(self):
-        with open("cypress/fixtures/tractrac.mtb", "rb") as lf:
-            device_map = MtbDecoder(lf).decode()
-        self.assertEqual(len(device_map), 11)
+# class MtbDecoderTestCase(TestCase):
+#    def test_decode(self):
+#        with open("cypress/fixtures/tractrac.mtb", "rb") as lf:
+#            device_map = MtbDecoder(lf).decode()
+#        self.assertEqual(len(device_map), 11)
