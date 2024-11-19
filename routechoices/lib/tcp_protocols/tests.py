@@ -34,11 +34,16 @@ def refresh_device(device):
 class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
     @gen_test
     async def test_gt06(self):
-        init_data = bytes.fromhex("78781101086020106158874800003200000190010d0a")
+        init_data = bytes.fromhex("78780D010860201061588748000199990d0a")
         ack_data = bytes.fromhex("787805010001d9dc0d0a")
         gps_data = bytes.fromhex(
-            "787826220a03170f3217cc026c6c820c37168200153e01cc002633000e7f010000000860a50d0a"
+            "787821121303120b2524c70138e363085b549003d43301940057d200cd52c000006aa1ca0d0a"
         )
+        gps_data2 = bytes.fromhex(
+            "787821161303120b2525c70138e363085b549003d43301940057d200cd52c000006aa1ca0d0a"
+        )
+        heartbeat_data = bytes.fromhex("787813134402040002000199990d0a")
+        ack2_data = bytes.fromhex("787805130001e9f10d0a")
 
         server = client = None
         device = await create_imei_device("860201061588748")
@@ -54,6 +59,16 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
         await asyncio.sleep(0.05)
         device = await refresh_device(device)
         self.assertEqual(device.location_count, 1)
+        await client.write(heartbeat_data)
+        data = await client.read_bytes(255, partial=True)
+        self.assertEqual(data, ack2_data)
+        await asyncio.sleep(0.05)
+        device = await refresh_device(device)
+        self.assertEqual(device.battery_level, 33)
+        await client.write(gps_data2)
+        await asyncio.sleep(0.05)
+        device = await refresh_device(device)
+        self.assertEqual(device.location_count, 2)
         if server is not None:
             server.stop()
         if client is not None:

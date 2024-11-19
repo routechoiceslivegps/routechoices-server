@@ -37,7 +37,15 @@ class GT06Connection:
                 self.stream.close()
                 return
 
-            if data_bin[:4] == b"\x78\x78\x11\x01":
+            header = data_bin[:2]
+            if header != b"\x78\x78":
+                print("Unknown protocol")
+                self.stream.close()
+                return
+
+            data_type = data_bin[3]
+
+            if data_type == 0x01:
                 # IDENTIFICATION
                 try:
                     await self.process_identification(data_bin)
@@ -48,20 +56,20 @@ class GT06Connection:
                     )
                     self.stream.close()
                     return
-            elif data_bin[:4] == b"\x78\x78\x0a\x13":
+            elif data_type in (0x12, 0x16):
+                # LOCATION OR ALARM DATA
+                try:
+                    await self.process_data(data_bin)
+                except Exception:
+                    print(f"Error parsing data ({self.address})", flush=True)
+                    self.stream.close()
+                    return
+            elif data_type == 0x13:
                 # HEARTBEAT
                 try:
                     await self.process_heartbeat(data_bin)
                 except Exception:
                     print(f"Error parsing heartbeat data ({self.address})", flush=True)
-                    self.stream.close()
-                    return
-            elif data_bin[:3] in (b"\x78\x78\x22", b"\x78\x78\x26"):
-                # GPS AND ALARM DATA
-                try:
-                    await self.process_data(data_bin)
-                except Exception:
-                    print(f"Error parsing data ({self.address})", flush=True)
                     self.stream.close()
                     return
 
@@ -85,7 +93,7 @@ class GT06Connection:
             self.db_device.user_agent = "GT06"
         self.imei = imei
         print(f"{self.imei} is connected")
-        serial_number = data_bin[16:18]
+        serial_number = data_bin[12:14]
         data_to_send = b"\x05\x01" + serial_number
         checksum = pack(">H", crc16(data_to_send))
         await self.stream.write(b"\x78\x78" + data_to_send + checksum + b"\r\n")
@@ -93,9 +101,11 @@ class GT06Connection:
     async def process_heartbeat(self, data_bin):
         if not self.imei:
             raise Exception(f"Heartbeat from unknown device ({self.address})")
-        serial_number = data_bin[9:11]
         battery_level = int(min(100, data_bin[5] * 100 / 6))
+
+        serial_number = data_bin[9:11]
         data_to_send = b"\x05\x13" + serial_number
+
         checksum = pack(">H", crc16(data_to_send))
         await self.stream.write(b"\x78\x78" + data_to_send + checksum + b"\r\n")
         self.db_device.battery_level = battery_level
