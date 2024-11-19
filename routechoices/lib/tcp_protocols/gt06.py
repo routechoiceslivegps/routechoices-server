@@ -77,6 +77,11 @@ class GT06Connection:
             f"GT06 CONN, {self.aid}, {self.address}: {safe64encode(data_bin)}"
         )
         imei = data_bin[4:12].hex()[1:]
+        if self.imei:
+            if imei != self.imei:
+                raise Exception("Cannot change IMEI")
+            else:
+                return
         validate_imei(imei)
         self.db_device = await get_device_by_imei(imei)
         if not self.db_device:

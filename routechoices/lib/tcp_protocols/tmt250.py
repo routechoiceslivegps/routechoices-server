@@ -92,6 +92,11 @@ class TMT250Connection:
         try:
             imei = data[2:17].decode("ascii")
             validate_imei(imei)
+            if self.imei:
+                if imei != self.imei:
+                    raise Exception("Cannot change IMEI")
+                else:
+                    return
         except Exception:
             is_valid_imei = False
         if imei_len != len(imei) or not is_valid_imei:
