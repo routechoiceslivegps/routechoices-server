@@ -1,7 +1,6 @@
 import json
 
 import arrow
-from django.core.exceptions import ValidationError
 
 from routechoices.lib.helpers import random_key, safe64encode
 from routechoices.lib.tcp_protocols.commons import (
@@ -23,64 +22,60 @@ class TrackTapeConnection:
         self.db_device = None
         self.logger = logger
 
-    async def start_listening(self):
-        print(f"Start listening from {self.address}")
-        imei = None
-        try:
-            data_raw = ""
-            while not data_raw:
-                data_bin = await self.stream.read_until(b"\n")
-                data_raw = data_bin.decode("ascii").strip()
-            print(f"Received data ({data_raw})", flush=True)
-            data = json.loads(data_raw)
-            imei = data.get("id")
-        except Exception as e:
-            print(e, flush=True)
-            self.stream.close()
-            return
-        if not imei:
-            print("No imei", flush=True)
-            self.stream.close()
-            return
-        is_valid_imei = True
-        try:
-            validate_imei(imei)
-        except ValidationError:
-            is_valid_imei = False
-        if not is_valid_imei:
-            print("Invalid imei", flush=True)
-            self.stream.close()
-            return
+    async def process_identification(self, imei):
+        if self.imei and imei != self.imei:
+            raise Exception("Cannot change IMEI")
+        validate_imei(imei)
         self.db_device = await get_device_by_imei(imei)
+        if not self.db_device.user_agent:
+            self.db_device.user_agent = "TrackTape"
         if not self.db_device:
-            print(f"Imei {imei} not registered ({self.address})", flush=True)
-            self.stream.close()
-            return
+            raise Exception("Imei not registered")
         self.imei = imei
         print(f"{self.imei} is connected")
 
-        await self._process_data(data)
+    async def start_listening(self):
+        print(f"Start listening from {self.address}")
+        while True:
+            imei = None
+            try:
+                data_raw = ""
+                while not data_raw:
+                    data_bin = await self.stream.read_until(b"\n")
+                    data_raw = data_bin.decode("ascii").strip()
+                print(f"Received data ({data_raw})", flush=True)
+                data = json.loads(data_raw)
+                imei = data["id"]
+            except Exception as e:
+                print(f"Could not read data {e}", flush=True)
+                self.stream.close()
+                return
+            try:
+                await self.process_identification(imei)
+            except Exception as e:
+                print(f"Could not identify device {e}", flush=True)
+                self.stream.close()
+                return
+            self.logger.info(
+                f"TRCKTP DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(json.dumps(data))}"
+            )
+            try:
+                await self.process_data(data)
+            except Exception as e:
+                print(f"Could not parse location {e}", flush=True)
+                self.stream.close()
+                return
 
-        while await self._read_line():
-            pass
-
-    async def _process_data(self, data):
-        if not self.db_device.user_agent:
-            self.db_device.user_agent = "TrackTape"
-        imei = data.get("id")
-        if imei != self.imei:
-            return False
+    async def process_data(self, data):
         try:
             battery_level = int(data.get("batteryLevel"))
         except Exception:
             pass
         else:
             self.db_device.battery_level = battery_level
+
         locs = data.get("positions", [])
         loc_array = []
-        self.logger.info(
-            f"TRCKTP DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(json.dumps(data))}"
-        )
         for loc in locs:
             try:
                 tim = arrow.get(loc.get("timestamp")).int_timestamp
@@ -92,21 +87,6 @@ class TrackTapeConnection:
         if loc_array:
             await add_locations(self.db_device, loc_array)
             print(f"{len(loc_array)} locations wrote to DB", flush=True)
-
-    async def _read_line(self):
-        try:
-            data_raw = ""
-            while not data_raw:
-                data_bin = await self.stream.read_until(b"\n")
-                data_raw = data_bin.decode("ascii").strip()
-            print(f"Received data ({data_raw})")
-            data = json.loads(data_raw)
-            await self._process_data(data)
-        except Exception as e:
-            print(f"Error parsing data: {str(e)}")
-            self.stream.close()
-            return False
-        return True
 
     def _on_close(self):
         print("Client quit", flush=True)
