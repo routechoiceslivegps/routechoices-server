@@ -3,14 +3,12 @@ import urllib.parse
 
 from background_task import background
 
-from routechoices.lib.third_party_downloader import (
-    GpsSeurantaNet,
-    Livelox,
-    Loggator,
-    OTracker,
-    SportRec,
-    Tractrac,
-)
+from routechoices.lib.other_gps_services.gpsseuranta import GpsSeurantaNet
+from routechoices.lib.other_gps_services.livelox import Livelox
+from routechoices.lib.other_gps_services.loggator import Loggator
+from routechoices.lib.other_gps_services.otracker import OTracker
+from routechoices.lib.other_gps_services.sportrec import SportRec
+from routechoices.lib.other_gps_services.tractrac import Tractrac
 
 
 class EventImportError(Exception):

@@ -1,0 +1,106 @@
+from operator import itemgetter
+
+import arrow
+from curl_cffi import requests
+from django.core.files.base import ContentFile
+
+from routechoices.core.models import Competitor, Event, Map
+from routechoices.lib.helpers import get_remote_image_sizes
+from routechoices.lib.other_gps_services.commons import (
+    EventImportError,
+    ThirdPartyTrackingSolutionWithProxy,
+)
+
+
+class Loggator(ThirdPartyTrackingSolutionWithProxy):
+    LOGGATOR_EVENT_URL = "https://loggator.com/api/events/"
+    name = "Loggator"
+    slug = "loggator"
+
+    def get_competitor_device_id_prefix(self):
+        return "LOG_"
+
+    def parse_init_data(self, uid):
+        event_url = f"{self.LOGGATOR_EVENT_URL}{uid}.json"
+        r = requests.get(event_url)
+        if r.status_code != 200:
+            raise EventImportError("API returned error code")
+        self.init_data = r.json()
+
+    def get_event(self):
+        event = Event()
+        event.slug = self.init_data["event"]["slug"]
+        event.club = self.club
+        event.name = self.init_data["event"]["name"][:255]
+        event.start_date = arrow.get(self.init_data["event"]["start_date"]).datetime
+        event.end_date = arrow.get(self.init_data["event"]["end_date"]).datetime
+        event.send_interval = 10
+        return event
+
+    def get_map_url(self):
+        return self.init_data.get("map")["url"]
+
+    def get_map(self, download_map=False):
+        map_data = self.init_data.get("map")
+        try:
+            length, size = get_remote_image_sizes(map_data["url"])
+        except Exception:
+            return None
+
+        map_obj = Map()
+        map_obj.width = size[0]
+        map_obj.height = size[1]
+        map_obj.corners_coordinates = ",".join(
+            [
+                str(map_data["coordinates"]["topLeft"]["lat"]),
+                str(map_data["coordinates"]["topLeft"]["lng"]),
+                str(map_data["coordinates"]["topRight"]["lat"]),
+                str(map_data["coordinates"]["topRight"]["lng"]),
+                str(map_data["coordinates"]["bottomRight"]["lat"]),
+                str(map_data["coordinates"]["bottomRight"]["lng"]),
+                str(map_data["coordinates"]["bottomLeft"]["lat"]),
+                str(map_data["coordinates"]["bottomLeft"]["lng"]),
+            ]
+        )
+
+        if download_map:
+            r = requests.get(map_data["url"])
+            if r.status_code == 200:
+                map_file = ContentFile(r.content)
+                map_obj.image.save("map", map_file, save=False)
+        return map_obj
+
+    def get_competitor_devices_data(self, uid, event):
+        devices_data = {}
+        r = requests.get(self.init_data["tracks"], timeout=20)
+        if r.status_code == 200:
+            try:
+                tracks_raw = r.json()["data"]
+            except Exception:
+                return {}
+            tracks_pts = tracks_raw.split(";")
+            for pt in tracks_pts:
+                d = pt.split(",")
+                dev_id = str(int(d[0]))
+                if not devices_data.get(dev_id):
+                    devices_data[dev_id] = []
+                devices_data[dev_id].append((int(d[4]), float(d[1]), float(d[2])))
+
+        cropped_devices_data = {}
+        for dev_id, locations in devices_data.items():
+            locations = sorted(locations, key=itemgetter(0))
+            cropped_devices_data[dev_id] = locations
+
+        return cropped_devices_data
+
+    def get_competitors_data(self):
+        competitors = {}
+        for c_data in self.init_data["competitors"]:
+            competitor = Competitor(
+                name=c_data["name"],
+                short_name=c_data["shortname"],
+                start_time=arrow.get(c_data["start_time"]).datetime,
+            )
+            device_id = f"{c_data['device_id']}"
+            competitors[device_id] = competitor
+        return competitors

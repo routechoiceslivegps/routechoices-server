@@ -61,9 +61,10 @@ from routechoices.lib.helpers import (
     short_random_key,
     short_random_slug,
 )
+from routechoices.lib.other_gps_services.gpsseuranta import GpsSeurantaNet
+from routechoices.lib.other_gps_services.loggator import Loggator
 from routechoices.lib.s3 import serve_image_from_s3
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
-from routechoices.lib.third_party_downloader import GpsSeurantaNet, Loggator
 from routechoices.lib.validators import (
     validate_imei,
     validate_latitude,

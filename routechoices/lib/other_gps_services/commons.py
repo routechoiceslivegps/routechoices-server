@@ -1,0 +1,173 @@
+from django.contrib.auth.models import User
+
+from routechoices.core.models import (
+    PRIVACY_SECRET,
+    Club,
+    Competitor,
+    Device,
+    Event,
+    Map,
+    MapAssignation,
+)
+from routechoices.lib.helpers import epoch_to_datetime, safe64encodedsha
+
+
+class EventImportError(Exception):
+    pass
+
+
+class MapsImportError(Exception):
+    pass
+
+
+class CompetitorsImportError(Exception):
+    pass
+
+
+class ThirdPartyTrackingSolution:
+    name = None
+    slug = None
+
+    def __init__(self):
+        self.club = self.get_or_create_club()
+
+    def get_or_create_club(self):
+        if not self.name or not self.slug:
+            raise ValueError()
+        admins = User.objects.filter(is_superuser=True)
+        club, created = Club.objects.get_or_create(
+            slug=self.slug, defaults={"name": self.name}
+        )
+        if created:
+            club.admins.set(admins)
+            club.save()
+        return club
+
+    def parse_init_data(self, uid):
+        raise NotImplementedError()
+
+    def get_or_create_event(self, uid):
+        raise NotImplementedError()
+
+    def get_or_create_event_maps(self, event, uid):
+        raise NotImplementedError()
+
+    def assign_maps_to_event(self, event, maps):
+        if maps:
+            event.map = maps[0]
+            for xtra_map in maps[1:]:
+                MapAssignation.object.get_or_create(
+                    name=xtra_map.name,
+                    map=xtra_map,
+                    event=event,
+                )
+        return event
+
+    def get_or_create_event_competitors(self, event, uid):
+        raise NotImplementedError()
+
+    def assign_competitors_to_event(self, event, competitors):
+        start_date = None
+        end_date = None
+        for competitor in competitors:
+            if competitor.device and competitor.device.location_count > 0:
+                locations = competitor.device.locations_series
+                from_date = locations[0][0]
+                to_date = locations[-1][0]
+                if not start_date or start_date > from_date:
+                    start_date = from_date
+                if not end_date or end_date < to_date:
+                    end_date = to_date
+        if start_date and end_date:
+            event.start_date = epoch_to_datetime(start_date)
+            event.end_date = epoch_to_datetime(end_date)
+        return event
+
+    def import_event(self, uid):
+        self.parse_init_data(uid)
+        event = self.get_or_create_event(uid)
+        maps = self.get_or_create_event_maps(event, uid)
+        event = self.assign_maps_to_event(event, maps)
+        competitors = self.get_or_create_event_competitors(event, uid)
+        event = self.assign_competitors_to_event(event, competitors)
+        event.save()
+        return event
+
+
+class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
+    def get_competitor_device_id_prefix(self):
+        raise NotImplementedError()
+
+    def get_event(self):
+        raise NotImplementedError()
+
+    def get_map(self, download_map=False):
+        raise NotImplementedError()
+
+    def get_competitor_devices_data(self, uid, event):
+        raise NotImplementedError()
+
+    def get_competitors_data(self):
+        raise NotImplementedError()
+
+    def get_or_create_event(self, uid):
+        tmp_event = self.get_event()
+        event, _ = Event.objects.get_or_create(
+            club=self.club,
+            slug=tmp_event.slug,
+            defaults={
+                "name": tmp_event.name,
+                "privacy": PRIVACY_SECRET,
+                "start_date": tmp_event.start_date,
+                "end_date": tmp_event.end_date,
+            },
+        )
+        return event
+
+    def get_or_create_event_maps(self, event, uid):
+        tmp_map = self.get_map(download_map=True)
+        if not tmp_map:
+            raise MapsImportError("Error importing map")
+        map_obj, _ = Map.objects.get_or_create(
+            name=event.name,
+            club=self.club,
+            defaults={
+                "image": tmp_map.image,
+                "width": tmp_map.width,
+                "height": tmp_map.height,
+                "corners_coordinates": tmp_map.corners_coordinates,
+            },
+        )
+        return [map_obj]
+
+    def get_or_create_event_competitors(self, event, uid):
+        devices_data = self.get_competitor_devices_data(uid, event)
+        device_map = {}
+        for dev_id, locations in devices_data.items():
+            dev_hash = safe64encodedsha(f"{dev_id}:{uid}")[:8]
+            dev_hash = f"{self.get_competitor_device_id_prefix()}{dev_hash}"
+            dev_obj, created = Device.objects.get_or_create(
+                aid=dev_hash,
+                defaults={"is_gpx": True},
+            )
+            if not created:
+                dev_obj.locations_series = []
+            dev_obj.locations_series = locations
+            device_map[dev_id] = dev_obj
+
+        competitors = self.get_competitors_data()
+        for cid, tmp_competitor in competitors.items():
+            competitor, _ = Competitor.objects.get_or_create(
+                name=tmp_competitor.name,
+                short_name=tmp_competitor.short_name,
+                start_time=tmp_competitor.start_time,
+                event=event,
+            )
+            device = device_map.get(cid)
+            if device:
+                device.save()
+                competitor.device = device
+            competitor.save()
+            competitors.append(competitor)
+
+        return competitors
