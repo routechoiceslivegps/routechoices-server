@@ -835,11 +835,11 @@ function RCEvent(infoURL, clockURL, locale) {
 		window.addEventListener("fullscreenchange", () => {
 			onAppResize();
 			if (document.fullscreenElement != null) {
-				u("#fullscreenSwitch > .fa-expand")
+				u("#fullscreen-switch > .fa-expand")
 					.addClass("fa-compress")
 					.removeClass("fa-expand");
 			} else {
-				u("#fullscreenSwitch > .fa-compress")
+				u("#fullscreen-switch > .fa-compress")
 					.addClass("fa-expand")
 					.removeClass("fa-compress");
 			}
@@ -862,9 +862,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			}
 		}
 
-		document
-			.getElementById("fullscreenSwitch")
-			?.addEventListener("click", toggleFullscreen);
+		u("#fullscreen-switch").on("click", toggleFullscreen);
 
 		initializeMap();
 		fetch(infoURL, {
@@ -3088,7 +3086,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			!elem.webkitRequestFullscreen &&
 			!elem.msRequestFullscreen
 		) {
-			document.getElementById("fullscreenSwitch").remove();
+			document.getElementById("fullscreen-switch").remove();
 		}
 		new RCEvent(window.local.eventUrl, window.local.serverClockUrl, locale);
 	});
