@@ -74,3 +74,18 @@ Label the data
 		font-weight: bold;
 	}
 }
+
+.fa-battery-empty {
+	color: red;
+}
+
+.fa-battery-quarter {
+	color: orange;
+}
+.fa-battery-half {
+	color: #efcc00;
+}
+.fa-battery-three-quarters,
+.fa-battery-full {
+	color: green;
+}

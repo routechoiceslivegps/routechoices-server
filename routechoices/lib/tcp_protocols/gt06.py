@@ -74,6 +74,9 @@ class GT06Connection:
                     return
 
     async def process_identification(self, data_bin):
+        self.logger.info(
+            f"GT06 CONN, {self.aid}, {self.address}: {safe64encode(data_bin)}"
+        )
         imei = data_bin[4:12].hex()[1:]
         is_valid_imei = True
         try:
@@ -97,6 +100,9 @@ class GT06Connection:
     async def process_heartbeat(self, data_bin):
         if not self.imei:
             raise Exception(f"Heartbeat from unknown device ({self.address})")
+        self.logger.info(
+            f"GT06 DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_bin)}"
+        )
         battery_level = int(min(100, data_bin[5] * 100 / 6))
 
         serial_number = data_bin[9:11]
