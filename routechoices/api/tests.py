@@ -698,26 +698,25 @@ class EventApiTestCase(EssentialApiBase):
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
+    def test_loggator_proxy(self):
+        uid = "TC24F12M"
+        url = self.reverse_and_check(
+            "third_party_event_detail",
+            f"/loggator/{uid}/",
+            "api",
+            {"provider": "loggator", "uid": uid},
+        )
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
 
-def test_loggator_proxy(self):
-    uid = "TC24F12M"
-    url = self.reverse_and_check(
-        "third_party_event_detail",
-        f"/loggator/{uid}/",
-        "api",
-        {"provider": "loggator", "uid": uid},
-    )
-    res = self.client.get(url)
-    self.assertEqual(res.status_code, status.HTTP_200_OK)
-
-    url = self.reverse_and_check(
-        "third_party_event_data",
-        f"/loggator/{uid}/data",
-        "api",
-        {"provider": "loggator", "uid": uid},
-    )
-    res = self.client.get(url)
-    self.assertEqual(res.status_code, status.HTTP_200_OK)
+        url = self.reverse_and_check(
+            "third_party_event_data",
+            f"/loggator/{uid}/data",
+            "api",
+            {"provider": "loggator", "uid": uid},
+        )
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
 
 
 class LocationApiTestCase(EssentialApiBase):
