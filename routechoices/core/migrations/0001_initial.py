@@ -806,7 +806,6 @@ class Migration(migrations.Migration):
                     models.CharField(
                         max_length=32,
                         unique=True,
-                        validators=[routechoices.lib.validators.validate_esn],
                     ),
                 ),
                 (
