@@ -29,6 +29,7 @@ class ThirdPartyTrackingSolution:
     slug = None
 
     def __init__(self):
+        self.uid = None
         self.club = self.get_or_create_club()
 
     def get_or_create_club(self):
