@@ -68,6 +68,10 @@ class SiteViewsTestCase(EssentialApiBase):
         self.assertNotContains(response, "Kiila Cup 1")
         self.assertContains(response, "Kiila Cup 2")
 
+        url = self.reverse_and_check("site:events_feed", "/feed", host="www")
+        response = client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_semi_static_pages_loads(self):
         client = APIClient(HTTP_HOST="www.routechoices.dev")
         url = self.reverse_and_check("site:landing_page", "/", host="www")
@@ -93,10 +97,6 @@ class SiteViewsTestCase(EssentialApiBase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         url = self.reverse_and_check("site:pricing_view", "/pricing", host="www")
-        response = client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        url = self.reverse_and_check("site:events_feed", "/feed", host="www")
         response = client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
