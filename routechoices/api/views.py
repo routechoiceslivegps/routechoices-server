@@ -1081,7 +1081,8 @@ def competitor_route_upload(request, competitor_id):
 )
 @api_GET_view
 def event_data(request, event_id):
-    t0 = time.perf_counter()
+    t0_perf = time.perf_counter()
+    t0 = time.time()
     cache_key_found = None
     event = None
 
@@ -1167,7 +1168,7 @@ def event_data(request, event_id):
     response = {
         "competitors": competitors_data,
         "nb_points": total_nb_pts,
-        "duration": (time.perf_counter() - t0),
+        "duration": (time.perf_counter() - t0_perf),
         "timestamp": time.time(),
     }
 
