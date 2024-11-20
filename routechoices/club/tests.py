@@ -4,6 +4,7 @@ from io import BytesIO
 import arrow
 from django.core.cache import cache
 from django.core.files import File
+from rest_framework import status
 from rest_framework.test import APIClient
 
 from routechoices.api.tests import EssentialApiBase
@@ -41,10 +42,10 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.headers.get("X-Cache-Hit"))
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.headers["X-Cache-Hit"], "1")
 
         url = self.reverse_and_check(
@@ -55,10 +56,10 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.headers.get("X-Cache-Hit"))
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.headers["X-Cache-Hit"], "1")
 
         url = self.reverse_and_check(
@@ -69,7 +70,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         url = self.reverse_and_check(
             "club_favicon",
@@ -80,7 +81,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # test range response
         url = self.reverse_and_check(
@@ -92,7 +93,7 @@ class ClubViewsTestCase(EssentialApiBase):
         )
 
         response = client.get(url, HTTP_RANGE="bytes=0-10")
-        self.assertEqual(response.status_code, 206)
+        self.assertEqual(response.status_code, status.HTTP_206_PARTIAL_CONTENT)
         data = b""
         for d in iter(response.streaming_content):
             data += d
@@ -101,7 +102,7 @@ class ClubViewsTestCase(EssentialApiBase):
         self.assertEqual(response.headers["Content-Range"], "bytes 0-10/286")
 
         response = client.get(url, HTTP_RANGE="bytes=10-20")
-        self.assertEqual(response.status_code, 206)
+        self.assertEqual(response.status_code, status.HTTP_206_PARTIAL_CONTENT)
         data2 = b""
         for d in iter(response.streaming_content):
             data2 += d
@@ -141,14 +142,14 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         s.create_page = True
         s.slug = "kiila-cup"
         s.save()
 
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_sitemaps_loads(self):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
@@ -179,7 +180,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         url = self.reverse_and_check(
             "club_sitemap_sections",
@@ -190,7 +191,17 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = self.reverse_and_check(
+            "club_feed",
+            "/feed",
+            host="clubs",
+            host_kwargs={"club_slug": "kiilat"},
+            prefix="kiilat",
+        )
+        response = client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_event_map_loads(self):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
@@ -226,18 +237,18 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         response = self.client.get(response["Location"])
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         event.map = raster_map
         event.save()
 
         # event image
         response = client.get(url)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         response = self.client.get(response["Location"])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # event kmz
         url = self.reverse_and_check(
@@ -249,9 +260,9 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         response = self.client.get(response["Location"])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # event zip
         url = self.reverse_and_check(
@@ -263,9 +274,9 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         response = self.client.get(response["Location"])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # event thumbnail
         url = self.reverse_and_check(
@@ -277,7 +288,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_event_pages_loads(self):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
@@ -296,7 +307,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         url = self.reverse_and_check(
             "event_view",
@@ -307,7 +318,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         url = self.reverse_and_check(
             "event_export_view",
@@ -318,7 +329,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "Export event data")
 
         url = self.reverse_and_check(
@@ -330,28 +341,28 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertNotContains(response, "Enter yourself")
         self.assertNotContains(response, "Upload GPX")
 
         e.open_registration = True
         e.save()
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "Enter yourself")
         self.assertNotContains(response, "Upload GPX")
 
         e.allow_route_upload = True
         e.save()
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "Enter yourself")
         self.assertContains(response, "Upload GPX")
 
         e.open_registration = False
         e.save()
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertNotContains(response, "Enter yourself")
         self.assertContains(response, "Upload GPX")
 
@@ -364,7 +375,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(f"{url}/does-not-exist")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("This page does not exist", response.content.decode())
 
         url = self.reverse_and_check(
@@ -376,7 +387,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "Start List")
 
     def test_no_event_pages_loads(self):
@@ -390,23 +401,23 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("Event not found", response.content.decode())
         response = client.get(f"{url}export")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("Event not found", response.content.decode())
         response = client.get(f"{url}contribute")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("Event not found", response.content.decode())
         response = client.get(f"{url}does-not-exist")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("This page does not exist", response.content.decode())
 
     def test_custom_domain_loads(self):
         client = APIClient(HTTP_HOST="gpstracking.kiilat.com")
 
         response = client.get("/")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn(
             "This domain has not been associated with a club...",
             response.content.decode(),
@@ -416,7 +427,7 @@ class ClubViewsTestCase(EssentialApiBase):
         self.club.save()
 
         response = client.get("/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.club.domain = ""
         self.club.save()
@@ -427,17 +438,17 @@ class ClubViewsTestCase(EssentialApiBase):
             "This domain has not been associated with a club...",
             response.content.decode(),
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_no_club_pages_loads(self):
         client = APIClient(HTTP_HOST="haldensk.routechoices.dev")
 
         response = client.get("/kiila-cup-69/does-not-exist")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("This page does not exist", response.content.decode())
 
         response = client.get("/")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("Club not found", response.content.decode())
 
     def test_future_event_pages_loads(self):
@@ -454,14 +465,14 @@ class ClubViewsTestCase(EssentialApiBase):
         )
 
         response = client.get("/kiila-cup-2/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = client.get("/kiila-cup-2/export")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "Export is not available yet")
 
         response = client.get("/kiila-cup-2/contribute")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "Enter yourself")
         self.assertNotContains(response, "Upload GPX")
 
@@ -479,14 +490,14 @@ class ClubViewsTestCase(EssentialApiBase):
         )
 
         response = client.get("/kiila-cup-3/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = client.get("/kiila-cup-3/export")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "Export event data")
 
         response = client.get("/kiila-cup-3/contribute")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "Enter yourself")
         self.assertContains(response, "Upload GPX")
 
@@ -505,17 +516,17 @@ class ClubViewsTestCase(EssentialApiBase):
         )
 
         response = client.get("/kiila-cup-4/")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         response = client.get("/kiila-cup-4/export")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         response = client.get("/kiila-cup-4/contribute")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         client.login(username="alice", password="pa$$word123")
         response = client.get("/kiila-cup-4/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = client.get("/kiila-cup-4/export")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -92,6 +92,23 @@ class SiteViewsTestCase(EssentialApiBase):
         response = client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        url = self.reverse_and_check("site:pricing_view", "/pricing", host="www")
+        response = client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = self.reverse_and_check("site:events_feed", "/feed", host="www")
+        response = client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = client.get("/sitemap.xml")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = client.get("/sitemap-static.xml")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = client.get("/sitemap-dynamic.xml")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_send_message(self):
         EmailAddress.objects.create(
             user=self.user, email=self.user.email, primary=True, verified=True
