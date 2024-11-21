@@ -2692,7 +2692,7 @@ function RCEvent(infoURL, clockURL, locale) {
 
 		for (const competitor of Object.values(competitorList)) {
 			if (!competitor.isShown) {
-				return;
+				continue;
 			}
 			const route = competitorRoutes[competitor.id];
 			if (route !== undefined) {
