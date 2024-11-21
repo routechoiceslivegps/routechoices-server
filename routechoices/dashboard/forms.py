@@ -300,6 +300,34 @@ class EventSetForm(ModelForm):
         except ValidationError as e:
             self._update_errors(e)
 
+    def clean_name(self):
+        name = self.cleaned_data.get("name")
+        qs = EventSet.objects.filter(club=self.club, name__iexact=name)
+        if self.instance.id:
+            qs = qs.exclude(id=self.instance.id)
+        if qs.exists():
+            raise ValidationError(
+                "Name already used by another event set of this club."
+            )
+        return name
+
+    def clean_slug(self):
+        create_page = self.data.get("create_page")
+        slug = self.cleaned_data.get("slug")
+        if create_page:
+            qs = EventSet.objects.filter(
+                club=self.club, create_page=True, slug__iexact=slug
+            )
+            if self.instance.id:
+                qs = qs.exclude(id=self.instance.id)
+            if qs.exists():
+                raise ValidationError(
+                    "Slug is already used by another event set of this club."
+                )
+            elif Event.objects.filter(club=self.club, slug__iexact=slug).exists():
+                raise ValidationError("Slug is already used by an event of this club.")
+        return slug
+
 
 class EventForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -358,6 +386,40 @@ class EventForm(ModelForm):
         end_date = self.cleaned_data.get("end_date")
         if start_date and end_date and end_date < start_date:
             self.add_error(None, "Start Date must be before End Date")
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name")
+        event_set = self.data.get("event_set")
+        club = self.club
+        if event_set:
+            qs = Event.objects.filter(
+                club_id=club.id,
+                event_set_id=event_set,
+                name__iexact=name,
+            )
+            if self.instance.id:
+                qs = qs.exclude(id=self.instance.id)
+            if qs.exists():
+                raise ValidationError(
+                    "Name is already used by an event in this event set."
+                )
+        return name
+
+    def clean_slug(self):
+        slug = self.cleaned_data.get("slug")
+        club = self.club
+        qs = Event.objects.filter(club_id=club.id, slug__iexact=slug)
+        if self.instance.id:
+            qs = qs.exclude(id=self.instance.id)
+        if qs.exists():
+            raise ValidationError("Slug is already used by another event of this club.")
+        elif EventSet.objects.filter(
+            club_id=club.id, create_page=True, slug__iexact=slug
+        ).exists():
+            raise ValidationError(
+                "Slug is already used by another event set of this club."
+            )
+        return slug
 
     def clean_map(self):
         raster_map = self.cleaned_data.get("map")

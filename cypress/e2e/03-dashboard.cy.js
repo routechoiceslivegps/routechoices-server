@@ -17,7 +17,9 @@ context("Dashboard actions", () => {
 		cy.get("button:not([type]),button[type=submit]").eq(0).click();
 		cy.contains("Competitor added!");
 		cy.get(".upload-route-btn").first().click();
-		cy.get("#id_gpx_file").selectFile("cypress/fixtures/Jukola_1st_leg.gpx");
+		cy.get("#id_gpx_file").selectFile(
+			"cypress/fixtures/Jukola2019/1/gpx/HaldenSK.gpx",
+		);
 		cy.get("#uploadRouteModal button:not([type]),button[type=submit]").click();
 		cy.contains("Data uploaded!");
 
@@ -34,7 +36,9 @@ context("Dashboard actions", () => {
 		);
 
 		cy.get(".open-upload-btn").first().click();
-		cy.get("#id_gpx_file").selectFile("cypress/fixtures/Jukola_1st_leg.gpx");
+		cy.get("#id_gpx_file").selectFile(
+			"cypress/fixtures/Jukola2019/1/gpx/PR.gpx",
+		);
 		cy.get(".upload-btn:not(.disabled)").click();
 		cy.contains("Data uploaded!");
 
@@ -90,7 +94,9 @@ context("Dashboard actions", () => {
 		cy.contains("Halden SK").click();
 		for (const gpxFileName of ["trk", "waypoint", "waypoint+trk"]) {
 			cy.visit("/dashboard/clubs/halden-sk/maps/upload-gpx");
-			cy.get("#id_gpx_file").selectFile(`cypress/fixtures/${gpxFileName}.gpx`);
+			cy.get("#id_gpx_file").selectFile(
+				`cypress/fixtures/gpx/${gpxFileName}.gpx`,
+			);
 			cy.get("button:not([type]),button[type=submit]").click();
 			cy.get("#django-messages").contains(
 				"The import of the map was successful",
@@ -98,21 +104,21 @@ context("Dashboard actions", () => {
 		}
 
 		cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
-		cy.get("#id_file").selectFile("cypress/fixtures/Jukola_1st_leg.kmz");
+		cy.get("#id_file").selectFile("cypress/fixtures/Jukola2019/1/map.kmz");
 		cy.get("button:not([type]),button[type=submit]").click();
 		cy.get("#django-messages", { timeout: 10000 }).contains(
 			"The import of the map was successful",
 		);
 
 		cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
-		cy.get("#id_file").selectFile("cypress/fixtures/multiground.kml");
+		cy.get("#id_file").selectFile("cypress/fixtures/maps/multiground.kml");
 		cy.get("button:not([type]),button[type=submit]").click();
 		cy.get("#django-messages", { timeout: 10000 }).contains(
 			"The import of the map was successful",
 		);
 
 		cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
-		cy.get("#id_file").selectFile("cypress/fixtures/tiled.kmz");
+		cy.get("#id_file").selectFile("cypress/fixtures/maps/tiled.kmz");
 		cy.get("button:not([type]),button[type=submit]").click();
 		cy.get("#django-messages", { timeout: 10000 }).contains(
 			"The import of the map was successful",
@@ -128,7 +134,7 @@ context("Dashboard actions", () => {
 
 		cy.get("#id_name").type("Jukola 2019 - 1st Leg (manual calibration)");
 
-		cy.get("#id_image").selectFile("cypress/fixtures/Jukola_1st_leg.jpg");
+		cy.get("#id_image").selectFile("cypress/fixtures/Jukola2019/1/map.jpg");
 
 		cy.get("#calibration-preview-opener").should("not.be.visible");
 		cy.get("#calibration-helper-opener").click();
@@ -205,33 +211,52 @@ context("Dashboard actions", () => {
 		cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
 
 		cy.get("a").contains("Jukola 2019 - 1st Leg").click();
-		const startListFileName = "startlist.csv";
-		cy.get("#csv_input").selectFile(`cypress/fixtures/${startListFileName}`);
-		cy.get("#id_competitors-2-name").should("have.value", "Frederic Tranchand");
+
+		cy.get("#csv_input").selectFile("cypress/fixtures/startlist.csv");
+		cy.get("#id_competitors-2-name").should("have.value", "Samuel Heinonen");
 		cy.get("button[name='save_continue']").click();
-
-		cy.get("#upload_route_btn").click();
-		cy.get("#id_competitor").select("Daniel Hubman");
-
-		const gpxFileName = "Jukola_1st_leg.gpx";
-		cy.get("#id_gpx_file").selectFile(`cypress/fixtures/${gpxFileName}`);
-		cy.get("button:not([type]),button[type=submit]").click();
-
-		cy.contains("The upload of the GPX file was successful");
+		const runners = [
+			{
+				club: "KooVee",
+				name: "Tim Robertson",
+			},
+			{
+				club: "PR",
+				name: "Samuel Heinonen",
+			},
+			{
+				club: "HaldenSK",
+				name: "Niels Christian Hellerud",
+			},
+		];
+		for (const runner of runners) {
+			cy.get("#upload_route_btn").click();
+			cy.get("#id_competitor").select(runner.name);
+			cy.get("#id_gpx_file").selectFile(
+				`cypress/fixtures/Jukola2019/1/gpx/${runner.club}.gpx`,
+			);
+			cy.get("button:not([type]),button[type=submit]").click();
+			cy.contains("The upload of the GPX file was successful");
+		}
 
 		cy.forceVisit("/halden-sk/Jukola-2019-1st-leg");
-		cy.contains("Olav Lundanes", { timeout: 20000 }); // in competitor list
+		cy.contains("Niels Christian Hellerud", { timeout: 20000 }); // in competitor list
 
 		// toggle competitor
-		cy.contains("#map", "KooVee");
-		cy.get(".competitor-switch").eq(1).uncheck();
-		cy.contains("#map", "KooVee").should("not.exist");
+		cy.get("#toggleAllSwitch").uncheck();
+
+		cy.get(".competitor-switch").eq(2).check();
+		cy.contains("#map", "🇫🇮 KooVee");
+		cy.get(".competitor-switch").eq(2).uncheck();
+		cy.contains("#map", "🇫🇮 KooVee").should("not.exist");
 		cy.get(".competitor-switch").eq(1).check();
-		cy.contains("#map", "KooVee");
+		cy.contains("#map", "🇫🇮 Paimion Rasti");
+
+		cy.get("#toggleAllSwitch").check();
 
 		// change runner color
-		cy.get(".color-tag").first().click();
-		cy.contains("Select new color for Frederic Tranchand");
+		cy.get(".color-tag").eq(1).click();
+		cy.contains("Select new color for Samuel Heinonen");
 		cy.get(".IroWheel").first().should("be.visible").click(50, 50);
 		cy.get("#save-color").click();
 
@@ -257,14 +282,19 @@ context("Dashboard actions", () => {
 		cy.wait(1000);
 		cy.get("#real_time_button").should("not.have.class", "active");
 
+		// Show grouping
+		cy.get("#options_show_button").click();
+		cy.get("#toggleClusterSwitch").click();
+		cy.get(".leaflet-control-grouping").first().contains("Group A");
+		cy.contains("#map", "Group A");
+		cy.contains("#map", "🇫🇮 Paimion Rasti");
+		cy.contains("#map", "🇫🇮 KooVee").should("not.exist");
+		cy.get("#toggleClusterSwitch").click();
+
 		// mass start simulation
 		cy.get("#mass_start_button").click();
 		cy.wait(1000);
 
-		// Show grouping
-		cy.get("#options_show_button").click();
-		cy.get("#toggleClusterSwitch").click();
-		cy.get(".leaflet-control-grouping").first().contains("No groups");
 		// Create Event with all fields info
 		cy.visit("/dashboard/clubs/halden-sk/events/new");
 
@@ -326,10 +356,7 @@ context("Dashboard actions", () => {
 			"/dashboard/clubs/halden-sk/events/new",
 		);
 		cy.contains("Start Date must be before End Date");
-		cy.contains(
-			"An Event with this Club, Event Set, and Name already exists.",
-		).should("not.exist");
-		cy.contains("An Event with this Club and Slug already exists.");
+		cy.contains("Slug is already used by another event of this club.");
 		cy.contains(
 			"Extra maps can be set only if the main map field is set first",
 		);
