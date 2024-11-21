@@ -322,10 +322,10 @@ class EventSetForm(ModelForm):
                 qs = qs.exclude(id=self.instance.id)
             if qs.exists():
                 raise ValidationError(
-                    "Slug is already used by another event set of this club."
+                    "URL is already used by another event set of this club."
                 )
             elif Event.objects.filter(club=self.club, slug__iexact=slug).exists():
-                raise ValidationError("Slug is already used by an event of this club.")
+                raise ValidationError("URL is already used by an event of this club.")
         return slug
 
 
@@ -412,12 +412,12 @@ class EventForm(ModelForm):
         if self.instance.id:
             qs = qs.exclude(id=self.instance.id)
         if qs.exists():
-            raise ValidationError("Slug is already used by another event of this club.")
+            raise ValidationError("URL is already used by another event of this club.")
         elif EventSet.objects.filter(
             club_id=club.id, create_page=True, slug__iexact=slug
         ).exists():
             raise ValidationError(
-                "Slug is already used by another event set of this club."
+                "URL is already used by another event set of this club."
             )
         return slug
 
