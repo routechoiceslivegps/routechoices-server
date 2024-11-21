@@ -19,7 +19,7 @@ function onCsvParsed(result) {
 	if (!errors) {
 		for (const l of result.data) {
 			if (l.length === 1 && l[0] === "") {
-				return; // empty line
+				continue; // empty line
 			}
 			if (l.length !== 2) {
 				errors += "All rows should have 2 columns\n";
@@ -28,7 +28,7 @@ function onCsvParsed(result) {
 				const nickname = l[1];
 				if (nickname.length > 12) {
 					errors += `IMEI or DeviceID ${imeiOrDeviceId}, nickname "${nickname}": nickname too long (Max 12 characters)\n`;
-					return;
+					continue;
 				}
 				if (imeiOrDeviceId.length === 8) {
 					const deviceId = imeiOrDeviceId;
