@@ -307,7 +307,7 @@ class EventSetForm(ModelForm):
             qs = qs.exclude(id=self.instance.id)
         if qs.exists():
             raise ValidationError(
-                "Name is already used by another event set of this club."
+                "Name already used by another event set of this club."
             )
         return name
 
@@ -321,11 +321,9 @@ class EventSetForm(ModelForm):
             if self.instance.id:
                 qs = qs.exclude(id=self.instance.id)
             if qs.exists():
-                raise ValidationError(
-                    "URL is already used by another event set of this club."
-                )
+                raise ValidationError("URL already used by another event set.")
             elif Event.objects.filter(club=self.club, slug__iexact=slug).exists():
-                raise ValidationError("URL is already used by an event of this club.")
+                raise ValidationError("URL already used by an event.")
         return slug
 
 
@@ -401,7 +399,7 @@ class EventForm(ModelForm):
                 qs = qs.exclude(id=self.instance.id)
             if qs.exists():
                 raise ValidationError(
-                    "Name is already used by an event in this event set."
+                    "Name already used by another event in this event set."
                 )
         return name
 
@@ -412,13 +410,11 @@ class EventForm(ModelForm):
         if self.instance.id:
             qs = qs.exclude(id=self.instance.id)
         if qs.exists():
-            raise ValidationError("URL is already used by another event of this club.")
+            raise ValidationError("URL already used by another event.")
         elif EventSet.objects.filter(
             club_id=club.id, create_page=True, slug__iexact=slug
         ).exists():
-            raise ValidationError(
-                "URL is already used by another event set of this club."
-            )
+            raise ValidationError("URL already used by an event set.")
         return slug
 
     def clean_map(self):
