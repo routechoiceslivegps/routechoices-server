@@ -307,7 +307,7 @@ class EventSetForm(ModelForm):
             qs = qs.exclude(id=self.instance.id)
         if qs.exists():
             raise ValidationError(
-                "Name already used by another event set of this club."
+                "Name is already used by another event set of this club."
             )
         return name
 
