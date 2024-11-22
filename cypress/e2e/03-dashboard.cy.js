@@ -355,7 +355,7 @@ context("Dashboard actions", () => {
 			"eq",
 			"/dashboard/clubs/halden-sk/events/new",
 		);
-		cy.contains("Start Date must be before End Date");
+		cy.contains("End Date must be after than the Start Date.");
 		cy.contains("URL already used by another event.");
 		cy.contains(
 			"Extra maps can be set only if the main map field is set first",

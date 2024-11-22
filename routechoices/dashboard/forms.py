@@ -378,12 +378,12 @@ class EventForm(ModelForm):
         if not club.can_modify_events:
             self.add_error(
                 None,
-                "Your 10 days free trial has now expired, you cannot create or edit events anymore",
+                "Your 10 days free trial has now expired, you cannot create or edit events anymore.",
             )
         start_date = self.cleaned_data.get("start_date")
         end_date = self.cleaned_data.get("end_date")
         if start_date and end_date and end_date < start_date:
-            self.add_error(None, "Start Date must be before End Date")
+            self.add_error("end_date", "End Date must be after than the Start Date.")
 
     def clean_name(self):
         name = self.cleaned_data.get("name")
