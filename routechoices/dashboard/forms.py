@@ -375,20 +375,24 @@ class EventForm(ModelForm):
     def clean(self):
         super().clean()
         club = self.club
+
+        # Check club has rights to create new events
         if not club.can_modify_events:
             self.add_error(
                 None,
                 "Your 10 days free trial has now expired, you cannot create or edit events anymore.",
             )
+
+        # Check that start date is before ends date
         start_date = self.cleaned_data.get("start_date")
         end_date = self.cleaned_data.get("end_date")
         if start_date and end_date and end_date < start_date:
             self.add_error("end_date", "End Date must be after than the Start Date.")
 
-    def clean_name(self):
+        # Check name is unique for this event set
         name = self.cleaned_data.get("name")
-        event_set = self.data.get("event_set")
-        club = self.club
+        event_set = self.cleaned_data.get("event_set")
+
         if event_set:
             qs = Event.objects.filter(
                 club_id=club.id,
@@ -398,24 +402,21 @@ class EventForm(ModelForm):
             if self.instance.id:
                 qs = qs.exclude(id=self.instance.id)
             if qs.exists():
-                raise ValidationError(
-                    "Name already used by another event in this event set."
+                self.add_error(
+                    "name", "Name already used by another event in this event set."
                 )
-        return name
 
-    def clean_slug(self):
+        # Check that slug is unique for this club
         slug = self.cleaned_data.get("slug")
-        club = self.club
         qs = Event.objects.filter(club_id=club.id, slug__iexact=slug)
         if self.instance.id:
             qs = qs.exclude(id=self.instance.id)
         if qs.exists():
-            raise ValidationError("URL already used by another event.")
+            self.add_error("slug", "URL already used by another event.")
         elif EventSet.objects.filter(
             club_id=club.id, create_page=True, slug__iexact=slug
         ).exists():
-            raise ValidationError("URL already used by an event set.")
-        return slug
+            self.add_error("slug", "URL already used by an event set.")
 
     def clean_map(self):
         raster_map = self.cleaned_data.get("map")
