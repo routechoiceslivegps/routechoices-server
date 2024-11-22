@@ -6,7 +6,7 @@ context("Dashboard actions", () => {
 	after(() => {
 		cy.wait(100);
 	});
-	/*
+
 	it("Manage participations", () => {
 		cy.login();
 		cy.forceVisit("/halden-sk/open-registration-upload-allowed/contribute");
@@ -183,7 +183,7 @@ context("Dashboard actions", () => {
 		cy.get("button:not([type]),button[type=submit]").click();
 		cy.contains("Changes saved successfully", { timeout: 10000 });
 	});
-*/
+
 	it("Create events", () => {
 		cy.login();
 		cy.visit("/dashboard/clubs/");
@@ -211,7 +211,7 @@ context("Dashboard actions", () => {
 		cy.get("button:not([type]),button[type=submit]").first().click();
 
 		cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
-		/*
+
 		cy.get("a").contains("Jukola 2019 - 1st Leg").click();
 
 		cy.get("#csv_input").selectFile("cypress/fixtures/startlist.csv");
@@ -296,7 +296,7 @@ context("Dashboard actions", () => {
 		// mass start simulation
 		cy.get("#mass_start_button").click();
 		cy.wait(1000);
-*/
+
 		// Create Event with all fields info
 		cy.visit("/dashboard/clubs/halden-sk/events/new");
 
