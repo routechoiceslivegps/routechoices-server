@@ -17,4 +17,5 @@ module.exports = defineConfig({
 		},
 	},
 	pageLoadTimeout: 10000,
+	video: true,
 });
