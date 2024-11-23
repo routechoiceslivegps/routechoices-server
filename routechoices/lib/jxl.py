@@ -28,6 +28,7 @@ def _save(im, fp, filename, save_all=False):
         effort=effort,
         use_container=use_container,
         use_original_profile=use_original_profile,
+        num_threads=-1,
     )
     metadata = {
         "exif": None,
