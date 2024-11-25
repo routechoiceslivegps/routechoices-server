@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load compress hosts static times %}
+{% load compress hosts random static times %}
 {% block extra_head %}
     {{ block.super }}
     {% compress css %}
@@ -89,7 +89,7 @@
                 </div>
                 <div class="row g-2  justify-content-evenly align-items-center">
                     {% for fb in user_feedbacks %}
-                        <div class="col-lg-3 col-12 col-sm-6">
+                        <div class="col-lg-3 col-12 col-sm-6" style="transform: rotate({% random_int -5 5 %}deg)">
                             <div class="card shadow border-0 p-3 text-center px-4">
                                 <div>
                                     <div class="mb-3" style="font-size: 0.7em">{{ fb.content }}</div>
