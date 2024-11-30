@@ -21,7 +21,7 @@
                         <tbody>
                             {% for p in participations %}
                                 <tr>
-                                    <td>{{ p.event.name }} by {{ p.event.club.name }} as {{ p.name }} ({{ p.short_name }})</td>
+                                    <td><a href="{{ p.event.get_absolute_url }}">{{ p.event.name }}</a> by {{ p.event.club.name }} as {{ p.name }} ({{ p.short_name }})</td>
                                     <td>
                                         <button data-competitor-name="{{ p.name }}"
                                                 data-competitor-short-name="{{ p.short_name }}"
