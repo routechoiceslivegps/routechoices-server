@@ -235,14 +235,17 @@ function parseGpx(xmlstr) {
 		swal(
 			{
 				title: "Confirm withdrawal",
-				text: `Are you sure you want to remove your participation the event ${eventName}?`,
-				type: "warning",
+				text: `Are you sure you want to remove your participation the event ${eventName}?\nType WITHDRAW to confirm:`,
+				type: "input",
 				closeOnConfirm: false,
 				showCancelButton: true,
 				confirmButtonText: "Withdraw",
-				confirmButtonClass: "btn-danger",
+				confirmButtonClass: "btn-danger withdraw-btn disabled",
 			},
-			() => {
+			(inputValue) => {
+				if (inputValue !== "WITHDRAW") {
+					return false;
+				}
 				reqwest({
 					url: `${window.local.apiBaseUrl}competitors/${competitorId}/`,
 					method: "DELETE",
@@ -264,6 +267,15 @@ function parseGpx(xmlstr) {
 				});
 			},
 		);
+		u(".sweet-alert input").on("keyup", (e) => {
+			const el = u(e.target);
+			if (el.val() !== "WITHDRAW") {
+				u(".withdraw-btn").addClass("disabled").attr("disabled=1");
+			} else {
+				u(".withdraw-btn").removeClass("disabled").attr("disabled=false");
+			}
+		});
+		u(".sweet-alert input").addClass("mb-2");
 	});
 	u("#upload-form").on("submit", (e) => {
 		e.preventDefault();
