@@ -27,11 +27,13 @@
                                                 data-competitor-short-name="{{ p.short_name }}"
                                                 data-competitor-id="{{ p.aid }}"
                                                 data-device-id="{{ p.device.aid }}"
-                                                class="me-2 mb-1 btn btn-secondary edit-info-btn">Edit info</button>
+                                                class="me-1 mb-1 btn btn-secondary edit-info-btn">Edit info</button>
                                         {% if p.event.allow_route_upload %}
                                             <button data-competitor-id="{{ p.aid }}"
-                                                    class="mb-1 btn btn-secondary open-upload-btn">Upload GPS</button>
+                                                    class="me-1 mb-1 btn btn-secondary open-upload-btn">Upload GPS</button>
                                         {% endif %}
+                                            <button data-competitor-id="{{ p.aid }}" data-event-name="{{ p.event.name }}"
+                                                    class="mb-1 btn btn-danger confirm-withdraw-btn">Withdraw</button>
                                     </td>
                                 </tr>
                             {% endfor %}

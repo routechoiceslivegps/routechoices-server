@@ -145,7 +145,8 @@ function parseGpx(xmlstr) {
 	const thisUrl = window.location.href;
 	if (
 		thisUrl.includes("info-edited=1") ||
-		thisUrl.includes("route-uploaded=1")
+		thisUrl.includes("route-uploaded=1") ||
+		thisUrl.includes("withdrawn=1")
 	) {
 		window.history.pushState("-", null, window.location.pathname);
 	}
@@ -227,6 +228,43 @@ function parseGpx(xmlstr) {
 		});
 	});
 
+	u(".confirm-withdraw-btn").on("click", (e) => {
+		const el = u(e.target);
+		const competitorId = el.attr("data-competitor-id");
+		const eventName = el.attr("data-event-name");
+		swal(
+			{
+				title: "Confirm withdrawal",
+				text: `Are you sure you want to remove your participation the event ${eventName}?`,
+				type: "warning",
+				closeOnConfirm: false,
+				showCancelButton: true,
+				confirmButtonText: "Withdraw",
+				confirmButtonClass: "btn-danger",
+			},
+			() => {
+				reqwest({
+					url: `${window.local.apiBaseUrl}competitors/${competitorId}/`,
+					method: "DELETE",
+					withCredentials: true,
+					crossOrigin: true,
+					headers: {
+						"X-CSRFToken": window.local.csrfToken,
+					},
+					success: () => {
+						window.location.href = `${window.location.href}?withdrawn=1`;
+					},
+					error: (e) => {
+						swal({
+							text: "Something went wrong",
+							title: "error",
+							type: "error",
+						});
+					},
+				});
+			},
+		);
+	});
 	u("#upload-form").on("submit", (e) => {
 		e.preventDefault();
 		u(".upload-btn").addClass("disabled");
