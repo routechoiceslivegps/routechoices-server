@@ -441,26 +441,13 @@ def distance_latlon(a, b):
 
 
 def simplify_line(points, tolerance=11):
-    """
-    :param points: list of lon-lat pairs
-    :type points: list
-    :param tolerance: tolerance in pixel
-    :type tolerance: float
-    :return: list of lon-lat pairs
-    :rtype: list
-    """
     if not points:
         return points
-
     new_coords = [points[0]]
-
     for p in points[1:-1]:
         last = new_coords[-1]
-
         dist = sqrt(pow(last[0] - p[0], 2) + pow(last[1] - p[1], 2))
         if dist > tolerance:
             new_coords.append(p)
-
     new_coords.append(points[-1])
-
     return new_coords
