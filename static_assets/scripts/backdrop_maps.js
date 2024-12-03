@@ -42,7 +42,7 @@ const backdropMaps = {
 		},
 	),
 	"topo-uk": L.tileLayer(
-		"http://tile-proxy.routechoices.com/uk/{z}/{x}/{y}.webp",
+		"https://tile-proxy.routechoices.com/uk/{z}/{x}/{y}.webp",
 		{
 			attribution: "&copy; Ordnance Survey",
 			className: "wms256",
