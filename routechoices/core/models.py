@@ -59,6 +59,7 @@ from routechoices.lib.helpers import (
     safe64encodedsha,
     short_random_slug,
     shortsafe64encodedsha,
+    simplify_line,
     time_base32,
 )
 from routechoices.lib.jxl import register_jxl_opener
@@ -1032,9 +1033,9 @@ class Map(models.Model):
         new_map.height = int(height * res_scale)
         draw = ImageDraw.Draw(im)
         for pts in seg:
-            map_pts = [
-                new_map.wsg84_to_map_xy(pt[0], pt[1], round_values=True) for pt in pts
-            ]
+            map_pts = simplify_line(
+                [new_map.wsg84_to_map_xy(pt[0], pt[1], round_values=True) for pt in pts]
+            )
             draw.line(map_pts, (255, 255, 255, 200), 22 * res_scale, joint="curve")
             draw.line(map_pts, line_color, 16 * res_scale, joint="curve")
         for pt in waypoints:
@@ -1096,6 +1097,15 @@ class Map(models.Model):
             / 1000,
             3,
         )
+
+    def draw_gps(self, gps_data):
+        img = Image.open(BytesIO(self.data)).convert("RGBA")
+        points = [self.wsg84_to_map_xy(coord[1], coord[2]) for coord in gps_data]
+        points = simplify_line(points)
+        draw = ImageDraw.Draw(img)
+        draw.line(points, fill="#FFFFFF", width=10, joint="curve")
+        draw.line(points, fill="#0000FF", width=6, joint="curve")
+        img.save("test.png")
 
     def merge(self, *other_maps):
         width, height = self.quick_size
