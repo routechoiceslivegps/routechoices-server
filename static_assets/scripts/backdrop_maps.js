@@ -41,16 +41,19 @@ const backdropMaps = {
 			className: "wms256",
 		},
 	),
-	"topo-uk": L.tileLayer("http://127.0.0.1:1234/uk/{z}/{x}/{y}.webp", {
-		attribution: "&copy; Ordnance Survey",
-		className: "wms256",
-		minZoom: 7,
-		maxNativeZoom: 15,
-		bounds: [
-			[49.75, -9.01],
-			[61.01, 2.01],
-		],
-	}),
+	"topo-uk": L.tileLayer(
+		"http://tile-proxy.routechoices.com/uk/{z}/{x}/{y}.webp",
+		{
+			attribution: "&copy; Ordnance Survey",
+			className: "wms256",
+			minZoom: 7,
+			maxNativeZoom: 15,
+			bounds: [
+				[49.75, -9.01],
+				[61.01, 2.01],
+			],
+		},
+	),
 	"mapant-no": L.tileLayer("https://mapant.no/osm-tiles/{z}/{x}/{y}.png", {
 		attribution: "&copy; MapAnt.no",
 		className: "wms256",
