@@ -1100,12 +1100,17 @@ class Map(models.Model):
 
     def draw_gps(self, gps_data):
         img = Image.open(BytesIO(self.data)).convert("RGBA")
-        points = [self.wsg84_to_map_xy(coord[1], coord[2]) for coord in gps_data]
+        points = [
+            self.wsg84_to_map_xy(
+                coord[LOCATION_LATITUDE_INDEX],
+                coord[LOCATION_LONGITUDE_INDEX]
+            ) for coord in gps_data
+        ]
         points = simplify_line(points)
         draw = ImageDraw.Draw(img)
         draw.line(points, fill="#FFFFFF", width=10, joint="curve")
         draw.line(points, fill="#0000FF", width=6, joint="curve")
-        img.save("test.png")
+        return img
 
     def merge(self, *other_maps):
         width, height = self.quick_size
