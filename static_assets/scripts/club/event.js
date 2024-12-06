@@ -1041,10 +1041,8 @@ function RCEvent(infoURL, clockURL, locale) {
 			resetMassStartContextMenuItem = null;
 		}
 		u(".if-live").removeClass("d-none");
-		u("#live_button")
-			.off("click")
-			.removeClass("btn-info", "disabled")
-			.addClass("d-none");
+		u("#live_button").off("click").removeClass("btn-info", "disabled");
+		u("#live_button").parent().addClass("d-none");
 		u("#replay_button").removeClass("d-none");
 		u("#real_time_button").removeClass("active");
 		u("#mass_start_button").removeClass("active");
@@ -1361,8 +1359,9 @@ function RCEvent(infoURL, clockURL, locale) {
 		u("#live_button")
 			.on("click", onSwitchToLive)
 			.text(banana.i18n("return-live-mode"))
-			.removeClass("active", "btn-info", "disabled", "d-none")
+			.removeClass("active", "btn-info", "disabled")
 			.addClass("btn-secondary");
+		u("#live_button").parent().removeClass("d-none");
 		u("#replay_button").addClass("d-none");
 		u("#replay_mode_buttons").css({ display: "" });
 		u("#replay_control_buttons").css({ display: "" });
@@ -1441,16 +1440,18 @@ function RCEvent(infoURL, clockURL, locale) {
 				u("#live_button")
 					.off("click")
 					.text(banana.i18n("archived-event"))
-					.removeClass("btn-secondary", "d-none")
+					.removeClass("btn-secondary")
 					.addClass("btn-info", "disabled");
+				u("#live_button").parent().removeClass("d-none");
 				isLiveEvent = false;
 			}
 			if (isBackLive) {
 				u("#live_button")
 					.on("click", onSwitchToLive)
 					.text(banana.i18n("return-live-mode"))
-					.removeClass("d-none", "btn-info", "disabled")
+					.removeClass("btn-info", "disabled")
 					.addClass("btn-secondary");
+				u("#live_button").parent().removeClass("d-none");
 				isLiveEvent = true;
 			}
 		}
