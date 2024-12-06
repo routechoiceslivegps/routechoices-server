@@ -129,7 +129,9 @@
 #full_progress_bar {
 	background-color: var(--bs-dark-bg-subtle);
 }
-
+#play_pause_button > small {
+	font-size: 0.7em;
+}
 .time_bar.loading {
 	display: none;
 }
