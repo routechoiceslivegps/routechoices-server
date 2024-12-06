@@ -973,7 +973,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					} else {
 						// event is archived
 						eventStateControl.setReplay();
-						u("#replay_button").addClass("d-none");
+						u("#replay_button").parent().addClass("d-none");
 						u("#live_button")
 							.off("click", onSwitchToLive)
 							.text(banana.i18n("archived-event"))
@@ -1043,7 +1043,7 @@ function RCEvent(infoURL, clockURL, locale) {
 		u(".if-live").removeClass("d-none");
 		u("#live_button").off("click").removeClass("btn-info", "disabled");
 		u("#live_button").parent().addClass("d-none");
-		u("#replay_button").removeClass("d-none");
+		u("#replay_button").parent().removeClass("d-none");
 		u("#real_time_button").removeClass("active");
 		u("#mass_start_button").removeClass("active");
 		u("#replay_mode_buttons").hide();
@@ -1362,7 +1362,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			.removeClass("active", "btn-info", "disabled")
 			.addClass("btn-secondary");
 		u("#live_button").parent().removeClass("d-none");
-		u("#replay_button").addClass("d-none");
+		u("#replay_button").parent().addClass("d-none");
 		u("#replay_mode_buttons").css({ display: "" });
 		u("#replay_control_buttons").css({ display: "" });
 		onAppResize();
@@ -2643,12 +2643,12 @@ function RCEvent(infoURL, clockURL, locale) {
 	function drawCompetitors(refreshMeters) {
 		// play/pause button
 		if (playbackPaused) {
-			const playButton = `<i class="fa-solid fa-play fa-fw"></i> x${playbackRate}`;
+			const playButton = `<i class="fa-solid fa-play fa-fw"></i><small>x${playbackRate}</small>`;
 			if (u("#play_pause_button").html() !== playButton) {
 				u("#play_pause_button").html(playButton);
 			}
 		} else {
-			const pauseButton = `<i class="fa-solid fa-pause fa-fw"></i> x${playbackRate}`;
+			const pauseButton = `<i class="fa-solid fa-pause fa-fw"></i><small>x${playbackRate}</small>`;
 			if (u("#play_pause_button").html() !== pauseButton) {
 				u("#play_pause_button").html(pauseButton);
 			}
