@@ -128,7 +128,7 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
         if not tmp_map:
             raise MapsImportError("Error importing map")
         map_obj, _ = Map.objects.get_or_create(
-            name=event.name,
+            name=f"{event.name} ({self.uid})",
             club=self.club,
             defaults={
                 "image": tmp_map.image,
