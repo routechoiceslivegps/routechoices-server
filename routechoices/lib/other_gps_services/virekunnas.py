@@ -1,4 +1,4 @@
-from routechoices.lib.other_gps_service.gpsseuranta import GpsSeurantaNet
+from routechoices.lib.other_gps_services.gpsseuranta import GpsSeurantaNet
 
 
 class GpsVirekunnasFi(GpsSeurantaNet):
