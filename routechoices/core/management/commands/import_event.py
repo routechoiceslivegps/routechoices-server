@@ -7,6 +7,7 @@ from routechoices.core.bg_tasks import (
     import_single_event_from_otracker,
     import_single_event_from_sportrec,
     import_single_event_from_tractrac,
+    import_single_event_from_virekunnas,
 )
 from routechoices.lib.other_gps_services.commons import EventImportError
 
@@ -24,6 +25,12 @@ class Command(BaseCommand):
             help="Import from gpsseuranta",
         )
         gpsseuranta_parser.set_defaults(method=self.gpsseuranta)
+
+        virekunnas_parser = subparsers.add_parser(
+            "virekunnas",
+            help="Import from virekunnas",
+        )
+        virekunnas_parser.set_defaults(method=self.virekunnas)
 
         livelox_parser = subparsers.add_parser(
             "livelox",
@@ -69,6 +76,18 @@ class Command(BaseCommand):
                     import_single_event_from_gps_seuranta(event_id)
                 else:
                     import_single_event_from_gps_seuranta.now(event_id)
+            except EventImportError:
+                self.stderr.write(f"Could not import event {event_id}")
+                continue
+
+    def virekunnas(self, *args, **options):
+        for event_id in options["event_ids"]:
+            try:
+                self.stdout.write(f"Importing event {event_id}")
+                if options["task"]:
+                    import_single_event_from_virekunnas(event_id)
+                else:
+                    import_single_event_from_virekunnas.now(event_id)
             except EventImportError:
                 self.stderr.write(f"Could not import event {event_id}")
                 continue

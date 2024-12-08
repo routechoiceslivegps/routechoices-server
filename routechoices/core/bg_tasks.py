@@ -9,6 +9,7 @@ from routechoices.lib.other_gps_services.loggator import Loggator
 from routechoices.lib.other_gps_services.otracker import OTracker
 from routechoices.lib.other_gps_services.sportrec import SportRec
 from routechoices.lib.other_gps_services.tractrac import Tractrac
+from routechoices.lib.other_gps_services.virekunnas import GpsVirekunnasFi
 
 
 class EventImportError(Exception):
@@ -27,6 +28,16 @@ def import_single_event_from_gps_seuranta(event_id):
     ):
         event_id = match.group("uid")
     solution = GpsSeurantaNet()
+    event = solution.import_event(event_id)
+    return event
+
+
+@background(schedule=0)
+def import_single_event_from_virekunnas(event_id):
+    event_id = event_id.strip()
+    if match := re.match(r"https?://gps\.virekunnas\.fi/(?P<uid>[^/]+)/?", event_id):
+        event_id = match.group("uid")
+    solution = GpsVirekunnasFi()
     event = solution.import_event(event_id)
     return event
 
