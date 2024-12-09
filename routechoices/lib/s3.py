@@ -113,7 +113,7 @@ def serve_image_from_s3(
         s3_client = get_s3_client()
         s3_client.download_fileobj(settings.AWS_S3_BUCKET, file_path, s3_buffer)
         img_data = s3_buffer.getvalue()
-        pil_img = Image.open(BytesIO(img_data)).convert("RGBA")
+        pil_image = Image.open(BytesIO(img_data)).convert("RGBA")
         if (img_mode and pil_image.mode != img_mode) or mime == "image/jpeg":
             pil_image = pil_image.convert("RGB")
 
