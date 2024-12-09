@@ -726,8 +726,8 @@ class UploadKmzForm(Form):
         new_maps = []
         try:
             overlays = extract_ground_overlay_info(kml)
-        except Exception as e:
-            raise ValidationError(f"Invalid File format ({e})")
+        except Exception:
+            raise ValidationError("Invalid File")
         if not overlays:
             raise ValidationError("Could not find any Ground Overlays in that file!")
 
