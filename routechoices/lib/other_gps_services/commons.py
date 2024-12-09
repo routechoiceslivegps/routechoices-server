@@ -1,4 +1,6 @@
+from curl_cffi import requests
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 
 from routechoices.core.models import (
     PRIVACY_SECRET,
@@ -100,11 +102,17 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
     def get_event(self):
         raise NotImplementedError()
 
+    def get_map_url(self):
+        raise NotImplementedError()
+
     def get_map(self):
         raise NotImplementedError()
-    
+
     def get_map_file(self):
-        raise NotImplementedError()
+        r = requests.get(self.get_map_url())
+        if r.status_code == 200:
+            return ContentFile(r.content)
+        return None
 
     def get_competitor_devices_data(self, event):
         raise NotImplementedError()

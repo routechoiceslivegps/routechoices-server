@@ -2,7 +2,6 @@ from operator import itemgetter
 
 import arrow
 from curl_cffi import requests
-from django.core.files.base import ContentFile
 
 from routechoices.core.models import Competitor, Event, Map
 from routechoices.lib.helpers import get_remote_image_sizes
@@ -42,34 +41,24 @@ class Loggator(ThirdPartyTrackingSolutionWithProxy):
         return self.init_data.get("map")["url"]
 
     def get_map(self, download_map=False):
-        map_data = self.init_data.get("map")
         try:
-            length, size = get_remote_image_sizes(map_data["url"])
+            length, size = get_remote_image_sizes(self.get_map_url())
         except Exception:
             return None
+
+        map_coords = self.init_data.get("map")["coordinates"]
 
         map_obj = Map()
         map_obj.width = size[0]
         map_obj.height = size[1]
+
         map_obj.corners_coordinates = ",".join(
             [
-                str(map_data["coordinates"]["topLeft"]["lat"]),
-                str(map_data["coordinates"]["topLeft"]["lng"]),
-                str(map_data["coordinates"]["topRight"]["lat"]),
-                str(map_data["coordinates"]["topRight"]["lng"]),
-                str(map_data["coordinates"]["bottomRight"]["lat"]),
-                str(map_data["coordinates"]["bottomRight"]["lng"]),
-                str(map_data["coordinates"]["bottomLeft"]["lat"]),
-                str(map_data["coordinates"]["bottomLeft"]["lng"]),
+                f"{map_coords[pos]['lat']:.5f},{map_coords[pos]['lng']:.5f}"
+                for pos in ("topLeft", "topRight", "bottomRight", "bottomLeft")
             ]
         )
         return map_obj
-    
-    def get_map_file(self):
-        r = requests.get(map_data["url"])
-        if r.status_code == 200:
-            return ContentFile(r.content)
-        return None
 
     def get_competitor_devices_data(self, event):
         devices_data = {}

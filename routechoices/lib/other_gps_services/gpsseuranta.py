@@ -3,7 +3,6 @@ from operator import itemgetter
 
 import arrow
 from curl_cffi import requests
-from django.core.files.base import ContentFile
 
 from routechoices.core.models import Competitor, Event, Map
 from routechoices.lib.helpers import (
@@ -90,12 +89,6 @@ class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
         coordinates = ",".join([str(round(x, 5)) for x in corners])
         map_obj.corners_coordinates = coordinates
         return map_obj
-    
-    def get_map_file(self):
-        r = requests.get(self.get_map_url())
-        if r.status_code == 200:
-            return ContentFile(r.content)
-        return None
 
     def get_competitor_devices_data(self, event):
         devices_data = {}
