@@ -1328,10 +1328,7 @@ def dashboard_map_download(request, map_id, *args, **kwargs):
     else:
         club_list = Club.objects.filter(admins=request.user)
         raster_map = get_object_or_404(
-            Map,
-            image__startswith="maps/",
-            image__contains=map_id,
-            club__in=club_list
+            Map, image__startswith="maps/", image__contains=map_id, club__in=club_list
         )
     file_path = raster_map.path
     mime_type = raster_map.mime_type
@@ -1425,6 +1422,7 @@ def event_route_upload_view(request, event_id):
                 start_time = None
                 end_time = None
                 points = []
+                missing_time_info = False
                 for track in gpx.tracks:
                     for segment in track.segments:
                         for point in segment.points:
@@ -1439,8 +1437,13 @@ def event_route_upload_view(request, event_id):
                                 if not start_time:
                                     start_time = point.time
                                 end_time = point.time
+                            elif point.latitude and point.longitude:
+                                missing_time_info = True
                 if len(points) == 0:
-                    error = "File does not contain valid points"
+                    if missing_time_info:
+                        error = "File does not contain information about locations date/time"
+                    else:
+                        error = "File does not contain any points"
                 else:
                     device.add_locations(points)
                     competitor = form.cleaned_data["competitor"]
