@@ -238,7 +238,7 @@ context("Dashboard actions", () => {
 				`cypress/fixtures/Jukola2019/1/gpx/${runner.club}.gpx`,
 			);
 			cy.get("button:not([type]),button[type=submit]").click();
-			cy.contains("The upload of the GPX file was successful");
+			cy.contains("The upload of the GPX file was successful!");
 		}
 
 		cy.forceVisit("/halden-sk/Jukola-2019-1st-leg");

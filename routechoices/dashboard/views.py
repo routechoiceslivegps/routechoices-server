@@ -1399,72 +1399,35 @@ def event_route_upload_view(request, event_id):
         # create a form instance and populate it with data from the request:
         form = UploadGPXForm(request.POST, request.FILES)
         form.fields["competitor"].queryset = competitors
-        # check whether it's valid:
-        if form.is_valid():
-            error = None
-            try:
-                gpx_file = form.cleaned_data["gpx_file"].read()
-                data = minidom.parseString(gpx_file)
-                gpx_file = data.toxml(encoding="utf-8")
-            except Exception:
-                error = "Couldn't decode file"
-            if not error:
-                try:
-                    gpx = gpxpy.parse(gpx_file)
-                except Exception:
-                    error = "Couldn't parse file"
-            if not error:
-                device = Device.objects.create(
-                    aid=f"{short_random_key()}_GPX",
-                    user_agent=request.session.user_agent[:200],
-                    is_gpx=True,
-                )
-                start_time = None
-                end_time = None
-                points = []
-                missing_time_info = False
-                for track in gpx.tracks:
-                    for segment in track.segments:
-                        for point in segment.points:
-                            if point.time and point.latitude and point.longitude:
-                                points.append(
-                                    (
-                                        int(point.time.timestamp()),
-                                        round(point.latitude, 5),
-                                        round(point.longitude, 5),
-                                    )
-                                )
-                                if not start_time:
-                                    start_time = point.time
-                                end_time = point.time
-                            elif point.latitude and point.longitude:
-                                missing_time_info = True
-                if len(points) == 0:
-                    if missing_time_info:
-                        error = "File does not contain information about locations date/time"
-                    else:
-                        error = "File does not contain any points"
-                else:
-                    device.add_locations(points)
-                    competitor = form.cleaned_data["competitor"]
-                    competitor.device = device
-                    if start_time and event.start_date <= start_time <= event.end_date:
-                        competitor.start_time = start_time
-                    competitor.save()
-            if error:
-                messages.error(request, error)
-            else:
-                messages.success(request, "The upload of the GPX file was successful")
-                if start_time < event.start_date or end_time > event.end_date:
-                    messages.warning(
-                        request, "Some points were outside of the event schedule..."
-                    )
-                return redirect(
-                    "dashboard:club:event:edit_view",
-                    event_id=event.aid,
-                    club_slug=request.club.slug,
-                )
 
+        if form.is_valid():
+            competitor = form.cleaned_data["competitor"]
+            start_time = form.cleaned_data["start_time"]
+            end_time = form.cleaned_data["end_time"]
+            locations = form.cleaned_data["locations"]
+
+            device = Device.objects.create(
+                aid=f"{short_random_key()}_GPX",
+                user_agent=request.session.user_agent[:200],
+                is_gpx=True,
+            )
+            device.add_locations(locations)
+
+            competitor.device = device
+            if start_time and event.start_date <= start_time <= event.end_date:
+                competitor.start_time = start_time
+            competitor.save()
+
+            messages.success(request, "The upload of the GPX file was successful!")
+            if start_time < event.start_date or end_time > event.end_date:
+                messages.warning(
+                    request, "Some points were outside of the event schedule..."
+                )
+            return redirect(
+                "dashboard:club:event:edit_view",
+                event_id=event.aid,
+                club_slug=request.club.slug,
+            )
     else:
         form = UploadGPXForm()
         form.fields["competitor"].queryset = competitors

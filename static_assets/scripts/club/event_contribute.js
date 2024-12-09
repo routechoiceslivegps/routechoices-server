@@ -16,22 +16,33 @@ function onGPXLoaded(e) {
 		onRouteLoaded(newRoute);
 		return;
 	}
+	let missingTimeInfo = false;
 	for (let i = 0; i < parsedGpx.segments[0].length; i++) {
 		const pos = parsedGpx.segments[0][i];
 		if (pos.loc[0] && pos.time) {
 			newRoute.push({ time: pos.time, latLon: [pos.loc[0], pos.loc[1]] });
+		} else if (pos.loc[0] && !missingTimeInfo) {
+			missingTimeInfo = true;
 		}
 	}
-	onRouteLoaded(newRoute);
+	onRouteLoaded(newRoute, missingTimeInfo);
 }
 
-function onRouteLoaded(newRoute) {
+function onRouteLoaded(newRoute, missingTimeInfo) {
 	if (!newRoute?.length) {
-		swal({
-			text: "Error parsing your file! No GPS points detected!",
-			title: "error",
-			type: "error",
-		});
+		if (missingTimeInfo) {
+			swal({
+				text: "Missing locations date/time information!",
+				title: "error",
+				type: "error",
+			});
+		} else {
+			swal({
+				text: "No locations found in this file!",
+				title: "error",
+				type: "error",
+			});
+		}
 		return;
 	}
 	const ts = newRoute.map((pt) => Math.round(+pt.time / 1e3)).join(",");

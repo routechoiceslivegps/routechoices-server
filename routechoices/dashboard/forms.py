@@ -1,6 +1,8 @@
 from io import BytesIO
 
 import arrow
+import gpxpy
+from defusedxml import minidom
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -559,6 +561,48 @@ class UploadGPXForm(Form):
     gpx_file = FileField(
         max_length=255, validators=[FileExtensionValidator(allowed_extensions=["gpx"])]
     )
+
+    def clean_gpx_file(self):
+        gpx_file = self.cleaned_data["gpx_file"]
+        try:
+            data = minidom.parseString(gpx_file.read())
+            gpx_file = data.toxml(encoding="utf-8")
+        except Exception:
+            raise ValidationError("Couldn't read file")
+        try:
+            gpx = gpxpy.parse(gpx_file)
+        except Exception:
+            raise ValidationError("Couldn't parse GPX format")
+        start_time = None
+        end_time = None
+        points = []
+        missing_time_info = False
+        for track in gpx.tracks:
+            for segment in track.segments:
+                for point in segment.points:
+                    if point.time and point.latitude and point.longitude:
+                        points.append(
+                            (
+                                int(point.time.timestamp()),
+                                round(point.latitude, 5),
+                                round(point.longitude, 5),
+                            )
+                        )
+                        if not start_time:
+                            start_time = point.time
+                        end_time = point.time
+                    elif point.latitude and point.longitude:
+                        missing_time_info = True
+        if len(points) == 0:
+            if missing_time_info:
+                raise ValidationError(
+                    "File does not contain information about locations date/time"
+                )
+            raise ValidationError("File does not contain any points")
+        self.cleaned_data["start_time"] = start_time
+        self.cleaned_data["end_time"] = end_time
+        self.cleaned_data["locations"] = points
+        return gpx_file
 
 
 class UploadMapGPXForm(Form):
