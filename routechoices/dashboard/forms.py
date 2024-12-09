@@ -1,7 +1,13 @@
+import math
+import os.path
+import shutil
+import tempfile
+import zipfile
 from io import BytesIO
 
 import arrow
 import gpxpy
+from curl_cffi import requests
 from defusedxml import minidom
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -33,6 +39,7 @@ from routechoices.core.models import (
     Notice,
 )
 from routechoices.lib.helpers import check_cname_record, get_aware_datetime
+from routechoices.lib.kmz import extract_ground_overlay_info
 from routechoices.lib.validators import validate_domain_name, validate_nice_slug
 
 
@@ -610,6 +617,79 @@ class UploadMapGPXForm(Form):
         max_length=255, validators=[FileExtensionValidator(allowed_extensions=["gpx"])]
     )
 
+    def clean_gpx_file(self):
+        gpx_file = self.cleaned_data["gpx_file"]
+        try:
+            data = minidom.parseString(gpx_file.read())
+            gpx_xml = data.toxml(encoding="utf-8")
+        except Exception:
+            raise ValidationError("Couldn't read file")
+        try:
+            gpx = gpxpy.parse(gpx_xml)
+        except Exception:
+            raise ValidationError("Couldn't parse GPX format")
+        self.cleaned_data["gpx_data"] = gpx
+
+        has_points = False
+
+        segments = []
+        waypoints = []
+
+        prev_lon = None
+        offset_lon = 0
+        for point in gpx.waypoints:
+            lon = point.longitude + offset_lon
+            if prev_lon and abs(prev_lon - lon) > 180:
+                offset_lon += math.copysign(
+                    360, (prev_lon + 180) % 360 - (lon + 180) % 360
+                )
+                lon = point.longitude + offset_lon
+            prev_lon = lon
+            waypoints.append([round(point.latitude, 5), round(lon, 5)])
+            has_points = True
+
+        for route in gpx.routes:
+            points = []
+            prev_lon = None
+            offset_lon = 0
+            for point, _ in route.walk():
+                lon = point.longitude + offset_lon
+                if prev_lon and abs(prev_lon - lon) > 180:
+                    offset_lon += math.copysign(
+                        360, (prev_lon + 180) % 360 - (lon + 180) % 360
+                    )
+                    lon = point.longitude + offset_lon
+                prev_lon = lon
+                points.append([round(point.latitude, 5), round(lon, 5)])
+            if len(points) > 1:
+                has_points = True
+                segments.append(points)
+
+        for track in gpx.tracks:
+            for segment in track.segments:
+                points = []
+                prev_lon = None
+                offset_lon = 0
+                for point in segment.points:
+                    lon = point.longitude + offset_lon
+                    if prev_lon and abs(prev_lon - lon) > 180:
+                        offset_lon += math.copysign(
+                            360, (prev_lon + 180) % 360 - (lon + 180) % 360
+                        )
+                        lon = point.longitude + offset_lon
+                    prev_lon = lon
+                    points.append([round(point.latitude, 5), round(lon, 5)])
+                if len(points) > 1:
+                    has_points = True
+                    segments.append(points)
+
+        if not has_points:
+            raise ValidationError("Could not find enough points to draw a map")
+
+        self.cleaned_data["gpx_segments"] = segments
+        self.cleaned_data["gpx_waypoints"] = waypoints
+        return gpx_file
+
 
 class UploadKmzForm(Form):
     file = FileField(
@@ -617,6 +697,70 @@ class UploadKmzForm(Form):
         max_length=255,
         validators=[FileExtensionValidator(allowed_extensions=["kmz", "kml"])],
     )
+
+    def clean_file(self):
+        file = self.cleaned_data["file"]
+        tmp_extract_dir = None
+        is_compressed = False
+        if file.name.lower().endswith(".kmz"):
+            is_compressed = True
+            tmp_extract_dir = tempfile.mkdtemp("_kmz")
+            try:
+                zf = zipfile.ZipFile(file)
+                zf.extractall(tmp_extract_dir)
+                if os.path.exists(os.path.join(tmp_extract_dir, "Doc.kml")):
+                    doc_file = "Doc.kml"
+                elif os.path.exists(os.path.join(tmp_extract_dir, "doc.kml")):
+                    doc_file = "doc.kml"
+                else:
+                    raise Exception("No valid doc.kml file")
+                with open(
+                    os.path.join(tmp_extract_dir, doc_file), "r", encoding="utf-8"
+                ) as f:
+                    kml = f.read().encode("utf8")
+            except Exception:
+                raise ValidationError("Could not extract maps from this file.")
+        elif file.name.lower().endswith(".kml"):
+            kml = file.read()
+
+        new_maps = []
+        try:
+            overlays = extract_ground_overlay_info(kml)
+        except Exception as e:
+            raise ValidationError(f"Invalid File format ({e})")
+        if not overlays:
+            raise ValidationError("Could not find any Ground Overlays in that file!")
+
+        for data in overlays:
+            name, image_path, corners_coords = data
+            file_data = None
+            if not name:
+                name = "Untitled"
+            if image_path.startswith("http://") or image_path.startswith("https://"):
+                try:
+                    r = requests.get(image_path, timeout=10)
+                    r.raise_for_status()
+                except Exception:
+                    raise ValidationError("File contains an unreachable image URL")
+                file_data = BytesIO(r.content)
+            elif is_compressed:
+                image_path = os.path.abspath(os.path.join(tmp_extract_dir, image_path))
+                if not image_path.startswith(tmp_extract_dir):
+                    raise ValidationError("File contains an illegal image path")
+                file_data = open(image_path, "rb")
+            else:
+                raise ValidationError("File contains an illegal image path")
+            image_file = File(file_data)
+            new_map = Map(
+                name=name,
+                corners_coordinates=corners_coords,
+            )
+            new_map.image.save("file", image_file, save=False)
+            new_maps.append(new_map)
+        if tmp_extract_dir:
+            shutil.rmtree(tmp_extract_dir, ignore_errors=True)
+        self.cleaned_data["extracted_maps"] = new_maps
+        return file
 
 
 CompetitorFormSet = inlineformset_factory(

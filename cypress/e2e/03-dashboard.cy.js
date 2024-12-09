@@ -99,7 +99,7 @@ context("Dashboard actions", () => {
 			);
 			cy.get("button:not([type]),button[type=submit]").click();
 			cy.get("#django-messages").contains(
-				"The import of the map was successful",
+				"The import of the map was successful!",
 			);
 		}
 
@@ -107,21 +107,21 @@ context("Dashboard actions", () => {
 		cy.get("#id_file").selectFile("cypress/fixtures/Jukola2019/1/map.kmz");
 		cy.get("button:not([type]),button[type=submit]").click();
 		cy.get("#django-messages", { timeout: 10000 }).contains(
-			"The import of the map was successful",
+			"The import of the map was successful!",
 		);
 
 		cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
 		cy.get("#id_file").selectFile("cypress/fixtures/maps/multiground.kml");
 		cy.get("button:not([type]),button[type=submit]").click();
 		cy.get("#django-messages", { timeout: 10000 }).contains(
-			"The import of the map was successful",
+			"The import of the map was successful!",
 		);
 
 		cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
 		cy.get("#id_file").selectFile("cypress/fixtures/maps/tiled.kmz");
 		cy.get("button:not([type]),button[type=submit]").click();
 		cy.get("#django-messages", { timeout: 10000 }).contains(
-			"The import of the map was successful",
+			"The import of the map was successful!",
 		);
 	});
 

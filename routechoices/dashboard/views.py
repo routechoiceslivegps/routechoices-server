@@ -1,12 +1,6 @@
-import math
-import os
-import shutil
-import tempfile
-import zipfile
 from copy import deepcopy
-from io import BytesIO, StringIO
+from io import StringIO
 
-import gpxpy
 from allauth.account import app_settings as allauth_settings
 from allauth.account.adapter import get_adapter
 from allauth.account.forms import default_token_generator
@@ -16,13 +10,10 @@ from allauth.account.utils import user_username
 from allauth.account.views import EmailView
 from allauth.decorators import rate_limit
 from allauth.utils import build_absolute_uri
-from curl_cffi import requests
-from defusedxml import minidom
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.files import File
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.db.models import Case, Q, Value, When
@@ -71,7 +62,6 @@ from routechoices.lib.helpers import (
     set_content_disposition,
     short_random_key,
 )
-from routechoices.lib.kmz import extract_ground_overlay_info
 from routechoices.lib.s3 import serve_from_s3
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
 
@@ -593,90 +583,23 @@ def map_gpx_upload_view(request):
     club = request.club
 
     if request.method == "POST":
-        # create a form instance and populate it with data from the request:
         form = UploadMapGPXForm(request.POST, request.FILES)
-        # check whether it's valid:
         if form.is_valid():
-            error = None
+            segments = form.cleaned_data["gpx_segments"]
+            waypoints = form.cleaned_data["gpx_waypoints"]
             try:
-                gpx_file = form.cleaned_data["gpx_file"].read()
-                data = minidom.parseString(gpx_file)
-                gpx_file = data.toxml(encoding="utf-8")
+                new_map = Map.from_points(segments, waypoints)
             except Exception:
-                error = "Couldn't decode file"
-            if not error:
-                try:
-                    gpx = gpxpy.parse(gpx_file)
-                except Exception:
-                    error = "Couldn't parse file"
-            if not error:
-                has_points = False
-                segments = []
-                waypoints = []
+                messages.error(request, "Failed to generate a map from this file")
+            else:
+                new_map.name = form.cleaned_data["gpx_file"].name[:-4]
+                new_map.club = club
+                new_map.save()
 
-                prev_lon = None
-                offset_lon = 0
-                for point in gpx.waypoints:
-                    lon = point.longitude + offset_lon
-                    if prev_lon and abs(prev_lon - lon) > 180:
-                        offset_lon += math.copysign(
-                            360, (prev_lon + 180) % 360 - (lon + 180) % 360
-                        )
-                        lon = point.longitude + offset_lon
-                    prev_lon = lon
-                    waypoints.append([round(point.latitude, 5), round(lon, 5)])
-                    has_points = True
-
-                for route in gpx.routes:
-                    points = []
-                    prev_lon = None
-                    offset_lon = 0
-                    for point, _ in route.walk():
-                        lon = point.longitude + offset_lon
-                        if prev_lon and abs(prev_lon - lon) > 180:
-                            offset_lon += math.copysign(
-                                360, (prev_lon + 180) % 360 - (lon + 180) % 360
-                            )
-                            lon = point.longitude + offset_lon
-                        prev_lon = lon
-                        points.append([round(point.latitude, 5), round(lon, 5)])
-                    if len(points) > 1:
-                        has_points = True
-                        segments.append(points)
-                for track in gpx.tracks:
-                    for segment in track.segments:
-                        points = []
-                        prev_lon = None
-                        offset_lon = 0
-                        for point in segment.points:
-                            lon = point.longitude + offset_lon
-                            if prev_lon and abs(prev_lon - lon) > 180:
-                                offset_lon += math.copysign(
-                                    360, (prev_lon + 180) % 360 - (lon + 180) % 360
-                                )
-                                lon = point.longitude + offset_lon
-                            prev_lon = lon
-                            points.append([round(point.latitude, 5), round(lon, 5)])
-                        if len(points) > 1:
-                            has_points = True
-                            segments.append(points)
-                if not has_points:
-                    error = "Could not find points in this file"
-                else:
-                    try:
-                        new_map = Map.from_points(segments, waypoints)
-                    except Exception:
-                        error = "Could not generate a map from this file"
-                    else:
-                        new_map.name = form.cleaned_data["gpx_file"].name[:-4]
-                        new_map.club = club
-                        new_map.save()
-            if not error:
-                messages.success(request, "The import of the map was successful")
+                messages.success(request, "The import of the map was successful!")
                 return redirect(
                     "dashboard:club:map:list_view", club_slug=request.club.slug
                 )
-            messages.error(request, error)
     else:
         form = UploadMapGPXForm()
     return render(
@@ -708,88 +631,18 @@ def map_kmz_upload_view(request):
     club = request.club
 
     if request.method == "POST":
-        # create a form instance and populate it with data from the request:
         form = UploadKmzForm(request.POST, request.FILES)
-        # check whether it's valid:
         if form.is_valid():
-            new_maps = []
-            file = form.cleaned_data["file"]
-            error = None
-            kml = None
-            is_kml = False
-            dest = None
-            if file.name.lower().endswith(".kmz"):
-                try:
-                    dest = tempfile.mkdtemp("_kmz")
-                    zf = zipfile.ZipFile(file)
-                    zf.extractall(dest)
-                    if os.path.exists(os.path.join(dest, "Doc.kml")):
-                        doc_file = "Doc.kml"
-                    elif os.path.exists(os.path.join(dest, "doc.kml")):
-                        doc_file = "doc.kml"
-                    else:
-                        raise Exception("No valid doc.kml file")
-                    with open(os.path.join(dest, doc_file), "r", encoding="utf-8") as f:
-                        kml = f.read().encode("utf8")
-                except Exception:
-                    error = "An error occured while extracting the map from this file."
-            elif file.name.lower().endswith(".kml"):
-                kml = file.read()
-                is_kml = True
-            if kml:
-                try:
-                    overlays = extract_ground_overlay_info(kml)
-                    for data in overlays:
-                        name, image_path, corners_coords = data
-                        file_data = None
-                        if not name:
-                            name = "Untitled"
-                        if image_path.startswith("http://") or image_path.startswith(
-                            "https://"
-                        ):
-                            r = requests.get(image_path, timeout=10)
-                            if r.status_code != 200:
-                                raise Exception("Could not reach image source")
-                            file_data = BytesIO(r.content)
-                        elif not is_kml:
-                            image_path = os.path.abspath(os.path.join(dest, image_path))
-                            if not image_path.startswith(dest):
-                                raise Exception("Fishy KMZ")
-                            file_data = open(image_path, "rb")
-                        else:
-                            raise Exception("Fishy KMZ")
-                        if file_data:
-                            image_file = File(file_data)
-                            new_map = Map(
-                                name=name,
-                                club=club,
-                                corners_coordinates=corners_coords,
-                            )
-                            new_map.image.save("file", image_file, save=False)
-                            new_maps.append(new_map)
-                except Exception:
-                    error = (
-                        "An error occured while extracting the map(s) from this file."
-                    )
-            if dest:
-                shutil.rmtree(dest, ignore_errors=True)
+            maps = form.cleaned_data["extracted_maps"]
 
-            if not error and not new_map:
-                error = "Could not find maps in this file"
+            new_map = maps[0]
+            if len(maps) > 1:
+                new_map = new_map.merge(*maps[1:])
+            new_map.club = club
+            new_map.save()
 
-            if not error:
-                out_map = new_maps[0]
-                if len(new_maps) > 1:
-                    out_map = out_map.merge(*new_maps[1:])
-                out_map.save()
-                messages.success(
-                    request,
-                    ("The import of the map was successful"),
-                )
-                return redirect(
-                    "dashboard:club:map:list_view", club_slug=request.club.slug
-                )
-            messages.error(request, error)
+            messages.success(request, "The import of the map was successful!")
+            return redirect("dashboard:club:map:list_view", club_slug=request.club.slug)
     else:
         form = UploadKmzForm()
     return render(

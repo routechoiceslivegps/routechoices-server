@@ -17,10 +17,10 @@ def extract_ground_overlay_info(kml):
         pass
     for go in doc.getElementsByTagName("GroundOverlay"):
         try:
-            try:
-                name = go.getElementsByTagName("name")[0].firstChild.nodeValue
-            except Exception:
-                pass
+            name = go.getElementsByTagName("name")[0].firstChild.nodeValue
+        except Exception:
+            name = "Untitled"
+        try:
             icon = go.getElementsByTagName("Icon")[0]
             href = icon.getElementsByTagName("href")[0].firstChild.nodeValue
             latlon_box_nodes = go.getElementsByTagName("LatLonBox")
@@ -62,6 +62,6 @@ def extract_ground_overlay_info(kml):
                 [f"{c[0]:.5f},{c[1]:.5f}" for c in (nw, ne, se, sw)]
             )
         except Exception:
-            raise BadKMLException("Could not find proper GroundOverlay.")
+            raise BadKMLException("Invalid GroundOverlay.")
         out.append((f"{main_name} - {name}", href, corners_coords))
     return out

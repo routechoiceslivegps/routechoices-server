@@ -1102,9 +1102,9 @@ class Map(models.Model):
         img = Image.open(BytesIO(self.data)).convert("RGBA")
         points = [
             self.wsg84_to_map_xy(
-                coord[LOCATION_LATITUDE_INDEX],
-                coord[LOCATION_LONGITUDE_INDEX]
-            ) for coord in gps_data
+                coord[LOCATION_LATITUDE_INDEX], coord[LOCATION_LONGITUDE_INDEX]
+            )
+            for coord in gps_data
         ]
         points = simplify_line(points)
         draw = ImageDraw.Draw(img)
@@ -1185,7 +1185,7 @@ class Map(models.Model):
         new_image.save(out_buffer, "WEBP", **params)
         out_file = ContentFile(out_buffer.getvalue())
 
-        map_obj = Map(name=self.name, club=self.club)
+        map_obj = Map(name=self.name)
         map_obj.image.save("imported_image", out_file, save=False)
         map_obj.width = new_image.width
         map_obj.height = new_image.height
