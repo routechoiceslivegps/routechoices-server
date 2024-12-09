@@ -1625,8 +1625,7 @@ def event_map_download(request, event_id, index="1", **kwargs):
         raster_map.image,
         (
             f"{event.name} - {title}_"
-            f"{raster_map.corners_coordinates_short.replace(',', '_')}_."
-            f"{mime[6:]}"
+            f"{raster_map.corners_coordinates_short.replace(',', '_')}_"
         ),
         mime=mime,
     )
