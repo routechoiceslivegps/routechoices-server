@@ -1322,11 +1322,11 @@ def dashboard_map_download(request, map_id, *args, **kwargs):
     if request.user.is_superuser:
         raster_map = get_object_or_404(
             Map,
-            aid=map_id,
+            image__contains=map_id,
         )
     else:
         club_list = Club.objects.filter(admins=request.user)
-        raster_map = get_object_or_404(Map, aid=map_id, club__in=club_list)
+        raster_map = get_object_or_404(Map, image__contains=map_id, club__in=club_list)
     file_path = raster_map.path
     mime_type = raster_map.mime_type
     return serve_from_s3(
