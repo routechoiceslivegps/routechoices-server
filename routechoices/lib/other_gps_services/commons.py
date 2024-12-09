@@ -100,7 +100,10 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
     def get_event(self):
         raise NotImplementedError()
 
-    def get_map(self, download_map=False):
+    def get_map(self):
+        raise NotImplementedError()
+    
+    def get_map_file(self):
         raise NotImplementedError()
 
     def get_competitor_devices_data(self, event):
@@ -124,19 +127,20 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
         return event
 
     def get_or_create_event_maps(self, event):
-        tmp_map = self.get_map(download_map=True)
+        tmp_map = self.get_map()
         if not tmp_map:
             raise MapsImportError("Error importing map")
         map_obj, _ = Map.objects.get_or_create(
             name=f"{event.name} ({self.uid})",
             club=self.club,
             defaults={
-                "image": tmp_map.image,
                 "width": tmp_map.width,
                 "height": tmp_map.height,
                 "corners_coordinates": tmp_map.corners_coordinates,
             },
         )
+        if map_file := self.get_map_file():
+            map_obj.image.save("map", map_file)
         return [map_obj]
 
     def get_or_create_event_competitors(self, event):

@@ -63,13 +63,13 @@ class Loggator(ThirdPartyTrackingSolutionWithProxy):
                 str(map_data["coordinates"]["bottomLeft"]["lng"]),
             ]
         )
-
-        if download_map:
-            r = requests.get(map_data["url"])
-            if r.status_code == 200:
-                map_file = ContentFile(r.content)
-                map_obj.image.save("map", map_file, save=False)
         return map_obj
+    
+    def get_map_file(self):
+        r = requests.get(map_data["url"])
+        if r.status_code == 200:
+            return ContentFile(r.content)
+        return None
 
     def get_competitor_devices_data(self, event):
         devices_data = {}

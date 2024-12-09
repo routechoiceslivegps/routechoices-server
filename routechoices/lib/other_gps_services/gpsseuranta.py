@@ -70,7 +70,7 @@ class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
     def get_map_url(self):
         return f"{self.GPSSEURANTA_EVENT_URL}{self.uid}/map"
 
-    def get_map(self, download_map=False):
+    def get_map(self):
         map_url = self.get_map_url()
         try:
             length, size = get_remote_image_sizes(map_url)
@@ -89,13 +89,13 @@ class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
         )
         coordinates = ",".join([str(round(x, 5)) for x in corners])
         map_obj.corners_coordinates = coordinates
-
-        if download_map:
-            r = requests.get(map_url)
-            if r.status_code == 200:
-                map_file = ContentFile(r.content)
-                map_obj.image.save("map", map_file, save=False)
         return map_obj
+    
+    def get_map_file(self):
+        r = requests.get(self.get_map_url())
+        if r.status_code == 200:
+            return ContentFile(r.content)
+        return None
 
     def get_competitor_devices_data(self, event):
         devices_data = {}
