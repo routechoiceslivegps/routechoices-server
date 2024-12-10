@@ -301,19 +301,17 @@ Follow our events live or replay them later.
             path = reverse(
                 "site:club:club_view", kwargs={"club_slug": self.slug.lower()}
             )
-            path = f"{path}"
         return f"{self.url_protocol}:{path}"
 
     def logo_scaled(self, width, ext="PNG"):
-        logo = None
         if not self.logo:
             return None
         with self.logo.open("rb") as fp:
             logo_b = fp.read()
         logo = Image.open(BytesIO(logo_b))
-        logo_s = logo.resize((width, width), Image.BILINEAR)
+        logo_squared = logo.resize((width, width), Image.BILINEAR)
         buffer = BytesIO()
-        logo_s.save(
+        logo_squared.save(
             buffer,
             ext,
             optimize=True,
@@ -335,18 +333,12 @@ Follow our events live or replay them later.
 
     def thumbnail(self, mime="image/jpeg"):
         cache_key = f"club:{self.aid}:thumbnail:{self.modification_date}:{mime}"
+        if cached := cache.get(cache_key):
+            return cached
         if not self.banner:
-            cache_key = f"{cache_key}:blank"
-            cached = cache.get(cache_key)
-            if cached:
-                return cached
             img = Image.new("RGB", (1200, 630), "WHITE")
         else:
             banner = self.banner
-
-            cached = cache.get(cache_key)
-            if cached:
-                return cached
             orig = banner.open("rb").read()
             img = Image.open(BytesIO(orig)).convert("RGBA")
             white_bg_img = Image.new("RGBA", img.size, "WHITE")
@@ -367,7 +359,7 @@ Follow our events live or replay them later.
             buffer,
             mime[6:].upper(),
             optimize=True,
-            quality=(40 if mime in ("image/webp", "image/avif", "image/jxl") else 80),
+            quality=(80 if mime == "image/jpeg" else 40),
         )
         data_out = buffer.getvalue()
         cache.set(cache_key, data_out, 31 * 24 * 3600)
@@ -462,15 +454,13 @@ class Map(models.Model):
     @property
     def data(self):
         cache_key = f"map:{self.image.name}:data"
-        cached = cache.get(cache_key)
-        if cached:
+        if cached := cache.get(cache_key):
             return cached
         with self.image.open("rb") as fp:
             data = fp.read()
-        try:
-            cache.set(cache_key, data, 3600)
-        except Exception:
-            pass
+
+        cache.set(cache_key, data, 3600)
+
         return data
 
     @property
@@ -508,16 +498,12 @@ class Map(models.Model):
     @property
     def mime_type(self):
         cache_key = f"map:{self.image.name}:mime"
-        cached = cache.get(cache_key)
-        if cached:
+        if cached := cache.get(cache_key):
             return cached
         with self.image.storage.open(self.image.name, mode="rb", nbytes=2048) as fp:
             data = fp.read()
         mime = magic.from_buffer(data, mime=True)
-        try:
-            cache.set(cache_key, mime, 3600)
-        except Exception:
-            pass
+        cache.set(cache_key, mime, 3600)
         return mime
 
     @property
@@ -528,23 +514,20 @@ class Map(models.Model):
 
     @data_uri.setter
     def data_uri(self, value):
-        if not value:
-            raise ValueError("Value can not be null")
         data_matched = re.match(
             r"^data:image/(?P<extension>jpeg|png|gif|webp);base64,"
             r"(?P<data_b64>(?:[A-Za-z0-9+/]{4})*"
             r"(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)$",
             value,
         )
-        if data_matched:
-            self.image.save(
-                "filename",
-                ContentFile(base64.b64decode(data_matched.group("data_b64"))),
-                save=False,
-            )
-            self.image.close()
-        else:
-            raise ValueError("Not a base 64 encoded data URI of an image")
+        if not data_matched:
+            raise ValueError("Not a base64 encoded image data URI")
+        self.image.save(
+            "filename",
+            ContentFile(base64.b64decode(data_matched.group("data_b64"))),
+            save=False,
+        )
+        self.image.close()
 
     @property
     def size(self):
@@ -615,8 +598,6 @@ class Map(models.Model):
     @property
     def matrix_3d(self):
         m = general_2d_projection(*self.alignment_points)
-        if not m[8]:
-            return
         for i in range(9):
             m[i] = m[i] / m[8]
         return m
@@ -627,8 +608,6 @@ class Map(models.Model):
 
     @property
     def map_xy_to_spherical_mercator(self):
-        if not self.matrix_3d:
-            return lambda x, y: (0, 0)
         return lambda x, y: project(self.matrix_3d, x, y)
 
     @property
@@ -738,30 +717,16 @@ class Map(models.Model):
         )
         use_cache = getattr(settings, "CACHE_TILES", False)
         cached = None
-        if use_cache:
-            try:
-                cached = cache.get(cache_key)
-            except Exception:
-                pass
-            else:
-                if cached:
-                    return cached, CACHED_TILE
+        if use_cache and (cached := cache.get(cache_key)):
+            return cached, CACHED_TILE
 
         if not self.intersects_with_tile(min_x, max_x, min_y, max_y):
             blank_cache_key = f"tile:blank:{output_width}x{output_height}:{img_mime}"
-            if use_cache:
-                try:
-                    cached = cache.get(blank_cache_key)
-                except Exception:
-                    pass
-                else:
-                    if cached:
-                        try:
-                            cache.set(cache_key, cached, 3600 * 24 * 30)
-                        except Exception:
-                            pass
-                        return cached, CACHED_BLANK_TILE
+            if use_cache and (cached := cache.get(blank_cache_key)):
+                cache.set(cache_key, cached, 3600 * 24 * 30)
+                return cached, CACHED_BLANK_TILE
 
+            # TODO: single PIL branch for all mime
             if img_mime in ("image/avif", "image/jxl"):
                 buffer = BytesIO()
                 pil_image = Image.new(
@@ -794,20 +759,15 @@ class Map(models.Model):
                 )
                 data_out = BytesIO(buffer).getvalue()
             if use_cache:
-                try:
-                    cache.set(cache_key, data_out, 3600 * 24 * 30)
-                    cache.set(blank_cache_key, data_out, 3600 * 24 * 30)
-                except Exception:
-                    pass
+                cache.set(cache_key, data_out, 3600 * 24 * 30)
+                cache.set(blank_cache_key, data_out, 3600 * 24 * 30)
             return data_out, NOT_CACHED_TILE
 
+        # TODO: create .cv2image property
         img_alpha = None
+        img_alpha_cache_key = f"img_data_{self.image.name}_raw"
         if use_cache:
-            try:
-                img_alpha = cache.get(f"img_data_{self.image.name}_raw")
-            except Exception:
-                pass
-
+            img_alpha = cache.get(img_alpha_cache_key)
         if img_alpha is None:
             orig = self.data
             orig_mime_type = magic.from_buffer(orig, mime=True)
@@ -818,9 +778,8 @@ class Map(models.Model):
                 img_nparr = np.fromstring(orig, np.uint8)
                 img = cv2.imdecode(img_nparr, cv2.IMREAD_UNCHANGED)
                 img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2BGRA)
-
-            if use_cache and not cache.has_key(f"img_data_{self.image.name}_raw"):
-                cache.set(f"img_data_{self.image.name}_raw", img_alpha, 3600 * 24 * 30)
+            if use_cache and not cache.has_key(img_alpha_cache_key):
+                cache.set(img_alpha_cache_key, img_alpha, 3600 * 24 * 30)
 
         width, height = self.quick_size
         tl = self.map_xy_to_spherical_mercator(0, 0)
@@ -893,10 +852,8 @@ class Map(models.Model):
             data_out = BytesIO(buffer).getvalue()
 
         if use_cache:
-            try:
-                cache.set(cache_key, data_out, 3600 * 24 * 30)
-            except Exception:
-                pass
+            cache.set(cache_key, data_out, 3600 * 24 * 30)
+
         return data_out, NOT_CACHED_TILE
 
     def intersects_with_tile(self, min_x, max_x, min_y, max_y):
@@ -1635,7 +1592,7 @@ class Event(models.Model):
             if map_index <= 0:
                 raise ValueError()
         except Exception:
-            raise Http404
+            raise Http404()
 
         map_index -= 1
         if map_index == 0:
@@ -1936,8 +1893,7 @@ class Event(models.Model):
                 f"map:{self.aid}:blank:thumbnail:{display_logo}"
                 f":{self.club.modification_date}:{mime}"
             )
-            cached = cache.get(cache_key)
-            if cached:
+            if cached := cache.get(cache_key):
                 return cached
             img = Image.new("RGB", (1200, 630), "WHITE")
         else:
@@ -1946,8 +1902,7 @@ class Event(models.Model):
                 f"map:{self.aid}:{raster_map.hash}:thumbnail:{display_logo}"
                 f":{self.club.modification_date}:{mime}"
             )
-            cached = cache.get(cache_key)
-            if cached:
+            if cached := cache.get(cache_key):
                 return cached
             orig = raster_map.data
             img = Image.open(BytesIO(orig)).convert("RGBA")
