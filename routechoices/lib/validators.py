@@ -98,12 +98,12 @@ def validate_corners_coordinates(val):
     cal_values = val.split(",")
     if len(cal_values) != 8:
         raise ValidationError(
-            _("Corners coordinates must have 8 float values " "separated by commas.")
+            _("Corners coordinates must be 8 float values separated by commas.")
         )
     for i, val in enumerate(cal_values):
         if not FLOAT_RE.match(val):
             raise ValidationError(
-                _("Corners coordinates must only contain float values.")
+                _("Corners coordinates must contain only float values.")
             )
         if i % 2 == 0:
             validate_latitude(val)
