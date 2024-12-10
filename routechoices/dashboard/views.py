@@ -1074,34 +1074,24 @@ def event_competitors_view(request, event_id):
         for cform in formset.forms:
             if cform.cleaned_data.get("device"):
                 all_devices_id.add(cform.cleaned_data.get("device").id)
-        dev_qs = (
-            Device.objects.filter(id__in=all_devices_id)
-            .defer("locations_encoded")
-            .prefetch_related("club_ownerships")
-        )
-        c = [
-            ["", "---------"],
-        ] + [[d.id, d.get_display_str(club)] for d in dev_qs]
-        for cform in formset.forms:
-            cform.fields["device"].queryset = dev_qs
-            cform.fields["device"].choices = c
     else:
         formset = CompetitorFormSet(
             instance=event,
             queryset=comps,
         )
         formset.extra = 0
-        dev_qs = (
-            Device.objects.filter(id__in=all_devices_id)
-            .defer("locations_encoded")
-            .prefetch_related("club_ownerships")
-        )
-        c = [
-            ["", "---------"],
-        ] + [[d.id, d.get_display_str(club)] for d in dev_qs]
-        for cform in formset.forms:
-            cform.fields["device"].queryset = dev_qs
-            cform.fields["device"].choices = c
+
+    dev_qs = (
+        Device.objects.filter(id__in=all_devices_id)
+        .defer("locations_encoded")
+        .prefetch_related("club_ownerships")
+    )
+    c = [
+        ["", "---------"],
+    ] + [[d.id, d.get_display_str(club)] for d in dev_qs]
+    for cform in formset.forms:
+        cform.fields["device"].queryset = dev_qs
+        cform.fields["device"].choices = c
 
     return render(
         request,
