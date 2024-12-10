@@ -1,12 +1,3 @@
-import functools
-import itertools
-import sys
-
-if sys.version_info[0] == 3:
-    iterbytes = iter
-else:
-    iterbytes = functools.partial(itertools.imap, ord)
-
 CRC_TAB = (
     0x0000,
     0x1189,
@@ -268,9 +259,9 @@ CRC_TAB = (
 
 
 def crc16(data):
-    crc_tab = CRC_TAB  # minor optimization: put CRC_TAB to locals()
+    crc_tab = CRC_TAB
     fcs = 0xFFFF
-    for b in iterbytes(data):
+    for b in iter(data):
         index = (fcs ^ b) & 0xFF
         fcs = (fcs >> 8) ^ crc_tab[index]
     return fcs ^ 0xFFFF
