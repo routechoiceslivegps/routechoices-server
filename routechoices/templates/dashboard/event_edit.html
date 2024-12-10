@@ -81,10 +81,10 @@
                 {% bootstrap_form form %}
                 <h4>Extra Maps</h4>
                 <div class="form-text">Extra maps can be used for example if the route is split in multiple parts</div>
-                {% bootstrap_formset_errors extra_map_formset %}
+                {% bootstrap_formset_errors extra_maps_formset %}
                 <table class="table map_table">
-                    {{ extra_map_formset.management_form }}
-                    {% for form in extra_map_formset %}
+                    {{ extra_maps_formset.management_form }}
+                    {% for form in extra_maps_formset %}
                         {% if forloop.first %}
                             <thead>
                                 <tr>
@@ -113,16 +113,17 @@
                 <h3>Competitors</h3>
                 {% if not use_competitor_formset and context == 'edit' %}
                     <p>
-                        You have more than 100 competitors <a class="btn btn-primary"
-    href="{% url 'dashboard:club:event:competitors_view' event_id=event.aid club_slug=request.club.slug %}"
-    target="_blank">Manage existing competitors</a>
+                        You have more than 100 competitors
+                        <a class="btn btn-primary" href="{% url 'dashboard:club:event:competitors_view' event_id=event.aid club_slug=request.club.slug %}" target="_blank">
+                            Manage existing competitors
+                        </a>
                     </p>
                     <h4>Add more competitors</h4>
                 {% endif %}
-                {% bootstrap_formset_errors formset %}
+                {% bootstrap_formset_errors competitors_formset %}
                 <table class="table competitor-table">
-                    {{ formset.management_form }}
-                    {% for form in formset %}
+                    {{ competitors_formset.management_form }}
+                    {% for form in competitors_formset %}
                         {% bootstrap_form_errors form type='non_fields' %}
                         {% if forloop.first %}
                             <thead>

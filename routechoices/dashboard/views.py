@@ -352,7 +352,6 @@ def device_list_view(request):
 @requires_club_in_session
 def device_add_view(request):
     club = request.club
-
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
         form = DeviceForm(request.POST)
@@ -369,10 +368,9 @@ def device_add_view(request):
             return redirect(
                 "dashboard:club:device:list_view", club_slug=request.club.slug
             )
-        form.fields["device"].queryset = Device.objects.none()
     else:
         form = DeviceForm()
-        form.fields["device"].queryset = Device.objects.none()
+    form.fields["device"].queryset = Device.objects.none()
     return render(
         request,
         "dashboard/device_add.html",
@@ -907,44 +905,50 @@ def event_edit_view(request, event_id):
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
         event_copy = deepcopy(event)
+
         form = EventForm(request.POST, request.FILES, instance=event_copy, club=club)
         form.fields["map"].queryset = map_list
         form.fields["event_set"].queryset = event_set_list
-        extra_map_formset = ExtraMapFormSet(request.POST, instance=event_copy)
-        for mform in extra_map_formset.forms:
+
+        extra_maps_formset = ExtraMapFormSet(request.POST, instance=event_copy)
+        for mform in extra_maps_formset.forms:
             mform.fields["map"].queryset = map_list
-        formset = CompetitorFormSet(
+
+        competitors_formset = CompetitorFormSet(
             request.POST,
             instance=event_copy,
         )
-        args = {}
+
+        notice_form_args = {}
         if event.has_notice:
-            args = {"instance": event.notice}
-        notice_form = NoticeForm(request.POST, **args)
-        # check whether it's valid:
+            notice_form_args["instance"] = event.notice
+        notice_form = NoticeForm(request.POST, **notice_form_args)
+
         if all(
             [
                 form.is_valid(),
-                formset.is_valid(),
+                competitors_formset.is_valid(),
+                extra_maps_formset.is_valid(),
                 notice_form.is_valid(),
-                extra_map_formset.is_valid(),
             ]
         ):
             form.save()
-            formset.save()
-            extra_map_formset.save()
-            prev_text = ""
+            competitors_formset.save()
+            extra_maps_formset.save()
+
+            prev_notice = ""
             if event.has_notice:
                 notice_form.instance = event.notice
                 event.notice.refresh_from_db()
-                prev_text = event.notice.text
-            if prev_text != notice_form.cleaned_data["text"]:
+                prev_notice = event.notice.text
+            if prev_notice != notice_form.cleaned_data["text"]:
                 if not event.has_notice:
                     notice = Notice(event=event)
                 else:
                     notice = event.notice
                 notice.text = notice_form.cleaned_data["text"]
                 notice.save()
+
             messages.success(request, "Changes saved successfully")
             if request.POST.get("save_continue"):
                 return redirect(
@@ -956,63 +960,49 @@ def event_edit_view(request, event_id):
                 "dashboard:club:event:list_view", club_slug=request.club.slug
             )
 
-        for cform in formset.forms:
+        for cform in competitors_formset.forms:
             if cform.cleaned_data.get("device"):
                 all_devices_id.add(cform.cleaned_data.get("device").id)
-        dev_qs = (
-            Device.objects.filter(id__in=all_devices_id)
-            .defer("locations_encoded")
-            .prefetch_related("club_ownerships")
-        )
-        cd = [
-            {
-                "full": (d.id, d.get_display_str(club)),
-                "key": (d.get_nickname(club), d.get_display_str(club)),
-            }
-            for d in dev_qs
-        ]
-        cd.sort(key=lambda x: (x["key"][0] == "", x["key"]))
-        c = [
-            ["", "---------"],
-        ] + [d["full"] for d in cd]
-        for cform in formset.forms:
-            cform.fields["device"].queryset = dev_qs
-            cform.fields["device"].choices = c
     else:
         form = EventForm(instance=event, club=club)
         form.fields["map"].queryset = map_list
         form.fields["event_set"].queryset = event_set_list
-        formset_qs = Competitor.objects.none() if not use_competitor_formset else None
-        formset_args = {}
+
+        competitors_formset_args = {}
         if not use_competitor_formset:
-            formset_args = {"queryset": formset_qs}
-        formset = CompetitorFormSet(instance=event, **formset_args)
-        extra_map_formset = ExtraMapFormSet(instance=event)
-        for mform in extra_map_formset.forms:
-            mform.fields["map"].queryset = map_list
-        args = {}
-        if event.has_notice:
-            args = {"instance": event.notice}
-        notice_form = NoticeForm(**args)
-        dev_qs = (
-            Device.objects.filter(id__in=all_devices_id)
-            .defer("locations_encoded")
-            .prefetch_related("club_ownerships")
+            competitors_formset_args["queryset"] = Competitor.objects.none()
+        competitors_formset = CompetitorFormSet(
+            instance=event, **competitors_formset_args
         )
-        cd = [
-            {
-                "full": (d.id, d.get_display_str(club)),
-                "key": (d.get_nickname(club), d.get_display_str(club)),
-            }
-            for d in dev_qs
-        ]
-        cd.sort(key=lambda x: (x["key"][0] == "", x["key"]))
-        c = [
-            ["", "---------"],
-        ] + [d["full"] for d in cd]
-        for cform in formset.forms:
-            cform.fields["device"].queryset = dev_qs
-            cform.fields["device"].choices = c
+
+        extra_maps_formset = ExtraMapFormSet(instance=event)
+        for mform in extra_maps_formset.forms:
+            mform.fields["map"].queryset = map_list
+
+        notice_form_args = {}
+        if event.has_notice:
+            notice_form_args["instance"] = event.notice
+        notice_form = NoticeForm(**notice_form_args)
+
+    dev_qs = (
+        Device.objects.filter(id__in=all_devices_id)
+        .defer("locations_encoded")
+        .prefetch_related("club_ownerships")
+    )
+    cd = [
+        {
+            "full": (d.id, d.get_display_str(club)),
+            "key": (d.get_nickname(club), d.get_display_str(club)),
+        }
+        for d in dev_qs
+    ]
+    cd.sort(key=lambda x: (x["key"][0] == "", x["key"]))
+    c = [
+        ["", "---------"],
+    ] + [d["full"] for d in cd]
+    for cform in competitors_formset.forms:
+        cform.fields["device"].queryset = dev_qs
+        cform.fields["device"].choices = c
 
     return render(
         request,
@@ -1022,8 +1012,8 @@ def event_edit_view(request, event_id):
             "context": "edit",
             "event": event,
             "form": form,
-            "formset": formset,
-            "extra_map_formset": extra_map_formset,
+            "competitors_formset": competitors_formset,
+            "extra_maps_formset": extra_maps_formset,
             "notice_form": notice_form,
             "use_competitor_formset": use_competitor_formset,
         },
