@@ -6,16 +6,7 @@ from django.db import migrations, models
 
 
 def transfer_ownership(apps, schema_editor):
-    # get BankAccounts model
-    DeviceOwnership = apps.get_model("core", "DeviceOwnership")
-    DeviceClubOwnership = apps.get_model("core", "DeviceClubOwnership")
-
-    for do in DeviceOwnership.objects.all():
-        for club in do.user.club_set.all():
-            DeviceClubOwnership.objects.get_or_create(
-                device=do.device,
-                club=club,
-            )
+    pass
 
 
 class Migration(migrations.Migration):
