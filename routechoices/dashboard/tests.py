@@ -592,11 +592,55 @@ class TestInviteFlow(APITestCase):
         self.assertTrue(
             f"Invitation to manage club {self.club} on " in mail.outbox[0].subject
         )
+
         # Accept invite
-        link = re.findall(r"http\:\/\/[^ ]+", mail.outbox[0].body)[0]
-        self.client.force_login(self.user2)
-        res = self.client.get(link)
+        accept_link = re.findall(r"http\:\/\/[^ ]+", mail.outbox[0].body)[0]
+
+        # Logged out user tries to accept
+        self.client.logout()
+        res = self.client.get(accept_link)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        res = self.client.post(link)
+        self.assertTrue(
+            f"You have been invited to manage club {self.club}, please confirm to continue"
+            in res.content.decode("utf-8")
+        )
+        res = self.client.post(accept_link)
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(res, "https://www.routechoices.dev/login/")
+        self.assertFalse(self.club.admins.filter(id=self.user2.id).exists())
+
+        # Wrong user try to accept
+        self.client.force_login(self.user)
+        res = self.client.get(accept_link)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(
+            "Invite is targeted to a different email address than yours"
+            in res.content.decode("utf-8")
+        )
+        res = self.client.post(accept_link)
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(res, "/logout")
+
+        # Logged in target user tries to accept
+        self.client.force_login(self.user2)
+        res = self.client.get(accept_link)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        res = self.client.post(accept_link)
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(res, "/dashboard/clubs/")
         self.assertTrue(self.club.admins.filter(id=self.user2.id).exists())
+
+        # Logged in target user retries to accept later
+        res = self.client.get(accept_link)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(
+            f"You were invited to manage club {self.club}, however you already accepted the invitation."
+            in res.content.decode("utf-8")
+        )
+        res = self.client.post(accept_link)
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(
+            res,
+            "https://www.routechoices.dev/login/",
+            target_status_code=status.HTTP_302_FOUND,
+        )
