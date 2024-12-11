@@ -4,7 +4,7 @@ from django.contrib.sites.models import Site
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-from routechoices.core.models import Club, Device, Event
+from routechoices.core.models import Club, Device, Event, FrontPageFeedback
 
 
 class Command(BaseCommand):
@@ -66,4 +66,8 @@ class Command(BaseCommand):
             end_date=arrow.now().shift(days=3).datetime,
             open_registration=True,
             allow_route_upload=True,
+        )
+
+        FrontPageFeedback.objects.create(
+            name="Anonymous", club_name="AA", content="Great Software", stars=5
         )
