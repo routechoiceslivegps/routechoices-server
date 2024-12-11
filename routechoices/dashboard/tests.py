@@ -580,7 +580,8 @@ class TestInviteFlow(APITestCase):
             )
         )
 
-    def test_send_invite(self):
+    def test_send_invite_existing_user(self):
+        # Send invite
         self.client.force_login(self.user)
         self.client.get("/dashboard/clubs/myclub/send-invite")
         res = self.client.post(
@@ -591,3 +592,11 @@ class TestInviteFlow(APITestCase):
         self.assertTrue(
             f"Invitation to manage club {self.club} on " in mail.outbox[0].subject
         )
+        # Accept invite
+        link = re.findall(r"http\:\/\/[^ ]+", mail.outbox[0].body)[0]
+        self.client.force_login(self.user2)
+        res = self.client.get(link)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        res = self.client.post(link)
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        self.assertTrue(self.club.admins.filter(id=self.user2.id).exists())
