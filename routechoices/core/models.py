@@ -699,6 +699,53 @@ class Map(models.Model):
             f"{img_mime}"
         )
 
+    @classmethod
+    def blank_tile(cls, output_width, output_height, img_mime, use_cache, cache_key):
+        blank_cache_key = f"tile:blank:{output_width}x{output_height}:{img_mime}"
+        if use_cache and (cached := cache.get(blank_cache_key)):
+            cache.set(cache_key, cached, 3600 * 24 * 30)
+            return cached, CACHED_BLANK_TILE
+
+        blank_image = Image.new(
+            mode=("RGB" if img_mime == "image/jpeg" else "RGBA"),
+            size=(output_height, output_width),
+            color=((255, 255, 255) if img_mime == "image/jpeg" else (255, 255, 255, 0)),
+        )
+        buffer = BytesIO()
+        blank_image.save(
+            buffer,
+            img_mime[6:].upper(),
+            optimize=True,
+            quality=10,
+        )
+        data_out = buffer.getvalue()
+
+        if use_cache:
+            cache.set(cache_key, data_out, 3600 * 24 * 30)
+            cache.set(blank_cache_key, data_out, 3600 * 24 * 30)
+
+        return data_out, NOT_CACHED_TILE
+
+    @property
+    def cv2image(self):
+        cv2_img_cache_key = f"map:image:{self.image.name}:cv2"
+        if (cv2_img := cache.get(cv2_img_cache_key)) is not None:
+            return cv2_img
+        src_img = self.data
+        src_mime = magic.from_buffer(src_img, mime=True)
+        if src_mime == "image/gif":
+            pil_img = Image.open(BytesIO(src_img)).convert("RGBA")
+            cv2_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGRA)
+        else:
+            src_bytes = np.fromstring(src_img, np.uint8)
+            cv2_img_raw = cv2.imdecode(src_bytes, cv2.IMREAD_UNCHANGED)
+            cv2_img = cv2.cvtColor(np.array(cv2_img_raw), cv2.COLOR_BGR2BGRA)
+
+        if not cache.has_key(cv2_img_cache_key):
+            cache.set(cv2_img_cache_key, cv2_img, 3600 * 24 * 30)
+
+        return cv2_img
+
     def create_tile(
         self,
         output_width,
@@ -721,65 +768,11 @@ class Map(models.Model):
             return cached, CACHED_TILE
 
         if not self.intersects_with_tile(min_x, max_x, min_y, max_y):
-            blank_cache_key = f"tile:blank:{output_width}x{output_height}:{img_mime}"
-            if use_cache and (cached := cache.get(blank_cache_key)):
-                cache.set(cache_key, cached, 3600 * 24 * 30)
-                return cached, CACHED_BLANK_TILE
-
-            # TODO: single PIL branch for all mime
-            if img_mime in ("image/avif", "image/jxl"):
-                buffer = BytesIO()
-                pil_image = Image.new(
-                    mode="RGBA",
-                    size=(output_height, output_width),
-                    color=(255, 255, 255, 0),
-                )
-                pil_image.save(
-                    buffer,
-                    img_mime[6:].upper(),
-                    optimize=True,
-                    quality=10,
-                )
-                data_out = buffer.getvalue()
-            else:
-                n_channels = 3 if img_mime == "image/jpeg" else 4
-                transparent_img = np.zeros(
-                    (output_height, output_width, n_channels), dtype=np.uint8
-                )
-                extra_args = []
-                if img_mime == "image/webp":
-                    extra_args = [int(cv2.IMWRITE_WEBP_QUALITY), 10]
-                elif img_mime == "image/jpeg":
-                    transparent_img[:, :] = (255, 255, 255)
-                    extra_args = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
-                _, buffer = cv2.imencode(
-                    f".{img_mime[6:]}",
-                    transparent_img,
-                    extra_args,
-                )
-                data_out = BytesIO(buffer).getvalue()
-            if use_cache:
-                cache.set(cache_key, data_out, 3600 * 24 * 30)
-                cache.set(blank_cache_key, data_out, 3600 * 24 * 30)
-            return data_out, NOT_CACHED_TILE
-
-        # TODO: create .cv2image property
-        img_alpha = None
-        img_alpha_cache_key = f"img_data_{self.image.name}_raw"
-        if use_cache:
-            img_alpha = cache.get(img_alpha_cache_key)
-        if img_alpha is None:
-            orig = self.data
-            orig_mime_type = magic.from_buffer(orig, mime=True)
-            if orig_mime_type == "image/gif":
-                img = Image.open(BytesIO(orig)).convert("RGBA")
-                img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGRA)
-            else:
-                img_nparr = np.fromstring(orig, np.uint8)
-                img = cv2.imdecode(img_nparr, cv2.IMREAD_UNCHANGED)
-                img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2BGRA)
-            if use_cache and not cache.has_key(img_alpha_cache_key):
-                cache.set(img_alpha_cache_key, img_alpha, 3600 * 24 * 30)
+            # Out of map bounds, return blank tile
+            blank_tile, cache_status = self.blank_tile(
+                output_width, output_height, img_mime, use_cache, cache_key
+            )
+            return blank_tile, cache_status
 
         width, height = self.quick_size
         tl = self.map_xy_to_spherical_mercator(0, 0)
@@ -824,8 +817,9 @@ class Map(models.Model):
             else:
                 break
 
+        cv2_img = self.cv2image
         tile_img = cv2.warpPerspective(
-            img_alpha,
+            cv2_img,
             coeffs,
             (int(output_width * scale), int(output_height * scale)),
             flags=cv2.INTER_AREA,
@@ -1099,8 +1093,8 @@ class Map(models.Model):
         new_image = Image.new(
             mode="RGBA", size=(new_width, new_height), color=(0, 0, 0, 0)
         )
-        img = Image.open(BytesIO(self.data)).convert("RGBA")
-        new_image.alpha_composite(img, (int(-min_x), int(-min_y)))
+        cv2_img_raw = Image.open(BytesIO(self.data)).convert("RGBA")
+        new_image.alpha_composite(cv2_img_raw, (int(-min_x), int(-min_y)))
 
         for i, other_map in enumerate(other_maps):
             w, h = other_map.quick_size
@@ -1114,26 +1108,28 @@ class Map(models.Model):
                 ]
             )
             coeffs = cv2.getPerspectiveTransform(p1, p2)
-            img_data = other_map.data
-            img_mime_type = magic.from_buffer(img_data, mime=True)
-            if img_mime_type == "image/gif":
-                img = Image.open(BytesIO(img_data)).convert("RGBA")
-                img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGRA)
+
+            src_data = other_map.data
+            src_mime = magic.from_buffer(src_data, mime=True)
+            if src_mime == "image/gif":
+                pil_src_img = Image.open(BytesIO(src_data)).convert("RGBA")
+                cv2_img = cv2.cvtColor(np.array(pil_src_img), cv2.COLOR_RGB2BGRA)
             else:
-                img_nparr = np.fromstring(img_data, np.uint8)
-                img = cv2.imdecode(img_nparr, cv2.IMREAD_UNCHANGED)
-                img_alpha = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2BGRA)
-            img = cv2.warpPerspective(
-                img_alpha,
+                img_bytes = np.fromstring(src_data, np.uint8)
+                cv2_img_raw = cv2.imdecode(img_bytes, cv2.IMREAD_UNCHANGED)
+                cv2_img = cv2.cvtColor(np.array(cv2_img_raw), cv2.COLOR_BGR2BGRA)
+            img_warped = cv2.warpPerspective(
+                cv2_img,
                 coeffs,
                 (new_width, new_height),
                 flags=cv2.INTER_AREA,
                 borderMode=cv2.BORDER_CONSTANT,
                 borderValue=(255, 255, 255, 0),
             )
-            color_converted = cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
-            img_pil = Image.fromarray(color_converted)
-            new_image.alpha_composite(img_pil, (0, 0))
+            pil_img_warped = Image.fromarray(
+                cv2.cvtColor(img_warped, cv2.COLOR_BGRA2RGBA)
+            )
+            new_image.alpha_composite(pil_img_warped, (0, 0))
         params = {
             "dpi": (72, 72),
             "quality": 40,
