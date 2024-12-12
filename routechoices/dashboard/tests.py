@@ -581,11 +581,13 @@ class TestInviteFlow(APITestCase):
         )
 
     def test_send_invite_new_user(self):
+        new_user_email = "new@example.com"
+        new_user_password = "myPa$$word123"
         # Send invite
         self.client.force_login(self.user)
         self.client.get("/dashboard/clubs/myclub/send-invite")
         res = self.client.post(
-            "/dashboard/clubs/myclub/send-invite", {"email": "new@example.com"}
+            "/dashboard/clubs/myclub/send-invite", {"email": new_user_email}
         )
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
         self.assertEqual(len(mail.outbox), 1)
@@ -607,14 +609,15 @@ class TestInviteFlow(APITestCase):
         self.assertRedirects(
             res, "/account/signup/", target_status_code=status.HTTP_302_FOUND
         )
+        self.assertFalse(self.club.admins.filter(email=new_user_email).exists())
 
         res = self.client.post(
             "/signup",
             data={
                 "username": "newuser",
-                "email": "new@example.com",
-                "password1": "myPa$$word123",
-                "password2": "myPa$$word123",
+                "email": new_user_email,
+                "password1": new_user_password,
+                "password2": new_user_password,
             },
         )
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
@@ -624,7 +627,7 @@ class TestInviteFlow(APITestCase):
             target_status_code=status.HTTP_301_MOVED_PERMANENTLY,
         )
 
-        self.assertTrue(self.club.admins.filter(email="new@example.com").exists())
+        self.assertTrue(self.club.admins.filter(email=new_user_email).exists())
 
     def test_send_invite_existing_user(self):
         # Send invite
