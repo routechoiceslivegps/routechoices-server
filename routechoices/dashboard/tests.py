@@ -580,6 +580,52 @@ class TestInviteFlow(APITestCase):
             )
         )
 
+    def test_send_invite_new_user(self):
+        # Send invite
+        self.client.force_login(self.user)
+        self.client.get("/dashboard/clubs/myclub/send-invite")
+        res = self.client.post(
+            "/dashboard/clubs/myclub/send-invite", {"email": "new@example.com"}
+        )
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(
+            f"Invitation to manage club {self.club} on " in mail.outbox[0].subject
+        )
+        # Accept invite
+        accept_link = re.findall(r"http\:\/\/[^ ]+", mail.outbox[0].body)[0]
+
+        self.client.logout()
+        res = self.client.get(accept_link)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(
+            f"You have been invited to manage club {self.club}, please confirm to continue"
+            in res.content.decode("utf-8")
+        )
+        res = self.client.post(accept_link)
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(
+            res, "/account/signup/", target_status_code=status.HTTP_302_FOUND
+        )
+
+        res = self.client.post(
+            "/signup",
+            data={
+                "username": "newuser",
+                "email": "new@example.com",
+                "password1": "myPa$$word123",
+                "password2": "myPa$$word123",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(
+            res,
+            "//www.routechoices.dev/dashboard",
+            target_status_code=status.HTTP_301_MOVED_PERMANENTLY,
+        )
+
+        self.assertTrue(self.club.admins.filter(email="new@example.com").exists())
+
     def test_send_invite_existing_user(self):
         # Send invite
         self.client.force_login(self.user)
