@@ -424,3 +424,30 @@ body {
 .theme-selector:hover > svg {
 	color: var(--bs-navbar-hover-color);
 }
+
+#status-indicator {
+	border-radius: 99px;
+	display: inline-block;
+	height: 12px;
+	width: 12px;
+}
+
+.status-indicator-none {
+	background-color: #008000;
+}
+
+.status-indicator-minor {
+	background-color: #ffff00;
+}
+
+.status-indicator-major {
+	background-color: #ffa500;
+}
+
+.status-indicator-critical {
+	background-color: #ff0000;
+}
+
+.status-indicator-default {
+	background-color: #808080;
+}

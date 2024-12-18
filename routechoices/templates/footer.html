@@ -1,4 +1,4 @@
-{% load hosts static %}
+{% load compress hosts static %}
 <footer id="myFooter">
     <div class="container">
         <div class="row mb-0">
@@ -29,7 +29,7 @@
                         <a href="https://github.com/routechoices">Source Code</a>
                     </li>
                     <li>
-                        <a href="https://routechoices.statuspage.io">Services Status</a>
+                        <a href="https://routechoices.statuspage.io">Services Status <span id="status-indicator" class="status-indicator-default"></span></a>
                     </li>
                     <li>
                         <a href="https://routechoices.eo.page/newsletter">Newsletter</a>
@@ -76,4 +76,7 @@
     </div>
 </div>
 </footer>
+{% compress js %}
+    <script src="{% static '/scripts/site/footer.js' %}"></script>
+{% endcompress %}
 <!-- Footer -->
