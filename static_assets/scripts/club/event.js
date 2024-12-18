@@ -1993,7 +1993,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					color: competitor.color,
 					opacity: 0.75,
 					weight: 5 * runnerIconScale,
-					className: competitor.focused ? "icon-focused" : "",
+					className: competitor.highlighted ? "runner-focused" : "",
 				}).addTo(map);
 				competitor.tailScale = runnerIconScale;
 			} else {

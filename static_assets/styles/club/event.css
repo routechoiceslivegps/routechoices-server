@@ -192,7 +192,7 @@
 		#fff;
 }
 
-.runner-icon.icon-focused > span {
+.runner-icon.runner-focused > span {
 	padding: 0px 5px;
 	background: #fff;
 	outline: 2px solid #000;
@@ -233,8 +233,11 @@
 	border: 2px solid black;
 }
 
-.runner-dot.focused {
-	z-index: 10000000 !important;
+.runner-focused {
+	z-index: 100000 !important;
+}
+
+.runner-dot.runner-focused {
 	border: 3px solid black;
 }
 

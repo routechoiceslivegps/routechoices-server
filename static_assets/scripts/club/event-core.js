@@ -258,11 +258,11 @@ function getContrastYIQ(hexcolorRaw) {
 function getRunnerIcon(color, faded = false, focused = false, scale = 2) {
 	const iconSize = 15 * scale;
 	const liveColor = tinycolor(color).setAlpha(faded ? 0.4 : 0.75);
-	const htmlRect = `<div class="runner-dot${focused ? " focused" : ""}" style="background: ${liveColor.toRgbString()};"></div>`;
+	const htmlRect = `<div class="runner-dot" style="background: ${liveColor.toRgbString()};"></div>`;
 	const runnerIcon = L.divIcon({
 		html: htmlRect,
 		iconAnchor: [iconSize / 2, iconSize / 2],
-		className: "",
+		className: focused ? "runner-focused" : "",
 	});
 	return runnerIcon;
 }
@@ -289,7 +289,7 @@ function getRunnerNameMarker(
 		.text()}</span>`;
 	const iconClass = `runner-icon runner-icon-${isDark ? "dark" : "light"}${
 		needFlagsEmojiPolyfill ? " flags-polyfill" : ""
-	}${focused ? " icon-focused" : ""}`;
+	}${focused ? " runner-focused" : ""}`;
 
 	// mesure tagname width
 	const tmpIconClass = `${iconClass} leaflet-marker-icon leaflet-zoom-animated leaflet-interactive`;
