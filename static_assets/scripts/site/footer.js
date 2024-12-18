@@ -6,6 +6,6 @@
 			const el = document.getElementById("status-indicator");
 			el.classList.remove("status-indicator-default");
 			el.classList.add(className);
-			el.parentElement().setAttribute("title", data.status.description);
+			el.parentNode.title = data.status.description;
 		});
 })();
