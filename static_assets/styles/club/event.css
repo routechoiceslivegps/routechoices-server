@@ -226,8 +226,16 @@
 	font-family: "Twemoji Country Flags", "Atkinson Hyperlegible", sans-serif;
 }
 
-.icon-focused {
+.runner-dot {
+	border-radius: 50%;
+	width: calc(var(--runner-scale) * 15px);
+	height: calc(var(--runner-scale) * 15px);
+	border: 2px solid black;
+}
+
+.runner-dot.focused {
 	z-index: 10000000 !important;
+	border: 3px solid black;
 }
 
 .close {
