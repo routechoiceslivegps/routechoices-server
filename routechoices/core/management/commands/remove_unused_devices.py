@@ -20,7 +20,7 @@ class Command(BaseCommand):
             competitor_count=0,
             _location_count=0,
         )
-        nb_devices = len(devices)
+        nb_devices = devices.count()
         if nb_devices == 0:
             self.stdout.write(self.style.SUCCESS("No devices to remove!"))
         elif force:
