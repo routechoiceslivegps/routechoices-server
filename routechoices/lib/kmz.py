@@ -52,10 +52,9 @@ def extract_ground_overlay_info(kml):
                     .firstChild.nodeValue.strip()
                     .split(" ")
                 )
-                nw, ne, se, sw = list(
-                    list(float(x) for x in cc.split(",", 1)[::-1])
-                    for cc in corners_lonlat
-                )
+                nw, ne, se, sw = [
+                    [float(x) for x in cc.split(",", 1)[::-1]] for cc in corners_lonlat
+                ]
             else:
                 raise Exception("Invalid GroundOverlay")
             corners_coords = ",".join(
