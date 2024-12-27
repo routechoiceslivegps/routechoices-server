@@ -2799,7 +2799,7 @@ function RCEvent(infoURL, clockURL, locale) {
 								? `${competitorBatteyLevels[competitor.id]}%${lastTs ? ` | ${banana.i18n("last-seen", whenLastPos)}` : ""}`
 								: `${lastTs ? banana.i18n("last-seen", whenLastPos) : banana.i18n("unknown")}`;
 						if (newText !== currentText) {
-							span.attr("data-bs-title", newText);
+							u(span).attr("data-bs-title", newText);
 						}
 					}
 
