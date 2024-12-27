@@ -1451,7 +1451,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					return;
 				}
 			}
-			if (ts - prevDisplayRefresh > 10000) {
+			if (ts - prevDisplayRefresh > 100) {
 				const mustRefreshMeters = ts - prevMeterDisplayRefresh > 500;
 				drawCompetitors(mustRefreshMeters);
 				if (mustRefreshMeters) {
