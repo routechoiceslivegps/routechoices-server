@@ -54,5 +54,6 @@
 	"from": "Från",
 	"to": "Till",
 	"start-list": "Startlista",
-	"icons-size": "Ikoner storlek"
+	"icons-size": "Ikoner storlek",
+	"last-seen": "Sågs senast $1"
 }

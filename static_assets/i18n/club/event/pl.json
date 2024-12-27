@@ -54,5 +54,6 @@
 	"from": "Skąd",
 	"to": "Koniec",
 	"start-list": "Lista startowa",
-	"icons-size": "Rozmiar ikon"
+	"icons-size": "Rozmiar ikon",
+	"last-seen": "Ostatnio widziano $1"
 }

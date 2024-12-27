@@ -272,7 +272,13 @@ function RCEvent(infoURL, clockURL, locale) {
 				}
 
 				const nameDiv = u("<span/>")
-					.addClass("overflow-hidden", "ps-0", "text-truncate", "fw-bold")
+					.addClass(
+						"overflow-hidden",
+						"ps-0",
+						"text-truncate",
+						"fw-bold",
+						"last-ts-title",
+					)
 					.text(competitor.name);
 
 				colorTag.append(colorTagIcon);
@@ -537,20 +543,23 @@ function RCEvent(infoURL, clockURL, locale) {
 				) {
 					const batteryLevelDiv = u("<div/>").addClass(
 						"float-end",
-						"d-inline-blockv",
+						"d-inline-block",
 						"text-end",
 						competitor.isShown ? "if-live" : "",
 						"battery-indicator",
 						!isLive || !competitor.isShown ? "d-none" : "",
 					);
 
+					const route = competitorRoutes[competitor.id];
+					const lastTs = route?.getLastPosition()?.[0];
+					const whenLastPos = dayjs(lastTs).fromNow();
 					const batterySpan = u("<span/>").attr({
 						"data-bs-toggle": "tooltip",
 						"data-bs-custom-class": "higher-z-index",
 						"data-bs-title":
 							competitorBatteyLevels[competitor.id] !== null
-								? `${competitorBatteyLevels[competitor.id]}%`
-								: banana.i18n("unknown"),
+								? `${competitorBatteyLevels[competitor.id]}%${lastTs ? ` | ${banana.i18n("last-seen", whenLastPos)}` : ""}`
+								: `${lastTs ? banana.i18n("last-seen", whenLastPos) : banana.i18n("unknown")}`,
 					});
 
 					const batteryIcon = u("<i/>").addClass(
@@ -559,7 +568,9 @@ function RCEvent(infoURL, clockURL, locale) {
 						`fa-battery-${batteryIconName(
 							competitorBatteyLevels[competitor.id],
 						)}`,
-						!competitorBatteyLevels[competitor.id] ? "text-muted" : "",
+						!competitorBatteyLevels[competitor.id]
+							? "text-muted opacity-50"
+							: "",
 					);
 
 					batterySpan.append(batteryIcon);
@@ -587,6 +598,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			competitor.sidebarCard = div;
 			competitor.speedometer = div.find(".speedometer").first();
 			competitor.odometer = div.find(".odometer").first();
+			competitor.batteryIndicator = div.find(".battery-indicator").first();
 
 			const divOneUp = u(
 				'<div class="card mb-1" style="background-color:transparent;"/>',
@@ -1853,13 +1865,17 @@ function RCEvent(infoURL, clockURL, locale) {
 						}
 					}
 					// if last position is not older than 30 minutes
-					if (
-						route &&
-						route.getLastPosition()[0] > +new Date() - 30 * 60 * 1e3
-					) {
+					let lastTS;
+					if (route) {
+						lastTS = route.getLastPosition()[0];
+					}
+					if (route && lastTS > +new Date() - 30 * 60 * 1e3) {
 						competitorBatteyLevels[competitor.id] = competitor.battery_level;
 					} else {
 						competitorBatteyLevels[competitor.id] = null;
+					}
+					if (competitor.nametag) {
+						competitor.nametag.title = dayjs(lastTS).fromNow();
 					}
 				}
 				// console.log(performance.now() - aaaa);
@@ -2614,6 +2630,9 @@ function RCEvent(infoURL, clockURL, locale) {
 		if (!sidebarShown) {
 			return false;
 		}
+		if (u(elem).hasClass("d-none")) {
+			return false;
+		}
 		const bcr = elem.getBoundingClientRect();
 		const elemCenter = {
 			x: bcr.left + elem.offsetWidth / 2,
@@ -2768,6 +2787,20 @@ function RCEvent(infoURL, clockURL, locale) {
 						const totalDistance = route.distanceUntil(viewedTime);
 						competitor.odometerValue = `${(totalDistance / 1000).toFixed(1)}km`;
 						competitor.odometer.textContent = competitor.odometerValue;
+					}
+
+					if (isLive && checkVisible(competitor.batteryIndicator)) {
+						const lastTs = route?.getLastPosition()?.[0];
+						const whenLastPos = dayjs(lastTs).fromNow();
+						const span = u(competitor.batteryIndicator).find("span").first();
+						const currentText = u(span).attr("data-bs-title");
+						const newText =
+							competitorBatteyLevels[competitor.id] !== null
+								? `${competitorBatteyLevels[competitor.id]}%${lastTs ? ` | ${banana.i18n("last-seen", whenLastPos)}` : ""}`
+								: `${lastTs ? banana.i18n("last-seen", whenLastPos) : banana.i18n("unknown")}`;
+						if (newText !== currentText) {
+							span.attr("data-bs-title", newText);
+						}
 					}
 
 					// Splittimes

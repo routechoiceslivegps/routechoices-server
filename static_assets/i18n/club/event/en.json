@@ -54,5 +54,6 @@
 	"from": "From",
 	"to": "To",
 	"start-list": "Start List",
-	"icons-size": "Icons size"
+	"icons-size": "Icons size",
+	"last-seen": "Last seen $1"
 }

@@ -54,5 +54,6 @@
 	"from": "De",
 	"to": "À",
 	"start-list": "Liste de départ",
-	"icons-size": "Taille des icônes"
+	"icons-size": "Taille des icônes",
+	"last-seen": "Vu la dernière fois $1"
 }

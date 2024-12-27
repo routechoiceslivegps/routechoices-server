@@ -54,5 +54,6 @@
 	"from": "Alkaen",
 	"to": "Maali",
 	"start-list": "Aloituslista",
-	"icons-size": "Kuvakkeiden koko"
+	"icons-size": "Kuvakkeiden koko",
+	"last-seen": "Viimeksi nähty $1"
 }
