@@ -76,6 +76,22 @@ function RCEvent(infoURL, clockURL, locale) {
 	let rankControl = null;
 	let competitorsMinCustomOffset = null;
 
+	const getBatteryLevelTitle = (battery, route) => {
+		const lastTs = route?.getLastPosition()?.[0];
+		const whenLastPos = dayjs(lastTs).fromNow();
+
+		if (battery && lastTs) {
+			return `${battL}% | ${banana.i18n("last-seen", whenLastPos)}`;
+		}
+		if (battery) {
+			return `${battL}%`;
+		}
+		if (lastTs) {
+			return banana.i18n("last-seen", whenLastPos);
+		}
+		return banana.i18n("unknown");
+	};
+
 	L.Control.Ranking = L.Control.extend({
 		onAdd: () => {
 			const back = L.DomUtil.create(
@@ -551,15 +567,14 @@ function RCEvent(infoURL, clockURL, locale) {
 					);
 
 					const route = competitorRoutes[competitor.id];
-					const lastTs = route?.getLastPosition()?.[0];
-					const whenLastPos = dayjs(lastTs).fromNow();
+
 					const batterySpan = u("<span/>").attr({
 						"data-bs-toggle": "tooltip",
 						"data-bs-custom-class": "higher-z-index",
-						"data-bs-title":
-							competitorBatteyLevels[competitor.id] !== null
-								? `${competitorBatteyLevels[competitor.id]}%${lastTs ? ` | ${banana.i18n("last-seen", whenLastPos)}` : ""}`
-								: `${lastTs ? banana.i18n("last-seen", whenLastPos) : banana.i18n("unknown")}`,
+						"data-bs-title": getBatteryLevelTitle(
+							competitorBatteyLevels[competitor.id],
+							route,
+						),
 					});
 
 					const batteryIcon = u("<i/>").addClass(
@@ -1874,9 +1889,6 @@ function RCEvent(infoURL, clockURL, locale) {
 					} else {
 						competitorBatteyLevels[competitor.id] = null;
 					}
-					if (competitor.nametag) {
-						competitor.nametag.title = dayjs(lastTS).fromNow();
-					}
 				}
 				// console.log(performance.now() - aaaa);
 				updateCompetitorList(response.competitors);
@@ -2790,14 +2802,12 @@ function RCEvent(infoURL, clockURL, locale) {
 					}
 
 					if (isLive && checkVisible(competitor.batteryIndicator)) {
-						const lastTs = route?.getLastPosition()?.[0];
-						const whenLastPos = dayjs(lastTs).fromNow();
 						const span = u(competitor.batteryIndicator).find("span").first();
 						const currentText = u(span).attr("data-bs-title");
-						const newText =
-							competitorBatteyLevels[competitor.id] !== null
-								? `${competitorBatteyLevels[competitor.id]}%${lastTs ? ` | ${banana.i18n("last-seen", whenLastPos)}` : ""}`
-								: `${lastTs ? banana.i18n("last-seen", whenLastPos) : banana.i18n("unknown")}`;
+						const newText = getBatteryLevelTitle(
+							competitorBatteyLevels[competitor.id],
+							route,
+						);
 						if (newText !== currentText) {
 							u(span).attr("data-bs-title", newText);
 						}
