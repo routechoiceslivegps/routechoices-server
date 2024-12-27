@@ -1451,7 +1451,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					return;
 				}
 			}
-			if (ts - prevDisplayRefresh > 100) {
+			if (ts - prevDisplayRefresh > 10000) {
 				const mustRefreshMeters = ts - prevMeterDisplayRefresh > 500;
 				drawCompetitors(mustRefreshMeters);
 				if (mustRefreshMeters) {
@@ -2810,6 +2810,11 @@ function RCEvent(infoURL, clockURL, locale) {
 						);
 						if (newText !== currentText) {
 							u(span).attr("data-bs-title", newText);
+							const tooltip = bootstrap.Tooltip.getInstance(span);
+							if (tooltip) {
+								tooltip._config.title = newText;
+								tooltip.update();
+							}
 						}
 					}
 
