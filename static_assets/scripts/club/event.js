@@ -2814,6 +2814,7 @@ function RCEvent(infoURL, clockURL, locale) {
 							if (tooltip) {
 								tooltip._config.title = newText;
 								tooltip.update();
+								u(tooltip.tip).find(".tooltip-inner").text(newText);
 							}
 						}
 					}
