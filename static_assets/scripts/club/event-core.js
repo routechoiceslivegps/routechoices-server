@@ -377,21 +377,20 @@ function updateText(locale) {
 		});
 }
 
-const displayCoords = {
+const coordsFormatters = {
 	wgs84: {
 		name: "WGS84",
-		render: (latlng) => {
-			return `${latlng.lat.toFixed(5)}º, ${latlng.lng.toFixed(5)}º`;
+		format: (lat, lng) => {
+			return `${lat.toFixed(5)}º, ${lng.toFixed(5)}º`;
 		},
 	},
 	uk: {
 		name: "British Grid",
-		render: (latlng) => {
+		format: (lat, lng) => {
 			const wgs84 = new GT_WGS84();
-			wgs84.setDegrees(latlng.lat, latlng.lng);
+			wgs84.setDegrees(lat, lng);
 			const osgb = wgs84.getOSGB();
 			return osgb.getGridRef(6);
 		},
 	},
 };
-const coordsTransform = null;

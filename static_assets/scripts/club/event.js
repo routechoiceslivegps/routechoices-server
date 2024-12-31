@@ -661,7 +661,10 @@ function RCEvent(infoURL, clockURL, locale) {
 		});
 
 		map.on("contextmenu.show", (e) => {
-			const text = displayCoords[coordsUsed].render(e.latlng);
+			const text = coordsFormatters[coordsUsed].format(
+				e.latlng.lat,
+				e.latlng.lng,
+			);
 			map.contextmenu.addItem({
 				text,
 				callback: () => {
@@ -701,7 +704,7 @@ function RCEvent(infoURL, clockURL, locale) {
 		eventStateControl = L.control.eventState();
 		coordsControl = L.control.mapCenterCoord({
 			position: "bottomright",
-			displayFunction: displayCoords[coordsUsed].render,
+			latLngFormatter: coordsFormatters[coordsUsed].format,
 		});
 		panControl = L.control.pan();
 		zoomControl = L.control.zoom();
@@ -2524,12 +2527,12 @@ function RCEvent(infoURL, clockURL, locale) {
 					coordsControl = L.control
 						.mapCenterCoord({
 							position: "bottomright",
-							displayFunction: displayCoords[coordsUsed].render,
+							latLngFormatter: coordsFormatters[coordsUsed].format,
 						})
 						.addTo(map);
 				});
 
-			for (const [key, { name }] of Object.entries(displayCoords)) {
+			for (const [key, { name }] of Object.entries(coordsFormatters)) {
 				const option = u("<option/>");
 				option.attr({ value: key });
 				option.text(name);
