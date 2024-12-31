@@ -55,5 +55,6 @@
 	"to": "Maali",
 	"start-list": "Aloituslista",
 	"icons-size": "Kuvakkeiden koko",
-	"last-seen": "Viimeksi nähty $1"
+	"last-seen": "Viimeksi nähty $1",
+	"coordinates": "Koordinaatit"
 }

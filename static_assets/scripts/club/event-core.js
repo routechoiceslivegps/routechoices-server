@@ -370,9 +370,28 @@ const banana = new Banana();
 function updateText(locale) {
 	banana.setLocale(locale);
 	const langFile = `${window.local.staticRoot}i18n/club/event/${locale}.json`;
-	return fetch(`${langFile}?v=2024122700`)
+	return fetch(`${langFile}?v=2024123100`)
 		.then((response) => response.json())
 		.then((messages) => {
 			banana.load(messages, banana.locale);
 		});
 }
+
+const displayCoords = {
+	wgs84: {
+		name: "WGS84",
+		render: (latlng) => {
+			return `${latlng.lat.toFixed(5)}º, ${latlng.lng.toFixed(5)}º`;
+		},
+	},
+	uk: {
+		name: "British Grid",
+		render: (latlng) => {
+			const wgs84 = new GT_WGS84();
+			wgs84.setDegrees(latlng.lat, latlng.lng);
+			const osgb = wgs84.getOSGB();
+			return osgb.getGridRef(6);
+		},
+	},
+};
+const coordsTransform = null;

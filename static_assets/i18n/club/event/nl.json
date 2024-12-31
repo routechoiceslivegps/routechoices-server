@@ -55,5 +55,6 @@
 	"to": "Eind",
 	"start-list": "Start lijst",
 	"icons-size": "Pictogrammen grootte",
-	"last-seen": "Laatst gezien $1"
+	"last-seen": "Laatst gezien $1",
+	"coordinates": "Coördinaten"
 }

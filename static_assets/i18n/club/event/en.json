@@ -55,5 +55,6 @@
 	"to": "To",
 	"start-list": "Start List",
 	"icons-size": "Icons size",
-	"last-seen": "Last seen $1"
+	"last-seen": "Last seen $1",
+	"coordinates": "Coordinates"
 }

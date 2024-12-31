@@ -55,5 +55,6 @@
 	"to": "Meta",
 	"start-list": "Lista de inicio",
 	"icons-size": "Tamaño de los iconos",
-	"last-seen": "Visto por última vez $1"
+	"last-seen": "Visto por última vez $1",
+	"coordinates": "Coordenadas"
 }

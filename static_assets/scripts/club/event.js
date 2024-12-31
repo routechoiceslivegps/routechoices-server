@@ -5,6 +5,7 @@ function RCEvent(infoURL, clockURL, locale) {
 	let eventStart = null;
 	let eventEnd = null;
 	let map = null;
+	let coordsUsed = "wgs84";
 	let locateControl;
 	let eventStateControl;
 	let coordsControl;
@@ -660,9 +661,9 @@ function RCEvent(infoURL, clockURL, locale) {
 		});
 
 		map.on("contextmenu.show", (e) => {
-			console.log(map.contextmenu);
+			const text = displayCoords[coordsUsed].render(e.latlng);
 			map.contextmenu.addItem({
-				text: `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`,
+				text,
 				callback: () => {
 					window.open(
 						`https://www.openstreetmap.org/?mlat=${e.latlng.lat}&mlon=${e.latlng.lng}`,
@@ -700,8 +701,7 @@ function RCEvent(infoURL, clockURL, locale) {
 		eventStateControl = L.control.eventState();
 		coordsControl = L.control.mapCenterCoord({
 			position: "bottomright",
-			icon: false,
-			template: "{y}, {x}",
+			displayFunction: displayCoords[coordsUsed].render,
 		});
 		panControl = L.control.pan();
 		zoomControl = L.control.zoom();
@@ -2506,6 +2506,42 @@ function RCEvent(infoURL, clockURL, locale) {
 			bgMapWidget.append(widgetTitle).append(mapSelector);
 
 			optionsSidebar.append(bgMapWidget);
+		}
+
+		{
+			const coordsCRSWidget = u("<div/>").addClass("mb-2");
+
+			const widgetTitle = u("<h4/>")
+				.text(banana.i18n("coordinates"))
+				.addClass("text-nowrap");
+
+			const crsSelector = u("<select/>")
+				.addClass("form-select")
+				.attr({ ariaLabel: "Background map" })
+				.on("change", (e) => {
+					coordsUsed = e.target.value;
+					coordsControl.remove();
+					coordsControl = L.control
+						.mapCenterCoord({
+							position: "bottomright",
+							displayFunction: displayCoords[coordsUsed].render,
+						})
+						.addTo(map);
+				});
+
+			for (const [key, { name }] of Object.entries(displayCoords)) {
+				const option = u("<option/>");
+				option.attr({ value: key });
+				option.text(name);
+				if (coordsUsed === key) {
+					option.attr({ selected: true });
+				}
+				crsSelector.append(option);
+			}
+
+			coordsCRSWidget.append(widgetTitle).append(crsSelector);
+
+			optionsSidebar.append(coordsCRSWidget);
 		}
 
 		if (shortcutURL) {

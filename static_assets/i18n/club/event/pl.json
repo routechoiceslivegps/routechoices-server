@@ -55,5 +55,6 @@
 	"to": "Koniec",
 	"start-list": "Lista startowa",
 	"icons-size": "Rozmiar ikon",
-	"last-seen": "Ostatnio widziano $1"
+	"last-seen": "Ostatnio widziano $1",
+	"coordinates": "Współrzędne"
 }
