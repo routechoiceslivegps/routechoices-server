@@ -4,6 +4,7 @@ import urllib.parse
 from io import BytesIO
 
 import arrow
+import cairosvg
 from curl_cffi import requests
 from django.core.files.base import ContentFile
 from PIL import Image, ImageDraw
@@ -138,126 +139,158 @@ class Livelox(ThirdPartyTrackingSolution):
         else:
             courses = self.init_data["xtra"]["courses"]
 
+        map_obj = Map(
+            name=event.name,
+        )
+        coordinates = [f"{b['latitude']},{b['longitude']}" for b in map_bounds[::-1]]
+        map_obj.corners_coordinates = ",".join(coordinates)
+
         r = requests.get(map_url)
         if r.status_code != 200:
             raise MapsImportError("Could not download image")
 
-        map_obj, _ = Map.objects.get_or_create(
-            name=event.name,
-            club=self.club,
-        )
         img_blob = ContentFile(r.content)
-        map_obj.image.save("imported_image", img_blob)
+        map_obj.image.save("imported_image", img_blob, save=False)
+
         im = Image.open(img_blob)
         width, height = im.size
         map_obj.width = width
         map_obj.height = height
-        map_obj.save()
-        upscale = 4
-        with Image.open(img_blob).convert("RGBA") as img:
-            map_drawing = Image.new(
-                "RGBA",
-                (img.size[0] * upscale, img.size[1] * upscale),
-                (255, 255, 255, 0),
-            )
-        coordinates = [f"{b['latitude']},{b['longitude']}" for b in map_bounds[::-1]]
-        map_obj.corners_coordinates = ",".join(coordinates)
 
-        draw = ImageDraw.Draw(map_drawing)
-        circle_size = int(40 * map_resolution) * upscale
-        line_width = int(8 * map_resolution) * upscale
-        line_color = (128, 0, 128, 180)
+        course_maps = []
+        for course in courses:
+            for i, course_img_data in enumerate(course.get("courseImages")):
+                course_bounds = course_img_data["boundingPolygon"]["vertices"]
+                coordinates = [
+                    f"{b['latitude']},{b['longitude']}" for b in course_bounds[::-1]
+                ]
+                course_url = course_img_data["url"]
 
-        routes = [c["controls"] for c in courses]
-        for route in routes:
-            ctrls = [
-                map_obj.wsg84_to_map_xy(
-                    c["control"]["position"]["latitude"],
-                    c["control"]["position"]["longitude"],
+                course_map = Map(name=f"Course {i+1}")
+                course_map.corners_coordinates = ",".join(coordinates)
+
+                r = requests.get(course_url)
+                if r.status_code != 200:
+                    raise MapsImportError("Could not download image")
+
+                out = BytesIO()
+                cairosvg.svg2png(
+                    bytestring=r.content, write_to=out, unsafe=True, scale=4
                 )
-                for c in route
-            ]
-            for i, ctrl in enumerate(ctrls[:-1]):
-                if ctrl[0] == ctrls[i + 1][0]:
-                    ctrl[0] -= 0.0001
-                pt = ctrl
-                next_pt = ctrls[i + 1]
-                angle = math.atan2(next_pt[1] - pt[1], next_pt[0] - pt[0])
-                if i == 0:
-                    # draw start triangle
+
+                img_blob = ContentFile(out.getbuffer())
+
+                course_map.image.save("imported_image", img_blob, save=False)
+
+                im = Image.open(img_blob)
+                width, height = im.size
+                course_map.width = width
+                course_map.height = height
+                course_maps.append(course_map)
+            if not course.get("courseImages"):
+                upscale = 4
+                map_drawing = Image.new(
+                    "RGBA",
+                    (map_obj.width * upscale, map_obj.height * upscale),
+                    (255, 255, 255, 0),
+                )
+                draw = ImageDraw.Draw(map_drawing)
+                route = course["controls"]
+                map_resolution *= route[0]["control"]["mapScale"] / 15000
+                circle_size = int(40 * map_resolution) * upscale
+                line_width = int(8 * map_resolution) * upscale
+                line_color = (185, 42, 247, 180)
+                ctrls = [
+                    map_obj.wsg84_to_map_xy(
+                        c["control"]["position"]["latitude"],
+                        c["control"]["position"]["longitude"],
+                    )
+                    for c in route
+                ]
+                for i, ctrl in enumerate(ctrls[:-1]):
+                    if ctrl[0] == ctrls[i + 1][0]:
+                        ctrl[0] -= 0.0001
+                    pt = ctrl
+                    next_pt = ctrls[i + 1]
+                    angle = math.atan2(next_pt[1] - pt[1], next_pt[0] - pt[0])
+                    if i == 0:
+                        # draw start triangle
+                        draw.line(
+                            [
+                                int(pt[0] * upscale + circle_size * math.cos(angle)),
+                                int(pt[1] * upscale + circle_size * math.sin(angle)),
+                                int(
+                                    pt[0] * upscale
+                                    + circle_size * math.cos(angle + 2 * math.pi / 3)
+                                ),
+                                int(
+                                    pt[1] * upscale
+                                    + circle_size * math.sin(angle + 2 * math.pi / 3)
+                                ),
+                                int(
+                                    pt[0] * upscale
+                                    + circle_size * math.cos(angle - 2 * math.pi / 3)
+                                ),
+                                int(
+                                    pt[1] * upscale
+                                    + circle_size * math.sin(angle - 2 * math.pi / 3)
+                                ),
+                                int(pt[0] * upscale + circle_size * math.cos(angle)),
+                                int(pt[1] * upscale + circle_size * math.sin(angle)),
+                            ],
+                            fill=line_color,
+                            width=line_width,
+                            joint="curve",
+                        )
+                    # draw line between controls
                     draw.line(
                         [
                             int(pt[0] * upscale + circle_size * math.cos(angle)),
                             int(pt[1] * upscale + circle_size * math.sin(angle)),
-                            int(
-                                pt[0] * upscale
-                                + circle_size * math.cos(angle + 2 * math.pi / 3)
-                            ),
-                            int(
-                                pt[1] * upscale
-                                + circle_size * math.sin(angle + 2 * math.pi / 3)
-                            ),
-                            int(
-                                pt[0] * upscale
-                                + circle_size * math.cos(angle - 2 * math.pi / 3)
-                            ),
-                            int(
-                                pt[1] * upscale
-                                + circle_size * math.sin(angle - 2 * math.pi / 3)
-                            ),
-                            int(pt[0] * upscale + circle_size * math.cos(angle)),
-                            int(pt[1] * upscale + circle_size * math.sin(angle)),
+                            int(next_pt[0] * upscale - circle_size * math.cos(angle)),
+                            int(next_pt[1] * upscale - circle_size * math.sin(angle)),
                         ],
                         fill=line_color,
                         width=line_width,
-                        joint="curve",
                     )
-                # draw line between controls
-                draw.line(
-                    [
-                        int(pt[0] * upscale + circle_size * math.cos(angle)),
-                        int(pt[1] * upscale + circle_size * math.sin(angle)),
-                        int(next_pt[0] * upscale - circle_size * math.cos(angle)),
-                        int(next_pt[1] * upscale - circle_size * math.sin(angle)),
-                    ],
-                    fill=line_color,
-                    width=line_width,
-                )
-                # draw controls
-                draw.ellipse(
-                    [
-                        int(next_pt[0] * upscale - circle_size),
-                        int(next_pt[1] * upscale - circle_size),
-                        int(next_pt[0] * upscale + circle_size),
-                        int(next_pt[1] * upscale + circle_size),
-                    ],
-                    outline=line_color,
-                    width=line_width,
-                )
-                # draw finish
-                if i == (len(ctrls) - 2):
-                    inner_circle_size = int(30 * map_resolution) * upscale
+                    # draw controls
                     draw.ellipse(
                         [
-                            int(next_pt[0] * upscale - inner_circle_size),
-                            int(next_pt[1] * upscale - inner_circle_size),
-                            int(next_pt[0] * upscale + inner_circle_size),
-                            int(next_pt[1] * upscale + inner_circle_size),
+                            int(next_pt[0] * upscale - circle_size),
+                            int(next_pt[1] * upscale - circle_size),
+                            int(next_pt[0] * upscale + circle_size),
+                            int(next_pt[1] * upscale + circle_size),
                         ],
                         outline=line_color,
                         width=line_width,
                     )
-        out_buffer = BytesIO()
-        params = {
-            "dpi": (72, 72),
-        }
-        map_drawing = map_drawing.resize(img.size, resample=Image.Resampling.BICUBIC)
-        out = Image.alpha_composite(img, map_drawing)
-        out.save(out_buffer, "PNG", **params)
-        f_new = ContentFile(out_buffer.getvalue())
-        map_obj.image.save("imported_image", f_new)
-        map_obj.width = out.width
-        map_obj.height = out.height
+                    # draw finish
+                    if i == (len(ctrls) - 2):
+                        inner_circle_size = int(30 * map_resolution) * upscale
+                        draw.ellipse(
+                            [
+                                int(next_pt[0] * upscale - inner_circle_size),
+                                int(next_pt[1] * upscale - inner_circle_size),
+                                int(next_pt[0] * upscale + inner_circle_size),
+                                int(next_pt[1] * upscale + inner_circle_size),
+                            ],
+                            outline=line_color,
+                            width=line_width,
+                        )
+                out_buffer = BytesIO()
+                params = {
+                    "dpi": (72, 72),
+                }
+                map_drawing.save(out_buffer, "PNG", **params)
+                f_new = ContentFile(out_buffer.getvalue())
+                course_map = Map(name=f"Course {i+1}")
+                course_map.corners_coordinates = map_obj.corners_coordinates
+                course_map.image.save("imported_image", f_new, save=False)
+                course_map.width = map_drawing.width
+                course_map.height = map_drawing.height
+                course_maps.append(course_map)
+        map_obj = map_obj.merge(*course_maps)
+        map_obj.club = self.club
         map_obj.save()
         return [map_obj]
 
