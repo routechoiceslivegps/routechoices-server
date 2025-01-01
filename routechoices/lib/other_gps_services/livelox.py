@@ -445,7 +445,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
             locations = sorted(locations, key=itemgetter(0))
             from_idx = bisect.bisect_left(locations, from_ts, key=itemgetter(0))
             locations = locations[from_idx:]
-            cropped_devices_data[dev_id] = locations
+            cropped_devices_data[str(dev_id)] = locations
 
         return cropped_devices_data
 
@@ -457,7 +457,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
         for p in participant_data:
             c_name = f"{p.get('firstName')} {p.get('lastName')}"
             c_sname = initial_of_name(c_name)
-            competitors[p["id"]] = Competitor(
+            competitors[str(p["id"])] = Competitor(
                 name=c_name,
                 short_name=c_sname,
             )
