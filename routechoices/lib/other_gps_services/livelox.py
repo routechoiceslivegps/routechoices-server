@@ -434,7 +434,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                     )
                 else:
                     pts.append(
-                        (int((pt[0] - time_offset) / 1e3), pt[1] / 1e6, pt[2] / 1e6)
+                        (int((pt[0] - time_offset) / 1e3), pt[2] / 1e6, pt[1] / 1e6)
                     )
             if pts:
                 devices_data[p["id"]] = pts
