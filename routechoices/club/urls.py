@@ -84,7 +84,7 @@ urlpatterns = [
         name="acme_challenge",
     ),
     re_path(
-        r"(?P<slug>[0-9a-zA-Z_-]+)/",
+        r"(?P<slug>[^/]+)/",
         include(
             [
                 path("", views.event_view, name="event_view"),

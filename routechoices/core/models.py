@@ -1816,7 +1816,7 @@ class Event(models.Model):
         return f"{self.club.nice_url}{self.slug}/export"
 
     def get_api_detail_url(self):
-        if self.club.slug in ("gpsseuranta", "loggator"):
+        if self.club.slug in ("gpsseuranta", "loggator", "livelox"):
             return reverse(
                 "third_party_event_detail",
                 host="api",
@@ -1825,7 +1825,7 @@ class Event(models.Model):
         return reverse("event_detail", host="api", kwargs={"event_id": self.aid})
 
     def get_api_data_url(self):
-        if self.club.slug in ("gpsseuranta", "loggator"):
+        if self.club.slug in ("gpsseuranta", "loggator", "livelox"):
             return reverse(
                 "third_party_event_data",
                 host="api",

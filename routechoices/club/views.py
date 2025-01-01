@@ -1,3 +1,4 @@
+import magic
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.sitemaps.views import (
@@ -24,6 +25,7 @@ from routechoices.lib.helpers import (
     safe64encodedsha,
 )
 from routechoices.lib.other_gps_services.gpsseuranta import GpsSeurantaNet
+from routechoices.lib.other_gps_services.livelox import Livelox
 from routechoices.lib.other_gps_services.loggator import Loggator
 from routechoices.lib.s3 import serve_image_from_s3
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
@@ -203,11 +205,15 @@ def event_view(request, slug, **kwargs):
     if not club_slug:
         club_slug = request.club_slug
 
-    if club_slug in ("gpsseuranta", "loggator"):
+    if club_slug in ("gpsseuranta", "loggator", "livelox"):
         if club_slug == "gpsseuranta":
             proxy = GpsSeurantaNet()
-        else:
+        elif club_slug == "loggator":
             proxy = Loggator()
+        elif club_slug == "livelox":
+            proxy = Livelox()
+        else:
+            raise Http404()
         try:
             proxy.parse_init_data(slug)
         except Exception:
@@ -429,6 +435,24 @@ def event_map_view(request, slug, index="1", **kwargs):
     if bypass_resp:
         return bypass_resp
     club_slug = request.club_slug
+
+    if club_slug in ("gpsseuranta", "loggator", "livelox"):
+        if club_slug == "gpsseuranta":
+            proxy = GpsSeurantaNet()
+        elif club_slug == "loggator":
+            proxy = Loggator()
+        elif club_slug == "livelox":
+            proxy = Livelox()
+        try:
+            proxy.parse_init_data(slug)
+        except Exception:
+            raise Http404()
+        rmap = proxy.get_map_file()
+        with rmap.open("rb") as fp:
+            data = fp.read()
+        mime_type = magic.from_buffer(data, mime=True)
+        return HttpResponse(rmap, content_type=mime_type)
+
     event = (
         Event.objects.all()
         .select_related("club")

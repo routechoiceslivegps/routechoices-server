@@ -1,24 +1,27 @@
+import bisect
 import json
 import math
+import re
 import urllib.parse
 from io import BytesIO
+from operator import itemgetter
 
 import arrow
 import cairosvg
 from curl_cffi import requests
 from django.core.files.base import ContentFile
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
-from routechoices.core.models import PRIVACY_SECRET, Competitor, Device, Event, Map
-from routechoices.lib.helpers import initial_of_name, project, safe64encodedsha
+from routechoices.core.models import Competitor, Event, Map
+from routechoices.lib.helpers import get_remote_image_sizes, initial_of_name, project
 from routechoices.lib.other_gps_services.commons import (
     EventImportError,
     MapsImportError,
-    ThirdPartyTrackingSolution,
+    ThirdPartyTrackingSolutionWithProxy,
 )
 
 
-class Livelox(ThirdPartyTrackingSolution):
+class Livelox(ThirdPartyTrackingSolutionWithProxy):
     slug = "livelox"
     name = "Livelox"
     HEADERS = {
@@ -27,7 +30,12 @@ class Livelox(ThirdPartyTrackingSolution):
     }
 
     def parse_init_data(self, uid):
-        details = dict(urllib.parse.parse_qsl(uid))
+        if match := re.match(r"^(\d+)(-(\d+))?$", uid):
+            details = {"classId": match[1]}
+            if leg := match[3]:
+                details["relayLeg"] = leg
+        else:
+            details = dict(urllib.parse.parse_qsl(uid))
 
         class_ids = []
         class_id = details.get("classId")
@@ -79,7 +87,25 @@ class Livelox(ThirdPartyTrackingSolution):
         self.init_data["class_id"] = int(class_id)
         self.uid = uid
 
-    def get_or_create_event(self):
+    def get_competitor_device_id_prefix(self):
+        return "LLX_"
+
+    def is_live(self):
+        return False
+
+    def get_start_time(self):
+        return arrow.get(
+            self.init_data["class"]["event"]["timeInterval"]["start"]
+        ).datetime
+
+    def get_end_time(self):
+        return arrow.get(
+            self.init_data["class"]["event"]["timeInterval"]["end"]
+        ).datetime
+
+    def get_event(self):
+        event = Event()
+        event.club = self.club
         event_name = (
             f"{self.init_data['class']['event']['name']} - "
             f"{self.init_data['class']['name']}"
@@ -94,36 +120,45 @@ class Livelox(ThirdPartyTrackingSolution):
             else:
                 name = f"#{relay_leg}"
             event_name += f" - {name}"
+        event.name = event_name
+        event.start_date = self.get_start_time()
+        event.end_date = self.get_end_time()
 
-        event_start = arrow.get(
-            self.init_data["class"]["event"]["timeInterval"]["start"]
-        ).datetime
-        event_end = arrow.get(
-            self.init_data["class"]["event"]["timeInterval"]["end"]
-        ).datetime
         slug = str(self.init_data["class_id"])
         if relay_leg:
             slug += f"-{relay_leg}"
-        event, _ = Event.objects.get_or_create(
-            club=self.club,
-            slug=slug,
-            defaults={
-                "name": event_name,
-                "start_date": event_start,
-                "end_date": event_end,
-                "privacy": PRIVACY_SECRET,
-            },
-        )
+        event.slug = slug
         return event
 
-    def get_or_create_event_maps(self, event):
+    def get_map(self):
         try:
             map_data = self.init_data["xtra"]["map"]
             map_bounds = map_data["boundingQuadrilateral"]["vertices"]
             map_url = map_data["url"]
+        except Exception:
+            raise MapsImportError("Could not extract basic map info")
+
+        map_obj = Map()
+        coordinates = [f"{b['latitude']},{b['longitude']}" for b in map_bounds[::-1]]
+        map_obj.corners_coordinates = ",".join(coordinates)
+
+        length, size = get_remote_image_sizes(map_url)
+        width, height = size
+        map_obj.width = width
+        map_obj.height = height
+
+        return map_obj
+
+    def get_map_file(self):
+        try:
+            map_data = self.init_data["xtra"]["map"]
+            map_url = map_data["url"]
             map_resolution = map_data["resolution"]
         except Exception:
             raise MapsImportError("Could not extract basic map info")
+
+        map_obj = self.get_map()
+
         courses = []
         # first determine the course for this leg if is relay
         relay_leg = self.init_data["relay_leg"]
@@ -139,12 +174,6 @@ class Livelox(ThirdPartyTrackingSolution):
         else:
             courses = self.init_data["xtra"]["courses"]
 
-        map_obj = Map(
-            name=event.name,
-        )
-        coordinates = [f"{b['latitude']},{b['longitude']}" for b in map_bounds[::-1]]
-        map_obj.corners_coordinates = ",".join(coordinates)
-
         r = requests.get(map_url)
         if r.status_code != 200:
             raise MapsImportError("Could not download image")
@@ -159,6 +188,15 @@ class Livelox(ThirdPartyTrackingSolution):
 
         course_maps = []
         course_img_found = False
+
+        upscale = 2
+        map_drawing = Image.new(
+            "RGBA",
+            (map_obj.width * upscale, map_obj.height * upscale),
+            (255, 255, 255, 0),
+        )
+        draw = ImageDraw.Draw(map_drawing)
+
         for course in courses:
             for i, course_img_data in enumerate(course.get("courseImages")):
                 course_bounds = course_img_data["boundingPolygon"]["vertices"]
@@ -190,15 +228,24 @@ class Livelox(ThirdPartyTrackingSolution):
                 course_maps.append(course_map)
                 course_img_found = True
             if not course.get("courseImages") and not course_img_found:
-                upscale = 4
-                map_drawing = Image.new(
-                    "RGBA",
-                    (map_obj.width * upscale, map_obj.height * upscale),
-                    (255, 255, 255, 0),
-                )
-                draw = ImageDraw.Draw(map_drawing)
                 route = course["controls"]
                 map_resolution *= route[0]["control"]["mapScale"] / 15000
+
+                map_projection = self.init_data["xtra"]["map"].get("projection")
+                map_angle = 0
+                if map_projection:
+                    matrix = (
+                        map_projection["matrix"][0]
+                        + map_projection["matrix"][1]
+                        + map_projection["matrix"][2]
+                    )
+                    p1x, p1y = project(matrix, 0, 0)
+                    p2x, p2y = project(matrix, map_obj.width, 0)
+                    map_angle = math.atan2(p2y - p1y, p2x - p1x)
+                    map_angle = (
+                        map_angle - math.floor(map_angle // (2 * math.pi)) * 2 * math.pi
+                    )
+
                 circle_size = int(40 * map_resolution) * upscale
                 line_width = int(8 * map_resolution) * upscale
                 line_color = (185, 42, 247, 180)
@@ -245,27 +292,90 @@ class Livelox(ThirdPartyTrackingSolution):
                             joint="curve",
                         )
                     # draw line between controls
-                    draw.line(
-                        [
-                            int(pt[0] * upscale + circle_size * math.cos(angle)),
-                            int(pt[1] * upscale + circle_size * math.sin(angle)),
-                            int(next_pt[0] * upscale - circle_size * math.cos(angle)),
-                            int(next_pt[1] * upscale - circle_size * math.sin(angle)),
-                        ],
-                        fill=line_color,
-                        width=line_width,
-                    )
+                    if lines := route[i].get("connectionLines"):
+                        for line in lines:
+                            start = map_obj.wsg84_to_map_xy(
+                                line["start"]["latitude"],
+                                line["start"]["longitude"],
+                            )
+                            end = map_obj.wsg84_to_map_xy(
+                                line["end"]["latitude"],
+                                line["end"]["longitude"],
+                            )
+                            draw.line(
+                                [
+                                    int(start[0] * upscale),
+                                    int(start[1] * upscale),
+                                    int(end[0] * upscale),
+                                    int(end[1] * upscale),
+                                ],
+                                fill=line_color,
+                                width=line_width,
+                            )
+                    else:
+                        draw.line(
+                            [
+                                int(pt[0] * upscale + circle_size * math.cos(angle)),
+                                int(pt[1] * upscale + circle_size * math.sin(angle)),
+                                int(
+                                    next_pt[0] * upscale - circle_size * math.cos(angle)
+                                ),
+                                int(
+                                    next_pt[1] * upscale - circle_size * math.sin(angle)
+                                ),
+                            ],
+                            fill=line_color,
+                            width=line_width,
+                        )
                     # draw controls
-                    draw.ellipse(
-                        [
-                            int(next_pt[0] * upscale - circle_size),
-                            int(next_pt[1] * upscale - circle_size),
-                            int(next_pt[0] * upscale + circle_size),
-                            int(next_pt[1] * upscale + circle_size),
-                        ],
-                        outline=line_color,
-                        width=line_width,
-                    )
+                    if gaps := route[i + 1]["control"].get("circleGaps"):
+                        for j, gap in enumerate(gaps):
+                            start = gap["startAngle"] + gap["distance"]
+                            end = (
+                                (gaps[0]["startAngle"] + 2 * math.pi)
+                                if j == (len(gaps) - 1)
+                                else gaps[j + 1]["startAngle"]
+                            )
+                            draw.arc(
+                                [
+                                    int(next_pt[0] * upscale - circle_size),
+                                    int(next_pt[1] * upscale - circle_size),
+                                    int(next_pt[0] * upscale + circle_size),
+                                    int(next_pt[1] * upscale + circle_size),
+                                ],
+                                fill=line_color,
+                                width=line_width,
+                                start=(-end) * 180 / math.pi,
+                                end=(-start) * 180 / math.pi,
+                            )
+                    else:
+                        draw.ellipse(
+                            [
+                                int(next_pt[0] * upscale - circle_size),
+                                int(next_pt[1] * upscale - circle_size),
+                                int(next_pt[0] * upscale + circle_size),
+                                int(next_pt[1] * upscale + circle_size),
+                            ],
+                            outline=line_color,
+                            width=line_width,
+                        )
+                    if controlLoc := route[i + 1].get("controlNumberPosition"):
+                        loc = map_obj.wsg84_to_map_xy(
+                            controlLoc["latitude"],
+                            controlLoc["longitude"],
+                        )
+                        text = route[i + 1].get("controlNumberText", f"{i+1}")
+                        fnt = ImageFont.truetype(
+                            "routechoices/Arial.ttf", circle_size * 2
+                        )
+                        draw.text(
+                            (loc[0] * upscale, loc[1] * upscale),
+                            text,
+                            font=fnt,
+                            fill=line_color,
+                            anchor="mm",
+                        )
+
                     # draw finish
                     if i == (len(ctrls) - 2):
                         inner_circle_size = int(30 * map_resolution) * upscale
@@ -292,11 +402,9 @@ class Livelox(ThirdPartyTrackingSolution):
                 course_map.height = map_drawing.height
                 course_maps.append(course_map)
         map_obj = map_obj.merge(*course_maps)
-        map_obj.club = self.club
-        map_obj.save()
-        return [map_obj]
+        return ContentFile(map_obj.data)
 
-    def get_or_create_event_competitors(self, event):
+    def get_competitor_devices_data(self, event):
         participant_data = [
             d for d in self.init_data["xtra"]["participants"] if d.get("routeData")
         ]
@@ -308,25 +416,19 @@ class Livelox(ThirdPartyTrackingSolution):
                 + map_projection["matrix"][1]
                 + map_projection["matrix"][2]
             )
-        competitors = []
+
+        map_obj = self.get_map()
+
+        devices_data = {}
         for p in participant_data:
-            c_name = f"{p.get('firstName')} {p.get('lastName')}"
-            c_sname = initial_of_name(c_name)
-            competitor, _ = Competitor.objects.get_or_create(
-                name=c_name,
-                short_name=c_sname,
-                event=event,
-            )
             pts = []
-            if not p.get("routeData"):
-                continue
             p_data64 = p["routeData"]
             d = LiveloxBase64Reader(p_data64)
             pts_raw = d.readWaypoints()
             for pt in pts_raw:
                 if map_projection:
                     px, py = project(matrix, pt[1] / 10, pt[2] / 10)
-                    latlon = event.map.map_xy_to_wsg84(px, py)
+                    latlon = map_obj.map_xy_to_wsg84(px, py)
                     pts.append(
                         (int((pt[0] - time_offset) / 1e3), latlon["lat"], latlon["lon"])
                     )
@@ -334,17 +436,31 @@ class Livelox(ThirdPartyTrackingSolution):
                     pts.append(
                         (int((pt[0] - time_offset) / 1e3), pt[1] / 1e6, pt[2] / 1e6)
                     )
-            dev_obj, created = Device.objects.get_or_create(
-                aid="LLX_" + safe64encodedsha(f"{p['id']}:{self.uid}")[:8], is_gpx=True
-            )
-            if not created:
-                dev_obj.location_series = []
             if pts:
-                dev_obj.add_locations(pts)
-                dev_obj.save()
-                competitor.device = dev_obj
-            competitor.save()
-            competitors.append(competitor)
+                devices_data[p["id"]] = pts
+
+        cropped_devices_data = {}
+        from_ts = event.start_date.timestamp()
+        for dev_id, locations in devices_data.items():
+            locations = sorted(locations, key=itemgetter(0))
+            from_idx = bisect.bisect_left(locations, from_ts, key=itemgetter(0))
+            locations = locations[from_idx:]
+            cropped_devices_data[dev_id] = locations
+
+        return cropped_devices_data
+
+    def get_competitors_data(self):
+        competitors = {}
+        participant_data = [
+            d for d in self.init_data["xtra"]["participants"] if d.get("routeData")
+        ]
+        for p in participant_data:
+            c_name = f"{p.get('firstName')} {p.get('lastName')}"
+            c_sname = initial_of_name(c_name)
+            competitors[p["id"]] = Competitor(
+                name=c_name,
+                short_name=c_sname,
+            )
         return competitors
 
 

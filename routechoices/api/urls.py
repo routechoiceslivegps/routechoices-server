@@ -214,7 +214,7 @@ urlpatterns = [
         ),
     ),
     re_path(
-        r"^(?P<provider>gpsseuranta|loggator)/(?P<uid>[^/]+)/",
+        r"^(?P<provider>gpsseuranta|loggator|livelox)/(?P<uid>[^/]+)/",
         include(
             [
                 path(

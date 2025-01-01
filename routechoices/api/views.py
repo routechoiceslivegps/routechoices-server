@@ -62,6 +62,7 @@ from routechoices.lib.helpers import (
     short_random_slug,
 )
 from routechoices.lib.other_gps_services.gpsseuranta import GpsSeurantaNet
+from routechoices.lib.other_gps_services.livelox import Livelox
 from routechoices.lib.other_gps_services.loggator import Loggator
 from routechoices.lib.s3 import serve_image_from_s3
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
@@ -1869,8 +1870,12 @@ def third_party_event(request, provider, uid):
 
     if provider == "gpsseuranta":
         proxy = GpsSeurantaNet()
-    else:
+    elif provider == "loggator":
         proxy = Loggator()
+    elif provider == "livelox":
+        proxy = Livelox()
+    else:
+        raise Http404()
     try:
         proxy.parse_init_data(uid)
     except Exception:
@@ -1911,7 +1916,7 @@ def third_party_event(request, provider, uid):
             "modification_date": event.map.modification_date,
             "default": True,
             "id": uid,
-            "url": proxy.get_map_url(),
+            "url": f"{event.club.nice_url}{event.slug}/map",
             "wms": False,
         }
         output["maps"].append(map_data)
@@ -1940,8 +1945,12 @@ def third_party_event_data(request, provider, uid):
 
     if provider == "gpsseuranta":
         proxy = GpsSeurantaNet()
-    else:
+    elif provider == "loggator":
         proxy = Loggator()
+    elif provider == "livelox":
+        proxy = Livelox()
+    else:
+        raise Http404()
     try:
         proxy.parse_init_data(uid)
     except Exception:
