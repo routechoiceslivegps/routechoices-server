@@ -158,6 +158,7 @@ class Livelox(ThirdPartyTrackingSolution):
         map_obj.height = height
 
         course_maps = []
+        course_img_found = False
         for course in courses:
             for i, course_img_data in enumerate(course.get("courseImages")):
                 course_bounds = course_img_data["boundingPolygon"]["vertices"]
@@ -187,7 +188,8 @@ class Livelox(ThirdPartyTrackingSolution):
                 course_map.width = width
                 course_map.height = height
                 course_maps.append(course_map)
-            if not course.get("courseImages"):
+                course_img_found = True
+            if not course.get("courseImages") and not course_img_found:
                 upscale = 4
                 map_drawing = Image.new(
                     "RGBA",
