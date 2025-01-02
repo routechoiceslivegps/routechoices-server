@@ -359,12 +359,33 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                             outline=line_color,
                             width=line_width,
                         )
-                    if controlLoc := route[i + 1].get("controlNumberPosition"):
-                        loc = map_obj.wsg84_to_map_xy(
-                            controlLoc["latitude"],
-                            controlLoc["longitude"],
-                        )
+                    if i + 2 < len(ctrls):
                         text = route[i + 1].get("controlNumberText", f"{i+1}")
+                        if controlLoc := route[i + 1].get("controlNumberPosition"):
+                            loc = map_obj.wsg84_to_map_xy(
+                                controlLoc["latitude"],
+                                controlLoc["longitude"],
+                            )
+                        else:
+                            prev_ctrl = ctrls[i]
+                            curr_ctrl = ctrls[i + 1]
+                            next_ctrl = ctrls[i + 2]
+
+                            prev_angle = math.atan2(
+                                prev_ctrl[1] - curr_ctrl[1], prev_ctrl[0] - curr_ctrl[0]
+                            )
+                            next_angle = math.atan2(
+                                next_ctrl[1] - curr_ctrl[1], next_ctrl[0] - curr_ctrl[0]
+                            )
+                            angle_diff = (
+                                (next_angle - prev_angle + math.pi) % (2 * math.pi)
+                            ) - math.pi
+                            avg_angle = (prev_angle + angle_diff / 2) % (2 * math.pi)
+                            opp_angle = avg_angle + math.pi
+                            loc = (
+                                curr_ctrl[0] + math.cos(opp_angle) * 50,
+                                curr_ctrl[1] + math.sin(opp_angle) * 50,
+                            )
                         fnt = ImageFont.truetype(
                             "routechoices/Arial.ttf", circle_size * 2
                         )
@@ -375,7 +396,6 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                             fill=line_color,
                             anchor="mm",
                         )
-
                     # draw finish
                     if i == (len(ctrls) - 2):
                         inner_circle_size = int(30 * map_resolution) * upscale
