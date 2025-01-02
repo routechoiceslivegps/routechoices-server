@@ -3,6 +3,7 @@ import json
 import math
 import re
 import urllib.parse
+from collections import defaultdict
 from io import BytesIO
 from operator import itemgetter
 
@@ -197,6 +198,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
         )
         draw = ImageDraw.Draw(map_drawing)
 
+        numbersLoc = defaultdict(list)
         for course in courses:
             for i, course_img_data in enumerate(course.get("courseImages")):
                 course_bounds = course_img_data["boundingPolygon"]["vertices"]
@@ -386,16 +388,8 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                                 curr_ctrl[0] + math.cos(opp_angle) * 50,
                                 curr_ctrl[1] + math.sin(opp_angle) * 50,
                             )
-                        fnt = ImageFont.truetype(
-                            "routechoices/Arial.ttf", circle_size * 2
-                        )
-                        draw.text(
-                            (loc[0] * upscale, loc[1] * upscale),
-                            text,
-                            font=fnt,
-                            fill=line_color,
-                            anchor="mm",
-                        )
+
+                        numbersLoc[text].append((loc[0] * upscale, loc[1] * upscale))
                     # draw finish
                     if i == (len(ctrls) - 2):
                         inner_circle_size = int(30 * map_resolution) * upscale
@@ -409,6 +403,43 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                             outline=line_color,
                             width=line_width,
                         )
+                fnt = ImageFont.truetype("routechoices/Arial.ttf", circle_size * 2)
+                finalLoc = defaultdict(list)
+                for text, locs in numbersLoc.items():
+                    left, top, right, bottom = fnt.getbbox(text)
+                    width = right - left
+                    height = bottom - top
+                    text_size = (width, height)
+
+                    def do_overlap(a, b):
+                        if abs(a[0] - b[0]) > text_size[0]:
+                            return False
+                        if abs(a[1] - b[1]) > text_size[1]:
+                            return False
+                        return True
+
+                    def simplify_overlaps(arr):
+                        if not arr:
+                            return []
+                        a = arr[0]
+                        arr_b = []
+                        for b in arr[1:]:
+                            if not do_overlap(a, b):
+                                arr_b.append(b)
+                        return [a] + simplify_overlaps(arr_b)
+
+                    finalLoc[text] = simplify_overlaps(locs)
+
+                for text, locs in finalLoc.items():
+                    for loc in locs:
+                        draw.text(
+                            (loc[0], loc[1]),
+                            text,
+                            font=fnt,
+                            fill=line_color,
+                            anchor="mm",
+                        )
+
                 out_buffer = BytesIO()
                 params = {
                     "dpi": (72, 72),
