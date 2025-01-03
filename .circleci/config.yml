@@ -9,7 +9,7 @@ commands:
       - checkout
       - run: ./gen-local-certs.sh
       - run: chmod -R 755 ./letsencrypt/live/routechoices.dev/
-      - run: echo "127.0.0.1 routechoices.dev api.routechoices.dev www.routechoices.dev halden-sk.routechoices.dev kangasala-sk.routechoices.dev registration.routechoices.dev" | sudo tee -a /etc/hosts
+      - run: echo "127.0.0.1 routechoices.dev api.routechoices.dev www.routechoices.dev halden-sk.routechoices.dev kangasala-sk.routechoices.dev registration.routechoices.dev livelox.routechoices.dev loggator.routechoices.dev gpsseuranta.routechoices.dev" | sudo tee -a /etc/hosts
       - run: mkdir -p media/routechoices/maps/
       - run: mv ./.env.dev ./.env
       - run: echo "SECURE_SSL_REDIRECT = False" > ./routechoices/settings_overrides.py
