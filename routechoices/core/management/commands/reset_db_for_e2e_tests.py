@@ -71,3 +71,7 @@ class Command(BaseCommand):
         FrontPageFeedback.objects.create(
             name="Anonymous", club_name="AA", content="Great Software", stars=5
         )
+
+        Club.objects.create(name="GPS Seuranta Proxy", slug="gpsseuranta")
+        Club.objects.create(name="Livelox Proxy", slug="livelox")
+        Club.objects.create(name="Loggator Proxy", slug="loggator")
