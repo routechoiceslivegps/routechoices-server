@@ -259,8 +259,8 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                     for c in route
                 ]
                 for i, ctrl in enumerate(ctrls[:-1]):
-                    if ctrl[0] == ctrls[i + 1][0]:
-                        ctrl[0] -= 0.0001
+                    # if ctrl[0] == ctrls[i + 1][0]:
+                        # ctrl[0] -= 0.0001
                     pt = ctrl
                     next_pt = ctrls[i + 1]
                     angle = math.atan2(next_pt[1] - pt[1], next_pt[0] - pt[0])
