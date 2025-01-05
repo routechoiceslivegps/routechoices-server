@@ -73,6 +73,15 @@
 	background-position: center;
 }
 
+.image-banner-suunnistus {
+	background-image: url("../../img/suunnistus.jpg"); /* fallback for non image-set browser */
+	margin: 0;
+	padding: 0;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
+}
+
 .image-banner > div {
 	background: var(--rc-opacity-cover);
 }
@@ -84,6 +93,20 @@
 	color: var(--bs-body-bg);
 }
 .image-banner svg {
+	position: relative;
+	top: 0;
+}
+.image-banner-suunnistus > div {
+	background: var(--rc-opacity-cover);
+}
+.image-banner-suunnistus .container {
+	margin-top: 40px;
+}
+
+.image-banner-suunnistus h3 {
+	color: var(--bs-body-bg);
+}
+.image-banner-suunnistus svg {
 	position: relative;
 	top: 0;
 }
@@ -114,5 +137,9 @@
 }
 
 .screenshots-block {
+	background-color: var(--bs-body-bg);
+}
+
+.text-block-white {
 	background-color: var(--bs-body-bg);
 }
