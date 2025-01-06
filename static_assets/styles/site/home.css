@@ -76,16 +76,16 @@
 	);
 }
 .image-suunnistus {
-	background-image: url("../../img/suunnistus.jpg"); /* fallback for non image-set browser */
+	background-image: url("../../img/suunnistus.jpg?v=2"); /* fallback for non image-set browser */
 	background-image: -webkit-image-set(
-		url("../../img/suunnistus.avif") 1x /* type("image/avif") */,
-		url("../../img/suunnistus.webp") 1x /* type("image/webp") */,
-		url("../../img/suunnistus.jpg") 1x /* type("image/png") */
+		url("../../img/suunnistus.avif?v=2") 1x /* type("image/avif") */,
+		url("../../img/suunnistus.webp?v=2") 1x /* type("image/webp") */,
+		url("../../img/suunnistus.jpg?v=2") 1x /* type("image/png") */
 	);
 	background-image: image-set(
-		url("../../img/suunnistus.avif") 1x,
-		url("../../img/suunnistus.webp") 1x,
-		url("../../img/suunnistus.jpg") 1x
+		url("../../img/suunnistus.avif?v=2") 1x,
+		url("../../img/suunnistus.webp?v=2") 1x,
+		url("../../img/suunnistus.jpg?v=2") 1x
 	);
 }
 
