@@ -55,6 +55,14 @@
 }
 
 .image-banner {
+	margin: 0;
+	padding: 0;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
+}
+
+.image-forest {
 	background-image: url("../../img/banner4.jpg"); /* fallback for non image-set browser */
 	background-image: -webkit-image-set(
 		url("../../img/banner4.avif") 1x /* type("image/avif") */,
@@ -66,20 +74,19 @@
 		url("../../img/banner4.webp") 1x,
 		url("../../img/banner4.jpg") 1x
 	);
-	margin: 0;
-	padding: 0;
-	background-repeat: no-repeat;
-	background-size: cover;
-	background-position: center;
 }
-
-.image-banner-suunnistus {
+.image-suunnistus {
 	background-image: url("../../img/suunnistus.jpg"); /* fallback for non image-set browser */
-	margin: 0;
-	padding: 0;
-	background-repeat: no-repeat;
-	background-size: cover;
-	background-position: center;
+	background-image: -webkit-image-set(
+		url("../../img/suunnistus.avif") 1x /* type("image/avif") */,
+		url("../../img/suunnistus.webp") 1x /* type("image/webp") */,
+		url("../../img/suunnistus.jpg") 1x /* type("image/png") */
+	);
+	background-image: image-set(
+		url("../../img/suunnistus.avif") 1x,
+		url("../../img/suunnistus.webp") 1x,
+		url("../../img/suunnistus.jpg") 1x
+	);
 }
 
 .image-banner > div {
@@ -93,20 +100,6 @@
 	color: var(--bs-body-bg);
 }
 .image-banner svg {
-	position: relative;
-	top: 0;
-}
-.image-banner-suunnistus > div {
-	background: var(--rc-opacity-cover);
-}
-.image-banner-suunnistus .container {
-	margin-top: 40px;
-}
-
-.image-banner-suunnistus h3 {
-	color: var(--bs-body-bg);
-}
-.image-banner-suunnistus svg {
 	position: relative;
 	top: 0;
 }
