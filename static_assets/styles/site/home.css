@@ -62,6 +62,15 @@
 	background-position: center;
 }
 
+@media (max-width: 576px) {
+	.image-iphone {
+		text-align: center;
+	}
+	.image-iphone img {
+		position: static !important;
+	}
+}
+
 .image-forest {
 	background-image: url("../../img/banner4.jpg"); /* fallback for non image-set browser */
 	background-image: -webkit-image-set(
@@ -114,7 +123,7 @@
 
 .image-hero {
 	max-width: 100%;
-	max-height: 600px;
+	max-height: 400px;
 	width: auto;
 	height: auto;
 }

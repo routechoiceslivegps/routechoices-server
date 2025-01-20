@@ -16,31 +16,38 @@
             <source src="{% static 'background.webm' %}" type="video/webm">
         </video>
         <div class="video_cover"></div>
-        <div class="row text-center">
-            <h1 class="video_text_overlay frontpage_text mb-0 intro-prefix">Presenting</h1>
-            <h1 id="site_title"
-                class="video_text_overlay frontpage_text_bold mb-0 intro">{{ site.name }}</h1>
-            <h1 id="site_subtitle" class="video_text_overlay frontpage_text">
-                Live GPS tracking for <b style="background-image: linear-gradient(#1ee96f, #1a728c);
-           -webkit-background-clip: text;
-           background-clip: text;
-           color: transparent">orienteering</b> events
-            </h1>
-            <p>
-                <picture>
-                    <source type="image/avif" srcset="{% static 'img/iphone.avif' %}?2024101402" />
-                    <source type="image/webp" srcset="{% static 'img/iphone.webp' %}?2024101402" />
-                    <img src="{% static 'img/iphone.png' %}?2024101402"
-                         width="600"
-                         height="600"
-                         class="image-hero"
-                         alt="Website browsed on phone" />
-                </picture>
-            </p>
-            <h3 class="frontpage_text mb-3">
-                <a class="px-4 py-2 text-decoration-none engage-link"
-                   href="{% url 'site:events_view' %}"><i class="fa-solid fa-person-running"></i> Event list</a>
-            </h3>
+        <div class="row">
+            <div class="col-12 col-sm-6">
+                <h1 class="video_text_overlay frontpage_text mt-5 mb-0 intro-prefix">Presenting</h1>
+                <h1 id="site_title"
+                    class="video_text_overlay frontpage_text_bold mb-0 intro">{{ site.name }}</h1>
+                <h1 id="site_subtitle" class="video_text_overlay frontpage_text_bold mb-5">
+                    Live GPS tracking for <b style="background-image: linear-gradient(#1ee96f, #1a728c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent">orienteering</b> and outdoor events
+                </h1>
+            </div>
+            <div class="col-12 col-sm-6 image-iphone">
+                <p>
+                    <picture>
+                        <source type="image/avif" srcset="{% static 'img/iphone.avif' %}?2024101402" />
+                        <source type="image/webp" srcset="{% static 'img/iphone.webp' %}?2024101402" />
+                        <img src="{% static 'img/iphone.png' %}?2024101402"
+                            width="400"
+                            height="400"
+                            class="image-hero"
+                            alt="Website browsed on phone"
+                            style="position: absolute" />
+                    </picture>
+                </p>
+            </div>
+            <div class="col-12 col-sm-6 image-iphone">
+                <h3 class="frontpage_text mb-3 text-center" style="position: relative">
+                    <a class="px-4 py-2 text-decoration-none engage-link"
+                    href="{% url 'site:events_view' %}"><i class="fa-solid fa-person-running"></i> Event list</a>
+                </h3>
+            </div>
         </div>
     </div>
     <div class="container-fluid p-0 m-0">
