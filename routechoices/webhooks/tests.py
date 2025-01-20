@@ -1,8 +1,10 @@
 import hashlib
 import hmac
+from datetime import timedelta
 
 from django.conf import settings
 from django.test.client import MULTIPART_CONTENT
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -42,6 +44,7 @@ class WebHookTestCase(EssentialApiBase):
     def setUp(self):
         super().setUp()
         self.club = Club.objects.create(name="Kemiön Kiilat", slug="kiilat")
+        self.club.creation_date = now() - timedelta(days=14)
         self.club.admins.set([self.user])
         self.ls_client = LemonSqueezyAPIClient(HTTP_HOST="www.routechoices.dev")
 
@@ -82,6 +85,7 @@ class WebHookTestCase(EssentialApiBase):
         self.club.refresh_from_db()
         self.assertTrue(self.club.upgraded)
         self.assertEqual(self.club.order_id, "123456")
+        self.assertTrue(self.club.can_modify_events)
 
     def test_downgrade_club(self):
         url = self.reverse_and_check(
@@ -100,14 +104,17 @@ class WebHookTestCase(EssentialApiBase):
         self.club.refresh_from_db()
         self.assertFalse(self.club.upgraded)
         self.assertEqual(self.club.order_id, "")
+        self.assertFalse(self.club.can_modify_events)
 
-    def test_pause_club(self):
+    def test_pause_club_subscription(self):
         url = self.reverse_and_check(
             "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
         )
         self.club.upgraded = True
         self.club.order_id = "123456"
         self.club.save()
+        self.assertFalse(self.club.subscription_paused)
+        self.assertTrue(self.club.can_modify_events)
         res = self.ls_client.post(
             url,
             {
@@ -124,5 +131,33 @@ class WebHookTestCase(EssentialApiBase):
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.club.refresh_from_db()
-        self.assertTrue(self.club.upgraded)
         self.assertTrue(self.club.subscription_paused)
+        self.assertFalse(self.club.can_modify_events)
+
+    def test_unpause_club_subscription(self):
+        url = self.reverse_and_check(
+            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
+        )
+        self.club.upgraded = True
+        self.club.order_id = "123456"
+        self.club.subscription_paused_at = now() - timedelta(days=2)
+        self.club.save()
+        self.assertTrue(self.club.subscription_paused)
+        self.assertFalse(self.club.can_modify_events)
+        res = self.ls_client.post(
+            url,
+            {
+                "data": {
+                    "attributes": {
+                        "order_id": 123456,
+                        "variant_id": 154372,
+                    }
+                }
+            },
+            HTTP_X_EVENT_NAME="subscription_unpaused",
+            content_type="json",
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.club.refresh_from_db()
+        self.assertFalse(self.club.subscription_paused)
+        self.assertTrue(self.club.can_modify_events)

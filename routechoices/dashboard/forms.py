@@ -386,16 +386,17 @@ class EventForm(ModelForm):
         club = self.club
 
         # Check club has rights to create new events
-        if club.subscription_paused:
-            self.add_error(
-                None,
-                "Your subscription is currently paused, you cannot create or edit events.",
-            )
-        elif not club.can_modify_events:
-            self.add_error(
-                None,
-                "Your 10 days free trial has now expired, you cannot create or edit events anymore.",
-            )
+        if not club.can_modify_events:
+            if club.subscription_paused:
+                self.add_error(
+                    None,
+                    "Your subscription is currently paused, you cannot create or edit events.",
+                )
+            else:
+                self.add_error(
+                    None,
+                    "Your 10 days free trial has now expired, you cannot create or edit events anymore.",
+                )
 
         # Check that start date is before ends date
         start_date = self.cleaned_data.get("start_date")
