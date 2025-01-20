@@ -78,4 +78,38 @@ def lemonsqueezy_webhook(request):
             club.save()
             return HttpResponse(f"Downgraded {club}")
 
+    # Club Pause
+    if (
+        "subscription_paused" in request.META.get("HTTP_X_EVENT_NAME", "")
+        and variant_id in settings.LEMONSQUEEZY_PRODUCTS_VARIANTS
+    ):
+        club = None
+        try:
+            order_id = str(data["data"]["attributes"]["order_id"])
+        except KeyError:
+            # Could not find order_id info
+            raise BadRequest("Missing order id")
+        club = Club.objects.filter(order_id=order_id).first()
+        if club and data["data"]["attributes"]["pause"]["mode"] == "void":
+            club.subscription_paused_at = now()
+            club.save()
+        return HttpResponse(f"Paused {club}")
+
+    # Club UnPause
+    if (
+        "subscription_unpaused" in request.META.get("HTTP_X_EVENT_NAME", "")
+        and variant_id in settings.LEMONSQUEEZY_PRODUCTS_VARIANTS
+    ):
+        club = None
+        try:
+            order_id = str(data["data"]["attributes"]["order_id"])
+        except KeyError:
+            # Could not find order_id info
+            raise BadRequest("Missing order id")
+        club = Club.objects.filter(order_id=order_id).first()
+        if club:
+            club.subscription_paused_at = None
+            club.save()
+            return HttpResponse(f"Unpaused {club}")
+
     return HttpResponse("Valid webhook call with no action taken")

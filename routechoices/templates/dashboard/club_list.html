@@ -54,7 +54,7 @@
                                     <div>
                                         <small class="text-muted">
                                             {% if club.upgraded %}
-                                                Paid Plan
+                                                Paid Plan{% if club.subscription_paused %} (Paused){% endif %}
                                             {% elif club.o_club %}
                                                 Orienteering Club
                                             {% else %}

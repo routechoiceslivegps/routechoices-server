@@ -202,6 +202,8 @@ Follow our events live or replay them later.
     upgraded = models.BooleanField(default=False)
     upgraded_date = models.DateTimeField(blank=True, null=True)
     order_id = models.CharField(max_length=200, blank=True, default="")
+    subscription_paused_at = models.DateTimeField(blank=True, null=True)
+
     forbid_invite_request = models.BooleanField(
         "Prevent external users to request admin rights", default=False
     )
@@ -265,8 +267,19 @@ Follow our events live or replay them later.
         return now() - self.creation_date < timedelta(days=10)
 
     @property
+    def subscription_paused(self):
+        return (
+            self.subscription_paused_at is not None
+            and self.subscription_paused_at < now()
+        )
+
+    @property
     def can_modify_events(self):
-        return self.free_trial_active or self.o_club or self.upgraded
+        return (
+            self.free_trial_active
+            or self.o_club
+            or (self.upgraded and not self.subscription_paused)
+        )
 
     def get_absolute_url(self):
         return self.nice_url
@@ -987,8 +1000,8 @@ class Map(models.Model):
             map_pts = simplify_line(
                 [new_map.wsg84_to_map_xy(pt[0], pt[1], round_values=True) for pt in pts]
             )
-            draw.line(map_pts, (255, 255, 255, 200), 22 * res_scale, joint="curve")
-            draw.line(map_pts, line_color, 16 * res_scale, joint="curve")
+            draw.line(map_pts, (255, 255, 255, 200), 3 * res_scale, joint="curve")
+            draw.line(map_pts, line_color, 2 * res_scale, joint="curve")
         for pt in waypoints:
             map_pt = new_map.wsg84_to_map_xy(pt[0], pt[1], round_values=True)
             widths = [66, 63, 11, 8]

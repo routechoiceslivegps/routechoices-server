@@ -100,3 +100,29 @@ class WebHookTestCase(EssentialApiBase):
         self.club.refresh_from_db()
         self.assertFalse(self.club.upgraded)
         self.assertEqual(self.club.order_id, "")
+
+    def test_pause_club(self):
+        url = self.reverse_and_check(
+            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
+        )
+        self.club.upgraded = True
+        self.club.order_id = "123456"
+        self.club.save()
+        res = self.ls_client.post(
+            url,
+            {
+                "data": {
+                    "attributes": {
+                        "order_id": 123456,
+                        "variant_id": 154372,
+                        "pause": {"mode": "void"},
+                    }
+                }
+            },
+            HTTP_X_EVENT_NAME="subscription_paused",
+            content_type="json",
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.club.refresh_from_db()
+        self.assertTrue(self.club.upgraded)
+        self.assertTrue(self.club.subscription_paused)

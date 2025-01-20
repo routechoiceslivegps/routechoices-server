@@ -36,14 +36,24 @@
                class="fw-bold">Upgrade to our paid plan!</a>
         </p>
     {% endif %}
-    {% if not club.upgraded and club.o_club %}
+    {% if club.o_club %}
         <p class="p-1 text-center"
            style="color: #000;
                   background: linear-gradient(120deg, #98d6a6 0%, #98cdd6 100%)">
             You are registered as an orienteering club, you can enjoy the site for free.
+            {% if not club.upgraded %}
             <a href="{% url 'dashboard:club:upgrade_view' club_slug=request.club.slug %}"
                style="color:var(--bs-info)"
                class="fw-bold">Upgrade to our paid plan</a> to help the site running!
+            {% endif %}
+        </p>
+    {% endif %}
+    {% if not club.o_club and club.upgraded and club.subscription_paused %}
+        <p class="p-1 text-center"
+           style="color: #000;
+                  background: linear-gradient(120deg, #98d6a6 0%, #98cdd6 100%)">
+            Your subscription is currently paused.
+            <a href="https://store.routechoices.com/billing" style="color:var(--bs-info)" target="_blank">Resume your subscription</a> to re-enable all features.
         </p>
     {% endif %}
     {% block pre_menu_content %}

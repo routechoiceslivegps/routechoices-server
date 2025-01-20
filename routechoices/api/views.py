@@ -272,6 +272,8 @@ def event_list(request):
         club = Club.objects.filter(admins=request.user, slug__iexact=club_slug).first()
         if not club:
             raise ValidationError("club not found")
+        if club.subscription_paused:
+            raise ValidationError("subscription paused")
         if not club.can_modify_events:
             raise ValidationError("free trial expired")
         name = f"Untitled {short_random_slug()}"
