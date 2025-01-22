@@ -1,4 +1,5 @@
 import bisect
+import html
 from operator import itemgetter
 
 import arrow
@@ -60,7 +61,7 @@ class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
         event = Event()
         event.slug = self.uid
         event.club = self.club
-        event.name = self.init_data.get("RACENAME", self.uid)[:255]
+        event.name = html.unescape(self.init_data.get("RACENAME", self.uid))[:255]
         event.start_date = self.get_start_time()
         event.end_date = self.get_end_time()
         event.send_interval = int(self.init_data.get("GRABINTERVAL", 10))
