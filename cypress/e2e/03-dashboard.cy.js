@@ -317,7 +317,9 @@ context("Dashboard actions", () => {
 		cy.get("button:not([type]),button[type=submit]").first().click();
 		cy.wait("@eventSubmit").then(({ request, response }) => {
 			expect(response.statusCode).to.eq(302);
-			expect(request.body).to.contain("&competitors-0-device=2&");
+			expect(request.body).to.contain(
+				'form-data; name="competitors-0-device"\r\n\r\n2\r\n',
+			);
 		});
 		cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
 		cy.forceVisit("/halden-sk/Jukola-2019-2nd-leg");
