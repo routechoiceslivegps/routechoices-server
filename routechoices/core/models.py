@@ -1488,6 +1488,7 @@ class Event(models.Model):
         validators=[validate_emails],
     )
     geojson_layer = models.FileField(
+        "GeoJSON Layer",
         upload_to=geojson_upload_path,
         null=True,
         blank=True,
