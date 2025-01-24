@@ -288,6 +288,11 @@ urlpatterns = [
                         views.dashboard_banner_download,
                         name="banner_download",
                     ),
+                    re_path(
+                        r"^geojson/(?P<event_id>[-0-9a-zA-Z_]{11})$",
+                        views.dashboard_geojson_download,
+                        name="geojson_download",
+                    ),
                 ],
                 "dashboard_media",
             ),

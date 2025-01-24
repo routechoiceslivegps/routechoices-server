@@ -76,7 +76,7 @@
             <h4 class="text-muted">
                 <span class="utc-offset"></span>
             </h4>
-            <form action="" method="post">
+            <form action="" method="post" enctype='multipart/form-data'>
                 {% csrf_token %}
                 {% bootstrap_form form %}
                 <h4>Extra Maps</h4>

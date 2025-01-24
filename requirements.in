@@ -28,6 +28,7 @@ djangorestframework
 drf-orjson-renderer
 drf-yasg
 geoip2
+geojson-validator
 gps-data-codec @ git+https://github.com/routechoices/gps-data-codec
 gpxpy
 pillow-jxl-plugin

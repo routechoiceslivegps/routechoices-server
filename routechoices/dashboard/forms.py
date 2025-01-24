@@ -1,3 +1,4 @@
+import json
 import math
 import os.path
 import shutil
@@ -6,6 +7,7 @@ import zipfile
 from io import BytesIO
 
 import arrow
+import geojson_validator
 import gpxpy
 from curl_cffi import requests
 from defusedxml import minidom
@@ -361,6 +363,7 @@ class EventForm(ModelForm):
             "tail_length",
             "emergency_contacts",
             "backdrop_map",
+            "geojson_layer",
             "map",
             "map_title",
         ]
@@ -463,6 +466,19 @@ class EventForm(ModelForm):
             ):
                 raise ValidationError("Map title given more than once in this event")
         return map_title
+
+    def clean_geojson_layer(self):
+        f_orig = self.cleaned_data["geojson_layer"]
+        if "geojson_layer" not in self.changed_data:
+            return f_orig
+        data = f_orig.file.read()
+        try:
+            datajson = json.loads(data)
+        except Exception:
+            raise ValidationError("Invalid JSON File")
+        if error := geojson_validator.validate_structure(datajson, check_crs=False):
+            raise ValidationError("Invalid GeoJSON File %r" % error)
+        return f_orig
 
 
 class NoticeForm(ModelForm):

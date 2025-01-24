@@ -126,6 +126,16 @@ def banner_upload_path(instance=None, file_name=None):
     return os.path.join(*tmp_path)
 
 
+def geojson_upload_path(instance=None, file_name=None):
+    tmp_path = ["geojson"]
+    time_hash = time_base32()
+    basename = instance.aid + "_" + time_hash
+    tmp_path.append(basename[0].upper())
+    tmp_path.append(basename[1].upper())
+    tmp_path.append(basename)
+    return os.path.join(*tmp_path)
+
+
 class Club(models.Model):
     aid = models.CharField(
         default=random_key,
@@ -1477,6 +1487,13 @@ class Event(models.Model):
         ),
         validators=[validate_emails],
     )
+    geojson_layer = models.FileField(
+        upload_to=geojson_upload_path,
+        null=True,
+        blank=True,
+        help_text="GeoJSON CSS Layer",
+        storage=OverwriteImageStorage(aws_s3_bucket_name=settings.AWS_S3_BUCKET),
+    )
 
     class Meta:
         ordering = ["-start_date", "name"]
@@ -1824,6 +1841,9 @@ class Event(models.Model):
 
     def get_absolute_map_url(self):
         return f"{self.club.nice_url}{self.slug}/map"
+
+    def get_geojson_url(self):
+        return f"{self.club.nice_url}{self.slug}/geojson"
 
     def get_absolute_export_url(self):
         return f"{self.club.nice_url}{self.slug}/export"

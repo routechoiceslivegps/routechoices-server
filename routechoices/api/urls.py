@@ -168,6 +168,11 @@ urlpatterns = [
                                     ]
                                 ),
                             ),
+                            path(
+                                "geojson",
+                                views.event_geojson_download,
+                                name="event_geojson_download",
+                            ),
                         ]
                     ),
                 ),

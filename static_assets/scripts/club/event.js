@@ -912,6 +912,7 @@ function RCEvent(infoURL, clockURL, locale) {
 						bgLayer = layer;
 					}
 				}
+
 				const now = clock.now();
 				eventStart = new Date(response.event.start_date);
 
@@ -1019,6 +1020,18 @@ function RCEvent(infoURL, clockURL, locale) {
 
 					displayAnouncement(response.announcement);
 					displayMaps(response.maps, true);
+
+					if (response.geojson_url) {
+						fetch(response.geojson_url, {
+							method: "GET",
+							credentials: window.local.isPrivate ? "include" : "same-origin",
+							mode: "cors",
+						})
+							.then((r) => r.json())
+							.then((geojson) => {
+								L.geoJson.css(geojson).addTo(map);
+							});
+					}
 
 					u(".main").removeClass("loading");
 					u(".sidebar").removeClass("loading");

@@ -6,7 +6,7 @@ from django.conf import settings
 from django_s3_storage.storage import S3File, S3Storage, _wrap_errors
 
 STORED_MEDIA_RE = re.compile(
-    r"^(maps|logos|banners)/[-A-Z0-9_]/[-A-Z0-9_]/([-0-9a-zA-Z_]{11})_[-a-zA-Z0-9_]+$"
+    r"^(maps|logos|banners|geojson)/[-A-Z0-9_]/[-A-Z0-9_]/([-0-9a-zA-Z_]{11})_[-a-zA-Z0-9_]+$"
 )
 
 

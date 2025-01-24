@@ -176,6 +176,7 @@ urlpatterns = [
                         ]
                     ),
                 ),
+                path("geojson", views.event_geojson_view, name="event_geojson_view"),
             ]
         ),
     ),

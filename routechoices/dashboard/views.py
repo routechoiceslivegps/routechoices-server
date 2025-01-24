@@ -1215,6 +1215,28 @@ def dashboard_banner_download(request, club_id, *args, **kwargs):
 
 
 @login_required
+def dashboard_geojson_download(request, event_id, *args, **kwargs):
+    if request.user.is_superuser:
+        event = get_object_or_404(Event, aid=event_id, geojson_layer__isnull=False)
+    else:
+        club_list = Club.objects.filter(admins=request.user)
+        event = Event.objects.filter(
+            club__in=club_list, aid=event_id, geojson_layer__isnull=False
+        ).first()
+    if not event:
+        raise Http404()
+    file_path = event.geojson_layer.name
+    return serve_from_s3(
+        settings.AWS_S3_BUCKET,
+        request,
+        file_path,
+        filename=f"{event.name}.geojson",
+        mime="application/json",
+        dl=False,
+    )
+
+
+@login_required
 @requires_club_in_session
 def event_route_upload_view(request, event_id):
     event = get_object_or_404(

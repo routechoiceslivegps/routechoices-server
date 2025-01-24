@@ -614,6 +614,9 @@ def event_detail(request, event_id):
             }
             output["maps"].append(map_data)
 
+    if event.geojson_layer:
+        output["geojson_url"] = event.get_geojson_url()
+
     headers = {"ETag": f'W/"{safe64encodedsha(json.dumps(output))}"'}
     if event.privacy == PRIVACY_PRIVATE:
         headers["Cache-Control"] = "Private"
@@ -1658,6 +1661,35 @@ def event_kmz_download(request, event_id, index="1"):
         headers=headers,
     )
     response["ETag"] = f'W/"{safe64encodedsha(kmz_data)}"'
+    response["Content-Disposition"] = set_content_disposition(filename)
+    return response
+
+
+@swagger_auto_schema(
+    method="get",
+    auto_schema=None,
+)
+@api_GET_HEAD_view
+def event_geojson_download(request, event_id):
+    event = get_object_or_404(
+        Event.objects.exclude(geojson_layer="").exclude(geojson_layer__isnull=True),
+        aid=event_id,
+    )
+    event.check_user_permission(request.user)
+    geojson_data = event.geojson_layer.file.read()
+
+    headers = {}
+    if event.privacy == PRIVACY_PRIVATE:
+        headers["Cache-Control"] = "Private"
+
+    filename = f"{event.name}.geojson"
+    response = StreamingHttpRangeResponse(
+        request,
+        geojson_data,
+        content_type="application/json",
+        headers=headers,
+    )
+    response["ETag"] = f'W/"{safe64encodedsha(geojson_data)}"'
     response["Content-Disposition"] = set_content_disposition(filename)
     return response
 
