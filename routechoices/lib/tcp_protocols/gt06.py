@@ -43,7 +43,12 @@ class GT06Connection:
                 return
 
             if header == b"\x79\x79":
-                await self.decode_extented(data_bin)
+                try:
+                    await self.decode_extented(data_bin)
+                except Exception:
+                    print(f"Error parsing data ({self.address})", flush=True)
+                    self.stream.close()
+                    return
 
             data_type = data_bin[3]
 
