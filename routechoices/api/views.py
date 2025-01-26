@@ -64,7 +64,7 @@ from routechoices.lib.helpers import (
 from routechoices.lib.other_gps_services.gpsseuranta import GpsSeurantaNet
 from routechoices.lib.other_gps_services.livelox import Livelox
 from routechoices.lib.other_gps_services.loggator import Loggator
-from routechoices.lib.s3 import serve_image_from_s3
+from routechoices.lib.s3 import serve_from_s3, serve_image_from_s3
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
 from routechoices.lib.validators import (
     validate_imei,
@@ -1676,22 +1676,20 @@ def event_geojson_download(request, event_id):
         aid=event_id,
     )
     event.check_user_permission(request.user)
-    geojson_data = event.geojson_layer.file.read()
 
     headers = {}
     if event.privacy == PRIVACY_PRIVATE:
         headers["Cache-Control"] = "Private"
 
     filename = f"{event.name}.geojson"
-    response = StreamingHttpRangeResponse(
+    return serve_from_s3(
+        settings.AWS_S3_BUCKET,
         request,
-        geojson_data,
-        content_type="application/json",
+        event.geojson_layer.file.name,
+        filename=filename,
+        mime="application/json",
         headers=headers,
     )
-    response["ETag"] = f'W/"{safe64encodedsha(geojson_data)}"'
-    response["Content-Disposition"] = set_content_disposition(filename)
-    return response
 
 
 @swagger_auto_schema(
