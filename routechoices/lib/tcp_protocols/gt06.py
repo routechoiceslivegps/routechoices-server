@@ -38,7 +38,7 @@ class GT06Connection:
 
             header = data_bin[:2]
             if header != b"\x78\x78":
-                print("Unknown protocol")
+                print(f"Unknown protocol ({header})")
                 self.stream.close()
                 return
 
