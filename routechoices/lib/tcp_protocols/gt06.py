@@ -37,17 +37,21 @@ class GT06Connection:
                 return
 
             header = data_bin[:2]
-            if header != b"\x78\x78":
+            offset = 0
+            if header not in (b"\x78\x78", b"\x79\x79"):
                 print(f"Unknown protocol ({header})")
                 self.stream.close()
                 return
 
-            data_type = data_bin[3]
+            if header == b"\x79\x79":
+                offset = 1
+
+            data_type = data_bin[3 + offset]
 
             if data_type == 0x01:
                 # IDENTIFICATION
                 try:
-                    await self.process_identification(data_bin)
+                    await self.process_identification(data_bin[offset:])
                 except Exception:
                     print(
                         f"Error parsing identification data ({self.address})",
@@ -58,7 +62,7 @@ class GT06Connection:
             elif data_type in (0x12, 0x16):
                 # LOCATION OR ALARM DATA
                 try:
-                    await self.process_data(data_bin)
+                    await self.process_data(data_bin[offset:])
                 except Exception:
                     print(f"Error parsing data ({self.address})", flush=True)
                     self.stream.close()
@@ -66,7 +70,7 @@ class GT06Connection:
             elif data_type == 0x13:
                 # HEARTBEAT
                 try:
-                    await self.process_heartbeat(data_bin)
+                    await self.process_heartbeat(data_bin[offset:])
                 except Exception:
                     print(f"Error parsing heartbeat data ({self.address})", flush=True)
                     self.stream.close()
