@@ -77,7 +77,7 @@ class GT06Connection:
 
     async def decode_extented(self, data):
         self.logger.info(
-            f"GT06 DATA, {self.aid}, self.address}: {safe64encode(data)}"
+            f"GT06 DATA, {self.aid}, {self.address}: {safe64encode(data)}"
         )
 
     async def process_identification(self, data_bin):
