@@ -53,6 +53,7 @@ from routechoices.lib.helpers import (
     epoch_to_datetime,
     general_2d_projection,
     get_current_site,
+    int_base32,
     project,
     random_device_id,
     random_key,
@@ -1844,7 +1845,7 @@ class Event(models.Model):
         return f"{self.club.nice_url}{self.slug}/map"
 
     def get_geojson_url(self):
-        return f"{self.club.nice_url}{self.slug}/geojson"
+        return f"{self.club.nice_url}{self.slug}/geojson?v={int_base32(int(self.modification_date.timestamp()))}"
 
     def get_absolute_export_url(self):
         return f"{self.club.nice_url}{self.slug}/export"
