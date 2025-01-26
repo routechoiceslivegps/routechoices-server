@@ -76,8 +76,10 @@ class GT06Connection:
                     return
 
     async def decode_extented(self, data):
+        if not self.imei:
+            raise Exception(f"Data from unknown device ({self.address})")
         self.logger.info(
-            f"GT06 DATA, {self.aid}, {self.address}: {safe64encode(data)}"
+            f"GT06 DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data)}"
         )
 
     async def process_identification(self, data_bin):
