@@ -44,6 +44,7 @@ class GT06Connection:
                 return
 
             if header == b"\x79\x79":
+                print("yy")
                 offset = 1
 
             data_type = data_bin[3 + offset]
