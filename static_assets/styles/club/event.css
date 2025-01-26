@@ -415,3 +415,25 @@
 	mix-blend-mode: exclusion;
 	filter: invert(1);
 }
+
+.map-marker {
+	background-image: url(../../img/markers-sprite.png);
+	background-repeat: no-repeat;
+	background-position: left top;
+}
+
+.map-marker.start-icon {
+	background-position: 0 -144px;
+}
+
+.map-marker.end-icon {
+	background-position: -24px -144px;
+}
+
+.map-marker.waypoint {
+	background-position: -48px -144px;
+}
+
+.map-marker-sprite.error-icon {
+	background-position: -192px -144px;
+}
