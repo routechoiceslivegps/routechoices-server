@@ -31,7 +31,7 @@ class GT06Connection:
             try:
                 data_bin = b""
                 while not data_bin:
-                    data_bin = await self.stream.read_until(b"\r\n", 255)
+                    data_bin = await self.stream.read_until(b"\r\n", 65536)
             except Exception:
                 self.stream.close()
                 return
