@@ -36,7 +36,7 @@ class GT06Connection:
             except Exception:
                 self.stream.close()
                 return
-
+            print(f"data from gt06 {safe64encode(data_bin)}")
             header = data_bin[:2]
             if header not in (b"\x78\x78", b"\x79\x79"):
                 print(f"Unknown protocol ({header})")
