@@ -46,10 +46,9 @@ class GT06Connection:
             if header == b"\x79\x79":
                 try:
                     await self.decode_extented(data_bin)
-                except Exception as e:
+                except Exception:
                     print(f"Error parsing data ({self.address})", flush=True)
                     self.stream.close()
-                    raise e
                     return
                 continue
 
