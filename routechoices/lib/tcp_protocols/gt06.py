@@ -116,7 +116,7 @@ class GT06Connection:
                     print("1 locations wrote to DB", flush=True)
 
                 offset += 4 + pck_len
-        elif data_type == 0x32:
+        elif data_type in (0x32, 0x33):
             pck_data = data[offset:]
             date_bin = pck_data[0:6]
             year, month, day, hours, minutes, seconds = unpack(">BBBBBB", date_bin)
@@ -125,6 +125,10 @@ class GT06Connection:
                 f"{year}-{month:02}-{day:02}T{hours:02}:{minutes:02}:{seconds:02}Z"
             )
 
+            serial_number = pck_data[-6:-4]
+            data_to_send = b"\x00\x05" + data_type.to_bytes() + serial_number
+            checksum = pack(">H", crc16(data_to_send))
+            await self.stream.write(b"\x79\x79" + data_to_send + checksum + b"\r\n")
             if pck_data[6] == 0x00:
                 return
 
