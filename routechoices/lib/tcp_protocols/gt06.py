@@ -81,6 +81,8 @@ class GT06Connection:
                     print(f"Error parsing heartbeat data ({self.address})", flush=True)
                     self.stream.close()
                     return
+            else:
+                self.logger.info(f"Unknown data type {data_type.to_bytes()}: {safe64encode(data_bin)}")
 
     async def decode_extented(self, data):
         if not self.imei:
