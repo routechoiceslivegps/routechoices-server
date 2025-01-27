@@ -1493,7 +1493,7 @@ class Event(models.Model):
         upload_to=geojson_upload_path,
         null=True,
         blank=True,
-        help_text="GeoJSON CSS Layer",
+        help_text="A GeoJSON CSS file. See https://geojson.io",
         storage=OverwriteImageStorage(aws_s3_bucket_name=settings.AWS_S3_BUCKET),
     )
 

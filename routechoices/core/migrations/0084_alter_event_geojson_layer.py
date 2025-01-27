@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name="geojson_layer",
             field=models.FileField(
                 blank=True,
-                help_text="GeoJSON CSS Layer",
+                help_text="A GeoJSON CSS file. See https://geojson.io",
                 null=True,
                 storage=routechoices.lib.storages.OverwriteImageStorage(
                     aws_s3_bucket_name="routechoices"

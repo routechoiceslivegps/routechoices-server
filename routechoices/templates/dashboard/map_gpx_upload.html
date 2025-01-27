@@ -4,6 +4,9 @@
     <div class="row">
         <div class="col-12">
             <h1>Upload GPX</h1>
+            <div class="alert alert-warning" role="alert">
+                This method is deprecated, we now recommend using a GeoJSON file within your event.
+            </div>
             <form action="" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {% bootstrap_form form %}
