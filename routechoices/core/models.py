@@ -1011,8 +1011,8 @@ class Map(models.Model):
             map_pts = simplify_line(
                 [new_map.wsg84_to_map_xy(pt[0], pt[1], round_values=True) for pt in pts]
             )
-            draw.line(map_pts, (255, 255, 255, 200), 3 * res_scale, joint="curve")
-            draw.line(map_pts, line_color, 2 * res_scale, joint="curve")
+            draw.line(map_pts, (255, 255, 255, 200), 22 * res_scale, joint="curve")
+            draw.line(map_pts, line_color, 16 * res_scale, joint="curve")
         for pt in waypoints:
             map_pt = new_map.wsg84_to_map_xy(pt[0], pt[1], round_values=True)
             widths = [66, 63, 11, 8]
