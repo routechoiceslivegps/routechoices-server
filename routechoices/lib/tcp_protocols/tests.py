@@ -45,39 +45,12 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
         gps_data3 = bytes.fromhex(
             "797900a87000000001020035000100003300125d62bf3a0800e804b5994308814a87001d5d00340006115d62bf29000011000a012e02620000000000000001000803537601000129800002000803102608593397620003000a8901260852293397626600180002017d002b000116002c00045d6278ea0009000108000a00010b002800010b002e00040000f0c1002a00010000290004000000be0030000a000100b4000a00b402d00006c5490d0a"
         )
-        """
-        7979
-        00a8
-        70
-        0000
-        0001
-        02
-
-        0035
-        0001
-        00
-
-        0033
-        0012
-        5d62bf3a
-        0800e8
-        04b59943
-        08814a87
-        00
-        1d5d
-
-        0034
-        0006
-        115d62bf2900
-
-        0011
-        000a
-        012e0262000000000000
-
-        0001
-        0008
-        03537601000129800002000803102608593397620003000a8901260852293397626600180002017d002b000116002c00045d6278ea0009000108000a00010b002800010b002e00040000f0c1002a00010000290004000000be0030000a000100b4000a00b402d00006c5490d0a
-        """
+        gps_data4 = bytes.fromhex(
+            "7979004a321106170c1b180cc900a875580b7ab4f00010350901fe0a007c0009112424007c000912240081004efe2100c500100f1200000000000000000000000000000000000000000000bc7c900d0a"
+        )
+        gps_data5 = bytes.fromhex(
+            "7979007121000000000143757272656e7420706f736974696f6e214c61743a4e35342e3733393333322c4c6f6e3a4532352e3237333237302c436f757273653a3132362e35332c53706565643a302e303030302c4461746554696d653a323031372d30352d3236202031303a32373a3437000bbee30d0a"
+        )
         heartbeat_data = bytes.fromhex("787813134402040002000199990d0a")
         ack2_data = bytes.fromhex("787805130001e9f10d0a")
 
@@ -109,6 +82,14 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
         await asyncio.sleep(0.05)
         device = await refresh_device(device)
         self.assertEqual(device.location_count, 3)
+        await client.write(gps_data4)
+        await asyncio.sleep(0.05)
+        device = await refresh_device(device)
+        self.assertEqual(device.location_count, 4)
+        await client.write(gps_data5)
+        await asyncio.sleep(0.05)
+        device = await refresh_device(device)
+        self.assertEqual(device.location_count, 5)
         if server is not None:
             server.stop()
         if client is not None:

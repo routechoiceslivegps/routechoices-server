@@ -1,3 +1,4 @@
+import re
 from struct import pack, unpack
 
 import arrow
@@ -90,6 +91,7 @@ class GT06Connection:
         )
         data_type = data[4]
         offset = 5
+
         if data_type == 0x70:
             while offset < len(data) - 6:
                 pck_type = data[offset : offset + 2]
@@ -114,6 +116,58 @@ class GT06Connection:
                     print("1 locations wrote to DB", flush=True)
 
                 offset += 4 + pck_len
+        elif data_type == 0x32:
+            pck_data = data[offset:]
+            date_bin = pck_data[0:6]
+            year, month, day, hours, minutes, seconds = unpack(">BBBBBB", date_bin)
+            year += 2000
+            date_str = (
+                f"{year}-{month:02}-{day:02}T{hours:02}:{minutes:02}:{seconds:02}Z"
+            )
+
+            if pck_data[6] == 0x00:
+                return
+
+            lat_bin = pck_data[8:12]
+            lon_bin = pck_data[12:16]
+            flags = pck_data[17]
+
+            north = flags & 0x4
+            west = flags & 0x8
+
+            lat = unpack(">I", lat_bin)[0] / 60 / 30000
+            if not north:
+                lat *= -1
+
+            lon = unpack(">I", lon_bin)[0] / 60 / 30000
+            if west:
+                lon *= -1
+            loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
+            await add_locations(self.db_device, loc_array)
+            print("1 locations wrote to DB", flush=True)
+        elif data_type == 0x21:
+            pck_data = data[offset + 5 : -6]
+            datatxt = ""
+            if data[offset + 4] == 0x01:
+                datatxt = pck_data.decode("ascii")
+            else:
+                datatxt = pck_data.decode("utf-16be")
+            if locmatch := re.match(
+                r"^Current position!Lat:([NS])(\d+\.\d+),Lon:([WE])(\d+\.\d+),Course:\d+\.\d+,Speed:\d+\.\d+,DateTime:(\d{4}-\d{2}-\d{2}) +(\d{2}:\d{2}:\d{2})$",
+                datatxt,
+            ):
+                north = locmatch.group(1) == "N"
+                lat = float(locmatch.group(2))
+                if not north:
+                    lat = -lat
+                west = locmatch.group(3) == "W"
+                lon = float(locmatch.group(4))
+                if west:
+                    lon = -lon
+                date_str = f"{locmatch.group(5)}T{locmatch.group(6)}Z"
+                loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
+                await add_locations(self.db_device, loc_array)
+                print("1 locations wrote to DB", flush=True)
 
     async def process_identification(self, data_bin):
         self.logger.info(
@@ -179,10 +233,9 @@ class GT06Connection:
         if west:
             lon *= -1
 
-        if flags & 0x16:
-            loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
-            await add_locations(self.db_device, loc_array)
-            print("1 locations wrote to DB", flush=True)
+        loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
+        await add_locations(self.db_device, loc_array)
+        print("1 locations wrote to DB", flush=True)
 
     def _on_close(self):
         print("Client quit", flush=True)
