@@ -45,9 +45,11 @@ class GT06Connection:
             if header == b"\x79\x79":
                 try:
                     await self.decode_extented(data_bin)
-                except Exception:
+                except Exception as e:
+
                     print(f"Error parsing data ({self.address})", flush=True)
                     self.stream.close()
+                    raise e
                     return
 
             data_type = data_bin[3]
@@ -86,6 +88,32 @@ class GT06Connection:
         self.logger.info(
             f"GT06 DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data)}"
         )
+        data_type = data[4]
+        offset = 5
+        if data_type == 0x70:
+            while offset < len(data) - 6:
+                pck_type = data[offset : offset + 2]
+                pck_len = unpack(">H", data[offset + 2 : offset + 4])[0]
+                if pck_type == b"\x00\x33":
+                    pck_data = data[offset : offset + 4 + pck_len]
+                    ts = unpack(">I", pck_data[4:8])[0]
+                    lat_bin = pck_data[11:15]
+                    lon_bin = pck_data[15:19]
+                    flags = pck_data[20]
+                    north = flags & 0x4
+                    west = flags & 0x8
+
+                    lat = unpack(">I", lat_bin)[0] / 60 / 30000
+                    if not north:
+                        lat *= -1
+                    lon = unpack(">I", lon_bin)[0] / 60 / 30000
+                    if west:
+                        lon *= -1
+                    loc_array = [(ts, lat, lon)]
+                    await add_locations(self.db_device, loc_array)
+                    print("1 locations wrote to DB", flush=True)
+
+                offset += 4 + pck_len
 
     async def process_identification(self, data_bin):
         self.logger.info(
