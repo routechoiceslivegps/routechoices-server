@@ -47,11 +47,11 @@ class GT06Connection:
                 try:
                     await self.decode_extented(data_bin)
                 except Exception as e:
-
                     print(f"Error parsing data ({self.address})", flush=True)
                     self.stream.close()
                     raise e
                     return
+                continue
 
             data_type = data_bin[3]
 
