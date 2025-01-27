@@ -173,6 +173,9 @@ class GT06Connection:
                 loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
                 await add_locations(self.db_device, loc_array)
                 print("1 locations wrote to DB", flush=True)
+        else:
+            print("no position", flush=True)
+        return
 
     async def process_identification(self, data_bin):
         self.logger.info(
