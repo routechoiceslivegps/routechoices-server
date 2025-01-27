@@ -471,6 +471,8 @@ class EventForm(ModelForm):
         f_orig = self.cleaned_data["geojson_layer"]
         if "geojson_layer" not in self.changed_data:
             return f_orig
+        if not f_orig:
+            return f_orig
         data = f_orig.file.read()
         try:
             datajson = json.loads(data)
