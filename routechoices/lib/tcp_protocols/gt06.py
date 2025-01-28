@@ -30,20 +30,24 @@ class GT06Connection:
 
         while True:
             try:
-                data_bin = b""
-                while not data_bin:
-                    data_bin = await self.stream.read_until(b"\r\n", 65536)
+                header = await self.stream.read_bytes(2)
             except Exception:
                 self.stream.close()
                 return
 
-            header = data_bin[:2]
             if header not in (b"\x78\x78", b"\x79\x79"):
                 print(f"Unknown protocol ({header})")
                 self.stream.close()
                 return
 
-            if header == b"\x79\x79":
+            data_bin = header
+            try:
+                data_bin += await self.stream.read_until(b"\x0d\x0a")
+            except Exception:
+                self.stream.close()
+                return
+
+            if header[0] == 0x79:
                 try:
                     await self.decode_extented(data_bin)
                 except Exception:
