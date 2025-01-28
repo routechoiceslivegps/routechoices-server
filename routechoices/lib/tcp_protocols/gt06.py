@@ -36,7 +36,7 @@ class GT06Connection:
             except Exception:
                 self.stream.close()
                 return
-            print(f"data from gt06 {safe64encode(data_bin)}", flush=True)
+
             header = data_bin[:2]
             if header not in (b"\x78\x78", b"\x79\x79"):
                 print(f"Unknown protocol ({header})")
@@ -53,7 +53,6 @@ class GT06Connection:
                 continue
 
             data_type = data_bin[3]
-
             if data_type == 0x01:
                 # IDENTIFICATION
                 try:
@@ -82,7 +81,9 @@ class GT06Connection:
                     self.stream.close()
                     return
             else:
-                self.logger.info(f"Unknown data type {safe64encode(data_bin)}")
+                self.logger.info(
+                    f"GT06 UNKNOW DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_bin)}"
+                )
 
     async def decode_extented(self, data):
         if not self.imei:
@@ -115,8 +116,8 @@ class GT06Connection:
                     loc_array = [(ts, lat, lon)]
                     await add_locations(self.db_device, loc_array)
                     print("1 locations wrote to DB", flush=True)
-
                 offset += 4 + pck_len
+
         elif data_type in (0x32, 0x33):
             pck_data = data[offset:]
             date_bin = pck_data[0:6]
@@ -130,6 +131,7 @@ class GT06Connection:
             data_to_send = b"\x00\x05" + data_type.to_bytes() + serial_number
             checksum = pack(">H", crc16(data_to_send))
             await self.stream.write(b"\x79\x79" + data_to_send + checksum + b"\r\n")
+
             if pck_data[6] == 0x00:
                 return
 
@@ -150,6 +152,7 @@ class GT06Connection:
             loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
             await add_locations(self.db_device, loc_array)
             print("1 locations wrote to DB", flush=True)
+
         elif data_type == 0x21:
             pck_data = data[offset + 5 : -6]
             datatxt = ""
@@ -174,7 +177,7 @@ class GT06Connection:
                 await add_locations(self.db_device, loc_array)
                 print("1 locations wrote to DB", flush=True)
         else:
-            print("no position", flush=True)
+            print("Data without positions", flush=True)
         return
 
     async def process_identification(self, data_bin):
