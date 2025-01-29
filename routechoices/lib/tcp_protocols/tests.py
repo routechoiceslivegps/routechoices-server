@@ -51,6 +51,9 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
         gps_data5 = bytes.fromhex(
             "7979007121000000000143757272656e7420706f736974696f6e214c61743a4e35342e3733393333322c4c6f6e3a4532352e3237333237302c436f757273653a3132362e35332c53706565643a302e303030302c4461746554696d653a323031372d30352d3236202031303a32373a3437000bbee30d0a"
         )
+        gps_data6 = bytes.fromhex(
+            "7878222219011d092909c006b84127032b35e700054600f42425820031e80000000004e9290d0a"
+        )
         ack_data2 = bytes.fromhex("797900053200bcedd10d0a")
         heartbeat_data = bytes.fromhex("787813134402040002000199990d0a")
         ack2_data = bytes.fromhex("787805130001e9f10d0a")
@@ -93,6 +96,10 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
         await asyncio.sleep(0.05)
         device = await refresh_device(device)
         self.assertEqual(device.location_count, 5)
+        await client.write(gps_data6)
+        await asyncio.sleep(0.05)
+        device = await refresh_device(device)
+        self.assertEqual(device.location_count, 6)
         if server is not None:
             server.stop()
         if client is not None:

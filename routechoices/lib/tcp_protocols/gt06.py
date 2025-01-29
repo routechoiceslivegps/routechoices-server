@@ -68,20 +68,47 @@ class GT06Connection:
                     )
                     self.stream.close()
                     return
-            elif data_type in (0x12, 0x16):
-                # LOCATION OR ALARM DATA
-                try:
-                    await self.process_data(data_bin)
-                except Exception:
-                    print(f"Error parsing data ({self.address})", flush=True)
-                    self.stream.close()
-                    return
             elif data_type == 0x13:
                 # HEARTBEAT
                 try:
                     await self.process_heartbeat(data_bin)
                 except Exception:
                     print(f"Error parsing heartbeat data ({self.address})", flush=True)
+                    self.stream.close()
+                    return
+            elif data_type == 0x34:
+                try:
+                    await self.process_data(data_bin[4:])
+                except Exception:
+                    print(f"Error parsing data ({self.address})", flush=True)
+                    self.stream.close()
+                    return
+            elif data_type in (
+                0x10,
+                0x11,
+                0x12,
+                0x16,
+                0x17,
+                0x1A,
+                0x1E,
+                0x22,
+                0x27,
+                0x26,
+                0x2D,
+                0x31,
+                0x32,
+                0x37,
+                0xA0,
+                0xA2,
+                0xA4,
+            ):
+                self.logger.info(
+                    f"GT06 DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_bin)}"
+                )
+                try:
+                    await self.process_data(data_bin)
+                except Exception:
+                    print(f"Error parsing data ({self.address})", flush=True)
                     self.stream.close()
                     return
             else:
@@ -223,16 +250,13 @@ class GT06Connection:
         self.db_device.battery_level = battery_level
         await save_device(self.db_device)
 
-    async def process_data(self, data_bin):
+    async def process_data(self, data_bin, offset=0):
         if not self.imei:
             raise Exception(f"Data from unknown device ({self.address})")
-        self.logger.info(
-            f"GT06 DATA, {self.aid}, {self.address}, {self.imei}: {safe64encode(data_bin)}"
-        )
         date_bin = data_bin[4:10]
-        lat_bin = data_bin[11:15]
-        lon_bin = data_bin[15:19]
-        flags = data_bin[20]
+        lat_bin = data_bin[11 + offset : 15 + offset]
+        lon_bin = data_bin[15 + offset : 19 + offset]
+        flags = data_bin[20 + offset]
 
         north = flags & 0x4
         west = flags & 0x8
