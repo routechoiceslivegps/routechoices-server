@@ -25,7 +25,6 @@ class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
         self.requests = requests.Session(impersonate="chrome")
         self.uid = uid
         event_url = f"{self.GPSSEURANTA_EVENT_URL}{uid}/init.txt"
-        print(event_url)
         r = self.requests.get(event_url)
         if r.status_code != 200:
             raise EventImportError("API returned error code" + event_url)
