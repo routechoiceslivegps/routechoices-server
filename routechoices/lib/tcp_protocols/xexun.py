@@ -45,10 +45,10 @@ class XexunConnection:
                 data_raw = ""
                 while not data_raw:
                     data_bin = await self.stream.read_bytes(255, partial=True)
-                    data_raw = data_bin[:-2].decode("ascii").strip()
+                    data_raw = data_bin.decode("ascii", "ignore")
                     data_raw = re.search(r"G[PN]RMC,.+", data_raw).group(0)
                 print(f"Received data ({data_raw})", flush=True)
-                imei = re.search(r"imei:(\d+),", data_raw).group(1)
+                imei = re.search(r"imei:(\d+)(,.*)?$", data_raw).group(1)
             except Exception as e:
                 print(f"Error parsing data: {e}", flush=True)
                 self.stream.close()
