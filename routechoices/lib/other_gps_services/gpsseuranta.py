@@ -17,14 +17,16 @@ from routechoices.lib.other_gps_services.commons import (
 
 
 class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
-    GPSSEURANTA_EVENT_URL = "http://www.tulospalvelu.fi/gps/"
+    GPSSEURANTA_EVENT_URL = "https://tulospalvelu.fi/gps/"
     name = "GPS Seuranta"
     slug = "gpsseuranta"
 
     def parse_init_data(self, uid):
+        self.requests = requests.Session(impersonate="chrome")
         self.uid = uid
         event_url = f"{self.GPSSEURANTA_EVENT_URL}{uid}/init.txt"
-        r = requests.get(event_url)
+        print(event_url)
+        r = self.requests.get(event_url)
         if r.status_code != 200:
             raise EventImportError("API returned error code" + event_url)
         event_data = {"COMPETITOR": []}
@@ -94,7 +96,7 @@ class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
     def get_competitor_devices_data(self, event):
         devices_data = {}
         data_url = f"{self.GPSSEURANTA_EVENT_URL}{self.uid}/data.lst"
-        r = requests.get(data_url)
+        r = self.requests.get(data_url)
         if r.status_code == 200:
             data_raw = r.text
             for line in data_raw.split("\n"):
