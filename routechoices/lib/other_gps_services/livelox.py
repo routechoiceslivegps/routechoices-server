@@ -450,7 +450,8 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                 course_map.width = map_drawing.width
                 course_map.height = map_drawing.height
                 course_maps.append(course_map)
-        map_obj = map_obj.merge(*course_maps)
+        if course_maps:
+            map_obj = map_obj.merge(*course_maps)
         return ContentFile(map_obj.data)
 
     def get_competitor_devices_data(self, event):
