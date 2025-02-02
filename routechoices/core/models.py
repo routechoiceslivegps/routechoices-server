@@ -1088,6 +1088,8 @@ class Map(models.Model):
         return img
 
     def merge(self, *other_maps):
+        if not other_maps:
+            return self
         width, height = self.quick_size
 
         min_x = 0
