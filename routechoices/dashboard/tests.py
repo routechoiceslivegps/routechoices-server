@@ -518,7 +518,7 @@ class TestDashboard(EssentialDashboardBase):
         self.assertTrue(Event.objects.filter(slug="myevent").exists())
         event = Event.objects.get(slug="myevent")
 
-        # List event set
+        # List event
         url = self.reverse_and_check(
             "dashboard:club:event:list_view",
             "/dashboard/clubs/myclub/events/",
@@ -528,7 +528,7 @@ class TestDashboard(EssentialDashboardBase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertContains(res, "My Event")
 
-        # Edit event set
+        # Edit event
         url = self.reverse_and_check(
             "dashboard:club:event:edit_view",
             f"/dashboard/clubs/myclub/events/{event.aid}/",
@@ -551,6 +551,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-INITIAL_FORMS": 0,
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "geo_json_layer": "",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
@@ -607,6 +608,8 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-INITIAL_FORMS": 0,
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "competitors-0-short_name": "A",
+                "competitors-0-name": "Alice",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -722,6 +725,131 @@ class TestDashboard(EssentialDashboardBase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertContains(res, "invalid-feedback")
         self.assertContains(res, "URL already used by an event set.")
+
+        raster_map = Map.objects.create(
+            club=self.club,
+            name="Test map",
+            corners_coordinates=(
+                "61.45075,24.18994,61.44656,24.24721,"
+                "61.42094,24.23851,61.42533,24.18156"
+            ),
+            width=1,
+            height=1,
+        )
+        raster_map.data_uri = (
+            "data:image/png;base64,"
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6Q"
+            "AAAA1JREFUGFdjED765z8ABZcC1M3x7TQAAAAASUVORK5CYII="
+        )
+        raster_map.save()
+
+        # map appears twice
+        res = self.client.post(
+            url,
+            {
+                "name": "My event in a set",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map": raster_map.id,
+                "map_assignations-TOTAL_FORMS": 2,
+                "map_assignations-INITIAL_FORMS": 0,
+                "map_assignations-0-map": raster_map.id,
+                "map_assignations-0-title": "Alt map",
+                "map_assignations-1-map": raster_map.id,
+                "map_assignations-1-title": "Alt map 2",
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "Map assigned more than once in this event")
+
+        # map title appears twice
+        res = self.client.post(
+            url,
+            {
+                "name": "My event in a set",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map": raster_map.id,
+                "map_title": "Main map",
+                "map_assignations-TOTAL_FORMS": 2,
+                "map_assignations-INITIAL_FORMS": 0,
+                "map_assignations-0-map": raster_map.id,
+                "map_assignations-0-title": "Main map",
+                "map_assignations-1-map": raster_map.id,
+                "map_assignations-1-title": "Main map",
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "Map title given more than once in this event")
+
+        # extra map without main map
+        res = self.client.post(
+            url,
+            {
+                "name": "My event in a set",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "map_assignations-0-map": raster_map.id,
+                "map_assignations-0-title": "Main map",
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(
+            res, "Extra maps can be set only if the main map field is set first"
+        )
+
+        # competitor start time bad
+        res = self.client.post(
+            url,
+            {
+                "name": "My Event",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+                "competitors-0-start_time": "2024-01-20 00:00:00",
+                "competitors-0-name": "Alice",
+                "competitors-0-short_name": "A",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(
+            res, "Competitor start time should be during the event time"
+        )
 
     def test_edit_event_sets(self):
         # Create event set

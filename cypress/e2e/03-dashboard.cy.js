@@ -335,48 +335,5 @@ context("Dashboard actions", () => {
 		cy.forceVisit("/halden-sk/Jukola-2019-2nd-leg");
 		cy.contains("Haldin", { timeout: 20000 });
 		cy.contains("Another map", { timeout: 20000 });
-
-		// TODO: remove following tests
-		// Trigger as many errors has possible
-		cy.visit("/dashboard/clubs/halden-sk/events/new");
-
-		cy.get("#id_name").type("Jukola 2019 - 1st Leg");
-		cy.get("#id_event_set-ts-control").parent().click().wait(300);
-		cy.get("#id_event_set-ts-dropdown > .option").eq(1).click().wait(300);
-		cy.get("#id_start_date").focus().realType("2019-06-15 20:00:00");
-		cy.get("#id_end_date").focus().realType("2019-06-14 00:00:00");
-		cy.get("#id_map_assignations-0-map").select("Jukola 2019 - 1st Leg");
-		cy.get("#id_competitors-0-device-ts-control").type("10000000").wait(1000);
-		cy.get("#id_competitors-0-start_time")
-			.focus()
-			.realType("2019-06-16 21:00:10");
-		cy.get("button:not([type]),button[type=submit]").first().click();
-
-		cy.location("pathname").should(
-			"eq",
-			"/dashboard/clubs/halden-sk/events/new",
-		);
-
-		cy.contains("Name already used by another event in this event set.");
-		cy.contains("URL already used by another event.");
-		cy.contains("End Date must be after than the Start Date.");
-		cy.contains(
-			"Extra maps can be set only if the main map field is set first",
-		);
-		cy.contains("Competitor start time should be during the event time");
-
-		// trigger more errors
-		cy.get("#id_map").select("Jukola 2019 - 1st Leg");
-		cy.get("#id_map_title").type("Alt route");
-		cy.get("#id_map_assignations-0-map").select("Jukola 2019 - 1st Leg");
-		cy.get("#id_map_assignations-0-title").type("Alt route");
-		cy.get("button:not([type]),button[type=submit]").first().click();
-
-		cy.location("pathname").should(
-			"eq",
-			"/dashboard/clubs/halden-sk/events/new",
-		);
-		cy.contains("Map assigned more than once in this event");
-		cy.contains("Map title given more than once in this event");
 	});
 });

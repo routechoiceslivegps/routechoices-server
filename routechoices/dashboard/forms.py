@@ -440,10 +440,6 @@ class EventForm(ModelForm):
 
     def clean_map(self):
         raster_map = self.cleaned_data.get("map")
-        club = self.club
-        if raster_map and club.id != raster_map.club_id:
-            raise ValidationError("Map must be from the organizing club")
-
         if raster_map:
             num_maps = int(self.data.get("map_assignations-TOTAL_FORMS", 1))
             start_count_maps = int(self.data.get("map_assignations-MIN_NUM_FORMS", 0))
@@ -498,9 +494,7 @@ class ExtraMapForm(ModelForm):
 
     def clean_map(self):
         raster_map = self.cleaned_data.get("map")
-        club = self.data.get("club")
-        if club and int(club) != raster_map.club_id:
-            raise ValidationError("Map must be from the organizing club")
+
         if not self.data.get("map"):
             raise ValidationError(
                 "Extra maps can be set only if the main map field is set first"
