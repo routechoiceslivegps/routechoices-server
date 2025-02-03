@@ -140,14 +140,18 @@ context("Dashboard actions", () => {
 		cy.get("#calibration-helper-opener").click();
 		cy.wait(1000);
 
-		// TODO: possibility to continue should be off now
+		cy.get("#to-calibration-step-2-button-disabled").should("be.visible");
+		cy.get("#to-calibration-step-2-button").should("not.be.visible");
 		cy.get("#raster-map").click(70, 10);
 		cy.get("#world-map").click(70, 10);
 		cy.get("#raster-map").click(200, 10);
 		cy.get("#world-map").click(200, 10);
 		cy.get("#raster-map").click(200, 200);
+		cy.get("#to-calibration-step-2-button-disabled").should("be.visible");
+		cy.get("#to-calibration-step-2-button").should("not.be.visible");
 		cy.get("#world-map").click(200, 200);
-		// TODO: possibility to continue should be on now
+		cy.get("#to-calibration-step-2-button-disabled").should("not.be.visible");
+		cy.get("#to-calibration-step-2-button").should("be.visible");
 		cy.get("#raster-map").click(10, 200);
 		cy.get("#world-map").click(10, 200);
 

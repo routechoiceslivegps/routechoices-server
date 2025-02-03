@@ -743,36 +743,21 @@ class TestDashboard(EssentialDashboardBase):
         )
         raster_map.save()
 
-        raster_map2 = raster_map
-        raster_map2.id = None
-        raster_map2.aid = "otheraid"
-        raster_map2.save()
-        # map appears twice
-        res = self.client.post(
-            url,
-            {
-                "name": "My event in a set",
-                "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
-                "privacy": "public",
-                "tail_length": 60,
-                "send_interval": 5,
-                "backdrop_map": "blank",
-                "map": raster_map.id,
-                "map_assignations-TOTAL_FORMS": 2,
-                "map_assignations-INITIAL_FORMS": 0,
-                "map_assignations-0-map": raster_map.id,
-                "map_assignations-0-title": "Alt map",
-                "map_assignations-1-map": raster_map.id,
-                "map_assignations-1-title": "Alt map 2",
-                "competitors-TOTAL_FORMS": 1,
-                "competitors-INITIAL_FORMS": 0,
-            },
+        raster_map2 = Map.objects.create(
+            club=self.club,
+            name="Test map",
+            corners_coordinates=(
+                "61.45075,24.18994,61.44656,24.24721,"
+                "61.42094,24.23851,61.42533,24.18156"
+            ),
+            width=1,
+            height=1,
         )
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertContains(res, "invalid-feedback")
-        self.assertContains(res, "Map assigned more than once in this event")
+        raster_map2.data_uri = (
+            "data:image/png;base64,"
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6Q"
+            "AAAA1JREFUGFdjED765z8ABZcC1M3x7TQAAAAASUVORK5CYII="
+        )
         raster_map2.save()
 
         # map appears twice
@@ -853,7 +838,7 @@ class TestDashboard(EssentialDashboardBase):
         self.assertContains(res, "invalid-feedback")
         self.assertContains(res, "Map title given more than once in this event")
 
-        # map title appears twice
+        # extra map title appears twice
         res = self.client.post(
             url,
             {
