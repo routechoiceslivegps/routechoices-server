@@ -745,6 +745,34 @@ class TestDashboard(EssentialDashboardBase):
 
         raster_map2 = raster_map
         raster_map2.id = None
+        raster_map2.aid = "otheraid"
+        raster_map2.save()
+        # map appears twice
+        res = self.client.post(
+            url,
+            {
+                "name": "My event in a set",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map": raster_map.id,
+                "map_assignations-TOTAL_FORMS": 2,
+                "map_assignations-INITIAL_FORMS": 0,
+                "map_assignations-0-map": raster_map.id,
+                "map_assignations-0-title": "Alt map",
+                "map_assignations-1-map": raster_map.id,
+                "map_assignations-1-title": "Alt map 2",
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "Map assigned more than once in this event")
         raster_map2.save()
 
         # map appears twice
