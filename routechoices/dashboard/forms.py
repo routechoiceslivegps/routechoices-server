@@ -326,6 +326,8 @@ class EventSetForm(ModelForm):
         create_page = self.data.get("create_page")
         slug = self.cleaned_data.get("slug")
         if create_page:
+            if not slug:
+                raise ValidationError("URL must be set when creating a page.")
             qs = EventSet.objects.filter(
                 club=self.club, create_page=True, slug__iexact=slug
             )

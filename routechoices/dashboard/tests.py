@@ -525,6 +525,53 @@ class TestDashboard(EssentialDashboardBase):
         self.assertNotContains(res, "Tough Competition")
         self.assertContains(res, "Easy Competition")
 
+        res = self.client.post(
+            url,
+            {"name": "Easy Competition", "create_page": "on", "slug": "myeventsetslug"},
+        )
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        es.refresh_from_db()
+        self.assertEqual(es.slug, "myeventsetslug")
+        self.assertTrue(es.create_page)
+
+        res = self.client.post(
+            url, {"name": "Easy Competition", "create_page": "on", "slug": ""}
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "URL must be set when creating a page.")
+
+        url = "/dashboard/clubs/myclub/event-sets/new"
+        res = self.client.post(
+            url, {"name": "Easy Competition", "create_page": "on", "slug": "someslug"}
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "Name already used by another event set of this club.")
+
+        res = self.client.post(
+            url,
+            {"name": "Easy Competition", "create_page": "on", "slug": "myeventsetslug"},
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "URL already used by another event set.")
+
+        Event.objects.create(
+            club=self.club,
+            slug="myeventslug",
+            name="My Event",
+            start_date=arrow.get("2023-08-01T00:00:00Z").datetime,
+            end_date=arrow.get("2023-08-01T23:59:59Z").datetime,
+        )
+        res = self.client.post(
+            url,
+            {"name": "Easy Competition", "create_page": "on", "slug": "myeventslug"},
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "URL already used by an event.")
+
         # Delete event set
         url = self.reverse_and_check(
             "dashboard:club:event_set:delete_view",
