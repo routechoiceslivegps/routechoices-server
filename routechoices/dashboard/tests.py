@@ -448,6 +448,29 @@ class TestDashboard(EssentialDashboardBase):
         )
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
 
+        res = self.client.post(
+            url,
+            {
+                "name": "My Test Map",
+                "image": map_image,
+                "corners_coordinates": "61.45075,24.18994,61.44656,24.24721,61.42094,24.23851,61.42533,24.18157,123",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "Invalid format")
+        res = self.client.post(
+            url,
+            {
+                "name": "My Test Map",
+                "image": map_image,
+                "corners_coordinates": "61.45075,24.18994,61.44656,24.24721,61.42094,24.23851,61.42533,xx.18157",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "Invalid format")
+
         raster_map.refresh_from_db()
         url = raster_map.image.url
         res = self.client.get(url)
