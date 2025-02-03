@@ -168,6 +168,43 @@ class TestDashboard(EssentialDashboardBase):
         self.club.refresh_from_db()
         self.assertEqual(self.club.domain, "live.kiilat.com")
 
+        other_club = Club.objects.create(name="My other Club", slug="otherclub")
+        other_club.admins.set([self.user])
+        url = "/dashboard/clubs/otherclub/custom-domain"
+        res = self.client.post(
+            url,
+            {"domain": "live.kiilat.com"},
+            follow=True,
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(
+            res, "Domain 'live.kiilat.com' already used by another club."
+        )
+        other_club.refresh_from_db()
+        self.assertEqual(other_club.domain, "")
+        res = self.client.post(
+            url,
+            {"domain": "gps.kiilat.com"},
+            follow=True,
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(
+            res, "CNAME record for 'gps.kiilat.com' has not been set properly."
+        )
+
+        url = "/dashboard/clubs/myclub/custom-domain"
+        res = self.client.post(
+            url,
+            {"domain": ""},
+            follow=True,
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertNotContains(res, "invalid-feedback")
+        self.club.refresh_from_db()
+        self.assertEqual(self.club.domain, "")
+
     def test_change_club_logo(self):
         url = self.reverse_and_check(
             "dashboard:club:edit_view",
@@ -579,6 +616,13 @@ class TestInviteFlow(APITestCase):
                 f"Hello,\n\nA user ({self.user2.email}) has requested an invite to manage the club"
             )
         )
+
+        self.client.force_login(self.user)
+        self.client.get("/dashboard/request-invite")
+        res = self.client.post("/dashboard/request-invite", {"club": self.club.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "You are already an admin of this club.")
 
     def test_send_invite_new_user(self):
         new_user_email = "new@example.com"
