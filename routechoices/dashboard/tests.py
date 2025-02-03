@@ -487,6 +487,80 @@ class TestDashboard(EssentialDashboardBase):
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
         self.assertFalse(Map.objects.filter(id=raster_map.id).exists())
 
+    def test_edit_events(self):
+        # Create event
+        url = self.reverse_and_check(
+            "dashboard:club:event:create_view",
+            "/dashboard/clubs/myclub/events/new",
+            extra_kwargs={"club_slug": self.club.slug},
+        )
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        res = self.client.post(
+            url,
+            {
+                "name": "My Event",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        self.assertTrue(Event.objects.filter(slug="myevent").exists())
+        event = Event.objects.get(slug="myevent")
+
+        # List event set
+        url = self.reverse_and_check(
+            "dashboard:club:event:list_view",
+            "/dashboard/clubs/myclub/events/",
+            extra_kwargs={"club_slug": self.club.slug},
+        )
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "My Event")
+
+        # Edit event set
+        url = self.reverse_and_check(
+            "dashboard:club:event:edit_view",
+            f"/dashboard/clubs/myclub/events/{event.aid}/",
+            extra_kwargs={"event_id": event.aid, "club_slug": self.club.slug},
+        )
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        res = self.client.post(
+            url,
+            {
+                "name": "My Competition",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_302_FOUND)
+        res = self.client.get("/dashboard/clubs/myclub/events/")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertNotContains(res, "My Event")
+        self.assertContains(res, "My Competition")
+
+        # TODO: test validations errors
+
     def test_edit_event_sets(self):
         # Create event set
         url = self.reverse_and_check(
@@ -534,6 +608,7 @@ class TestDashboard(EssentialDashboardBase):
         self.assertEqual(es.slug, "myeventsetslug")
         self.assertTrue(es.create_page)
 
+        # test validation errors
         res = self.client.post(
             url, {"name": "Easy Competition", "create_page": "on", "slug": ""}
         )

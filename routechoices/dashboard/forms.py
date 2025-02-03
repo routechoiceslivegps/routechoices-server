@@ -445,8 +445,8 @@ class EventForm(ModelForm):
             raise ValidationError("Map must be from the organizing club")
 
         if raster_map:
-            num_maps = int(self.data.get("map_assignations-TOTAL_FORMS"))
-            start_count_maps = int(self.data.get("map_assignations-MIN_NUM_FORMS"))
+            num_maps = int(self.data.get("map_assignations-TOTAL_FORMS", 1))
+            start_count_maps = int(self.data.get("map_assignations-MIN_NUM_FORMS", 0))
             for i in range(start_count_maps, start_count_maps + num_maps):
                 if (
                     self.data.get(f"map_assignations-{i}-map")
@@ -458,8 +458,8 @@ class EventForm(ModelForm):
 
     def clean_map_title(self):
         map_title = self.cleaned_data.get("map_title")
-        num_maps = int(self.data.get("map_assignations-TOTAL_FORMS"))
-        start_count_maps = int(self.data.get("map_assignations-MIN_NUM_FORMS"))
+        num_maps = int(self.data.get("map_assignations-TOTAL_FORMS", 1))
+        start_count_maps = int(self.data.get("map_assignations-MIN_NUM_FORMS", 0))
         for i in range(start_count_maps, start_count_maps + num_maps):
             if (
                 self.data.get(f"map_assignations-{i}-title")
@@ -510,8 +510,8 @@ class ExtraMapForm(ModelForm):
             raise ValidationError("Map assigned more than once in this event")
 
         map_occurence = 0
-        num_maps = int(self.data.get("map_assignations-TOTAL_FORMS"))
-        start_count_maps = int(self.data.get("map_assignations-MIN_NUM_FORMS"))
+        num_maps = int(self.data.get("map_assignations-TOTAL_FORMS", 1))
+        start_count_maps = int(self.data.get("map_assignations-MIN_NUM_FORMS", 0))
         for i in range(start_count_maps, start_count_maps + num_maps):
             if (
                 self.data.get(f"map_assignations-{i}-map")
@@ -530,8 +530,8 @@ class ExtraMapForm(ModelForm):
             raise ValidationError("Map title given more than once in this event")
 
         title_occurence = 0
-        num_maps = int(self.data.get("map_assignations-TOTAL_FORMS"))
-        start_count_maps = int(self.data.get("map_assignations-MIN_NUM_FORMS"))
+        num_maps = int(self.data.get("map_assignations-TOTAL_FORMS", 1))
+        start_count_maps = int(self.data.get("map_assignations-MIN_NUM_FORMS", 0))
         for i in range(start_count_maps, start_count_maps + num_maps):
             if (
                 self.data.get(f"map_assignations-{i}-title")
