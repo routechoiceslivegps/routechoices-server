@@ -316,8 +316,8 @@ context("Dashboard actions", () => {
 		cy.get("#id_map_assignations-0-map").select("Another map");
 		cy.get("#id_map_assignations-0-title").type("Another map");
 		cy.get("#id_competitors-0-device-ts-control").type("10000000").wait(1000);
-		cy.get("#id_competitors-0-name").type("Mats Haldin");
-		cy.get("#id_competitors-0-short_name").type("Halden");
+		cy.get("#id_competitors-0-name").type("Björn Ekeberg");
+		cy.get("#id_competitors-0-short_name").type("🇳🇴 IL Tyrving");
 		cy.get("#id_competitors-0-start_time")
 			.focus()
 			.realType("2019-06-15 21:00:10");
@@ -333,7 +333,7 @@ context("Dashboard actions", () => {
 
 		// test the event view
 		cy.forceVisit("/halden-sk/Jukola-2019-2nd-leg");
-		cy.contains("Haldin", { timeout: 20000 });
+		cy.contains("Björn Ekeberg", { timeout: 20000 });
 		cy.contains("Another map", { timeout: 20000 });
 	});
 });
