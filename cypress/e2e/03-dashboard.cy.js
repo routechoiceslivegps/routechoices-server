@@ -139,12 +139,15 @@ context("Dashboard actions", () => {
 		cy.get("#calibration-preview-opener").should("not.be.visible");
 		cy.get("#calibration-helper-opener").click();
 		cy.wait(1000);
+
+		// TODO: possibility to continue should be off now
 		cy.get("#raster-map").click(70, 10);
 		cy.get("#world-map").click(70, 10);
 		cy.get("#raster-map").click(200, 10);
 		cy.get("#world-map").click(200, 10);
 		cy.get("#raster-map").click(200, 200);
 		cy.get("#world-map").click(200, 200);
+		// TODO: possibility to continue should be on now
 		cy.get("#raster-map").click(10, 200);
 		cy.get("#world-map").click(10, 200);
 
@@ -194,7 +197,6 @@ context("Dashboard actions", () => {
 
 		// Create Event with minimal info
 		cy.visit("/dashboard/clubs/halden-sk/events/");
-
 		cy.get("a").contains("Create new event").click();
 		cy.location("pathname").should(
 			"eq",
@@ -210,8 +212,8 @@ context("Dashboard actions", () => {
 		cy.get("#id_map").select("Jukola 2019 - 1st Leg");
 		cy.get("button:not([type]),button[type=submit]").first().click();
 
+		// Edit event we just created
 		cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
-
 		cy.get("a").contains("Jukola 2019 - 1st Leg").click();
 
 		cy.get("#csv_input").selectFile("cypress/fixtures/startlist.csv");
@@ -241,10 +243,12 @@ context("Dashboard actions", () => {
 			cy.contains("The upload of the GPX file was successful!");
 		}
 
+		// Test the event view
+		// TODO: move to own test
 		cy.forceVisit("/halden-sk/Jukola-2019-1st-leg");
 		cy.contains("Niels Christian Hellerud", { timeout: 20000 }); // in competitor list
 
-		// toggle competitor
+		//// toggle competitor
 		cy.get("#toggleAllSwitch").uncheck();
 
 		cy.get(".competitor-switch").eq(2).check();
@@ -256,35 +260,35 @@ context("Dashboard actions", () => {
 
 		cy.get("#toggleAllSwitch").check();
 
-		// change runner color
+		//// change runner color
 		cy.get(".color-tag").eq(1).click();
 		cy.contains("Select new color for Samuel Heinonen");
 		cy.get(".IroWheel").first().should("be.visible").click(50, 50);
 		cy.get("#save-color").click();
 
-		// center on runner
+		//// center on runner
 		cy.get('[aria-label="Center"]').eq(1).click();
 		cy.wait(200);
 
-		// move progress bar and focus on runner
+		//// move progress bar and focus on runner
 		cy.get("#full_progress_bar").click(50, 7);
 		cy.get(".competitor-focus-btn").eq(1).click();
 		cy.wait(500);
 
-		// toogle full route
+		//// toogle full route
 		cy.get(".competitor-highlight-btn").eq(1).click();
 		cy.get(".competitor-full-route-btn").eq(1).click();
 		cy.wait(500);
 		cy.get(".competitor-highlight-btn").eq(1).click();
 		cy.get(".competitor-full-route-btn").eq(1).click();
 
-		// random location mass start
+		//// random location mass start
 		cy.get("#real_time_button").should("have.class", "active");
 		cy.get("#map").dblclick(70, 100);
 		cy.wait(1000);
 		cy.get("#real_time_button").should("not.have.class", "active");
 
-		// Show grouping
+		//// Show grouping
 		cy.get("#options_show_button").click();
 		cy.get("#toggleClusterSwitch").click();
 		cy.get(".leaflet-control-grouping").first().contains("Group A");
@@ -293,28 +297,32 @@ context("Dashboard actions", () => {
 		cy.contains("#map", "🇫🇮 KooVee").should("not.exist");
 		cy.get("#toggleClusterSwitch").click();
 
-		// mass start simulation
+		//// mass start simulation
 		cy.get("#mass_start_button").click();
 		cy.wait(1000);
 
-		// Create Event with all fields info
+		// Create second event with all fields info
+		cy.createMap("Another map");
+		cy.intercept("POST", "/dashboard/clubs/halden-sk/events/new").as(
+			"eventSubmit",
+		);
 		cy.visit("/dashboard/clubs/halden-sk/events/new");
-
 		cy.get("#id_name").type("Jukola 2019 - 2nd Leg");
+		cy.get("#id_event_set-ts-control").parent().click().wait(300);
+		cy.get("#id_event_set-ts-dropdown > .option").eq(1).click().wait(300);
 		cy.get("#id_start_date").focus().realType("2019-06-15 21:00:00");
 		cy.get("#id_end_date").focus().realType("2019-06-16 00:00:00");
 		cy.get("#id_map").select("Jukola 2019 - 1st Leg"); // doesnt matter
+		cy.get("#id_map_assignations-0-map").select("Another map");
+		cy.get("#id_map_assignations-0-title").type("Another map");
 		cy.get("#id_competitors-0-device-ts-control").type("10000000").wait(1000);
 		cy.get("#id_competitors-0-name").type("Mats Haldin");
 		cy.get("#id_competitors-0-short_name").type("Halden");
 		cy.get("#id_competitors-0-start_time")
 			.focus()
 			.realType("2019-06-15 21:00:10");
-
-		cy.intercept("POST", "/dashboard/clubs/halden-sk/events/new").as(
-			"eventSubmit",
-		);
 		cy.get("button:not([type]),button[type=submit]").first().click();
+
 		cy.wait("@eventSubmit").then(({ request, response }) => {
 			expect(response.statusCode).to.eq(302);
 			expect(request.body).to.contain(
@@ -322,34 +330,19 @@ context("Dashboard actions", () => {
 			);
 		});
 		cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
+
+		// test the event view
 		cy.forceVisit("/halden-sk/Jukola-2019-2nd-leg");
 		cy.contains("Haldin", { timeout: 20000 });
+		cy.contains("Another map", { timeout: 20000 });
 
-		// check event can handle multiple maps
-		cy.createMap("Another map");
-		cy.visit("/dashboard/clubs/halden-sk/events/");
-		cy.get("table a").contains("Jukola 2019 - 2nd Leg").click();
-		cy.get("#id_map_assignations-0-map").select("Another map");
-		cy.get("#id_map_assignations-0-title").type("Alt route");
-		cy.intercept("POST", "/dashboard/clubs/halden-sk/events/*").as(
-			"eventSubmit",
-		);
-		cy.get("button:not([type]),button[type=submit]").first().click();
-		cy.wait("@eventSubmit").then(({ request, response }) => {
-			expect(response.statusCode).to.eq(302);
-		});
-		cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
-		cy.forceVisit("/halden-sk/Jukola-2019-2nd-leg");
-
-		cy.contains("Alt route", { timeout: 20000 });
-
+		// TODO: remove following tests
 		// Trigger as many errors has possible
 		cy.visit("/dashboard/clubs/halden-sk/events/new");
 
 		cy.get("#id_name").type("Jukola 2019 - 1st Leg");
 		cy.get("#id_event_set-ts-control").parent().click().wait(300);
 		cy.get("#id_event_set-ts-dropdown > .option").eq(1).click().wait(300);
-
 		cy.get("#id_start_date").focus().realType("2019-06-15 20:00:00");
 		cy.get("#id_end_date").focus().realType("2019-06-14 00:00:00");
 		cy.get("#id_map_assignations-0-map").select("Jukola 2019 - 1st Leg");
@@ -358,10 +351,12 @@ context("Dashboard actions", () => {
 			.focus()
 			.realType("2019-06-16 21:00:10");
 		cy.get("button:not([type]),button[type=submit]").first().click();
+
 		cy.location("pathname").should(
 			"eq",
 			"/dashboard/clubs/halden-sk/events/new",
 		);
+
 		cy.contains("Name already used by another event in this event set.");
 		cy.contains("URL already used by another event.");
 		cy.contains("End Date must be after than the Start Date.");
@@ -370,17 +365,17 @@ context("Dashboard actions", () => {
 		);
 		cy.contains("Competitor start time should be during the event time");
 
+		// trigger more errors
 		cy.get("#id_map").select("Jukola 2019 - 1st Leg");
 		cy.get("#id_map_title").type("Alt route");
 		cy.get("#id_map_assignations-0-map").select("Jukola 2019 - 1st Leg");
 		cy.get("#id_map_assignations-0-title").type("Alt route");
-
 		cy.get("button:not([type]),button[type=submit]").first().click();
+
 		cy.location("pathname").should(
 			"eq",
 			"/dashboard/clubs/halden-sk/events/new",
 		);
-
 		cy.contains("Map assigned more than once in this event");
 		cy.contains("Map title given more than once in this event");
 	});
