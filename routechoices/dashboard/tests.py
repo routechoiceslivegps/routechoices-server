@@ -559,7 +559,169 @@ class TestDashboard(EssentialDashboardBase):
         self.assertNotContains(res, "My Event")
         self.assertContains(res, "My Competition")
 
-        # TODO: test validations errors
+        # test validations errors
+
+        # free trial expired
+        self.club.creation_date = arrow.now().shift(years=-1).datetime
+        self.club.save()
+        res = self.client.post(
+            url,
+            {
+                "name": "My Competition",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(
+            res,
+            "Your 10 days free trial has now expired, you cannot create or edit events anymore.",
+        )
+
+        # subscription paused
+        self.club.upgraded = True
+        self.club.subscription_paused_at = arrow.now().shift(hours=-1).datetime
+        self.club.save()
+
+        res = self.client.post(
+            url,
+            {
+                "name": "My Competition",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(
+            res,
+            "Your subscription is currently paused, you cannot create or edit events.",
+        )
+
+        self.club.subscription_paused_at = None
+        self.club.save()
+
+        # messed up dates
+        res = self.client.post(
+            url,
+            {
+                "name": "My Competition",
+                "slug": "myevent",
+                "start_date": "2025-02-05T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "End Date must be after than the Start Date.")
+
+        # name used other event in same event set
+        es = EventSet.objects.create(
+            name="Blob",
+            club=self.club,
+            create_page=True,
+            slug="eventset-slug",
+        )
+        Event.objects.create(
+            club=self.club,
+            slug="myeventslug",
+            name="My event in a set",
+            start_date=arrow.get("2023-08-01T00:00:00Z").datetime,
+            end_date=arrow.get("2023-08-01T23:59:59Z").datetime,
+            event_set=es,
+        )
+        res = self.client.post(
+            url,
+            {
+                "name": "My event in a set",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+                "event_set": es.id,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(
+            res, "Name already used by another event in this event set."
+        )
+
+        # slug already exists in an event
+        res = self.client.post(
+            url,
+            {
+                "name": "My event in a set",
+                "slug": "myeventslug",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "URL already used by another event.")
+
+        # slug already exists in an event set
+        res = self.client.post(
+            url,
+            {
+                "name": "My event in a set",
+                "slug": "eventset-slug",
+                "start_date": "2025-02-03T00:00:00Z",
+                "end_date": "2025-02-04T00:00:00Z",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "URL already used by an event set.")
 
     def test_edit_event_sets(self):
         # Create event set
