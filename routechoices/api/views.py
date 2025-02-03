@@ -1674,6 +1674,7 @@ def event_geojson_download(request, event_id):
     event = get_object_or_404(
         Event.objects.exclude(geojson_layer="").exclude(geojson_layer__isnull=True),
         aid=event_id,
+        start_date__lt=now(),
     )
     event.check_user_permission(request.user)
 
