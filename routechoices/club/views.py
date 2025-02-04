@@ -285,7 +285,7 @@ def event_view(request, slug, **kwargs):
 
 def event_startlist_view(request, slug, **kwargs):
     bypass_resp = handle_legacy_request(
-        request, "event_export_view", kwargs.get("club_slug"), slug=slug
+        request, "event_startlist_view", kwargs.get("club_slug"), slug=slug
     )
     if bypass_resp:
         return bypass_resp
