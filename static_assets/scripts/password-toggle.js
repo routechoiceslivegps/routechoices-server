@@ -9,7 +9,7 @@
 	u(".togglePassword").on("click", function (e) {
 		u(this).find("i").toggleClass("fa-eye-slash, fa-eye");
 		u(this)
-			.parent()
+			.closest(":has(input)")
 			.find("input")
 			.each((el) => {
 				el.type = el.type === "password" ? "text" : "password";

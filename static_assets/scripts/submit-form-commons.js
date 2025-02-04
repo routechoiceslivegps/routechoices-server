@@ -8,8 +8,7 @@
 	});
 
 	u("input[name=type-confirmation]").on("keyup", function (ev) {
-		const t = u(this).parent().parent();
-		const submitBtn = t.find("#submit-btn");
+		const submitBtn = u(this).closest(":has(#submit-btn)").find("#submit-btn");
 		if (ev.target.value === "DELETE") {
 			submitBtn.attr({ disabled: false });
 		} else {

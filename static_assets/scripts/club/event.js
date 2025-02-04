@@ -335,7 +335,7 @@ function RCEvent(infoURL, clockURL, locale) {
 							checked: !!competitor.isShown,
 						})
 						.on("click", function (e) {
-							const commonDiv = u(this).parent().parent();
+							const commonDiv = u(this).closest(".competitor-card");
 							if (!e.target.checked) {
 								competitor.isShown = false;
 								competitor.focused = false;
@@ -1385,7 +1385,7 @@ function RCEvent(infoURL, clockURL, locale) {
 				}
 			} else {
 				zoomOnRunners = init;
-				u("#toggleMapSwitch").parent().parent().hide();
+				u("#toggleMapSwitch").closest("div:has(.form-check)").hide();
 				mapOpacity = 1;
 			}
 		}
@@ -2211,7 +2211,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			tailLenFormDiv.append(hourDiv).append(minuteDiv).append(secondDiv);
 
 			tailLenFormDiv.find(".tailLengthControl").on("input", (e) => {
-				const commonDiv = u(e.target).parent().parent();
+				const commonDiv = u(e.target).closest("div:has(h4)");
 				const hourInput = commonDiv.find('input[name="hours"]');
 				const minInput = commonDiv.find('input[name="minutes"]');
 				const secInput = commonDiv.find('input[name="seconds"]');

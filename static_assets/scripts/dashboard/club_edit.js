@@ -1,25 +1,21 @@
 (() => {
 	u("#id_slug").parent().find(".form-label").text("Domain Prefix");
 
-	const currentLogo = u(u("#id_logo").parent().find("div").find("div").first())
-		.find("a")
-		.attr("href");
+	const currentLogo = u("#id_logo").parent().find("div div a").attr("href");
 	if (currentLogo) {
-		u(u("#id_logo").parent().find("div").find("div").first())
-			.find("a")
+		u("#id_logo")
+			.parent()
+			.find("div div a")
 			.html(
 				`<br/><img alt="Current Logo" height="50" width="50" src="${window.local.clubNiceUrl}logo"/>`,
 			);
 	}
 
-	const currentBanner = u(
-		u("#id_banner").parent().find("div").find("div").first(),
-	)
-		.find("a")
-		.attr("href");
+	const currentBanner = u("#id_banner").parent().find("div div a").attr("href");
 	if (currentBanner) {
-		u(u("#id_banner").parent().find("div").find("div").first())
-			.find("a")
+		u("#id_banner")
+			.parent()
+			.find("div div a")
 			.html(
 				`<br/><img alt="Current Banner" height="210" width="400" src="${window.local.clubNiceUrl}banner"/>`,
 			);

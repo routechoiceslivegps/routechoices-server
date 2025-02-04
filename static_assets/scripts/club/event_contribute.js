@@ -293,7 +293,7 @@ function selectizeDeviceInput(field) {
 				new bootstrap.Tooltip(wrapper.nodes[0]);
 			} else {
 				u(el).on("click", (e) => {
-					u("#id_competitor_aid").parent().css({ display: "none" });
+					u("#id_competitor_aid").parent().hide();
 					u("#id_competitor_aid").val(u(el).attr("data-competitor-aid"));
 					u("#uploader-name").text(u(el).attr("data-competitor-name"));
 					uploadModal.show();

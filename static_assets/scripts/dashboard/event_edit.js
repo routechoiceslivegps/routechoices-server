@@ -105,12 +105,12 @@ function addCompetitor(name, shortName, startTime, deviceId) {
 
 function displayRoutechoicesListedOption(value, first) {
 	if (value === "public") {
-		u("#id_on_events_page").parent().parent().show();
+		u("#id_on_events_page").closest("div:has(.form-check)").show();
 		if (!first && window.local.clubUpgraded) {
 			u("#id_on_events_page").first().checked = true;
 		}
 	} else {
-		u("#id_on_events_page").parent().parent().hide();
+		u("#id_on_events_page").closest("div:has(.form-check)").hide();
 		u("#id_on_events_page").first().checked = false;
 	}
 }
@@ -275,9 +275,12 @@ function showLocalTime(el) {
 	if (val) {
 		let local = dayjs(val).utc(true).local().format("YYYY-MM-DD HH:mm:ss");
 		local += local === "Invalid Date" ? "" : " Local time";
-		u(el).parent().find(".local_time").text(local);
+		u(el).closest(":has(.local_time)").find(".local_time").text(local);
 	} else {
-		u(el).parent().find(".local_time").html("&ZeroWidthSpace;");
+		u(el)
+			.closest(":has(.local_time)")
+			.find(".local_time")
+			.html("&ZeroWidthSpace;");
 	}
 }
 
@@ -294,7 +297,7 @@ function showLocalTime(el) {
 		"min-width": "150px",
 		display: "inline-block",
 	});
-	u("#id_slug").parent().find(".form-label").text("URL");
+	u("#id_slug").closest(":has(.form-label)").find(".form-label").text("URL");
 	const newSlug = u("#id_name").val() === "";
 	let slugEdited = false;
 	makeFieldRandomizable("#id_slug");
@@ -544,7 +547,7 @@ function showLocalTime(el) {
 	u(tailLenFormDiv)
 		.find(".tailLengthControl")
 		.on("input", (e) => {
-			const commonDiv = u(e.target).parent().parent();
+			const commonDiv = u(e.target).closest("div:has(div input)");
 			const hourInput = commonDiv.find('input[name="hours"]');
 			const minInput = commonDiv.find('input[name="minutes"]');
 			const secInput = commonDiv.find('input[name="seconds"]');

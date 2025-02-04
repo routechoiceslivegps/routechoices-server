@@ -12,7 +12,8 @@
 		})
 		.on("input", function () {
 			this.value = this.value.replace(/[^0-9]/g, "");
-			if (this.value.length >= 6)
-				u(this).parent().parent().find("button").first().focus();
+			if (this.value.length >= 6) {
+				u(this).closest(":has(button)").find("button").first().focus();
+			}
 		});
 })();

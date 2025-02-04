@@ -8,7 +8,7 @@ const makeFieldRandomizable = (id) => {
 		);
 	u(".randomize_btn").on("click", function (e) {
 		e.preventDefault();
-		const target = u(this).parent().parent().find(".form-control");
+		const target = u(this).closest(":has(.form-control)").find(".form-control");
 		let result = "";
 		const characters = "23456789abcdefghijkmnpqrstuvwxyz";
 		const charactersLength = characters.length;
@@ -30,7 +30,7 @@ const makeFieldNowable = (el) => {
 		.find(".set_time_now_btn")
 		.on("click", function (e) {
 			e.preventDefault();
-			const target = u(this).parent().parent().find("input");
+			const target = u(this).closest(":has(input)").find("input");
 			target.val(dayjs().utc().format("YYYY-MM-DD HH:mm:ss"));
 			target.trigger("change");
 		});
@@ -46,7 +46,7 @@ const makeTimeFieldClearable = (el) => {
 		.find(".set_time_null_btn")
 		.on("click", function (e) {
 			e.preventDefault();
-			const target = u(this).parent().parent().find("input");
+			const target = u(this).closest(":has(input)").find("input");
 			target.val("");
 			target.trigger("change");
 		});
