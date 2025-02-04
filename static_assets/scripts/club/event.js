@@ -1029,7 +1029,12 @@ function RCEvent(infoURL, clockURL, locale) {
 						})
 							.then((r) => r.json())
 							.then((geojson) => {
-								L.geoJson.css(geojson).addTo(map);
+								const geojsonLayer = L.geoJson.css(geojson).addTo(map);
+								map.fitBounds(geojsonLayer.getBounds(), {
+									maxZoom: 15,
+									padding: [25, 25],
+								});
+								zoomOnRunners = false;
 							});
 					}
 
