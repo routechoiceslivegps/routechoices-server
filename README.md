@@ -4,7 +4,7 @@
 Routechoices server
 ===================
 
-Server applications for the Routechoices.com live GPS tracking solution dedicatged to orienteering sports.
+Server applications for the Routechoices.com live GPS tracking solution for orienteering and other outdoor sports.
 
 It includes:
 

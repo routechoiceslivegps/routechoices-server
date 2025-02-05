@@ -28,7 +28,7 @@
     {% else %}
         | {{ site.name }}
     {% endif %}
-    | Live GPS tracking for orienteering
+    | Live GPS tracking
 {% endblock head_title %}
 
 {% block head_description %}
@@ -40,7 +40,7 @@
     {% if club %}
         by {{ club.name }}
     {% else %}
-        on {{ site.name }}, an easy to use and powerful live GPS tracking solution for orienteering.
+        on {{ site.name }}, an easy to use and powerful live GPS tracking solution designed for orienteering and outdoor events.
     {% endif %}
 {% endblock head_description %}
 
@@ -52,7 +52,7 @@
     <meta property="og:title"
           content="Events{% if club %} by {{ club.name }} | Powered by {{ site.name }}{% else %} on {{ site.name }}{% endif %}" />
     <meta property="og:description"
-          content="{% if event_set_page %}{{ event_set.name }}{% else %}List of public events{% endif %}{% if club %} by {{ club.name }}{% else %} on {{ site.name }}, an easy to use and powerful live GPS tracking solution for orienteering events.{% endif %}" />
+          content="{% if event_set_page %}{{ event_set.name }}{% else %}List of public events{% endif %}{% if club %} by {{ club.name }}{% else %} on {{ site.name }}, an easy to use and powerful live GPS tracking solution designed for orienteering and outdoor events.{% endif %}" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="{{ site.name }}" />
