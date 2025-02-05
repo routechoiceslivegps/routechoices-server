@@ -261,4 +261,37 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 			alert("Error parsing your KMZ file!");
 		}
 	};
+
+	const hashParams = new URLSearchParams(document.location.hash.slice(1));
+	if (hashParams.has("geojson")) {
+		try {
+			fetch(hashParams.get("geojson"), {
+				method: "GET",
+				credentials: "include",
+				mode: "cors",
+			})
+				.then((r) => r.json())
+				.then((geojson) => {
+					const geojsonLayer = L.geoJson.css(geojson).addTo(map);
+					map.fitBounds(geojsonLayer.getBounds(), {
+						maxZoom: 15,
+						padding: [25, 25],
+					});
+				});
+		} catch (e) {
+			console.log(e);
+		}
+	}
+	if (hashParams.has("latlon")) {
+		const latlon = hashParams.get("latlon");
+		const [latRaw, lonRaw] = latlon.split(",", 2);
+		try {
+			const lat = Number.parseFloat(latRaw);
+			const lon = Number.parseFloat(lonRaw);
+			map.addLayer(L.marker([lat, lon]));
+			map.setView([lat, lon], 10);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 })();

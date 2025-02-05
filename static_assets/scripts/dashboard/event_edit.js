@@ -571,6 +571,20 @@ function showLocalTime(el) {
 	});
 	displayRoutechoicesListedOption(u("#id_privacy").val(), true);
 
+	const currentGeoJson = u("#id_geojson_layer")
+		.parent()
+		.find("div div a")
+		.attr("href");
+	if (currentGeoJson) {
+		u("#id_geojson_layer")
+			.parent()
+			.find("div div a")
+			.text("Download")
+			.after(
+				`<a class="ms-2" href="https://map.routechoices.com/#geojson=${currentGeoJson}" target="_blank">Preview<a/>`,
+			);
+	}
+
 	u("form").on("submit", (e) => {
 		u("#submit-btn").attr({ disabled: true });
 		u("button[name='save_continue']").addClass("disabled");

@@ -696,7 +696,7 @@ class DeviceAdmin(admin.ModelAdmin):
             return "-"
         lat, lon = round(lat, 5), round(lon, 5)
         return format_html(
-            '<a href="http://www.openstreetmap.org/?mlat={}&mlon={}" target="_blank">{}, {}</a>',
+            '<a href="https://map.routechoices.com/?latlon={},{}" target="_blank">{}, {}</a>',
             lat,
             lon,
             lat,
@@ -812,7 +812,7 @@ class MapAdmin(admin.ModelAdmin):
         lat = round(center["lat"], 5)
         lon = round(center["lon"], 5)
         return format_html(
-            '<a href="http://www.openstreetmap.org/?mlat={}&mlon={}" target="_blank">{}, {}</a>',
+            '<a href="https://map.routechoices.com/?latlon={},{}" target="_blank">{}, {}</a>',
             lat,
             lon,
             lat,

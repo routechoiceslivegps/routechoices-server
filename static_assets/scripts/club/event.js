@@ -669,7 +669,7 @@ function RCEvent(infoURL, clockURL, locale) {
 				text,
 				callback: () => {
 					window.open(
-						`https://www.openstreetmap.org/?mlat=${e.latlng.lat}&mlon=${e.latlng.lng}`,
+						`https://map.routechoices.com/?latlon=${e.latlng.lat},${e.latlng.lng}`,
 					);
 				},
 			});
