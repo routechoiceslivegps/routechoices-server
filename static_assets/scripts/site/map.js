@@ -262,7 +262,7 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 		}
 	};
 
-	const hashParams = new URLSearchParams(document.location.hash.slice(1));
+	const hashParams = new URLSearchParams(window.location.search.slice(1));
 	if (hashParams.has("geojson")) {
 		try {
 			fetch(hashParams.get("geojson"), {
