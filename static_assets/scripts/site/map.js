@@ -104,18 +104,6 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 		});
 	});
 
-	// Center on load
-	fetch(`${window.local.apiRoot}check-latlon`)
-		.then((r) => r.json())
-		.then((data) => {
-			if (data.status === "success") {
-				map.setView([data.lat, data.lon], 10, {
-					duration: 0,
-				});
-			}
-		})
-		.catch();
-
 	// KMZ uploader
 	L.Control.KMZUploader = L.Control.extend({
 		onAdd: (map) => {
@@ -293,5 +281,18 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 		} catch (e) {
 			console.log(e);
 		}
+	}
+	if (!hashParams.has("latlon") && !hashParams.has("geojson")) {
+		// Center on load if no args
+		fetch(`${window.local.apiRoot}check-latlon`)
+			.then((r) => r.json())
+			.then((data) => {
+				if (data.status === "success") {
+					map.setView([data.lat, data.lon], 10, {
+						duration: 0,
+					});
+				}
+			})
+			.catch();
 	}
 })();
