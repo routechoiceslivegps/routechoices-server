@@ -421,6 +421,7 @@
 	background-image: url(../../img/markers-sprite.png);
 	background-repeat: no-repeat;
 	background-position: left top;
+	z-index: -1 !important;
 }
 
 .map-marker.start-icon {
