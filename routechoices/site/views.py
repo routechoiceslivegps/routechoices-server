@@ -58,15 +58,15 @@ def pricing_page(request):
 def pay_view(request):
     if request.method != "POST":
         return redirect(reverse("site:pricing_view"))
-    price = request.POST.get("price-per-month", "4.99")
+    price = request.POST.get("price-per-month", "7.99")
     try:
-        price = max(Decimal("4.99"), Decimal(price))
+        price = max(Decimal("7.99"), Decimal(price))
     except Exception:
-        price = Decimal("4.99")
+        price = Decimal("7.99")
     yearly_payment = request.POST.get("per-year", False) == "on"
     final_price = price * Decimal("100")
     if yearly_payment:
-        final_price *= 12
+        final_price *= Decimal("12")
     variants = settings.LEMONSQUEEZY_PRODUCTS_VARIANTS
     variant_id = variants[1] if yearly_payment else variants[0]
     body = {

@@ -2,9 +2,9 @@
 	const onPriceChange = (e) => {
 		const perMonthRaw = u(e.target).val();
 		let perMonth = Number.parseFloat(perMonthRaw);
-		if (Number.isNaN(perMonth) || perMonth < 4.99) {
-			u(e.target).val("4.99");
-			perMonth = 4.99;
+		if (Number.isNaN(perMonth) || perMonth < 7.99) {
+			u(e.target).val("7.99");
+			perMonth = 7.99;
 		}
 		if (`${perMonth}` !== perMonthRaw) {
 			u(e.target).val(`${perMonth}`);
