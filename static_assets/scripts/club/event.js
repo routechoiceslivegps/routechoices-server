@@ -1022,6 +1022,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					displayMaps(response.maps, true);
 
 					if (response.geojson_url) {
+						zoomOnRunners = false;
 						fetch(response.geojson_url, {
 							method: "GET",
 							credentials: window.local.isPrivate ? "include" : "same-origin",
@@ -1030,11 +1031,14 @@ function RCEvent(infoURL, clockURL, locale) {
 							.then((r) => r.json())
 							.then((geojson) => {
 								const geojsonLayer = L.geoJson.css(geojson).addTo(map);
-								map.fitBounds(geojsonLayer.getBounds(), {
-									maxZoom: 15,
-									padding: [25, 25],
-								});
-								zoomOnRunners = false;
+								if (
+									!(Array.isArray(response.maps) && response.maps.length > 0)
+								) {
+									map.fitBounds(geojsonLayer.getBounds(), {
+										maxZoom: 15,
+										padding: [25, 25],
+									});
+								}
 							});
 					}
 
