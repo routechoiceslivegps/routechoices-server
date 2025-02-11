@@ -1,0 +1,240 @@
+{% load compress static %}<!DOCTYPE html>
+<html>
+<head>
+    <title>GeoJSON CSS Guide</title>
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}?v=2024a">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+          content="A guide on how to setup your GeoJSON files for routechoices.com">
+    <meta name="keywords" content="geojson,map,layers,maps" />
+    {% compress css %}
+    <link rel="stylesheet"
+          href="{% static '/vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
+    <link rel="stylesheet"
+          href="{% static '/vendor/leaflet-1.9.4/leaflet.css' %}" />
+    <link rel="stylesheet"
+          href="{% static 'styles/club/event.css' %}" />
+    {% endcompress %}
+</head>
+<body>
+    <div class="container">
+        <h1>Routechoices.com GeoJSON CSS Guide</h1>
+        <div class="mb-3">
+            <p>GeoJSON allows you to draw features on your map.</p>
+            <p>You can combine multiple lines and points under the features element of the JSON.</p>
+            <p>Add the style informations you want for each feature.</p>
+            <p>Find more info at <a href="//geojson.io" target="_blank" rel="noopener noreferrer">GeoJSON.io</a></p>
+        </div>
+        <h2>Quick Examples</h2>
+        <div class="row">
+            <h3>Polygons</h3>
+            <div class="col-6">
+                <pre style="background: #eee">{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "style": {
+        "color": "#CC0000",
+        "weight": 2,
+        "opacity": 1,
+        "dashArray": "3, 5",
+        "fillColor": "#0000CC",
+        "fill-opacity": 0.6
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [37.61489152908325,55.752586015356876],
+          [37.61577129364014,55.7539867694403],
+          [37.616543769836426,55.75506145183324],
+          [37.6177453994751,55.75443355110991],
+          [37.619526386260986,55.753491681072205],
+          [37.62143611907959,55.75252563689488],
+          [37.62117862701416,55.75211506087468],
+          [37.61875391006469,55.750762544596384],
+          [37.61813163757324,55.749989657097],
+          [37.61302471160889,55.749035602973365],
+          [37.612552642822266,55.74907183330299],
+          [37.6134967803955,55.750641781933986],
+          [37.61489152908325,55.752586015356876]
+        ]]
+      }
+    }
+  ]
+}</pre>
+            </div>
+            <div class="col-6">
+                <div class="map"  style="height: 500px"></div>
+            </div>
+        </div>
+        <div class="row">
+            <h3>Lines</h3>
+            <div class="col-6">
+                <pre style="background: #eee">{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "style": {
+        "color": "#0099ff",
+        "weight": 9,
+        "opacity": 0.7
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [4.364140,50.84248],
+          [4.564510,50.84241],
+          [4.464510,51.04241],
+        ]
+      }
+    }
+  ]
+}</pre>
+            </div>
+            <div class="col-6">
+                <div class="map"  style="height: 500px"></div>
+            </div>
+        </div>
+        <div class="row">
+            <h3>Points</h3>
+            <div class="col-6">
+                <pre style="background: #eee">{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "style": {
+        "icon": {
+          "className": "map-marker start-icon"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.36414,50.84248]
+      }
+    }
+  ]
+}</pre>
+            </div>
+            <div class="col-6">
+                <div class="map" style="height: 500px"></div>
+            </div>
+            <div>
+                <p>"style" > "icon" > "className" can be set to one of the following:</p>
+                <ul>
+                    <li>
+                        map-marker start-icon
+                    </li>
+                    <li>
+                        map-marker end-icon
+                    </li>
+                    <li>
+                        map-marker waypoint
+                    </li>
+                    <li>
+                        map-marker waypoint grey
+                    </li>
+                    <li>
+                        map-marker waypoint red
+                    </li>
+                    <li>
+                        map-marker waypoint orange
+                    </li>
+                    <li>
+                        map-marker waypoint green
+                    </li>
+                    <li>
+                        map-marker waypoint dark-green
+                    </li>
+                    <li>
+                        map-marker waypoint dark-green
+                    </li>
+                    <li>
+                        distance-marker warning
+                    </li>
+                    <li>
+                        distance-marker red
+                    </li>
+                    <li>
+                        distance-marker green
+                    </li>
+                    <li>
+                        map-marker cat1
+                    </li>
+                    <li>
+                        map-marker cat2
+                    </li>
+                    <li>
+                        map-marker cat3
+                    </li>
+                    <li>
+                        map-marker cat4
+                    </li>
+                    <li>
+                        map-marker cathc
+                    </li>
+                    <li>
+                        distance-marker d1
+                    </li>
+                    <li>
+                        distance-marker d2
+                    </li>
+                    <li>
+                        distance-marker d3
+                    </li>
+                    <li>
+                        ...
+                    </li>
+                    <li>
+                        distance-marker d9
+                    </li>
+                    <li>
+                        distance-marker d10
+                    </li>
+                    <li>
+                        distance-marker d15
+                    </li>
+                    <li>
+                        distance-marker d20
+                    </li>
+                    <li>
+                        ...
+                    </li>
+                    <li>
+                        distance-marker d95
+                    </li>
+                    <li>
+                        distance-marker d100
+                    </li>
+                    <li>
+                        distance-marker d110
+                    </li>
+                    <li>
+                        distance-marker d120
+                    </li>
+                    <li>
+                        ...
+                    </li>
+                    <li>
+                        distance-marker d490
+                    </li>
+                    <li>
+                        distance-marker d500
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% compress js %}
+<script src="{% static '/vendor/leaflet-1.9.4/leaflet.js' %}"></script>
+<script src="{% static '/vendor/leaflet-geojson-css-0.0.1/leaflet-geojson-css.min.js' %}"></script>
+<script src="{% static '/scripts/site/geojson.js' %}"></script>
+{% endcompress %}
+</body>
+</html>

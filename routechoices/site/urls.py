@@ -19,6 +19,11 @@ urlpatterns = [
         name="trackers_view",
     ),
     re_path(
+        r"^guide/geojson/?$",
+        TemplateView.as_view(template_name="site/geojson.html"),
+        name="geojson_guide_view",
+    ),
+    re_path(
         r"^privacy-policy/?$",
         TemplateView.as_view(template_name="site/privacy_policy.html"),
         name="privacy_policy_view",

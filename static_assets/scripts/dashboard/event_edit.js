@@ -573,12 +573,12 @@ function showLocalTime(el) {
 
 	const currentGeoJson = u("#id_geojson_layer")
 		.parent()
-		.find("div div a")
+		.find("div div.col-auto a")
 		.attr("href");
 	if (currentGeoJson) {
 		u("#id_geojson_layer")
 			.parent()
-			.find("div div a")
+			.find("div div.col-auto a")
 			.text("Download")
 			.after(
 				`<a class="ms-2" href="https://map.routechoices.com/?geojson=${currentGeoJson}" target="_blank">Preview<a/>`,
