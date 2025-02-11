@@ -498,38 +498,41 @@
 .distance-marker.d35 {
 	background-position: -96px -24px;
 }
-.distance-marker.d45 {
+.distance-marker.d40 {
 	background-position: -120px -24px;
 }
-.distance-marker.d50 {
+.distance-marker.d45 {
 	background-position: -144px -24px;
 }
-.distance-marker.d55 {
+.distance-marker.d50 {
 	background-position: -168px -24px;
 }
-.distance-marker.d60 {
+.distance-marker.d55 {
 	background-position: -192px -24px;
 }
-.distance-marker.d65 {
+.distance-marker.d60 {
 	background-position: -216px -24px;
 }
-.distance-marker.d70 {
+.distance-marker.d65 {
 	background-position: -240px -24px;
 }
-.distance-marker.d75 {
+.distance-marker.d70 {
 	background-position: -264px -24px;
 }
-.distance-marker.d80 {
+.distance-marker.d75 {
 	background-position: -288px -24px;
 }
-.distance-marker.d85 {
+.distance-marker.d80 {
 	background-position: -312px -24px;
 }
-.distance-marker.d90 {
+.distance-marker.d85 {
 	background-position: -336px -24px;
 }
-.distance-marker.d95 {
+.distance-marker.d90 {
 	background-position: -360px -24px;
+}
+.distance-marker.d95 {
+	background-position: -384px -24px;
 }
 .distance-marker.d100 {
 	background-position: 0px -48px;
