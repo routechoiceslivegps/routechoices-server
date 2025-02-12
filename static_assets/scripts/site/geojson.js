@@ -420,6 +420,19 @@ const geoJSONs = [
 					},
 				},
 			},
+			{
+				"type": "Feature",
+				"properties": {},
+				"geometry": {
+					"type": "Point",
+					"coordinates": [4.44,50.83248]
+				},
+				"style": {
+					"icon": {
+						"className": "leaflet-fa-marker fa-solid fa-map-pin"
+					}
+				}
+			},
 		],
 	},
 ];
