@@ -9,4 +9,3 @@ workers = 4
 threads = 3
 max_requests = 10000
 max_requests_jitter = 500
-limit_request_line = 0
