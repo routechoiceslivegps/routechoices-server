@@ -95,7 +95,6 @@ PyPi Packages:
     python-magic                MIT License
     sewer                       MIT License
     tornado                     Apache Software License
-    uWSGI                       GNU General Public License v2 or later (GPLv2+)
 
 Fonts:
 ------

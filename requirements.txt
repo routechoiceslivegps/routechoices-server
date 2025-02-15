@@ -49,6 +49,7 @@ geoip2==4.8.1
 geojson-validator==0.6.0
 gps-data-codec @ git+https://github.com/routechoices/gps-data-codec@8761135f92fe8e6fff9efe2c4bfb542d28dd16f2
 gpxpy==1.6.2
+gunicorn==23.0.0
 idna==3.10
 inflection==0.5.1
 jmespath==1.0.1
@@ -99,7 +100,6 @@ types-python-dateutil==2.9.0.20241206
 typing-extensions==4.12.2
 uritemplate==4.1.1
 urllib3==2.3.0
-uwsgi==2.0.28
 webauthn==1.11.1
 webencodings==0.5.1
 yarl==1.18.3

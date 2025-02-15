@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 Type=Simple
-ExecStart=/apps/routechoices-server/env/bin/uwsgi --ini /apps/routechoices-server/bin/uwsgi.ini
+ExecStart=/apps/routechoices-server/env/bin/gunicorn -c /apps/routechoices-server/bin/gunicorn.conf.py
 Restart=always
 Environment="PATH=/apps/routechoices-server/env/bin/"
 WorkingDirectory=/apps/routechoices-server/
