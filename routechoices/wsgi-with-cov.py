@@ -8,6 +8,7 @@ https://docs.djangoproject.com/en/2.1/howto/deployment/wsgi/
 """
 
 import atexit
+import sys
 
 import coverage
 
@@ -18,7 +19,7 @@ from wsgi import application  # noqa
 
 
 def save_coverage():
-    print("Saving coverage", flush=True)
+    print("Saving coverage", flush=True, file=sys.stderr)
     cov.stop()
     cov.save()
 
