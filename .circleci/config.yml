@@ -86,10 +86,10 @@ jobs:
             TZ=Europe/Helsinki pnpm cypress run --browser chrome
       - run: docker kill --signal=HUP rc_django
       - run: sleep 5
-      - run: ./dc exec django coverage xml
-      - codecov/upload:
-          file: coverage.xml
-          flags: e2e
+      # - run: ./dc exec django coverage xml
+      # - codecov/upload:
+      #    file: coverage.xml
+      #    flags: e2e
       - store_artifacts:
           path: cypress/videos
       - store_artifacts:
