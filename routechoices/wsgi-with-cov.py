@@ -8,16 +8,13 @@ https://docs.djangoproject.com/en/2.1/howto/deployment/wsgi/
 """
 
 import atexit
-import os
 
 import coverage
-from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "routechoices.settings")
-os.environ["HTTPS"] = "on"
 cov = coverage.coverage()
 cov.start()
-application = get_wsgi_application()
+
+from wsgi import application  # noqa
 
 
 def save_coverage():
