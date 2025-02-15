@@ -71,4 +71,4 @@ services:
       - db
       - minio
       - smtp
-    command: ['gunicorn', '-c', 'bin/gunicorn.conf.py', '--reload', 'routechoices.${WSGI_FILE:-wsgi}:application']
+    command: ["gunicorn", "-c", "bin/gunicorn.conf.py", "--reload", "routechoices.${WSGI_FILE:-wsgi}:application", "--workers", "${NUM_PROCESSES:-3}", "--threads", "${NUM_PROCESSES:-3}"]

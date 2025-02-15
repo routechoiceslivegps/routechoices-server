@@ -21,7 +21,7 @@ application = get_wsgi_application()
 
 
 def save_coverage():
-    print("Saving coverage")
+    print("Saving coverage", flush=True)
     cov.stop()
     cov.save()
 
