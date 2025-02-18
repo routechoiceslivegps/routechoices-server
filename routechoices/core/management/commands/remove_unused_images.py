@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from routechoices.core.models import Club, Map
+from routechoices.core.models import Club, Event, Map
 from routechoices.lib.s3 import get_s3_client, s3_delete_key
 
 
@@ -57,11 +57,19 @@ class Command(BaseCommand):
                 .values_list("banner", flat=True)
             )
         )
+        self.image_paths.update(
+            set(
+                Event.objects.all()
+                .exclude(geojson_layer__isnull=True)
+                .exclude(geojson_layer="")
+                .values_list("geojson_layer", flat=True)
+            )
+        )
 
         self.n_image_removed = 0
         self.n_image_keeped = 0
         self.s3 = get_s3_client()
-        for directory in ("maps", "logos", "banners"):
+        for directory in ("banners", "geojson", "logos", "maps"):
             for filename in self.scan_directory(directory):
                 self.process_image_file(filename, force)
 
