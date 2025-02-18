@@ -192,6 +192,14 @@
 		#fff;
 }
 
+.markerText {
+	color: #000;
+	text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0
+		#fff;
+	font-weight: 700;
+	font-family: "Atkinson Hyperlegible", sans-serif;
+}
+
 .runner-icon.runner-focused > span {
 	padding: 0px 5px;
 	background: #fff;
