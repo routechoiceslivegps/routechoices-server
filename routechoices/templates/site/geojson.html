@@ -122,123 +122,133 @@
       }
     }
   ]
-}</pre><p>"style" > "icon" > "className" can be set to one of the following:</p>
-<ul>
-    <li>
-        map-marker start-icon
-    </li>
-    <li>
-        map-marker end-icon
-    </li>
-    <li>
-        map-marker waypoint
-    </li>
-    <li>
-        map-marker waypoint grey
-    </li>
-    <li>
-        map-marker waypoint red
-    </li>
-    <li>
-        map-marker waypoint orange
-    </li>
-    <li>
-        map-marker waypoint green
-    </li>
-    <li>
-        map-marker waypoint dark-green
-    </li>
-    <li>
-        map-marker waypoint dark-green
-    </li>
-    <li>
-        distance-marker warning
-    </li>
-    <li>
-        distance-marker red
-    </li>
-    <li>
-        distance-marker green
-    </li>
-    <li>
-        map-marker cat1
-    </li>
-    <li>
-        map-marker cat2
-    </li>
-    <li>
-        map-marker cat3
-    </li>
-    <li>
-        map-marker cat4
-    </li>
-    <li>
-        map-marker cathc
-    </li>
-    <li>
-        distance-marker d1
-    </li>
-    <li>
-        distance-marker d2
-    </li>
-    <li>
-        distance-marker d3
-    </li>
-    <li>
-        ...
-    </li>
-    <li>
-        distance-marker d9
-    </li>
-    <li>
-        distance-marker d10
-    </li>
-    <li>
-        distance-marker d15
-    </li>
-    <li>
-        distance-marker d20
-    </li>
-    <li>
-        ...
-    </li>
-    <li>
-        distance-marker d95
-    </li>
-    <li>
-        distance-marker d100
-    </li>
-    <li>
-        distance-marker d110
-    </li>
-    <li>
-        distance-marker d120
-    </li>
-    <li>
-        ...
-    </li>
-    <li>
-        distance-marker d490
-    </li>
-    <li>
-        distance-marker d500
-    </li>
-</ul>
-<p>
-    Or you can also use any of the <a href="//fontawesome.com" rel="noopener noreferrer" target="_blank">FontAwesome</a> 6.7.2 icons by using the "leaflet-fa-marker" class name in addition of the fontawesome class of the icon you want. (e.g. "leaflet-fa-marker fa-solid fa-map-pin")
-</p>
-
-<p>You can also add a label to the point, with adding a "properties" > "text" value</p>
+}</pre>
+                <p>"style" > "icon" > "className" can be set to one of the following:</p>
+                <div class="row">
+                    <div class="col-12 col-sm-6">
+                        <ul>
+                            <li>
+                                map-marker start-icon
+                            </li>
+                            <li>
+                                map-marker end-icon
+                            </li>
+                            <li>
+                                map-marker waypoint
+                            </li>
+                            <li>
+                                map-marker waypoint grey
+                            </li>
+                            <li>
+                                map-marker waypoint red
+                            </li>
+                            <li>
+                                map-marker waypoint orange
+                            </li>
+                            <li>
+                                map-marker waypoint green
+                            </li>
+                            <li>
+                                map-marker waypoint dark-green
+                            </li>
+                            <li>
+                                map-marker waypoint dark-green
+                            </li>
+                            <li>
+                                distance-marker warning
+                            </li>
+                            <li>
+                                distance-marker red
+                            </li>
+                            <li>
+                                distance-marker green
+                            </li>
+                            <li>
+                                map-marker cat1
+                            </li>
+                            <li>
+                                map-marker cat2
+                            </li>
+                            <li>
+                                map-marker cat3
+                            </li>
+                            <li>
+                                map-marker cat4
+                            </li>
+                            <li>
+                                map-marker cathc
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <ul>
+                            <li>
+                                distance-marker d1
+                            </li>
+                            <li>
+                                distance-marker d2
+                            </li>
+                            <li>
+                                distance-marker d3
+                            </li>
+                            <li>
+                                ...
+                            </li>
+                            <li>
+                                distance-marker d9
+                            </li>
+                            <li>
+                                distance-marker d10
+                            </li>
+                            <li>
+                                distance-marker d15
+                            </li>
+                            <li>
+                                distance-marker d20
+                            </li>
+                            <li>
+                                ...
+                            </li>
+                            <li>
+                                distance-marker d95
+                            </li>
+                            <li>
+                                distance-marker d100
+                            </li>
+                            <li>
+                                distance-marker d110
+                            </li>
+                            <li>
+                                distance-marker d120
+                            </li>
+                            <li>
+                                ...
+                            </li>
+                            <li>
+                                distance-marker d490
+                            </li>
+                            <li>
+                                distance-marker d500
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <p>
+                    Or you can also use any of the <a href="//fontawesome.com" rel="noopener noreferrer" target="_blank">FontAwesome</a> 6.7.2 icons by using the "leaflet-fa-marker" class name in addition of the fontawesome class of the icon you want. (e.g. "leaflet-fa-marker fa-solid fa-map-pin")
+                </p>
+                <p>
+                    You can also add a label to the point, with adding a "properties" > "text" value
+                </p>
             </div>
             <div class="col-12 col-md-6">
                 <div class="map" style="height: 500px"></div>
             </div>
         </div>
     </div>
-{% compress js %}
-<script src="{% static '/vendor/leaflet-1.9.4/leaflet.js' %}"></script>
-<script src="{% static '/vendor/leaflet-geojson-css-0.0.1/leaflet-geojson-css.min.js' %}"></script>
-<script src="{% static '/scripts/site/geojson.js' %}"></script>
-{% endcompress %}
+    {% compress js %}
+    <script src="{% static '/vendor/leaflet-1.9.4/leaflet.js' %}"></script>
+    <script src="{% static '/vendor/leaflet-geojson-css-0.0.1/leaflet-geojson-css.min.js' %}"></script>
+    <script src="{% static '/scripts/site/geojson.js' %}"></script>
+    {% endcompress %}
 </body>
 </html>
