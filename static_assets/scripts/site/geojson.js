@@ -421,17 +421,27 @@ const geoJSONs = [
 				},
 			},
 			{
-				"type": "Feature",
-				"properties": {},
-				"geometry": {
-					"type": "Point",
-					"coordinates": [4.44,50.83248]
+				type: "Feature",
+				properties: {},
+				geometry: {
+					type: "Point",
+					coordinates: [4.44, 50.83248],
 				},
-				"style": {
-					"icon": {
-						"className": "leaflet-fa-marker fa-solid fa-map-pin"
-					}
-				}
+				style: {
+					icon: {
+						className: "leaflet-fa-marker fa-solid fa-map-pin",
+					},
+				},
+			},
+			{
+				type: "Feature",
+				properties: {
+					text: "CP01",
+				},
+				geometry: {
+					type: "Point",
+					coordinates: [4.45, 50.83248],
+				},
 			},
 		],
 	},
