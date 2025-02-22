@@ -493,6 +493,7 @@ class ClubAdmin(admin.ModelAdmin):
 
     event_count.admin_order_field = "event_count"
     map_count.admin_order_field = "map_count"
+    geojson_count.admin_order_field = "geojson_count"
 
 
 class ExtraMapInline(admin.TabularInline):
