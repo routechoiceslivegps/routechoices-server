@@ -390,20 +390,25 @@ class EventSetAdmin(admin.ModelAdmin):
 class ClubAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "o_club",
-        "creation_date",
         "slug",
+        "creation_date",
+        "can_modify_events_bool",
         "admin_list",
         "event_count",
         "map_count",
-        "upgraded",
         "domain",
     )
-    list_filter = (HasEventsFilter, HasMapsFilter, "upgraded")
+    list_filter = (HasEventsFilter, HasMapsFilter, "upgraded", "o_club")
     show_facets = False
     search_fields = ("name",)
 
     actions = ["mark_as_o_club"]
+
+    @admin.display(boolean=True)
+    def can_modify_events_bool(self, obj):
+        return obj.can_modify_events
+
+    can_modify_events_bool.short_description = "Can Modify Events"
 
     def mark_as_o_club(self, request, queryset):
         for q in queryset:
@@ -486,15 +491,16 @@ class NoticeInline(admin.TabularInline):
 class EventAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "event_set_link",
         "club_link",
+        "event_set_link",
         "start_date",
-        "db_duration",
         "db_is_live",
-        "privacy",
         "on_frontpage",
-        "competitor_count",
+        "privacy",
+        "db_duration",
         "map_count",
+        "competitor_count",
+        "has_geojson",
         "link",
     )
     list_filter = (
@@ -507,6 +513,10 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ("name", "event_set__name", "club__name")
     inlines = [ExtraMapInline, NoticeInline, CompetitorInline]
     show_facets = False
+
+    @admin.display(boolean=True)
+    def has_geojson(self, obj):
+        return bool(obj.geojson_layer)
 
     def get_queryset(self, request):
         return (
