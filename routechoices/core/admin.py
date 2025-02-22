@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
-from django.db.models import Case, Count, Exists, F, OuterRef, Prefetch, Value, When
+from django.db.models import Case, Count, Exists, F, OuterRef, Prefetch, Q, Value, When
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -297,6 +297,25 @@ class HasMapsFilter(admin.SimpleListFilter):
             return queryset.filter(map_count__gt=0)
 
 
+class HasGeoJSONFilter(admin.SimpleListFilter):
+    title = "whether it use geoJSON"
+    parameter_name = "has_geojson"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("true", "With geoJSON"),
+            ("false", "Without geoJSON"),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "false":
+            return queryset.filter(Q(geojson_layer="") | Q(geojson_layer__isnull=True))
+        if self.value():
+            return queryset.filter(
+                ~(Q(geojson_layer="") | Q(geojson_layer__isnull=True))
+            )
+
+
 class HasClubsFilter(admin.SimpleListFilter):
     title = "whether it admins a club"
     parameter_name = "has_club"
@@ -396,6 +415,7 @@ class ClubAdmin(admin.ModelAdmin):
         "admin_list",
         "event_count",
         "map_count",
+        "geojson_count",
         "domain",
     )
     list_filter = (HasEventsFilter, HasMapsFilter, "upgraded", "o_club")
@@ -426,6 +446,16 @@ class ClubAdmin(admin.ModelAdmin):
             .prefetch_related("admins")
             .annotate(event_count=Count("events", distinct=True))
             .annotate(map_count=Count("maps", distinct=True))
+            .annotate(
+                geojson_count=Count(
+                    "events",
+                    filter=~(
+                        Q(events__geojson_layer="")
+                        | Q(events__geojson_layer__isnull=True)
+                    ),
+                    distinct=True,
+                )
+            )
         )
 
     def event_count(self, obj):
@@ -440,6 +470,13 @@ class ClubAdmin(admin.ModelAdmin):
             '<a href="/core/map/?club__id__exact={}">{}</a>',
             obj.pk,
             obj.map_count,
+        )
+
+    def geojson_count(self, obj):
+        return format_html(
+            '<a href="/core/event/?club__id__exact={}&has_geojson=true">{}</a>',
+            obj.pk,
+            obj.geojson_count,
         )
 
     def admin_list(self, obj):
@@ -507,6 +544,7 @@ class EventAdmin(admin.ModelAdmin):
         EventDateRangeFilter,
         HasCompetitorFilter,
         HasMapsFilter,
+        HasGeoJSONFilter,
         "privacy",
         "club",
     )
