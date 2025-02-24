@@ -17,9 +17,6 @@
 		"cypress": "^13.17.0"
 	},
 	"pnpm": {
-		"onlyBuiltDependencies": [
-			"cypress",
-			"@biomejs/biome"
-		]
+		"onlyBuiltDependencies": ["cypress", "@biomejs/biome"]
 	}
 }
