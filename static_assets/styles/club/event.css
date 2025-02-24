@@ -186,20 +186,6 @@
 	margin-top: 0;
 }
 
-.runner-icon-dark {
-	color: #000;
-	text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0
-		#fff;
-}
-
-.markerText {
-	color: #000;
-	text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0
-		#fff;
-	font-weight: 700;
-	font-family: "Atkinson Hyperlegible", sans-serif;
-}
-
 .runner-icon.runner-focused > span {
 	padding: 0px 5px;
 	background: #fff;
@@ -211,6 +197,12 @@
 	color: #fff;
 	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0
 		#000;
+}
+
+.runner-icon-dark {
+	color: #000;
+	text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0
+		#fff;
 }
 
 #progress_bar {
@@ -384,6 +376,7 @@
 .cd-nb {
 	font-variant-numeric: tabular-nums;
 }
+
 .powered-vert {
 	writing-mode: vertical-rl;
 	transform: scale(-1, -1);
@@ -391,6 +384,7 @@
 	margin-left: -1px;
 	font-size: 0.8em;
 }
+
 .powered-vert:hover {
 	background: rgba(0, 0, 0, 0.125);
 }
@@ -422,270 +416,4 @@
 [data-bs-theme="dark"] .qr-code {
 	mix-blend-mode: exclusion;
 	filter: invert(1);
-}
-
-.map-marker,
-.distance-marker {
-	background-image: url(../../img/markers-sprite.png);
-	background-repeat: no-repeat;
-	background-position: left top;
-	z-index: -1 !important;
-}
-
-.map-marker.start-icon {
-	background-position: 0 -144px;
-}
-
-.map-marker.end-icon {
-	background-position: -24px -144px;
-}
-.map-marker.waypoint {
-	background-position: -48px -144px;
-}
-.map-marker.waypoint.red {
-	background-position: 0px -168px;
-}
-.map-marker.waypoint.green {
-	background-position: 0px -144px;
-}
-.map-marker.waypoint.orange {
-	background-position: -24px -168px;
-}
-.map-marker.waypoint.dark-green {
-	background-position: -48px -168px;
-}
-.map-marker.waypoint.blue {
-	background-position: -72px -168px;
-}
-.map-marker.waypoint.gray,
-.map-marker.waypoint.grey {
-	background-position: -96px -168px;
-}
-.distance-marker.d1 {
-	background-position: 0px 0px;
-}
-.distance-marker.d2 {
-	background-position: -24px 0px;
-}
-.distance-marker.d3 {
-	background-position: -48px 0px;
-}
-.distance-marker.d4 {
-	background-position: -72px 0px;
-}
-.distance-marker.d5 {
-	background-position: -96px 0px;
-}
-.distance-marker.d6 {
-	background-position: -120px 0px;
-}
-.distance-marker.d7 {
-	background-position: -144px 0px;
-}
-.distance-marker.d8 {
-	background-position: -168px 0px;
-}
-.distance-marker.d9 {
-	background-position: -192px 0px;
-}
-.distance-marker.d10 {
-	background-position: -216px 0px;
-}
-.distance-marker.d15 {
-	background-position: 0px -24px;
-}
-.distance-marker.d20 {
-	background-position: -24px -24px;
-}
-.distance-marker.d25 {
-	background-position: -48px -24px;
-}
-.distance-marker.d30 {
-	background-position: -72px -24px;
-}
-.distance-marker.d35 {
-	background-position: -96px -24px;
-}
-.distance-marker.d40 {
-	background-position: -120px -24px;
-}
-.distance-marker.d45 {
-	background-position: -144px -24px;
-}
-.distance-marker.d50 {
-	background-position: -168px -24px;
-}
-.distance-marker.d55 {
-	background-position: -192px -24px;
-}
-.distance-marker.d60 {
-	background-position: -216px -24px;
-}
-.distance-marker.d65 {
-	background-position: -240px -24px;
-}
-.distance-marker.d70 {
-	background-position: -264px -24px;
-}
-.distance-marker.d75 {
-	background-position: -288px -24px;
-}
-.distance-marker.d80 {
-	background-position: -312px -24px;
-}
-.distance-marker.d85 {
-	background-position: -336px -24px;
-}
-.distance-marker.d90 {
-	background-position: -360px -24px;
-}
-.distance-marker.d95 {
-	background-position: -384px -24px;
-}
-.distance-marker.d100 {
-	background-position: 0px -48px;
-}
-.distance-marker.d110 {
-	background-position: -24px -48px;
-}
-.distance-marker.d120 {
-	background-position: -48px -48px;
-}
-.distance-marker.d130 {
-	background-position: -72px -48px;
-}
-.distance-marker.d140 {
-	background-position: -96px -48px;
-}
-.distance-marker.d150 {
-	background-position: -120px -48px;
-}
-.distance-marker.d160 {
-	background-position: -144px -48px;
-}
-.distance-marker.d170 {
-	background-position: -168px -48px;
-}
-.distance-marker.d180 {
-	background-position: -192px -48px;
-}
-.distance-marker.d190 {
-	background-position: -216px -48px;
-}
-.distance-marker.d200 {
-	background-position: -240px -48px;
-}
-.distance-marker.d210 {
-	background-position: -264px -48px;
-}
-.distance-marker.d220 {
-	background-position: -288px -48px;
-}
-.distance-marker.d230 {
-	background-position: -312px -48px;
-}
-.distance-marker.d240 {
-	background-position: -336px -48px;
-}
-.distance-marker.d250 {
-	background-position: -360px -48px;
-}
-.distance-marker.d260 {
-	background-position: -384px -48px;
-}
-.distance-marker.d270 {
-	background-position: -408px -48px;
-}
-.distance-marker.d280 {
-	background-position: 0px -72px;
-}
-.distance-marker.d290 {
-	background-position: -24px -72px;
-}
-.distance-marker.d300 {
-	background-position: -48px -72px;
-}
-.distance-marker.d310 {
-	background-position: -72px -72px;
-}
-.distance-marker.d320 {
-	background-position: -96px -72px;
-}
-.distance-marker.d330 {
-	background-position: -120px -72px;
-}
-.distance-marker.d340 {
-	background-position: -144px -72px;
-}
-.distance-marker.d350 {
-	background-position: -168px -72px;
-}
-.distance-marker.d360 {
-	background-position: -192px -72px;
-}
-.distance-marker.d370 {
-	background-position: -216px -72px;
-}
-.distance-marker.d380 {
-	background-position: -240px -72px;
-}
-.distance-marker.d390 {
-	background-position: -264px -72px;
-}
-.distance-marker.d400 {
-	background-position: -288px -72px;
-}
-.distance-marker.d410 {
-	background-position: -312px -72px;
-}
-.distance-marker.d420 {
-	background-position: -336px -72px;
-}
-.distance-marker.d430 {
-	background-position: -360px -72px;
-}
-.distance-marker.d440 {
-	background-position: -384px -72px;
-}
-.distance-marker.d450 {
-	background-position: -408px -72px;
-}
-.distance-marker.d460 {
-	background-position: 0px -96px;
-}
-.distance-marker.d470 {
-	background-position: -24px -96px;
-}
-.distance-marker.d480 {
-	background-position: -48px -96px;
-}
-.distance-marker.d490 {
-	background-position: -72px -96px;
-}
-.distance-marker.d500 {
-	background-position: -96px -96px;
-}
-.distance-marker.warning {
-	background-position: -192px -144px;
-}
-.distance-marker.red {
-	background-position: -216px -144px;
-}
-.distance-marker.green {
-	background-position: -240px -144px;
-}
-.map-marker.cat1 {
-	background-position: -264px -144px;
-}
-.map-marker.cat2 {
-	background-position: -288px -144px;
-}
-.map-marker.cat3 {
-	background-position: -312px -144px;
-}
-.map-marker.cat4 {
-	background-position: -336px -144px;
-}
-.map-marker.cathc {
-	background-position: -360px -144px;
 }
