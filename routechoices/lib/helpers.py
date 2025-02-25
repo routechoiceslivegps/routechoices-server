@@ -16,7 +16,7 @@ from curl_cffi import requests
 from django.conf import settings
 from django.http.response import Http404
 from django.utils.dateparse import parse_datetime
-from django.utils.timezone import is_aware, make_aware
+from django.utils.timezone import is_naive, make_aware
 from PIL import ImageFile
 from user_sessions.templatetags.user_sessions import device as device_name
 
@@ -158,7 +158,7 @@ def get_device_name(ua):
 
 def get_aware_datetime(date_str):
     ret = parse_datetime(date_str)
-    if not is_aware(ret):
+    if is_naive(ret):
         ret = make_aware(ret)
     return ret
 

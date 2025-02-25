@@ -27,6 +27,7 @@ from django.forms import (
     Textarea,
     inlineformset_factory,
 )
+from django.utils.timezone import is_naive, make_aware
 from PIL import Image
 
 from routechoices.core.models import (
@@ -626,9 +627,10 @@ class UploadGPXForm(Form):
                     "File does not contain information about locations date/time"
                 )
             raise ValidationError("File does not contain any points")
-        if start_time:
-            start_time = arrow.get(start_time).datetime
-            end_time = arrow.get(end_time).datetime
+        if is_naive(start_time):
+            start_time = make_aware(start_time)
+        if is_naive(end_time):
+            end_time = make_aware(end_time)
         self.cleaned_data["start_time"] = start_time
         self.cleaned_data["end_time"] = end_time
         self.cleaned_data["locations"] = points
