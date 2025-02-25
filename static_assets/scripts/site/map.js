@@ -104,55 +104,62 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 		});
 	});
 
-	// KMZ uploader
-	L.Control.KMZUploader = L.Control.extend({
-		onAdd: (map) => {
+	// Geo file uploader
+	L.Control.GeoFileUploader = L.Control.extend({
+		onAdd: () => {
 			const back = L.DomUtil.create(
 				"div",
-				"leaflet-control leaflet-bar leaflet-kmzuploader",
+				"leaflet-control leaflet-bar leaflet-geo-file-uploader",
 			);
-			back.innerHTML =
-				"KMZ:<br/><input id='kmz-uploader' type='file' accept='.kmz' multiple/><br/>GPX:<br/><input id='gpx-uploader' type='file' accept='.gpx' multiple/>";
+			back.innerHTML = `<form>
+			  <label for="file-uploader">GeoJSON, GPX, or KMZ:</label>
+			  <input id="file-uploader" type="file" accept=".geojson,.json,.gpx,.kmz" multiple/>
+			</form>`;
 			L.DomEvent.on(back, "mousewheel", L.DomEvent.stopPropagation);
 			L.DomEvent.on(back, "touchstart", L.DomEvent.stopPropagation);
 			return back;
 		},
-
-		onRemove: (map) => {
-			u(".leaflet-control").remove();
-		},
 	});
-	L.control.kmzUploader = (opts) => new L.Control.KMZUploader(opts);
-	kmzControl = L.control.kmzUploader({ position: "bottomright" });
-	map.addControl(kmzControl);
+	L.control.geoFileUploader = (opts) => new L.Control.GeoFileUploader(opts);
+	geoFileControl = L.control.geoFileUploader({ position: "bottomright" });
+	map.addControl(geoFileControl);
+
 	document
-		.getElementById("kmz-uploader")
+		.getElementById("file-uploader")
 		.addEventListener("change", async function () {
 			for (const file of this.files) {
-				await onKmzLoaded(file);
+				const extension = file.name.split(".").pop().toLowerCase();
+				if (extension === "kmz") {
+					await onKmzLoaded(file);
+				} else if (extension === "gpx") {
+					const reader = new FileReader();
+					reader.addEventListener("load", (event) => {
+						const parser = new gpxParser();
+						parser.parse(event.target.result);
+						for (const track of parser.tracks) {
+							const latlons = track.points.map((pt) => [pt.lat, pt.lon]);
+							L.polyline(latlons).addTo(map);
+						}
+					});
+					reader.readAsText(file);
+				} else if (["geojson", "json"].includes(extension)) {
+					const reader = new FileReader();
+					reader.addEventListener("load", (event) => {
+						const data = JSON.parse(event.target.result);
+						L.geoJson.css(data).addTo(map);
+					});
+					reader.readAsText(file);
+				}
 			}
 		});
 
 	document
-		.getElementById("gpx-uploader")
+		.getElementById("geojson-uploader")
 		.addEventListener("change", async function () {
 			for (const file of this.files) {
-				const reader = new FileReader();
-				reader.addEventListener("load", (event) => {
-					const parser = new gpxParser();
-					parser.parse(event.target.result);
-					for (const track of parser.tracks) {
-						const latlons = [];
-						for (const pt of track.points) {
-							latlons.push([pt.lat, pt.lon]);
-						}
-						const p = L.polyline(latlons);
-						p.addTo(map);
-					}
-				});
-				reader.readAsText(file);
 			}
 		});
+
 	const extractKMZInfo = async (kmlText, kmz) => {
 		const parser = new DOMParser();
 		const parsedText = parser.parseFromString(kmlText, "text/xml");

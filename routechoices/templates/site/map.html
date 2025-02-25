@@ -23,14 +23,19 @@
             <link rel="stylesheet" href="{% static 'styles/geojson.css' %}" />
             <link rel="stylesheet" href="{% static '/styles/site.css' %}" />
             <style>
-    #map {
-        height: calc(100% - 40px);
-        width: 100%;
-    }
-    .leaflet-kmzuploader {
-        background-color: #fff;
-        padding: 3px
-    }
+                #map {
+                    height: calc(100% - 40px);
+                    width: 100%;
+                }
+                .leaflet-geo-file-uploader {
+                    background-color: #fff;
+                    padding: 3px;
+                    border-radius: 5px;
+                }
+                .leaflet-geo-file-uploader label {
+                    display: block;
+                    font-weight: 900;
+                }
             </style>
         {% endcompress %}
     </head>
