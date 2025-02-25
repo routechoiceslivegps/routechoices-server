@@ -4,8 +4,6 @@ from io import BytesIO
 
 import boto3
 import botocore
-import cv2
-import numpy as np
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse
