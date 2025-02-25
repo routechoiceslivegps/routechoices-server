@@ -112,8 +112,8 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 				"leaflet-control leaflet-bar leaflet-geo-file-uploader",
 			);
 			back.innerHTML = `<form>
-			  <label for="file-uploader">GeoJSON, GPX, or KMZ:</label>
-			  <input id="file-uploader" type="file" accept=".geojson,.json,.gpx,.kmz" multiple/>
+			  <input id="file-uploader" type="file" style="display: none" accept=".geojson,.json,.gpx,.kmz" multiple/>
+			  <a id="file-uploader-btn" href="#"><i class="fa-solid fa-file-arrow-up"></i></a>
 			</form>`;
 			L.DomEvent.on(back, "mousewheel", L.DomEvent.stopPropagation);
 			L.DomEvent.on(back, "touchstart", L.DomEvent.stopPropagation);
@@ -121,9 +121,14 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 		},
 	});
 	L.control.geoFileUploader = (opts) => new L.Control.GeoFileUploader(opts);
-	geoFileControl = L.control.geoFileUploader({ position: "bottomright" });
+	geoFileControl = L.control.geoFileUploader({ position: "topleft" });
 	map.addControl(geoFileControl);
-
+	document
+		.getElementById("file-uploader-btn")
+		.addEventListener("click", (e) => {
+			e.preventDefault();
+			document.getElementById("file-uploader").click();
+		});
 	document
 		.getElementById("file-uploader")
 		.addEventListener("change", async function () {

@@ -13,6 +13,8 @@
             <link rel="stylesheet"
                   href="{% static '/vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
             <link rel="stylesheet"
+                  href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
+            <link rel="stylesheet"
                   href="{% static '/vendor/leaflet-1.9.4/leaflet.css' %}" />
             <link rel="stylesheet"
                   href="{% static '/vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.css' %}" />
@@ -29,13 +31,14 @@
                 }
                 .leaflet-geo-file-uploader {
                     background-color: #fff;
-                    padding: 3px;
                     border-radius: 5px;
                 }
-                .leaflet-geo-file-uploader label {
-                    display: block;
-                    font-weight: 900;
+                .leaflet-geo-file-uploader a {
+                    width: 30px;
+                    height: 30px;
+                    line-height: 30px;
                 }
+
             </style>
         {% endcompress %}
     </head>
