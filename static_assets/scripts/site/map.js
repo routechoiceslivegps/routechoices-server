@@ -158,13 +158,6 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 			}
 		});
 
-	document
-		.getElementById("geojson-uploader")
-		.addEventListener("change", async function () {
-			for (const file of this.files) {
-			}
-		});
-
 	const extractKMZInfo = async (kmlText, kmz) => {
 		const parser = new DOMParser();
 		const parsedText = parser.parseFromString(kmlText, "text/xml");
