@@ -626,8 +626,11 @@ class UploadGPXForm(Form):
                     "File does not contain information about locations date/time"
                 )
             raise ValidationError("File does not contain any points")
-        self.cleaned_data["start_time"] = arrow(start_time).datetime
-        self.cleaned_data["end_time"] = arrow(end_time).datetime
+        if start_time:
+            start_time = arrow(start_time).datetime
+            end_time = arrow(end_time).datetime
+        self.cleaned_data["start_time"] = start_time
+        self.cleaned_data["end_time"] = end_time
         self.cleaned_data["locations"] = points
         return gpx_file
 
