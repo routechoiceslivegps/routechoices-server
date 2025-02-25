@@ -113,7 +113,7 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 			);
 			back.innerHTML = `<form>
 			  <input id="file-uploader" type="file" style="display: none" accept=".geojson,.json,.gpx,.kmz" multiple/>
-			  <a id="file-uploader-btn" href="#"><i class="fa-solid fa-file-arrow-up"></i></a>
+			  <a id="file-uploader-btn" title="Load GeoJSON, GPX or KMZ file" href="#"><i class="fa-solid fa-file-arrow-up"></i></a>
 			</form>`;
 			L.DomEvent.on(back, "mousewheel", L.DomEvent.stopPropagation);
 			L.DomEvent.on(back, "touchstart", L.DomEvent.stopPropagation);
