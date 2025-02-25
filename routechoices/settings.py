@@ -220,7 +220,7 @@ REST_FRAMEWORK = {
     ),
 }
 ACCOUNT_ADAPTER = "routechoices.lib.account_adapters.SiteAccountAdapter"
-ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 ACCOUNT_USERNAME_BLACKLIST = SLUG_BLACKLIST
