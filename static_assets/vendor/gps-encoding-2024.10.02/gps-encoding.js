@@ -72,27 +72,34 @@ getDistanceBetween = function (a, c) {
   return 12756274 * Math.atan2(Math.sqrt(d), Math.sqrt(1 - d));
 };
 
-function closestPointOnSegment(p, p1, p2) {
-  var x = p1[1],
-      y = p1[2],
-      dx = p2[1] - x,
-      dy = p2[2] - y,
+const spericalMercator = L.Projection.SphericalMercator;
+
+function closestPointOnSegment(pLoc, p1Loc, p2Loc) {
+  const  p = spericalMercator.project(new L.LatLng(pLoc[1], pLoc[2]));
+  const  p1 = spericalMercator.project(new L.LatLng(p1Loc[1], p1Loc[2]));
+  const  p2 = spericalMercator.project(new L.LatLng(p2Loc[1], p2Loc[2]));
+
+  var x = p1.x,
+      y = p1.y,
+      dx = p2.x - x,
+      dy = p2.y - y,
       dot = dx * dx + dy * dy,
       t;
   if (dot > 0) {
-    t = ((p[1] - x) * dx + (p[2] - y) * dy) / dot;
+    t = ((p.x - x) * dx + (p.y - y) * dy) / dot;
     if (t > 1) {
-      x = p2[1];
-      y = p2[2];
+      x = p2.x;
+      y = p2.y;
     } else if (t > 0) {
       x += dx * t;
       y += dy * t;
     }
   }
-  dx = p[1] - x;
-  dy = p[2] - y;
-  const tt = p1[0] + (p2[0] - p1[0]) * ((x - p1[1]) / (p2[1] - p1[1] + Number.EPSILON) + (y - p1[2]) / (p2[2] - p1[2] + Number.EPSILON)) / 2;
-  return [dx * dx + dy * dy, [tt, x, y]];
+  dx = p.x - x;
+  dy = p.y - y;
+  const tt = p1Loc[0] + (p2Loc[0] - p1Loc[0]) * ((x - p1.x) / (p2.x - p1.x + Number.EPSILON) + (y - p1.y) / (p2.y - p1.y + Number.EPSILON)) / 2;
+  const ll = spericalMercator.unproject(new L.Point(x, y));
+  return [dx * dx + dy * dy, [tt, ll.lat, ll.lon]];
 }
 
 const PositionArchive = function () {
