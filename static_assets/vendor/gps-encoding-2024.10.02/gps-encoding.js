@@ -72,7 +72,7 @@ getDistanceBetween = function (a, c) {
   return 12756274 * Math.atan2(Math.sqrt(d), Math.sqrt(1 - d));
 };
 
-function closestPointOnSegment(p, p1, p2, sqDist) {
+function closestPointOnSegment(p, p1, p2) {
   var x = p1[1],
       y = p1[2],
       dx = p2[1] - x,
@@ -80,7 +80,7 @@ function closestPointOnSegment(p, p1, p2, sqDist) {
       dot = dx * dx + dy * dy,
       t;
   if (dot > 0) {
-    t = ((p.x - x) * dx + (p.y - y) * dy) / dot;
+    t = ((p[1] - x) * dx + (p[2] - y) * dy) / dot;
     if (t > 1) {
       x = p2[1];
       y = p2[2];
@@ -323,7 +323,7 @@ const PositionArchive = function () {
   this.closestPointFrom = function (p) {
     let minDistance = Infinity,
         minPoint = null,
-        p1, p2;
+        p1, p2, pp;
     for (let i = 1; i < positions.length; i++) {
         p1 = positions[i - 1];
         p2 = positions[i];
@@ -331,6 +331,7 @@ const PositionArchive = function () {
         if (sqDist < minDistance) {
           minDistance = sqDist;
           minPoint = pt;
+          pp = i
         }
     }
     return minPoint;
