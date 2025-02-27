@@ -61,7 +61,10 @@ var intValCodec = (function () {
 const positionTowardAtTimestamp = function(a, b, timestamp) {
   const r = (timestamp - a[0]) / (b[0] - a[0]);
   const r_ = 1 - r;
-  return [timestamp, b[1] * r + r_ * a[1], b[2] * r + r_ * a[2]];
+  const  aa = spericalMercator.project(new L.LatLng(a[1], a[2]));
+  const  bb = spericalMercator.project(new L.LatLng(b[1], b[2]));
+  const cc = spericalMercator.unproject(new L.Point(bb.x * r + r_ * aa.x, bb.y * r + r_ * aa.y))
+  return [timestamp, cc.lat, cc.lng];
 }
 
 getDistanceBetween = function (a, c) {
@@ -99,7 +102,7 @@ function closestPointOnSegment(pLoc, p1Loc, p2Loc) {
   dy = p.y - y;
   const tt = p1Loc[0] + (p2Loc[0] - p1Loc[0]) * ((x - p1.x) / (p2.x - p1.x + Number.EPSILON) + (y - p1.y) / (p2.y - p1.y + Number.EPSILON)) / 2;
   const ll = spericalMercator.unproject(new L.Point(x, y));
-  return [dx * dx + dy * dy, [tt, ll.lat, ll.lon]];
+  return [dx * dx + dy * dy, [tt, ll.lat, ll.lng]];
 }
 
 const PositionArchive = function () {
