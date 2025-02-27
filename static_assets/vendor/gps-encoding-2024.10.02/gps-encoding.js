@@ -64,13 +64,36 @@ const positionTowardAtTimestamp = function(a, b, timestamp) {
   return [timestamp, b[1] * r + r_ * a[1], b[2] * r + r_ * a[2]];
 }
 
-distance = function (a, c) {
+getDistanceBetween = function (a, c) {
   const C = Math.PI / 180;
   const dlat = a[1] - c[1];
   const dlon = a[2] - c[2];
   const d = Math.sin((C * dlat) / 2) * Math.sin((C * dlat) / 2) + Math.cos(C * a[1]) * Math.cos(C * c[1]) * Math.sin((C * dlon) / 2) * Math.sin((C * dlon) / 2);
   return 12756274 * Math.atan2(Math.sqrt(d), Math.sqrt(1 - d));
 };
+
+function closestPointOnSegment(p, p1, p2, sqDist) {
+  var x = p1[1],
+      y = p1[2],
+      dx = p2[1] - x,
+      dy = p2[2] - y,
+      dot = dx * dx + dy * dy,
+      t;
+  if (dot > 0) {
+    t = ((p.x - x) * dx + (p.y - y) * dy) / dot;
+    if (t > 1) {
+      x = p2[1];
+      y = p2[2];
+    } else if (t > 0) {
+      x += dx * t;
+      y += dy * t;
+    }
+  }
+  dx = p[1] - x;
+  dy = p[2] - y;
+  const tt = p1[0] + (p2[0] - p1[0]) * ((x - p1[1]) / (p2[1] - p1[1] + Number.EPSILON) + (y - p1[2]) / (p2[2] - p1[2] + Number.EPSILON)) / 2;
+  return [dx * dx + dy * dy, [tt, x, y]];
+}
 
 const PositionArchive = function () {
   let positions = [];
@@ -254,17 +277,30 @@ const PositionArchive = function () {
       return now - positions[0][0];
     }
   };
-  this.distanceUntil = function (t) {
+  this.distanceUntil = function (timestamp) {
     let result = 0;
     if (this.getPositionsCount() === 0) {
       return 0;
     }
-    const npositions = this.extractInterval(positions[0][0], +t);
+    const npositions = this.extractInterval(positions[0][0], +timestamp);
     const nn = npositions.getPositionsCount();
     for (let i = 0; i < nn - 1; i++) {
-      result += distance(npositions.getByIndex(i), npositions.getByIndex(i + 1));
+      result += getDistanceBetween(npositions.getByIndex(i), npositions.getByIndex(i + 1));
     }
     return result;
+  };
+  this.totalDistance = function () {
+    let distance = 0;
+    let prevPosition = null;
+    for (const position of positions) {
+      if (!Number.isNaN(position[1])) {
+        if (prevPosition) {
+          distance += getDistanceBetween(position, prevPosition);
+        }
+			  prevPosition = position;
+		  }
+    }
+    return distance;
   };
   this.decode = function(encoded) {
     const YEAR2010 = 1262304000; // = Date.parse("2010-01-01T00:00:00Z")/1e3,
@@ -283,6 +319,21 @@ const PositionArchive = function () {
       positions.push([vals[0] * 1e3, vals[1] / 1e5, vals[2] / 1e5]);
     }
     return this;
+  }
+  this.closestPointFrom = function (p) {
+    let minDistance = Infinity,
+        minPoint = null,
+        p1, p2;
+    for (let i = 1; i < positions.length; i++) {
+        p1 = positions[i - 1];
+        p2 = positions[i];
+        const [sqDist, pt] = closestPointOnSegment(p, p1, p2);
+        if (sqDist < minDistance) {
+          minDistance = sqDist;
+          minPoint = pt;
+        }
+    }
+    return minPoint;
   }
 };
 

@@ -1063,7 +1063,7 @@ function RCEvent(infoURL, clockURL, locale) {
 						onAppResize();
 					});
 				}
-				setInterval(refreshData, 25 * 1e3);
+				setInterval(refreshData, 25_000);
 			})
 			.catch(() => {
 				u("#loading-event-modal").remove();
@@ -1725,22 +1725,13 @@ function RCEvent(infoURL, clockURL, locale) {
 	function setCustomStart(latlng) {
 		competitorsMinCustomOffset = +clock.now();
 		for (const competitor of Object.values(competitorList)) {
-			let minDist = Number.POSITIVE_INFINITY;
-			let minDistT = null;
 			const route = competitorRoutes[competitor.id];
 
 			if (route) {
-				const length = route.getPositionsCount();
-				for (let i = 0; i < length; i++) {
-					dist = distance(route.getByIndex(i), [0, latlng.lat, latlng.lng]);
-					if (dist < minDist) {
-						minDist = dist;
-						minDistT = route.getByIndex(i)[0];
-					}
-				}
-				competitor.custom_offset = minDistT;
+				const closestPt = route.closestPointFrom([0, latlng.lat, latlng.lng]);
+				competitor.custom_offset = closestPt[0];
 				competitorsMinCustomOffset = Math.min(
-					minDistT,
+					closestPt[0],
 					competitorsMinCustomOffset,
 				);
 			}
@@ -2831,7 +2822,7 @@ function RCEvent(infoURL, clockURL, locale) {
 				if (refreshMeters) {
 					// odometer and speedometer
 					const hasPointInTail = route.hasPointInInterval(
-						viewedTime - 30 * 1e3,
+						viewedTime - 30_000,
 						viewedTime,
 					);
 					if (!hasPointInTail) {
@@ -2839,19 +2830,12 @@ function RCEvent(infoURL, clockURL, locale) {
 						competitor.speedometer.textContent = competitor.speedometerValue;
 					} else {
 						if (checkVisible(competitor.speedometer)) {
-							let dist = 0;
-							let prevPos = null;
 							const tail30s = route.extractInterval(
-								viewedTime - 30 * 1e3,
+								viewedTime - 30_000,
 								viewedTime,
 							);
-							for (const pos of tail30s.getArray()) {
-								if (prevPos && !Number.isNaN(pos[1])) {
-									dist += distance(pos, prevPos);
-								}
-								prevPos = pos;
-							}
-							const speed = (30 / dist) * 1000;
+							const distance = tail30s.totalDistance();
+							const speed = 30_000 / distance;
 							competitor.speedometerValue = formatSpeed(speed);
 							competitor.speedometer.textContent = competitor.speedometerValue;
 						}

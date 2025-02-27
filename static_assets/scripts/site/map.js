@@ -2,6 +2,104 @@ function deg2rad(deg) {
 	return (deg * Math.PI) / 180;
 }
 
+const extractKMZInfo = async (kmlText, kmz) => {
+	const parser = new DOMParser();
+	const parsedText = parser.parseFromString(kmlText, "text/xml");
+	const maps = [];
+	for (go of parsedText.getElementsByTagName("GroundOverlay")) {
+		try {
+			const latLonboxElNodes = go.getElementsByTagName("LatLonBox");
+			const latLonQuadElNodes = go.getElementsByTagName("gx:LatLonQuad");
+			const filePath = go.getElementsByTagName("href")[0].innerHTML;
+			let imageDataURI;
+			if (filePath.startsWith("http")) {
+				imageDataURI = filePath;
+			} else {
+				const fileU8 = await kmz.file(filePath).async("uint8array");
+				const filename = kmz.file(filePath).name;
+				const extension = filename.toLowerCase().split(".").pop();
+				let mime = "";
+				if (extension === "jpg") {
+					mime = "image/jpeg";
+				} else if (
+					["png", "gif", "jpeg", "webp", "avif", "jxl"].includes(extension)
+				) {
+					mime = `image/${extension}`;
+				}
+				imageDataURI = `data:${mime};base64,${btoa(
+					[].reduce.call(fileU8, (p, c) => p + String.fromCharCode(c), ""),
+				)}`;
+			}
+			let bounds;
+			for (let i = 0; i < latLonboxElNodes.length; i++) {
+				const latLonboxEl = latLonboxElNodes[i];
+				bounds = computeBoundsFromLatLonBox(
+					Number.parseFloat(
+						latLonboxEl.getElementsByTagName("north")[0].innerHTML,
+					),
+					Number.parseFloat(
+						latLonboxEl.getElementsByTagName("east")[0].innerHTML,
+					),
+					Number.parseFloat(
+						latLonboxEl.getElementsByTagName("south")[0].innerHTML,
+					),
+					Number.parseFloat(
+						latLonboxEl.getElementsByTagName("west")[0].innerHTML,
+					),
+					Number.parseFloat(
+						latLonboxEl.getElementsByTagName("rotation")[0]
+							? latLonboxEl.getElementsByTagName("rotation")[0].innerHTML
+							: 0,
+					),
+				);
+				maps.push({ imageDataURI, bounds });
+			}
+			for (let i = 0; i < latLonQuadElNodes.length; i++) {
+				const latLonQuadEl = latLonQuadElNodes[i];
+				let [sw, se, ne, nw] = latLonQuadEl
+					.getElementsByTagName("coordinates")[0]
+					.innerHTML.trim()
+					.split(" ");
+				nw = nw.split(",");
+				ne = ne.split(",");
+				se = se.split(",");
+				sw = sw.split(",");
+				bounds = [
+					[Number.parseFloat(nw[1]), Number.parseFloat(nw[0])],
+					[Number.parseFloat(ne[1]), Number.parseFloat(ne[0])],
+					[Number.parseFloat(se[1]), Number.parseFloat(se[0])],
+					[Number.parseFloat(sw[1]), Number.parseFloat(sw[0])],
+				];
+				maps.push({ imageDataURI, bounds });
+			}
+		} catch (e) {
+			alert("Error parsing your KMZ file!");
+			return;
+		}
+	}
+	return maps;
+};
+
+const onKmzLoaded = async (file) => {
+	const zip = await JSZip.loadAsync(file);
+	if (zip.files?.["doc.kml"] || zip.files["Doc.kml"]) {
+		let filename = "Doc.kml";
+		if (zip.files["doc.kml"]) {
+			filename = "doc.kml";
+		}
+		const kml = await zip.file(filename).async("string");
+		const maps = await extractKMZInfo(kml, zip);
+		if (maps) {
+			for (const data of maps) {
+				const rmap = L.imageTransform(data.imageDataURI, data.bounds);
+				map.addLayer(rmap);
+			}
+		}
+	} else {
+		alert("Error parsing your KMZ file!");
+	}
+};
+
 function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 	const a = (e + w) / 2;
 	const b = (n + s) / 2;
@@ -28,110 +126,17 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 	return [nw, ne, se, sw];
 }
 
-(() => {
-	const map = L.map("map", { tap: false }).setView([0, 0], 2);
-	// geocoder (map search)
-	const geocoder = L.Control.geocoder({
-		defaultMarkGeocode: false,
-	});
-	geocoder.on("markgeocode", (e) => {
-		map.fitBounds(e.geocode.bbox);
-	});
-	geocoder.addTo(map);
-
-	// maps layer
-	const baseLayers = getBaseLayers();
-	const defaultLayer = baseLayers["Open Street Map"];
-	map.addLayer(defaultLayer);
-	const controlLayers = L.control.layers(baseLayers);
-	map.addControl(controlLayers);
-	if (L.Browser.touch && L.Browser.mobile) {
-		map.on("baselayerchange", (e) => {
-			controlLayers.collapse();
-		});
-	}
-	// GPS location
-	L.control.locate().addTo(map);
-
-	// Draw on map
-	const drawnItems = new L.FeatureGroup();
-	map.addLayer(drawnItems);
-	const drawControl = new L.Control.Draw({
-		draw: {
-			polyline: {
-				metric: true,
-				feet: false,
-				showLength: true,
-			},
-			polygon: false,
-			rectangle: false,
-			circle: false,
-			marker: false,
-			circlemarker: false,
-		},
-		edit: {
-			featureGroup: drawnItems,
-		},
-	});
-	map.addControl(drawControl);
-	function getDistance(polyline) {
-		// Calculating the distance of the polyline
-		let tempLatLng = null;
-		let totalDistance = 0.0;
-		if (!polyline?.getLatLngs) return 0;
-		polyline?.getLatLngs().forEach((latlng, i) => {
-			if (tempLatLng == null) {
-				tempLatLng = latlng;
-				return;
-			}
-			totalDistance += tempLatLng.distanceTo(latlng);
-			tempLatLng = latlng;
-		});
-		return totalDistance;
-	}
-	map.on(L.Draw.Event.CREATED, (e) => {
-		drawnItems.clearLayers();
-		drawnItems.addLayer(e.layer);
-		if (e.layerType === "polyline") {
-			e.layer.bindPopup(`${getDistance(e.layer).toFixed(2)} meters`);
-			e.layer.openPopup();
-		}
-	});
-	map.on("draw:edited", (e) => {
-		e.layers.eachLayer((layer) => {
-			layer.bindPopup(`${getDistance(layer).toFixed(2)} meters`);
-			layer.openPopup();
-		});
-	});
-
-	// Geo file uploader
-	L.Control.GeoFileUploader = L.Control.extend({
-		onAdd: () => {
-			const back = L.DomUtil.create(
-				"div",
-				"leaflet-control leaflet-bar leaflet-geo-file-uploader",
-			);
-			back.innerHTML = `<form>
-			  <input id="file-uploader" type="file" style="display: none" accept=".geojson,.json,.gpx,.kmz" multiple/>
-			  <a id="file-uploader-btn" title="Load GeoJSON, GPX or KMZ file" href="#"><i class="fa-solid fa-file-arrow-up"></i></a>
-			</form>`;
-			L.DomEvent.on(back, "mousewheel", L.DomEvent.stopPropagation);
-			L.DomEvent.on(back, "touchstart", L.DomEvent.stopPropagation);
-			return back;
-		},
-	});
-	L.control.geoFileUploader = (opts) => new L.Control.GeoFileUploader(opts);
-	geoFileControl = L.control.geoFileUploader({ position: "topleft" });
-	map.addControl(geoFileControl);
-	document
-		.getElementById("file-uploader-btn")
-		.addEventListener("click", (e) => {
-			e.preventDefault();
-			document.getElementById("file-uploader").click();
-		});
-	document
-		.getElementById("file-uploader")
-		.addEventListener("change", async function () {
+// Geo file uploader
+L.Control.GeoFileUploader = L.Control.extend({
+	onAdd: (map) => {
+		const control = L.DomUtil.create(
+			"div",
+			"leaflet-control leaflet-bar leaflet-geo-file-uploader",
+		);
+		const fileUploader = L.DomUtil.create("input");
+		fileUploader.type = "file";
+		fileUploader.style.display = "none";
+		fileUploader.addEventListener("change", async function () {
 			for (const file of this.files) {
 				const extension = file.name.split(".").pop().toLowerCase();
 				if (extension === "kmz") {
@@ -158,103 +163,110 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 			}
 		});
 
-	const extractKMZInfo = async (kmlText, kmz) => {
-		const parser = new DOMParser();
-		const parsedText = parser.parseFromString(kmlText, "text/xml");
-		const maps = [];
-		for (go of parsedText.getElementsByTagName("GroundOverlay")) {
-			try {
-				const latLonboxElNodes = go.getElementsByTagName("LatLonBox");
-				const latLonQuadElNodes = go.getElementsByTagName("gx:LatLonQuad");
-				const filePath = go.getElementsByTagName("href")[0].innerHTML;
-				let imageDataURI;
-				if (filePath.startsWith("http")) {
-					imageDataURI = filePath;
-				} else {
-					const fileU8 = await kmz.file(filePath).async("uint8array");
-					const filename = kmz.file(filePath).name;
-					const extension = filename.toLowerCase().split(".").pop();
-					let mime = "";
-					if (extension === "jpg") {
-						mime = "image/jpeg";
-					} else if (
-						["png", "gif", "jpeg", "webp", "avif", "jxl"].includes(extension)
-					) {
-						mime = `image/${extension}`;
-					}
-					imageDataURI = `data:${mime};base64,${btoa(
-						[].reduce.call(fileU8, (p, c) => p + String.fromCharCode(c), ""),
-					)}`;
-				}
-				let bounds;
-				for (let i = 0; i < latLonboxElNodes.length; i++) {
-					const latLonboxEl = latLonboxElNodes[i];
-					bounds = computeBoundsFromLatLonBox(
-						Number.parseFloat(
-							latLonboxEl.getElementsByTagName("north")[0].innerHTML,
-						),
-						Number.parseFloat(
-							latLonboxEl.getElementsByTagName("east")[0].innerHTML,
-						),
-						Number.parseFloat(
-							latLonboxEl.getElementsByTagName("south")[0].innerHTML,
-						),
-						Number.parseFloat(
-							latLonboxEl.getElementsByTagName("west")[0].innerHTML,
-						),
-						Number.parseFloat(
-							latLonboxEl.getElementsByTagName("rotation")[0]
-								? latLonboxEl.getElementsByTagName("rotation")[0].innerHTML
-								: 0,
-						),
-					);
-					maps.push({ imageDataURI, bounds });
-				}
-				for (let i = 0; i < latLonQuadElNodes.length; i++) {
-					const latLonQuadEl = latLonQuadElNodes[i];
-					let [sw, se, ne, nw] = latLonQuadEl
-						.getElementsByTagName("coordinates")[0]
-						.innerHTML.trim()
-						.split(" ");
-					nw = nw.split(",");
-					ne = ne.split(",");
-					se = se.split(",");
-					sw = sw.split(",");
-					bounds = [
-						[Number.parseFloat(nw[1]), Number.parseFloat(nw[0])],
-						[Number.parseFloat(ne[1]), Number.parseFloat(ne[0])],
-						[Number.parseFloat(se[1]), Number.parseFloat(se[0])],
-						[Number.parseFloat(sw[1]), Number.parseFloat(sw[0])],
-					];
-					maps.push({ imageDataURI, bounds });
-				}
-			} catch (e) {
-				alert("Error parsing your KMZ file!");
-				return;
-			}
-		}
-		return maps;
-	};
-	const onKmzLoaded = async (file) => {
-		const zip = await JSZip.loadAsync(file);
-		if (zip.files?.["doc.kml"] || zip.files["Doc.kml"]) {
-			let filename = "Doc.kml";
-			if (zip.files["doc.kml"]) {
-				filename = "doc.kml";
-			}
-			const kml = await zip.file(filename).async("string");
-			const maps = await extractKMZInfo(kml, zip);
-			if (maps) {
-				for (const data of maps) {
-					const rmap = L.imageTransform(data.imageDataURI, data.bounds);
-					map.addLayer(rmap);
-				}
-			}
-		} else {
-			alert("Error parsing your KMZ file!");
-		}
-	};
+		const button = L.DomUtil.create("a");
+		button.href = "#";
+		button.title = "Load GeoJSON, GPX or KMZ file";
+		button.innerHTML = '<i class="fa-solid fa-file-arrow-up"></i>';
+		button.addEventListener("click", (e) => {
+			e.preventDefault();
+			fileUploader.click();
+		});
 
+		control.appendChild(button);
+
+		L.DomEvent.on(control, "mousewheel", L.DomEvent.stopPropagation);
+		L.DomEvent.on(control, "touchstart", L.DomEvent.stopPropagation);
+
+		return control;
+	},
+});
+
+L.control.geoFileUploader = (opts) => new L.Control.GeoFileUploader(opts);
+
+function getDistance(polyline) {
+	// Calculating the distance of the polyline
+	let tempLatLng = null;
+	let totalDistance = 0.0;
+	if (!polyline?.getLatLngs) return 0;
+	polyline?.getLatLngs().forEach((latlng, i) => {
+		if (tempLatLng == null) {
+			tempLatLng = latlng;
+			return;
+		}
+		totalDistance += tempLatLng.distanceTo(latlng);
+		tempLatLng = latlng;
+	});
+	return totalDistance;
+}
+
+(() => {
+	const map = L.map("map", { tap: false }).setView([0, 0], 2);
+	// geocoder (map search)
+	const geocoder = L.Control.geocoder({
+		defaultMarkGeocode: false,
+	});
+	geocoder.on("markgeocode", (e) => {
+		map.fitBounds(e.geocode.bbox);
+	});
+	geocoder.addTo(map);
+
+	// maps layer
+	const baseLayers = getBaseLayers();
+	const defaultLayer = baseLayers["Open Street Map"];
+	map.addLayer(defaultLayer);
+	const controlLayers = L.control.layers(baseLayers);
+	map.addControl(controlLayers);
+	if (L.Browser.touch && L.Browser.mobile) {
+		map.on("baselayerchange", (e) => {
+			controlLayers.collapse();
+		});
+	}
+
+	// GPS location
+	L.control.locate().addTo(map);
+
+	// Draw on map
+	const drawnItems = new L.FeatureGroup();
+	map.addLayer(drawnItems);
+	const drawControl = new L.Control.Draw({
+		draw: {
+			polyline: {
+				metric: true,
+				feet: false,
+				showLength: true,
+			},
+			polygon: false,
+			rectangle: false,
+			circle: false,
+			marker: false,
+			circlemarker: false,
+		},
+		edit: {
+			featureGroup: drawnItems,
+		},
+	});
+	map.addControl(drawControl);
+
+	map.on(L.Draw.Event.CREATED, (e) => {
+		drawnItems.clearLayers();
+		drawnItems.addLayer(e.layer);
+		if (e.layerType === "polyline") {
+			e.layer.bindPopup(`${getDistance(e.layer).toFixed(2)} meters`);
+			e.layer.openPopup();
+		}
+	});
+	map.on("draw:edited", (e) => {
+		e.layers.eachLayer((layer) => {
+			layer.bindPopup(`${getDistance(layer).toFixed(2)} meters`);
+			layer.openPopup();
+		});
+	});
+
+	// fileUploader
+	const geoFileControl = L.control.geoFileUploader({ position: "topleft" });
+	map.addControl(geoFileControl);
+
+	// hash param load features
 	const hashParams = new URLSearchParams(window.location.search.slice(1));
 	if (hashParams.has("geojson")) {
 		try {
