@@ -1,6 +1,5 @@
 wsgi_app = "routechoices.wsgi:application"
 preload_app = True
-chdir = ".."
 daemon = False
 raw_env = ["DJANGO_SETTINGS_MODULE=routechoices.settings"]
 pythonpath = "/app/routechoices-server/env/bin/python3"
