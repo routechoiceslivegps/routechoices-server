@@ -53,17 +53,43 @@ const intValCodec = (function () {
       return [parseInt(result.toString(), 10), i, true];
     };
   return {
-    decodeUnsignedValueFromString: decodeUnsignedValueFromString,
-    decodeSignedValueFromString: decodeSignedValueFromString,
+    decodeUnsignedValueFromString,
+    decodeSignedValueFromString,
   };
 })();
 
+const spericalMercator = (function() {
+  const earthRadius = 6371000;
+  const MaxLatitude = 85.0511287798;
+  const oneRadian  = Math.PI / 180;
 
-const earthRadius = 6371000;
-const sphericalMercatorMaxLatitude = 85.0511287798;
+  const project = function (pos) {
+    const R = earthRadius,
+      d = oneRadian,
+      max = MaxLatitude,
+      lat = Math.max(Math.min(max, pos[1]), -max),
+      sin = Math.sin(lat * d);
+    return [R * pos[2] * d, R * Math.log((1 + sin) / (1 - sin)) / 2];
+  }
+
+  const unproject = function(x, y) {
+    const R = earthRadius,
+      d = oneRadian;
+
+    return [
+      (2 * Math.atan(Math.exp(y / R)) - (Math.PI / 2)) / d,
+      x / d / R
+    ];
+  }
+
+  return {
+    project,
+    unproject,
+  };
+})();
 
 const getDistanceBetween = function (pos1, pos2) {
-	const R = earthRadius,
+	const R = 6371000,
     rad = Math.PI / 180,
     lat1 = pos1[1] * rad,
   	lat2 = pos2[1] * rad,
@@ -74,45 +100,27 @@ const getDistanceBetween = function (pos1, pos2) {
   return R * c;
 }
 
-const spericalMercatorProject = function (pos) {
-  const R = earthRadius,
-    d = Math.PI / 180,
-    max = sphericalMercatorMaxLatitude,
-    lat = Math.max(Math.min(max, pos[1]), -max),
-    sin = Math.sin(lat * d);
-
-  return [R * pos[2] * d, R * Math.log((1 + sin) / (1 - sin)) / 2];
-};
-
-const spericalMercatorUnproject = function (x, y) {
-  const R = earthRadius, d = 180 / Math.PI;
-
-  return [
-    (2 * Math.atan(Math.exp(y / R)) - (Math.PI / 2)) * d,
-    x * d / R
-  ];
-};
-
-const positionTowardAtTimestamp = function(a, b, timestamp) {
-  const r = (timestamp - a[0]) / (b[0] - a[0]);
-  const r_ = 1 - r;
-  const  aa = spericalMercatorProject(a);
-  const  bb = spericalMercatorProject(b);
-  const cc = spericalMercatorUnproject(bb[0] * r + r_ * aa[0], bb[1] * r + r_ * aa[1]);
-  return [timestamp, cc[0], cc[1]];
+const positionOnSegmentAtTimestamp = function(a, b, timestamp) {
+  const r = (timestamp - a[0]) / (b[0] - a[0]),
+    k = 1 - r,
+    i = spericalMercator.project(a),
+    j = spericalMercator.project(b),
+    l = spericalMercator.unproject(j[0] * r + k * i[0], j[1] * r + k * i[1]);
+  return [timestamp, l[0], l[1]];
 }
 
 function closestPointOnSegment(pLoc, p1Loc, p2Loc) {
-  const  p = spericalMercatorProject(pLoc);
-  const  p1 = spericalMercatorProject(p1Loc);
-  const  p2 = spericalMercatorProject(p2Loc);
+  const p = spericalMercator.project(pLoc),
+    p1 = spericalMercator.project(p1Loc),
+    p2 = spericalMercator.project(p2Loc);
 
-  var x = p1[0],
+  let x = p1[0],
       y = p1[1],
       dx = p2[0] - x,
       dy = p2[1] - y,
-      dot = dx * dx + dy * dy,
       t;
+
+  const dot = dx * dx + dy * dy;
   if (dot > 0) {
     t = ((p[0] - x) * dx + (p[1] - y) * dy) / dot;
     if (t > 1) {
@@ -125,8 +133,9 @@ function closestPointOnSegment(pLoc, p1Loc, p2Loc) {
   }
   dx = p[0] - x;
   dy = p[1] - y;
-  const tt = p1Loc[0] + (p2Loc[0] - p1Loc[0]) * ((x - p1[0]) / (p2[0] - p1[0] + Number.EPSILON) + (y - p1[1]) / (p2[1] - p1[1] + Number.EPSILON)) / 2;
-  const ll = spericalMercatorUnproject(x, y);
+
+  const tt = p1Loc[0] + (p2Loc[0] - p1Loc[0]) * ((x - p1[0]) / (p2[0] - p1[0] + Number.EPSILON) + (y - p1[1]) / (p2[1] - p1[1] + Number.EPSILON)) / 2,
+    ll = spericalMercator.unproject(x, y);
   return [dx * dx + dy * dy, [tt, ll[0], ll[1]]];
 }
 
@@ -235,7 +244,7 @@ const PositionArchive = function () {
     if (positions[index][0] === t) {
       return positions[index];
     } else {
-      return positionTowardAtTimestamp(
+      return positionOnSegmentAtTimestamp(
         positions[index - 1],
         positions[index],
         t
@@ -274,7 +283,7 @@ const PositionArchive = function () {
     result = this.slice(i1, i2 + 1);
     if (i1B) {
       result.add(
-        positionTowardAtTimestamp(
+        positionOnSegmentAtTimestamp(
           positions[i1 - 1],
           positions[i1],
           t1
@@ -283,7 +292,7 @@ const PositionArchive = function () {
     }
     if (i2B) {
       result.add(
-        positionTowardAtTimestamp(
+        positionOnSegmentAtTimestamp(
           positions[i2],
           positions[i2 + 1],
           t2
