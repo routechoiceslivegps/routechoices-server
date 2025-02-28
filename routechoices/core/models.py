@@ -373,7 +373,7 @@ Follow our events live or replay them later.
             logo_b = self.logo.open("rb").read()
             logo = Image.open(BytesIO(logo_b))
         elif not self.domain:
-            logo = Image.open("routechoices/watermark.png")
+            logo = Image.open("routechoices/assets/images/watermark.png")
         if logo:
             logo_f = logo.resize((250, 250), Image.LANCZOS)
             img.paste(logo_f, (int((1200 - 250) / 2), int((630 - 250) / 2)), logo_f)
@@ -1974,7 +1974,7 @@ class Event(models.Model):
                 logo_b = self.club.logo.open("rb").read()
                 logo = Image.open(BytesIO(logo_b))
             elif not self.club.domain:
-                logo = Image.open("routechoices/watermark.png")
+                logo = Image.open("routechoices/assets/images/watermark.png")
             if logo:
                 logo_f = logo.resize((250, 250), Image.LANCZOS)
                 img.paste(logo_f, (int((1200 - 250) / 2), int((630 - 250) / 2)), logo_f)

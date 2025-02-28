@@ -401,7 +401,9 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                             outline=line_color,
                             width=line_width,
                         )
-                fnt = ImageFont.truetype("routechoices/Arial.ttf", circle_size * 2)
+                fnt = ImageFont.truetype(
+                    "routechoices/assets/fonts/arial.ttf", circle_size * 2
+                )
                 finalLoc = defaultdict(list)
                 for text, locs in numbersLoc.items():
                     left, top, right, bottom = fnt.getbbox(text)
