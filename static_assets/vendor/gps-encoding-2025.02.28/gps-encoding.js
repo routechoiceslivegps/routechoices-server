@@ -1,7 +1,7 @@
-/* gps-encoding.js 2023-04-13 */
+/* gps-encoding.js 2025-02-28 */
 // Depends on BN.js, https://github.com/indutny/bn.js
-var intValCodec = (function () {
-  var decodeUnsignedValueFromString = function (encoded, offset) {
+const intValCodec = (function () {
+  const decodeUnsignedValueFromString = function (encoded, offset) {
       const enc_len = encoded.length;
       let i = 0;
       let s = 0;
@@ -58,51 +58,76 @@ var intValCodec = (function () {
   };
 })();
 
+
+const earthRadius = 6371000;
+const sphericalMercatorMaxLatitude = 85.0511287798;
+
+const getDistanceBetween = function (pos1, pos2) {
+	const R = earthRadius,
+    rad = Math.PI / 180,
+    lat1 = pos1[1] * rad,
+  	lat2 = pos2[1] * rad,
+  	sinDLat = Math.sin((pos2[1] - pos1[1]) * rad / 2),
+  	sinDLon = Math.sin((pos2[2] - pos1[2]) * rad / 2),
+  	a = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon,
+  	c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+const spericalMercatorProject = function (pos) {
+  const R = earthRadius,
+    d = Math.PI / 180,
+    max = sphericalMercatorMaxLatitude,
+    lat = Math.max(Math.min(max, pos[1]), -max),
+    sin = Math.sin(lat * d);
+
+  return [R * pos[2] * d, R * Math.log((1 + sin) / (1 - sin)) / 2];
+};
+
+const spericalMercatorUnproject = function (x, y) {
+  const R = earthRadius, d = 180 / Math.PI;
+
+  return [
+    (2 * Math.atan(Math.exp(y / R)) - (Math.PI / 2)) * d,
+    x * d / R
+  ];
+};
+
 const positionTowardAtTimestamp = function(a, b, timestamp) {
   const r = (timestamp - a[0]) / (b[0] - a[0]);
   const r_ = 1 - r;
-  const  aa = spericalMercator.project(new L.LatLng(a[1], a[2]));
-  const  bb = spericalMercator.project(new L.LatLng(b[1], b[2]));
-  const cc = spericalMercator.unproject(new L.Point(bb.x * r + r_ * aa.x, bb.y * r + r_ * aa.y))
-  return [timestamp, cc.lat, cc.lng];
+  const  aa = spericalMercatorProject(a);
+  const  bb = spericalMercatorProject(b);
+  const cc = spericalMercatorUnproject(bb[0] * r + r_ * aa[0], bb[1] * r + r_ * aa[1]);
+  return [timestamp, cc[0], cc[1]];
 }
 
-getDistanceBetween = function (a, c) {
-  const C = Math.PI / 180;
-  const dlat = a[1] - c[1];
-  const dlon = a[2] - c[2];
-  const d = Math.sin((C * dlat) / 2) * Math.sin((C * dlat) / 2) + Math.cos(C * a[1]) * Math.cos(C * c[1]) * Math.sin((C * dlon) / 2) * Math.sin((C * dlon) / 2);
-  return 12756274 * Math.atan2(Math.sqrt(d), Math.sqrt(1 - d));
-};
-
-const spericalMercator = L.Projection.SphericalMercator;
-
 function closestPointOnSegment(pLoc, p1Loc, p2Loc) {
-  const  p = spericalMercator.project(new L.LatLng(pLoc[1], pLoc[2]));
-  const  p1 = spericalMercator.project(new L.LatLng(p1Loc[1], p1Loc[2]));
-  const  p2 = spericalMercator.project(new L.LatLng(p2Loc[1], p2Loc[2]));
+  const  p = spericalMercatorProject(pLoc);
+  const  p1 = spericalMercatorProject(p1Loc);
+  const  p2 = spericalMercatorProject(p2Loc);
 
-  var x = p1.x,
-      y = p1.y,
-      dx = p2.x - x,
-      dy = p2.y - y,
+  var x = p1[0],
+      y = p1[1],
+      dx = p2[0] - x,
+      dy = p2[1] - y,
       dot = dx * dx + dy * dy,
       t;
   if (dot > 0) {
-    t = ((p.x - x) * dx + (p.y - y) * dy) / dot;
+    t = ((p[0] - x) * dx + (p[1] - y) * dy) / dot;
     if (t > 1) {
-      x = p2.x;
-      y = p2.y;
+      x = p2[0];
+      y = p2[1];
     } else if (t > 0) {
       x += dx * t;
       y += dy * t;
     }
   }
-  dx = p.x - x;
-  dy = p.y - y;
-  const tt = p1Loc[0] + (p2Loc[0] - p1Loc[0]) * ((x - p1.x) / (p2.x - p1.x + Number.EPSILON) + (y - p1.y) / (p2.y - p1.y + Number.EPSILON)) / 2;
-  const ll = spericalMercator.unproject(new L.Point(x, y));
-  return [dx * dx + dy * dy, [tt, ll.lat, ll.lng]];
+  dx = p[0] - x;
+  dy = p[1] - y;
+  const tt = p1Loc[0] + (p2Loc[0] - p1Loc[0]) * ((x - p1[0]) / (p2[0] - p1[0] + Number.EPSILON) + (y - p1[1]) / (p2[1] - p1[1] + Number.EPSILON)) / 2;
+  const ll = spericalMercatorUnproject(x, y);
+  return [dx * dx + dy * dy, [tt, ll[0], ll[1]]];
 }
 
 const PositionArchive = function () {
