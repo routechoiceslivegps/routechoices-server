@@ -154,7 +154,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
         try:
             map_data = self.init_data["xtra"]["map"]
             map_url = map_data["url"]
-            map_resolution = map_data["resolution"]
+            map_resolution_orig = map_data["resolution"]
         except Exception:
             raise MapsImportError("Could not extract basic map info")
 
@@ -231,7 +231,9 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                 course_img_found = True
             if not course.get("courseImages") and not course_img_found:
                 route = course["controls"]
-                map_resolution *= route[0]["control"]["mapScale"] / 15000
+                map_resolution = (
+                    map_resolution_orig * route[0]["control"]["mapScale"] / 15000
+                )
 
                 map_projection = self.init_data["xtra"]["map"].get("projection")
                 map_angle = 0
