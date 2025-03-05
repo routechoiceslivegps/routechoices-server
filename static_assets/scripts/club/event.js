@@ -847,7 +847,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			.replace("2", "")
 			.trim();
 
-		return `<div class="mb-3 justify-content-center fw-bold d-flex text-uppercase">
+		return `<div class="mb-3 justify-content-center fw-bold d-flex text-uppercase noselect">
       <div class="me-2"><span class="fs-3 cd-nb">${days}</span><br/>${daysText}</div>
       <div class="ms-3 me-2"><span class="fs-3 cd-nb">${hours}</span><br/>${hoursText}</div>
       <div class="ms-3 me-2"><span class="fs-3 cd-nb">${minutes}</span><br/>${minutesText}</div>
