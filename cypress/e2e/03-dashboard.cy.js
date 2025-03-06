@@ -92,37 +92,30 @@ context("Dashboard actions", () => {
 		cy.login();
 		cy.visit("/dashboard/clubs/");
 		cy.contains("Halden SK").click();
+
 		for (const gpxFileName of ["trk", "waypoint", "waypoint+trk"]) {
 			cy.visit("/dashboard/clubs/halden-sk/maps/upload-gpx");
 			cy.get("#id_gpx_file").selectFile(
 				`cypress/fixtures/gpx/${gpxFileName}.gpx`,
 			);
-			cy.get("button:not([type]),button[type=submit]").click();
+			cy.get("button:not([type]),button[type=submit]").eq(1).click();
 			cy.get("#django-messages").contains(
 				"The import of the map was successful!",
 			);
 		}
 
-		cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
-		cy.get("#id_file").selectFile("cypress/fixtures/Jukola2019/1/map.kmz");
-		cy.get("button:not([type]),button[type=submit]").click();
-		cy.get("#django-messages", { timeout: 10000 }).contains(
-			"The import of the map was successful!",
-		);
-
-		cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
-		cy.get("#id_file").selectFile("cypress/fixtures/maps/multiground.kml");
-		cy.get("button:not([type]),button[type=submit]").click();
-		cy.get("#django-messages", { timeout: 10000 }).contains(
-			"The import of the map was successful!",
-		);
-
-		cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
-		cy.get("#id_file").selectFile("cypress/fixtures/maps/tiled.kmz");
-		cy.get("button:not([type]),button[type=submit]").click();
-		cy.get("#django-messages", { timeout: 10000 }).contains(
-			"The import of the map was successful!",
-		);
+		for (const kmzFileName of [
+			"Jukola2019/1/map.kmz",
+			"maps/multiground.kml",
+			"maps/tiled.kmz",
+		]) {
+			cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
+			cy.get("#id_file").selectFile(`cypress/fixtures/${kmzFileName}`);
+			cy.get("button:not([type]),button[type=submit]").click();
+			cy.get("#django-messages", { timeout: 10000 }).contains(
+				"The import of the map was successful!",
+			);
+		}
 	});
 
 	it("Create map from image", () => {
