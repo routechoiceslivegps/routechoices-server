@@ -30,122 +30,120 @@ function saveGeoJSON(filename, data) {
 			type: "FeatureCollection",
 			features: [],
 		};
-		for (const file of fileUploader2.files) {
-			const reader = new FileReader();
-			reader.addEventListener("load", (event) => {
-				const parser = new gpxParser();
-				parser.parse(event.target.result);
-				for (const track of parser.tracks) {
-					const latlons = track.points.map((pt) => [pt.lon, pt.lat]);
-					const startLatLon = latlons[0];
-					const endLatLon = latlons.at(-1);
+		const reader = new FileReader();
+		reader.addEventListener("load", (event) => {
+			const parser = new gpxParser();
+			parser.parse(event.target.result);
+			for (const track of parser.tracks) {
+				const latlons = track.points.map((pt) => [pt.lon, pt.lat]);
+				const startLatLon = latlons[0];
+				const endLatLon = latlons.at(-1);
 
-					const startFeature = {
-						type: "Feature",
-						properties: {},
-						style: {
-							icon: {
-								className: "map-marker start-icon",
-							},
+				const startFeature = {
+					type: "Feature",
+					properties: {},
+					style: {
+						icon: {
+							className: "map-marker start-icon",
 						},
-						geometry: {
-							type: "Point",
-							coordinates: startLatLon,
+					},
+					geometry: {
+						type: "Point",
+						coordinates: startLatLon,
+					},
+				};
+				const lineFeature = {
+					type: "Feature",
+					properties: {},
+					geometry: {
+						type: "LineString",
+						coordinates: latlons,
+					},
+				};
+				const endFeature = {
+					type: "Feature",
+					properties: {},
+					style: {
+						icon: {
+							className: "map-marker end-icon",
 						},
-					};
-					const lineFeature = {
-						type: "Feature",
-						properties: {},
-						geometry: {
-							type: "LineString",
-							coordinates: latlons,
-						},
-					};
-					const endFeature = {
-						type: "Feature",
-						properties: {},
-						style: {
-							icon: {
-								className: "map-marker end-icon",
-							},
-						},
-						geometry: {
-							type: "Point",
-							coordinates: endLatLon,
-						},
-					};
-					output.features.push(startFeature);
-					output.features.push(lineFeature);
-					output.features.push(endFeature);
-				}
-				for (const track of parser.routes) {
-					const latlons = track.points.map((pt) => [pt.lon, pt.lat]);
-					const startLatLon = latlons[0];
-					const endLatLon = latlons.at(-1);
+					},
+					geometry: {
+						type: "Point",
+						coordinates: endLatLon,
+					},
+				};
+				output.features.push(startFeature);
+				output.features.push(lineFeature);
+				output.features.push(endFeature);
+			}
+			for (const track of parser.routes) {
+				const latlons = track.points.map((pt) => [pt.lon, pt.lat]);
+				const startLatLon = latlons[0];
+				const endLatLon = latlons.at(-1);
 
-					const startFeature = {
-						type: "Feature",
-						properties: {},
-						style: {
-							icon: {
-								className: "map-marker start-icon",
-							},
+				const startFeature = {
+					type: "Feature",
+					properties: {},
+					style: {
+						icon: {
+							className: "map-marker start-icon",
 						},
-						geometry: {
-							type: "Point",
-							coordinates: startLatLon,
+					},
+					geometry: {
+						type: "Point",
+						coordinates: startLatLon,
+					},
+				};
+				const lineFeature = {
+					type: "Feature",
+					properties: {},
+					geometry: {
+						type: "LineString",
+						coordinates: latlons,
+					},
+				};
+				const endFeature = {
+					type: "Feature",
+					properties: {},
+					style: {
+						icon: {
+							className: "map-marker end-icon",
 						},
-					};
-					const lineFeature = {
-						type: "Feature",
-						properties: {},
-						geometry: {
-							type: "LineString",
-							coordinates: latlons,
+					},
+					geometry: {
+						type: "Point",
+						coordinates: endLatLon,
+					},
+				};
+				output.features.push(startFeature);
+				output.features.push(lineFeature);
+				output.features.push(endFeature);
+			}
+			for (const wpt of parser.waypoints) {
+				const feature = {
+					type: "Feature",
+					properties: {
+						text: wpt.name,
+					},
+					style: {
+						icon: {
+							className: "map-marker waypoint",
 						},
-					};
-					const endFeature = {
-						type: "Feature",
-						properties: {},
-						style: {
-							icon: {
-								className: "map-marker end-icon",
-							},
-						},
-						geometry: {
-							type: "Point",
-							coordinates: endLatLon,
-						},
-					};
-					output.features.push(startFeature);
-					output.features.push(lineFeature);
-					output.features.push(endFeature);
-				}
-				for (const wpt of parser.waypoints) {
-					const feature = {
-						type: "Feature",
-						properties: {
-							text: wpt.name,
-						},
-						style: {
-							icon: {
-								className: "map-marker waypoint",
-							},
-						},
-						geometry: {
-							type: "Point",
-							coordinates: [wpt.lon, wpt.lat],
-						},
-					};
-					output.features.push(feature);
-				}
-			});
-			reader.readAsText(file);
-		}
-		const downloadData = JSON.stringify(output, null, 2);
-		const filename = fileUploader2.files[0].name;
+					},
+					geometry: {
+						type: "Point",
+						coordinates: [wpt.lon, wpt.lat],
+					},
+				};
+				output.features.push(feature);
+			}
+			const downloadData = JSON.stringify(output, null, 2);
+			const filename = fileUploader2.files[0].name;
 
-		saveGeoJSON(`${filename.slice(0, -4)}.geojson`, downloadData);
-		this.reset();
+			saveGeoJSON(`${filename.slice(0, -4)}.geojson`, downloadData);
+			this.reset();
+		});
+		reader.readAsText(fileUploader2.files[0]);
 	});
 })();
