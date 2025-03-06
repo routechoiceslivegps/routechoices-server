@@ -139,20 +139,13 @@ function saveGeoJSON(filename, data) {
 					};
 					output.features.push(feature);
 				}
-
-				const downloadData = JSON.stringify(output, null, 2);
-				saveGeoJSON(
-					`map-${new Date().toISOString().slice(0, 10)}.geojson`,
-					downloadData,
-				);
-
-				const t = u(this);
-				const submitBtn = t.find("#submit-btn");
-				const icon = submitBtn.find("i");
-				submitBtn.attr({ disabled: false });
-				icon.attr({ class: "" }).addClass("fa-solid fa-file-arrow-up");
 			});
 			reader.readAsText(file);
 		}
+		const downloadData = JSON.stringify(output, null, 2);
+		const filename = fileUploader2.files[0].name;
+
+		saveGeoJSON(`${filename.slice(0, -4)}.geojson`, downloadData);
+		this.reset();
 	});
 })();
