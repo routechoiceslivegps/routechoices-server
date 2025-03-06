@@ -22,6 +22,7 @@ from routechoices.lib.helpers import (
     get_best_image_mime,
     get_current_site,
     get_image_mime_from_request,
+    int_base32,
     safe64encodedsha,
 )
 from routechoices.lib.other_gps_services.gpsseuranta import GpsSeurantaNet
@@ -576,6 +577,7 @@ def event_geojson_view(request, slug, **kwargs):
             host="api",
             kwargs={"event_id": event.aid},
         )
+        + f"?v={int_base32(int(event.modification_date.timestamp()))}"
     )
 
 
