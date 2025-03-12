@@ -66,11 +66,13 @@ class Command(BaseCommand):
                     url = (
                         "https://api.findmespot.com/spot-main-web/consumer"
                         f"/rest-api/2.0/public/feed/{feed.feed_id}/message.xml?"
-                        f"startDate={last_fetched.isoformat()}&endDate={now.isoformat()}"
+                        f"startDate={last_fetched.strftime('%Y-%m-%dT%H:%I:%S-0000')}&endDate={now.strftime('%Y-%m-%dT%H:%I:%S-0000')}"
                     )
+                    print(url)
                     res = requests.get(url, timeout=10)
                     if res.status_code == 200:
                         try:
+                            print(res.text)
                             n += self.parse_response(res.text)
                         except Exception:
                             pass
