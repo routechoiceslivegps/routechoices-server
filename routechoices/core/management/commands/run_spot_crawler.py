@@ -78,7 +78,7 @@ class Command(BaseCommand):
                             feed.last_fetched = now
                             feed.save()
                     time.sleep(2)
-                print(f"{n} new positions, sleeping now...")
+                print(f"{n} new positions, sleeping now...", flush=True)
                 time.sleep(max(0, 150 - (time.time() - t0)))
             except KeyboardInterrupt:
                 break
