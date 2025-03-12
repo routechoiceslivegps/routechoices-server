@@ -70,6 +70,7 @@ from routechoices.lib.validators import (
     validate_domain_name,
     validate_domain_slug,
     validate_emails,
+    validate_esn,
     validate_imei,
     validate_latitude,
     validate_longitude,
@@ -2667,3 +2668,33 @@ class UserSettings(models.Model):
 
 
 User.settings = property(lambda u: UserSettings.objects.get_or_create(user=u)[0])
+
+
+class SpotFeed(models.Model):
+    feed_id = models.CharField(
+        max_length=64,
+        unique=True,
+    )
+    last_fetched = models.DateTimeField(blank=True, null=True)
+
+
+class SpotDevice(models.Model):
+    creation_date = models.DateTimeField(auto_now_add=True)
+    messenger_id = models.CharField(
+        max_length=32,
+        unique=True,
+        validators=[
+            validate_esn,
+        ],
+    )
+    device = models.OneToOneField(
+        Device, related_name="spot_device", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        ordering = ["messenger_id"]
+        verbose_name = "spot device"
+        verbose_name_plural = "spot devices"
+
+    def __str__(self):
+        return self.messenger_id

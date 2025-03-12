@@ -8,3 +8,4 @@ cd $BASEDIR
 ./bin/stop-django
 ./bin/stop-task_queue
 ./bin/stop-tornado
+./bin/stop-spot

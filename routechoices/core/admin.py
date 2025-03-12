@@ -28,6 +28,8 @@ from routechoices.core.models import (
     Map,
     MapAssignation,
     Notice,
+    SpotDevice,
+    SpotFeed,
     TcpDeviceCommand,
 )
 from routechoices.lib.helpers import epoch_to_datetime, get_device_name
@@ -1022,6 +1024,20 @@ class WebAuthnKeyAdmin(admin.ModelAdmin):
 @admin.register(FrontPageFeedback)
 class FrontPageFeedbackAdmin(admin.ModelAdmin):
     list_display = ("name", "stars", "club_name")
+
+
+@admin.register(SpotDevice)
+class SpotDeviceAdmin(admin.ModelAdmin):
+    list_display = (
+        "messenger_id",
+        "device",
+        "creation_date",
+    )
+
+
+@admin.register(SpotFeed)
+class SpotFeedAdmin(admin.ModelAdmin):
+    list_display = ("feed_id", "last_fetched")
 
 
 ADMIN_COMMAND_LIST = [

@@ -8,3 +8,4 @@ cd $BASEDIR
 ./bin/restart-django
 ./bin/restart-taskqueue
 ./bin/restart-tornado
+./bin/restart-spot

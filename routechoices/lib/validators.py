@@ -110,6 +110,16 @@ def validate_corners_coordinates(val):
         # do not validate longitude for map over the international date line
 
 
+def validate_esn(number):
+    """Check if the number provided is a valid ESN number."""
+    try:
+        matched = re.match(r"^\d-\d{7}$", number)
+    except Exception:
+        raise ValidationError("Invalid ESN")
+    if not matched:
+        raise ValidationError("Invalid ESN")
+
+
 custom_username_validators = [
     validate_nice_slug,
 ]
