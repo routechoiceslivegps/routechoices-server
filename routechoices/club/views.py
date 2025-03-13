@@ -864,7 +864,7 @@ LIVE:{1 if event.is_live else 0}
         out += f"CALIBRATION:{tl['lat']:.5f}|{tl['lon']:.5f}|0|0|{tr['lat']:.5f}|{tr['lon']:.5f}|{width}|0|{br['lat']:.5f}|{br['lon']:.5f}|{width}|{height}\n"
 
     for comp in event.competitors.all():
-        out += f"COMPETITOR:t{comp.id}|{comp.start_time.strftime("%Y%m%d")}|{comp.start_time.strftime("%H%I%S")}|{comp.name}|{comp.short_name}\n"
+        out += f"COMPETITOR:t{comp.aid}|{comp.start_time.strftime("%Y%m%d")}|{comp.start_time.strftime("%H%I%S")}|{comp.name}|{comp.short_name}\n"
     content_type = "text/plain; charset=utf-8"
 
     headers = {}
@@ -894,13 +894,37 @@ def event_gpsseuranta_data_view(request, slug, **kwargs):
     event.check_user_permission(request.user)
 
     def encode_gps_seuranta_data(competitor, locations):
-        # TODO: use special encoding
+
+        def encode_small_number(val):
+            if val < -21:
+                return chr(79 + val)
+            if val < 5:
+                return chr(86 + val)
+            return chr(92 + val)
+
         out = ""
-        for pt in locations:
-            t = pt[0] - 1136073600
-            lng = round(pt[2] * 5e4)
-            lat = round(pt[1] * 1e5)
-            out += f"t{competitor.id}.{t}_{lng}_{lat}.\n"
+        chunks = []
+        nb_pt_per_line = 29
+        for i in range(0, len(locations) // nb_pt_per_line):
+            chunks.append(locations[i * nb_pt_per_line : (i + 1) * nb_pt_per_line])
+        for chunk in chunks:
+            prev_pt = None
+            for pt in chunk:
+                t = pt[0] - 1136073600
+                lng = round(pt[2] * 5e4)
+                lat = round(pt[1] * 1e5)
+                if prev_pt is None:
+                    out += f"t{competitor.aid}.{t}_{lng}_{lat}."
+                else:
+                    dt = t - prev_pt[0]
+                    dlat = lat - prev_pt[1]
+                    dlng = lng - prev_pt[2]
+                    if abs(dt) < 31 and abs(dlat) < 31 and abs(dlng) < 31:
+                        out += f"{encode_small_number(dt)}{encode_small_number(dlng)}{encode_small_number(dlat)}."
+                    else:
+                        out += f"{dt}_{dlng}_{dlat}."
+                prev_pt = [t, lat, lng]
+            out += "\n"
         return out
 
     total_nb_pts = 0
