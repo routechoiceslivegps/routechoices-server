@@ -1,0 +1,284 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+	  <script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/strings.js"></script>
+		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+		<title>GPS-seuranta</title>
+		<meta charset="utf-8">
+		<meta name="author" content="GPS-seuranta">
+		<link id="cssMode" rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/style.css" />
+		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/start/jquery-ui.css" />
+		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leaflet180.css" />
+		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leafletCustom.css" />
+		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leaflet.contextmenu.css"/>
+		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leaflet.viewcenter.css"/>
+		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leaflet.fullscreen.css"/>
+		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/colpick.css"/>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0, minimal-ui">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<script>
+			var cdnpath = "//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/";
+			var isgpxseuranta = false;
+			var hideallmenus = false;
+			var langu = 0;
+		</script>
+		<script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/libs/jquery-2.1.3.min.js"></script>
+		<script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/libs/jquery-ui.min.js"></script>
+        <script>
+            var langu = 0;
+            var Strings_AppMode = ['App Mode','moodi',decodeURIComponent('&#32735&#26790&#38597')];
+            var Strings_Real = ['REAL', 'reaali', decodeURIComponent('&#32735&#26790&#38597')];
+
+            var sessionid="";
+            var issessioned = false;
+            var sessioneventPath = new String(document.location);
+            var sessionpathArray = sessioneventPath.split("?");
+            if(sessionpathArray.length > 1) {
+                var sessionparams =  sessionpathArray[1];
+                    var sessionpathArray2 = sessionparams.split("&");
+                        for(sii=0;sii<sessionpathArray2.length;sii++) {
+                        if(sessionpathArray2[sii].indexOf("GpsSeurantaSessionID=")==0) {
+                        sessionid =  sessionpathArray2[sii].substring(21);
+                        issessioned = true;
+                        break;
+                }
+
+            }
+
+
+            }
+            console.log("session: "+sessionid);
+
+            window.addEventListener("message", function(event) {
+                kasky = event.data;
+                if(kasky.startsWith("center:"))  trevent.centercompetitorid(mapHeight, kasky.substring(7));
+            });
+	</script>
+	<script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/load3.js"></script>
+    <style>
+        #shield {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 10000000;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="statusBox">
+            <div id="playDate"> <div id="curDate"></div> </div>
+            <div id="playTime"> <div id="curTime"></div> </div>
+            <div id="btnMassStart" class="btnMSoff"><div id="btnMassStartText"><span class="boldertext">REAL</span>&nbsp;&nbsp;&nbsp;<span class="smallertext">SYNC</span></div></div>
+            <div id="liveStatus" class="onlyReplay"><div id="text">REPLAY</div></div>
+            <div id="scalebox"> <div id="scaleline">scale...</div></div>
+            <div id="hideStatusBox" class="hideStatusBox"></div>
+        </div>
+        <div id="menuBtnContainerMobile">
+            <div id="btnListMobile" class="btnNotSelected" title="Show competitor list">LIST</div>
+            <div id="btnOptionsMobile" class="btnNotSelected" title="Show options menu">OPTIONS</div>
+            <div id="btnSettingsMobile" class="btnNotSelected" title="Show splits menu">SPLITS</div>
+        </div>
+        <div id="menu">
+            <div id="menuBtnContainer">
+                <div class="fa fa-wrench fa-lg" id="listoptionsButton"></div>
+                <a href="" target="_blank" id="newtaba"><div class="fa fa-window-restore fa-lg" id="newtabbutton" title="open in new tab"></div></a>
+            </div>
+            <div id="compMenu">
+                <div id="searchBarCont">
+                    <div id="btnCheckAll" class="fa fa-check"></div>
+                    <input type="text" class="textbox" placeholder="Competitors..." maxlength="20">
+                    <label id="btnClear" class="fa fa-times-circle"></label></input>
+                </div>
+                <div id="competitorCont"></div>
+                <div class="compSettingsCont">
+                </div>
+            </div>
+            <div id="optionsMenu">
+                <div id="optionsCont">
+                </div>
+            </div>
+        </div>
+        <div id="btnShowMenu"></div>
+        <div id="btnShowSetMenu" class="showSetMenu"></div>
+        <div id="btnShowPlayer" class="hidePlayer"></div>
+        <div id="settingsMenu">
+            <div id="setMenuTabs">
+                <ul>
+                    <li><a href="#tabs-1">Settings</a></li>
+                    <li><a href="#tabs-2">Splits</a></li>
+                    <li><a href="#tabs-2b">Sector</a></li>
+                    <li><a href="#tabs-3">Diff</a></li>
+                    <li><a href="#tabs-4">Points</a></li>
+                </ul>
+                <div id="tabs-1">
+                    <p>Right-click/long tap map to make splitpoints/lines</p>
+                    <div class="splitsettingsdiv">Lines/points on the map<br>
+                        <span id="showHideLinesRadio">
+                            <input type="radio" id="showLinesRadio" name="radio1" checked="checked" value="show"><label for="showLinesRadio">Show</label>
+                            <input type="radio" id="hideLinesRadio" name="radio1"  value="hide"><label for="hideLinesRadio">Hide</label>
+                            </span>
+                    </div>
+
+                    <div class="splitsettingsdiv">Time to use<br>
+                        <span id="timeToUseRadio">
+                            <input type="radio" id="timeFromStartRadio" name="radio2" checked="checked" value="start"><label for="timeFromStartRadio">Race</label>
+                            <input type="radio" id="realTimeRadio" name="radio2"  value="real"><label for="realTimeRadio">Real</label>
+                            </span>
+                    </div>
+
+                    <div class="splitsettingsdiv">Show<br>
+                        <span id="showDiffTimeRadio">
+                            <input type="radio" id="timeDiffRadio" name="radio3" checked="checked" value="diff"><label for="timeDiffRadio">Diff.</label>
+                            <input type="radio" id="timeTimeRadio" name="radio3"  value="time"><label for="timeTimeRadio">Times</label>
+                            </span>
+                    </div>
+
+                    <div class="splitsettingsdiv">Show<br>
+                        <span id="showLetNamesRadio">
+                            <input type="radio" id="showNameRadio" name="radio4" checked="checked" value="name"><label for="showNameRadio">Names</label>
+                            <input type="radio" id="showLetRadio" name="radio4"  value="let"><label for="showLetRadio">Letters</label>
+                            </span>
+                    </div>
+                    <div class="splitsettingsdiv">Show<br>
+                        <span id="showAllCheckRadio">
+                            <input type="radio" id="showAllRadio" name="radio5" checked="checked" value="all"><label for="showAllRadio">All</label>
+                            <input type="radio" id="showCheckRadio" name="radio5"  value="checked"><label for="showCheckRadio">Checked</label>
+                            </span>
+                    </div>
+                    <div class="splitsettingsdiv">Font size<br>
+                        <span id="fontSizeButtons">
+                        <button id="decFontSize">Button with icon only</button>
+                            <button id="fontSizeSpan">12</button>
+                            <button id="incFontSize">Button with icon only</button>
+                            </span>
+                    </div>
+                </div>
+                <div id="tabs-2">
+                    <div class="chooseSpointdiv">
+                        <select id="chooseSpointselect" name="Spointselect"></select>
+                        <span id="lapselspan"><br>Lap: <input id="lapselspinner" name="lapselspinner"></span>
+                        &nbsp;&nbsp; <input type="checkbox" id="splitsettingscb" data-role="button"><label for="splitsettingscb">&nbsp;</label>
+                        <div id="splitlinesettings">
+                            <button id="ignorebutton">Ignore times before</button> <br>
+                            Real time <br><span id="igRTlabel">(not set)</span><br>
+                            Race time <br><span id="igTFSlabel">(not set)</span><br><br>
+                            <button id="deleteSpointbutton">Delete point/line</button>
+                        </div>
+
+                    </div>
+                    <div id="splitlist"></div>
+                </div>
+                <div id="tabs-2b">
+                    <div class="chooseS1pointdiv">
+                        From:<br><select id="chooseS1pointselect" name="S1pointselect"></select>
+                        <span id="lap1selspan">Lap: <input id="lap1selspinner" name="lap2selspinner"></span><br>
+                        To:<br><select id="chooseS2pointselect" name="S2pointselect"></select>
+                        <span id="lap2selspan">Lap: <input id="lap2selspinner" name="lap2selspinner"></span> <br>
+                        <p><button id="calcSectorButton">Calculate</button>  <input type="checkbox" name="sectorroutescb" id="sectorroutescb" value="routes"><label for="sectorroutescb" id="sectorroutescblabel">Routes</label><br>
+                        &nbsp;&nbsp;&nbsp;<input type="checkbox" name="sectorcolorcb" id="sectorcolorcb" value="scolors"><label for="sectorcolorcb" id="sectorcolorcblabel">color by time</label></p>
+
+                    </div>
+                    <div id="sectorlist"></div>
+                </div>
+                <div id="tabs-3">
+                        <p><strong>Time difference between 2 competitors</strong></p>
+                        <span id="showDifferenceRadio">
+                            <input type="radio" id="showDiffOn" name="radio2a" value="dion"><label for="showDiffOn">Show</label>
+                            <input type="radio" id="showDiffOff" name="radio2a" checked="checked"  value="dioff"><label for="showDiffOff">Hide</label>
+                            </span>
+                        <p><strong>First</strong><br>
+                        <select id="diffFirstselect" name="diffFirstselect"></select>
+                        <br>
+                        <strong>Behind</strong><br>
+                        <select id="diffBehindselect" name="diffBehindselect"></select>
+                        <br><br>
+                        <strong>Min-max differences (minutes)</strong><br>
+                        <input id="mindiffspinner" name="mindiffspinner">
+                        -
+                        <input id="maxdiffspinner" name="maxdiffspinner">
+                        </p>
+                    <p>Calculate time difference between two competitors if their routes are within 50 meters.<br><br>Difference must be between min-max.<br><br>Doesn't work well on controls/other sharp turns.</p>
+                </div>
+                <div id="tabs-4">
+                        <p><strong>Rogaining points (experimental)</strong></p>
+                        <input type="checkbox" name="rogonthemapcb" id="rogonthemapcb" value="rogonmap"><label for="rogonthemapcb" id="rogonthemapcblabel">Show on map</label><br>
+
+                        <div id="roglist"></div>
+                </div>
+            </div>
+        </div>
+			<div id="ignore-dialog-form" title="Edit settings">
+  				<form>
+    				  <fieldset>
+      					<input type="checkbox" id="ignoreRTcb"><label for="ignoreRTcb">real time</label><br>
+      					<input type="text" name="name" id="ignoreRT" value="2015-04-25 13:01:00" class="text ui-widget-content ui-corner-all"><br>
+      					<input type="checkbox" id="ignoreTFScb"><label for="ignoreTFScb">race time</label>
+      					<input type="text" name="name" id="ignoreTFS" value="00:00:00" class="text ui-widget-content ui-corner-all"><br>
+     					 <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    				   </fieldset>
+ 				 </form>
+			</div>
+			<div id="helpBox"><a class="helpboxclose" id="helpboxclose" title="Close"></a><p>&nbsp;&nbsp;&nbsp;development version 2015-06-04</p></div>
+			<div id="colorBox"><div id="colorBoxTitle">Choose color:</div><a class="helpboxclose" id="colorboxclose" title="Close"></a><div id="colorArea"> <div id="picker"></div> </div></div>
+			<div id="newpoint-dialog-form" title="New split point">
+  				<form>
+    				<fieldset>
+                        <div class="newSplitNamediv">
+                            Name <input type="text" class="newsplittextbox" id="newsplitname" maxlength="6">
+                        </div>
+
+                        <div class="newSplitNamediv">
+                            After  <select id="newsplitorderselect" name="splitorderselect"></select>
+                        </div>
+
+
+                        <div class="newSplitNamediv" id="newsplitradiusdiv">
+                            Radius<select id="newsplitradiusselect" name="splitradiusselect"><option value="10">10 m</option><option value="20">20 m</option><option value="30">30 m</option><option value="40">40 m</option><option value="50">50 m</option><option value="60">60 m</option><option value="70">70 m</option><option value="80">80 m</option><option value="90">90 m</option><option value="100">100 m</option></select>
+                        </div>
+                        <input type="submit" tabindex="-1" style="position:absolute; top:-1000px" id="newpointsubmit">
+    				   </fieldset>
+ 				 </form>
+			</div>
+			<div id="loadingBox"></div>
+			<div id="map">
+				<noscript><div id="errorBox">JavaScript is off. Please enable to view full site!</div></noscript>
+			</div>
+			<div id="player">
+				<div id="btnPlay" class="paused"></div>
+				<select id="speed-select" name="speed-select"></select>
+				<div id="timeline">
+					<div id="arrowsLeftCont">
+						<div class="a4lc" id="a4l"></div>
+						<div class="a3lc" id="a3l"></div>
+						<div class="a2lc" id="a2l"></div>
+						<div class="a1lc" id="a1l"></div>
+					</div>
+					<div id="progressBar"> <div id="timeSlider"></div> </div>
+					<div id="arrowsRightCont">
+						<div class="a1rc" id="a1r"></div>
+						<div class="a2rc" id="a2r"></div>
+						<div class="a3rc" id="a3r"></div>
+						<div class="a4rc" id="a4r"></div>
+					</div>
+				</div>
+				<div id="mobileControls">
+					<div id="btnPlayMob" class="paused"></div>
+					<div id="arrowsLeftContMob">
+						<div class="ma2" id="ma2l"></div>
+						<div class="ma1l" id="ma1l"></div>
+					</div>
+					<div id="arrowsRightContMob">
+						<div class="ma1r" id="ma1r"></div>
+						<div class="ma2" id="ma2r"></div>
+					</div>
+					<select id="speed-selectMob" name="speed-select"></select>
+				</div>
+			</div>
+		</div>
+		<script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/compliled20.js"></script>
+	</body>
+</html>

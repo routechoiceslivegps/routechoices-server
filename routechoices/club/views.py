@@ -837,6 +837,30 @@ def gpsseuranta_time(request):
     return HttpResponse(time.time() - 1136073600)
 
 
+def event_gpsseuranta_index_view(request, slug, **kwargs):
+    bypass_resp = handle_legacy_request(
+        request, "event_gpsseuranta_init_view", kwargs.get("club_slug"), slug=slug
+    )
+    if bypass_resp:
+        return bypass_resp
+    club_slug = request.club_slug
+    event = get_object_or_404(
+        Event,
+        club__slug__iexact=club_slug,
+        slug__iexact=slug,
+    )
+    headers = {}
+    if event.privacy == PRIVACY_PRIVATE:
+        headers["Cache-Control"] = "Private"
+
+    return TemplateResponse(
+        request,
+        "club/gpsseuranta.html",
+        content_type="text/html",
+        headers=headers,
+    )
+
+
 def event_gpsseuranta_init_view(request, slug, **kwargs):
     bypass_resp = handle_legacy_request(
         request, "event_gpsseuranta_init_view", kwargs.get("club_slug"), slug=slug

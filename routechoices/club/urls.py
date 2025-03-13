@@ -188,6 +188,11 @@ urlpatterns = [
                     views.event_gpsseuranta_init_view,
                     name="event_gpsseuranta_init_view",
                 ),
+                path(
+                    "gpsseuranta",
+                    views.event_gpsseuranta_index_view,
+                    name="event_gpsseuranta_index_view",
+                ),
             ]
         ),
     ),
