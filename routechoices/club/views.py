@@ -830,3 +830,97 @@ def sitemap(
         content_type=content_type,
         headers=headers,
     )
+
+
+def event_gpsseuranta_init_view(request, slug, **kwargs):
+    bypass_resp = handle_legacy_request(
+        request, "event_gpsseuranta_data_view", kwargs.get("club_slug"), slug=slug
+    )
+    if bypass_resp:
+        return bypass_resp
+    club_slug = request.club_slug
+    event = get_object_or_404(
+        Event.objects.select_related("club", "map").prefetch_related("competitors"),
+        club__slug__iexact=club_slug,
+        slug__iexact=slug,
+    )
+    event.check_user_permission(request.user)
+
+    out = f"""VERSIO:3
+RACENAME: {event.name}
+TIMEZONE:0
+GRABINTERVAL:15
+DASHLIMIT:45
+LIVEBUFFER:30
+MINBEFORESTART:0
+NUMBEROFLOGOS:0
+LIVE:{1 if event.is_live else 0}
+"""
+    if event.map:
+        width, height = event.map.quick_size
+        tl = event.map.map_xy_to_wsg84(0, 0)
+        tr = event.map.map_xy_to_wsg84(width, 0)
+        br = event.map.map_xy_to_wsg84(width, height)
+        out += f"CALIBRATION:{tl['lat']:.5f}|{tl['lon']:.5f}|0|0|{tr['lat']:.5f}|{tr['lon']:.5f}|{width}|0|{br['lat']:.5f}|{br['lon']:.5f}|{width}|{height}\n"
+
+    for comp in event.competitors.all():
+        out += f"COMPETITOR:t{comp.id}|{comp.start_time.strftime("%Y%m%d")}|{comp.start_time.strftime("%H%I%S")}|{comp.name}|{comp.short_name}\n"
+    content_type = "text/plain; charset=utf-8"
+
+    headers = {}
+    if event.privacy == PRIVACY_PRIVATE:
+        headers["Cache-Control"] = "Private"
+
+    return HttpResponse(
+        out,
+        content_type=content_type,
+        headers=headers,
+    )
+
+
+def event_gpsseuranta_data_view(request, slug, **kwargs):
+    bypass_resp = handle_legacy_request(
+        request, "event_gpsseuranta_data_view", kwargs.get("club_slug"), slug=slug
+    )
+    if bypass_resp:
+        return bypass_resp
+    club_slug = request.club_slug
+    event = get_object_or_404(
+        Event.objects.select_related("club", "map"),
+        club__slug__iexact=club_slug,
+        slug__iexact=slug,
+    )
+
+    event.check_user_permission(request.user)
+
+    def encode_gps_seuranta_data(competitor, locations):
+        # TODO: use special encoding
+        out = ""
+        for pt in locations:
+            t = pt[0] - 1136073600
+            lng = round(pt[2] * 5e4)
+            lat = round(pt[1] * 1e5)
+            out += f"t{competitor.id}.{t}_{lng}_{lat}.\n"
+        return out
+
+    total_nb_pts = 0
+    result = ""
+    for competitor, from_date, end_date in event.iterate_competitors():
+        if competitor.device_id:
+            locations, nb_pts = competitor.device.get_locations_between_dates(
+                from_date, end_date
+            )
+            total_nb_pts += nb_pts
+            result += encode_gps_seuranta_data(competitor, locations)
+
+    content_type = "text/plain; charset=utf-8"
+
+    headers = {}
+    if event.privacy == PRIVACY_PRIVATE:
+        headers["Cache-Control"] = "Private"
+
+    return HttpResponse(
+        result,
+        content_type=content_type,
+        headers=headers,
+    )

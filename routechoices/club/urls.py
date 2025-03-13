@@ -177,6 +177,16 @@ urlpatterns = [
                     ),
                 ),
                 path("geojson", views.event_geojson_view, name="event_geojson_view"),
+                path(
+                    "data.lst",
+                    views.event_gpsseuranta_data_view,
+                    name="event_gpsseuranta_data_view",
+                ),
+                path(
+                    "init.txt",
+                    views.event_gpsseuranta_init_view,
+                    name="event_gpsseuranta_init_view",
+                ),
             ]
         ),
     ),
