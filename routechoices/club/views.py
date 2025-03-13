@@ -834,7 +834,7 @@ def sitemap(
 
 def event_gpsseuranta_init_view(request, slug, **kwargs):
     bypass_resp = handle_legacy_request(
-        request, "event_gpsseuranta_data_view", kwargs.get("club_slug"), slug=slug
+        request, "event_gpsseuranta_init_view", kwargs.get("club_slug"), slug=slug
     )
     if bypass_resp:
         return bypass_resp
@@ -861,7 +861,7 @@ LIVE:{1 if event.is_live else 0}
         tl = event.map.map_xy_to_wsg84(0, 0)
         tr = event.map.map_xy_to_wsg84(width, 0)
         br = event.map.map_xy_to_wsg84(width, height)
-        out += f"CALIBRATION:{tl['lat']:.5f}|{tl['lon']:.5f}|0|0|{tr['lat']:.5f}|{tr['lon']:.5f}|{width}|0|{br['lat']:.5f}|{br['lon']:.5f}|{width}|{height}\n"
+        out += f"CALIBRATION:{tl['lon']:.5f}|{tl['lat']:.5f}|0|0|{tr['lon']:.5f}|{tr['lat']:.5f}|{width}|0|{br['lon']:.5f}|{br['lat']:.5f}|{width}|{height}\n"
 
     for comp in event.competitors.all():
         out += f"COMPETITOR:t{comp.aid}|{comp.start_time.strftime("%Y%m%d")}|{comp.start_time.strftime("%H%I%S")}|{comp.name}|{comp.short_name}\n"
