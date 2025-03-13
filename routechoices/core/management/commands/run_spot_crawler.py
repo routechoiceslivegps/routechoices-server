@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def parse_response(self, xml):
         doc = minidom.parseString(xml)
-        locations = []
+        locations = {}
         for message in doc.getElementsByTagName("message"):
             type = message.getElementsByTagName("messageType")[0].firstChild.nodeValue
             if type in ("TRACK", "EXTREME-TRACK", "UNLIMITED-TRACK"):
@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
         nb_new_points = 0
         messengers_id = list(locations.keys())
-        db_devices = Device.objects.pre_related("spot_device").filters(
+        db_devices = Device.objects.prefetch_related("spot_device").filter(
             spot_device__messenger_id__in=messengers_id
         )
         for db_device in db_devices:
@@ -71,8 +71,10 @@ class Command(BaseCommand):
                     res = requests.get(url, timeout=10)
                     if res.status_code == 200:
                         try:
+                            print(url)
+                            print(res.text)
                             n += self.parse_response(res.text)
-                        except Exception:
+                        except Exception():
                             pass
                         else:
                             feed.last_fetched = now
