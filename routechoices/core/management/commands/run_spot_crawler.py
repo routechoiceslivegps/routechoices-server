@@ -72,8 +72,6 @@ class Command(BaseCommand):
                     res = requests.get(url, timeout=10)
                     if res.status_code == 200:
                         try:
-                            print(url)
-                            print(res.text)
                             n += self.parse_response(res.text)
                         except Exception():
                             pass
