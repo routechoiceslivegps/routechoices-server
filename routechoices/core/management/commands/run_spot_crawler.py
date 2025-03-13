@@ -40,16 +40,17 @@ class Command(BaseCommand):
 
         nb_new_points = 0
         messengers_id = list(locations.keys())
-        db_devices = Device.objects.prefetch_related("spot_device").filter(
-            spot_device__messenger_id__in=messengers_id
-        )
-        for db_device in db_devices:
-            try:
-                messenger_id = db_device.spot_device.messenger_id
-                db_device.add_locations(locations[messenger_id])
-                nb_new_points += len(locations[messenger_id])
-            except Exception:
-                continue
+        if messengers_id:
+            db_devices = Device.objects.prefetch_related("spot_device").filter(
+                spot_device__messenger_id__in=messengers_id
+            )
+            for db_device in db_devices:
+                try:
+                    messenger_id = db_device.spot_device.messenger_id
+                    db_device.add_locations(locations[messenger_id])
+                    nb_new_points += len(locations[messenger_id])
+                except Exception:
+                    continue
         return nb_new_points
 
     def handle(self, *args, **options):
