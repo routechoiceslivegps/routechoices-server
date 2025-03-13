@@ -288,6 +288,7 @@ SLUG_BLACKLIST = [
     "github",
     "go",
     "gokartor-proxy",
+    "gps",
     "graph",
     "group",
     "groups",

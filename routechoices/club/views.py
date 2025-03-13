@@ -865,6 +865,7 @@ LIVE:{1 if event.is_live else 0}
 
     for comp in event.competitors.all():
         out += f"COMPETITOR:t{comp.aid}|{comp.start_time.strftime("%Y%m%d")}|{comp.start_time.strftime("%H%I%S")}|{comp.name}|{comp.short_name}\n"
+
     content_type = "text/plain; charset=utf-8"
 
     headers = {}

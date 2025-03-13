@@ -177,8 +177,8 @@ urlpatterns = [
                     ),
                 ),
                 path("geojson", views.event_geojson_view, name="event_geojson_view"),
-                path(
-                    "data.lst",
+                re_path(
+                    r"^data\.(?P<ext>lst|php)$",
                     views.event_gpsseuranta_data_view,
                     name="event_gpsseuranta_data_view",
                 ),
