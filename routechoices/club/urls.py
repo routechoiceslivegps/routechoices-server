@@ -10,6 +10,7 @@ sitemaps = {
 
 urlpatterns = [
     path("", views.club_view, name="club_view"),
+    path("gps/time.php", views.gpsseuranta_time, name="gpsseuranta_time"),
     path("manifest.json", views.manifest, name="manifest"),
     path("robots.txt", views.robots_txt, name="robots.txt"),
     path(

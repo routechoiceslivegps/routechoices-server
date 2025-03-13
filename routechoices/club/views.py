@@ -832,6 +832,11 @@ def sitemap(
     )
 
 
+def gpsseuranta_time(request):
+    import time
+    return HttpResponse(time.time() - 1136073600)
+
+
 def event_gpsseuranta_init_view(request, slug, **kwargs):
     bypass_resp = handle_legacy_request(
         request, "event_gpsseuranta_init_view", kwargs.get("club_slug"), slug=slug
