@@ -852,7 +852,7 @@ def event_gpsseuranta_init_view(request, slug, **kwargs):
     event.check_user_permission(request.user)
 
     out = f"""VERSIO:3
-RACENAME: {event.name}
+RACENAME:{event.name}
 TIMEZONE:0
 GRABINTERVAL:15
 DASHLIMIT:45
