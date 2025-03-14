@@ -1361,7 +1361,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					mapData.title =
 						!mapData.title && mapData.default
 							? '<i class="fa-solid fa-star"></i> Main Map'
-							: u("<i/>").text(mapData.title).text();
+							: u("<i/>").text(mapData.title).html();
 					const layer = addRasterMapLayer(mapData, i);
 					mapChoices[mapData.title] = layer;
 

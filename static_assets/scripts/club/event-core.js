@@ -286,7 +286,7 @@ function getRunnerNameMarker(
 	}`;
 	const iconHtml = `<span style="${iconStyle}">${u("<span/>")
 		.text(name)
-		.text()}</span>`;
+		.html()}</span>`;
 	const iconClass = `runner-icon runner-icon-${isDark ? "dark" : "light"}${
 		needFlagsEmojiPolyfill ? " flags-polyfill" : ""
 	}${focused ? " runner-focused" : ""}`;
@@ -318,7 +318,7 @@ function getSplitLineMarker(name, color = "purple") {
 	const iconStyle = `color: ${color};opacity: 0.75;`;
 	const iconHtml = `<span style="${iconStyle}">${u("<span/>")
 		.text(name)
-		.text()}</span>`;
+		.html()}</span>`;
 	const iconClass = "runner-icon runner-icon-dark";
 	const icon = L.divIcon({
 		className: iconClass,
