@@ -1,0 +1,1824 @@
+html, body {
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+	overflow: hidden !important;
+}
+
+body {
+	//font-family: arial, verdana, helvetica, sans-serif;
+	font-family: 'Open Sans', sans-serif;
+}
+
+@media (orientation:landscape) {
+    .ios7-fix {
+        position: fixed;
+        bottom: 0;
+        width:100%;
+        height: 672px !important;
+    }
+}
+
+.ownTooltipClass {
+	padding: 8px;
+	position: absolute;
+	z-index: 9999999;
+	max-width: 300px;
+	-webkit-box-shadow: 0 0 5px #aaa;
+	box-shadow: 0 0 5px #aaa;
+	font-family: Verdana,Arial,sans-serif;
+	font-size: 10px;
+	background-color: red;
+
+}
+
+/* ilmoitus jos javascript ei päällä */
+#errorBox {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+	height: 40px;
+	background-color: red;
+	color: white;
+	font-size: 18px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 40px;
+	border-bottom: solid 1px black;
+}
+.speed {font-size:80%;}
+
+#helpBox {
+	width: 600px;
+	height: 300px;
+	margin-left: 45%; /* fallback */
+	margin-left: calc(50% - 300px); /* näytön keskikohta miinus puolet elementin leveydestä */
+	margin-top: 10%;
+	background-color: #EEEEEE;
+	border: solid 1px black;
+	border-radius: 8px;
+	position: absolute;
+	z-index: 999999;
+	display: none;
+}
+
+#loadingBox {
+	width: 200px;
+	height: 50px;
+	margin-left: 45%; /* fallback */
+	margin-left: calc(50% - 100px); /* näytön keskikohta miinus puolet elementin leveydestä */
+	margin-top: 10%;
+	background-color: #EEEEEE;
+	border: solid 1px black;
+	border-radius: 8px;
+	position: absolute;
+	z-index: 9999999;
+	display: none;
+	font-size: 20px;
+    	font-weight: bold;
+	text-align: center;
+	vertical-align: middle;
+	box-shadow: 5px 5px 5px #888;
+}
+
+
+
+#colorBox {
+    display: none;
+    width: 400px;
+    height: 270px;
+	margin-left: 45%; /* fallback */
+    margin-left: calc(50% - 200px); /* näytön keskikohta miinus puolet elementin leveydestä */
+    margin-top: 10%;
+    background-color: #EEEEEE;
+    border: solid 1px black;
+    border-radius: 8px;
+    position: absolute;
+	z-index: 999999;
+    cursor: default;
+}
+
+#colorBoxTitle {
+    margin-top: 5px;
+    margin-left: 10px;
+    float: left;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* SPLITS */
+
+.chooseSpointdiv {
+   padding-left:10px;
+   margin-top: 5px;
+}
+
+#chooseSpointselect{
+    height: 22px;
+    width: 90px;
+    margin-left: 0px;
+    //margin-top: 9px;
+    border: 1px solid;
+}
+
+#chooseS1pointselect,#chooseS2pointselect {
+    height: 22px;
+    width: 60px;
+    margin-left: 0px;
+    //margin-top: 9px;
+    border: 1px solid;
+}
+
+
+/*
+#updateSplitsbutton{
+	//width: 70px;
+	//height: 30px;
+	//float: right;
+	//margin-top: 24px;
+	//padding:5px;
+	background-color: white;
+	border: solid 1px;
+	border-radius: 6px;
+	font-size: 14px;
+	text-align: center;
+	line-height: 32px;
+	//vertical-align: bottom;
+	cursor: pointer;
+}
+*/
+
+#tabs-2 {
+	font-size:80%;
+}
+#tabs-2b {
+	font-size:80%;
+}
+
+
+/* SPLITS END */
+
+
+
+
+.newSplitNamediv {
+   padding-left:10px;
+   margin-top: 5px;
+}
+
+.newsplittextbox{
+	border-radius: 6px;
+	border: 1px solid black;
+	height: 24px;
+	width: 90px;
+	font-size: 18px;
+	margin-top: 1px;
+	margin-left: 8px;
+	text-align: center;
+	//float: left;
+}
+
+#newsplitorderselect {
+    height: 22px;
+    width: 90px;
+    margin-left: 14px;
+    //margin-top: 9px;
+    border: 1px solid;
+}
+
+#newsplitradiusselect {
+    height: 22px;
+    width: 90px;
+    margin-left: 7px;
+    //margin-top: 9px;
+    border: 1px solid;
+}
+
+.newSplitBoxButton {
+	text-align: center;
+	//vertical-align: bottom;
+	width: auto;
+	height: auto;
+	margin-top: 10px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+
+#colorArea {
+    width: 200px;
+    margin-top: 10px;
+    margin-left: 100px;
+    float: left;
+    border-radius: 6px;
+}
+
+a.helpBtn{
+    float: right;
+    margin-top: 7px;
+    margin-right: 8px;
+    cursor: pointer;
+    color: #fff;
+    border-radius: 30px;
+    background: #2195CB;
+    font-size: 18px;
+    display: inline-block;
+    height: 23px;
+    width: 23px;
+    border-radius: 50%;
+    background-image: url("../images/question.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+a.helpboxclose{
+    float:right;
+    margin-top: 4px;
+    margin-right: 4px;
+    cursor: pointer;
+    color: #fff;
+    background: #2195CB;
+    display: inline-block;
+    height: 23px;
+    width: 23px;
+    border-radius: 50%;
+    background-image: url("../images/close.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Disabloi tekstin valinta tietyissä elementeissä */
+#btnMassStart, #btnList, #btnOptions, #btnAll, #playTime, #playDate, #btnCheckAll, #btnUncheckAll, #btnSel, .btnSettingOpen,
+.btnSetting, .compName, .btnLayout, .btnExCol, .compData , #selCompName, .btnCompCenter, .btnAutoCompCenter, .btnCompHighLight,
+.btnCompFullRoute, .btnAutoCompCenterOn, .btnCompHighLightOn, .btnCompFullRouteOn, .btnSelUntil,  #statusBox, #btnClear, #btnShowMenu, #statusBox, .showColor {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+#container {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+/* Sama korkeus pääelementeille */
+#map, #menu, #settingsMenu {
+	height: 100%; /* fallback  */
+	height: calc(100% - 41px); /* player 40px + 1px reunus */
+}
+
+/* Kartta elementin ominaisuudet */
+#map {
+	width: auto;
+	float: none;
+	background-color: #FFFFFF;
+}
+
+/* -----------------------------
+	Oikean puoleinen valikko - osio alkaa
+   ----------------------------- */
+
+#settingsMenu {
+	width: 180px;
+	background-color: #505050;
+	float: right;
+	display: none;
+}
+
+#setMenuTabs {
+	margin: 3px;
+
+}
+
+
+
+#btnShowSetMenu {
+    width: 20px;
+    height: 40px;
+    background-color: #505050;
+    float: right;
+    border-left: solid 1px;
+    border-bottom: solid 1px;
+    border-top: solid 1px;
+    border-bottom-left-radius: 6px;
+    border-top-left-radius: 6px;
+    position: absolute;
+    z-index: 900001;
+	right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+	-webkit-transform: translateY(-50%);
+    cursor: pointer;
+}
+
+#btnShowSetMenu:hover {
+	background-color: #B8B8B8;
+}
+
+.showSetMenu, .hideSetMenu {
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+
+
+
+.showSetMenu {
+	background-image: url("../images/arrowLe.png");
+}
+
+.hideSetMenu {
+	background-image: url("../images/arrowRi.png");
+}
+
+/* -----------------------------
+	Vasemman puoleinen valikko - osio alkaa
+   ----------------------------- */
+
+#btnShowMenu {
+	width: 20px;
+    height: 40px;
+    background-color: #505050;
+	float: left;
+    border-right: solid 1px;
+    border-bottom: solid 1px;
+    border-top: solid 1px;
+    border-bottom-right-radius: 6px;
+    border-top-right-radius: 6px;
+    position: absolute;
+    z-index: 900001;
+    left: 230px;
+    top: 50%;
+    transform: translateY(-50%);
+	-webkit-transform: translateY(-50%);
+    cursor: pointer;
+}
+
+btnShowPlayer {
+	display: none;
+}
+
+#menu {
+	width: 230px;
+	float: left;
+	background-color: #505050;
+
+}
+
+#btnShowMenu:hover {
+	background-color: #B8B8B8;
+}
+
+.showMenu, .hideMenu {
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.showMenu {
+	background-image: url("../images/arrowRi.png");
+}
+
+.hideMenu {
+	background-image: url("../images/arrowLe.png");
+}
+
+#compMenu, #optionsMenu {
+	width: 100%;
+	height: 100%;
+}
+
+#optionsMenu {
+	display: none;
+}
+
+#selectBtnContainer {
+	width: 220px;
+	height: 35px;
+	background-color: #505050;
+}
+
+#btnCheckAll, #btnUncheckAll, #btnSel {
+	width: 60px;
+	height: 20px;
+	background-color: white;
+	float: left;
+	cursor: pointer;
+	/*margin-top: 5px;*/
+	margin-left: 5px;
+	border: solid 1px;
+	border-radius: 6px;
+	font-size: 14px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 20px;
+}
+
+#btnCheckAll {
+	width:20px;
+	border-radius: 10px;
+
+
+}
+#listoptionsButton {
+	width:26px;
+	border-radius: 2px;
+	background-color: #505050;
+	color:white;
+	cursor: pointer;
+	float:right;
+	height: 26px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+	margin-right: 3px;
+	margin-top: 3px;
+
+
+
+}
+
+#newtabbutton {
+	width:26px;
+	border-radius: 2px;
+	background-color: #505050;
+	color:white;
+	cursor: pointer;
+	float:right;
+	height: 26px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+	margin-right: 3px;
+	margin-top: 3px;
+
+
+
+}
+
+
+#btnCheckAll:active, #btnUncheckAll:active, #btnSel:active, #listoptionsButton:active, #newtabbutton:active {
+	background-color: blue;
+}
+
+#menuBtnContainer {
+	width: 100%;
+	height: 30px;
+    background-image:url("../images/logo.png");
+}
+
+#menuBtnContainerMobile {
+	display: none;
+}
+
+#btnList, #btnOptions  {
+    float: left;
+	height: 26px;
+	width: 180px;
+    border-radius: 10px;
+	color: white;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+    margin-left: 5px;
+    margin-top: 4px;
+    border: 1px solid black;
+}
+
+#btnList {
+    display: none;
+}
+
+.btnSelected {
+	background-color: #505050;
+	cursor: pointer;
+}
+
+.btnNotSelected {
+	background-color: grey;
+	cursor: pointer;
+}
+
+.btnNotSelected:hover {
+	background-color: #ededed;
+	cursor: pointer;
+}
+
+#exAll:hover, #colAll:hover, #btnCheckAll:hover,#btnUncheckAll:hover,#btnSel:hover, #listoptionsButton:hover, #newtabbutton:hover {
+	background-color: #ededed;
+	color: #505050;
+}
+
+
+#competitorCont {
+	margin-left: 2px;
+	margin-right: 2px;
+	width: 224px; /* 230 - 2 - 2 - 2 (menu - marginL - marginR - borderLR) */
+	float: left;
+	height: auto;
+	max-height: 50%; /* fallback */
+	max-height: calc(100% - 63px);
+	background-color: #EEEEEE;
+	border-top: solid 1px;
+	border-right: solid 1px;
+	border-bottom: none;
+	border-left:  solid 1px;
+	overflow-y: auto;
+	overflow-x: hidden;
+
+
+
+}
+
+#optionsCont {
+	margin: 4px;
+	padding: 5px;
+	width: auto;
+	height: 50%; /* fallback */
+	height: calc(100% - 52px);
+	background-color: #EEEEEE;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+#searchBarCont {
+	width: 100%;
+	float: left;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	position:relative;
+}
+
+.textbox {
+	height: 18px;
+	width: 180px;
+	margin-left: 5px;
+	float: left;
+	padding-left:0.5em;
+	background-color: white;
+	border-top-left-radius: 6px;
+	border-bottom-left-radius: 6px;
+	border-top-right-radius: 6px;
+	border-bottom-right-radius: 6px;
+	border: 1px solid black;
+}
+
+.textbox:focus {
+	outline: none;
+	box-shadow: inset 0 0 5px #505050;
+	border:1px solid black;
+	border-top-left-radius: 6px;
+	border-bottom-left-radius: 6px;
+}
+
+#btnClear {
+	float: left;
+	position:absolute;
+	right:7px;
+	bottom:4px;
+	height: 20px;
+	width: 20px;
+	padding-right:3px;
+	/*background-color: white;*/
+	/*border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	border-right: 1px solid black;*/
+	border-top-right-radius: 6px;
+	border-bottom-right-radius: 6px;
+
+	text-align: center;
+	/*font-weight: bold;*/
+	vertical-align: middle;
+	line-height: 20px;
+	cursor: pointer;
+	display: none;
+
+}
+
+#btnClear:hover {
+	background-color: #ededed;
+}
+
+#btnClear:active {
+	background-color: red;
+}
+
+
+.competitor:nth-child(odd) {
+    background: #ededed;
+}
+
+.competitor:nth-child(even) {
+    background: #ffffff;
+}
+
+
+
+.competitor {
+	width: 100%;
+	height: 30px;
+	padding-top:5px;
+	padding-bottom:5px;
+	/*border-bottom: solid 1px;*/
+}
+
+.competitorSelected {
+	width: 100%;
+	height: 30px;
+	padding-top:5px;
+	padding-bottom:5px;
+	/*border-bottom: solid 1px;*/
+	background-color: #BCD2E6;
+
+}
+
+.compSelect {
+	height: 30px;
+	width: 25px;
+	float: left;
+}
+
+.compNameHolder {
+	width: 85%; /* fallback */
+	width: calc(100% - 30px);
+	float: left;
+}
+
+.compName {
+	width: auto;
+	margin-top: 1px;
+	font-size: 13px;
+	float: left;
+	cursor: pointer;
+	color: black;
+	white-space: nowrap;
+}
+
+.compName:hover {
+	font-weight: bold;
+}
+
+.compName:active {
+	color: red;
+}
+
+.compLet {
+    display: none;
+}
+
+.compData {
+	width: 86%; /* fallback */
+	width: calc(100% - 27px);
+	height: 12px;
+	font-size: 9px;
+	float: left;
+	cursor: default;
+	/*margin-top: -1px;*/
+	color: #666666;
+}
+
+.cst {
+    display: inline;
+}
+
+.compSettingsCont {
+	width: 120px;
+	height: 110px;
+	padding: 10px 10px;
+	top: 0px;
+	float: left;
+
+	left: 101%;
+	left: calc(100% - 2px);
+
+	background-color: #F8F8F8;
+	position: relative;
+	z-index: 999999;
+	display: none;
+
+
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border: solid 1px;
+	border-left: none;
+
+}
+
+
+
+.cMenu {
+	width: calc(100% - 28px);
+	height: 70px;
+	clear: both;
+
+	padding: 0px 1px 0px 27px;
+	display: none;
+	line-height:14px;
+}
+
+
+
+a.boxclose{
+    float:right;
+    margin-top: -6px;
+    margin-right: -6px;
+    cursor: pointer;
+    color: #fff;
+    border-radius: 30px;
+    background: #2195CB;
+    font-size: 21px;
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background-image: url("../images/close.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#selCompName {
+	/*float: left;
+    	font-size: 18px;*/
+	font-size: 12px;
+	font-weight:bold;
+	/*width: 100px;*/
+	width: 85%; /* fallback */
+	width: calc(100% - 30px);
+	cursor: default;
+	white-space: nowrap;
+	overflow:hidden;
+}
+
+.btnAutoCompCenter, .btnAutoCompCenterOn, .btnCompFullRoute,  .btnCompFullRouteOn, .btnSelUntil  {
+	float:right;
+	/*width:80px;*/
+	text-align:right;
+}
+
+.btnCompCenter, .btnAutoCompCenter, .btnCompHighLight, .btnCompFullRoute, .btnSelUntil  {
+	 /* margin-left: 10px; */
+	/*float: left;*/
+	width: auto;
+	cursor: pointer;
+	font-size: 12px;
+	color: black;
+}
+
+
+.btnSelUntil {
+	padding-top:5px;
+}
+
+.btnCompCenter:hover, .btnAutoCompCenter:hover, .btnCompHighLight:hover, .btnCompFullRoute:hover, .btnSelUntil:hover {
+	font-weight: bold;
+}
+
+.btnAutoCompCenterOn, .btnCompHighLightOn, .btnCompFullRouteOn {
+    /* margin-left: 10px;
+    float: left; */
+    width: auto;
+    cursor: pointer;
+    font-size: 12px;
+    color: red;
+    font-weight: bold;
+}
+
+#colorText {
+	margin-top: 5px;
+	/* float: left; */
+	width: auto;
+	cursor: default;
+	font-size: 12px;
+	color: black;
+}
+
+.showColor {
+
+	margin-top: 5px;
+	margin-left: 5px;
+	height: 16px;
+	width: 30px;
+	/* float: left;*/
+	cursor: pointer;
+	background-color: white;
+	font-size: 9px;
+   	border: solid 1px;
+}
+
+.btnCompCenter:active {
+	color: red;
+}
+
+.btnSetting {
+	width: auto;
+	margin-bottom: 2px;
+	height: 30px;
+	border-radius: 6px;
+	background-color: #505050;
+	color:white;
+	text-align: center;
+	line-height: 30px;
+	vertical-align: middle;
+	border: solid 1px;
+	cursor: pointer;
+	font-size:80%;
+	font-weight:600;
+
+
+}
+
+.btnSetting:hover {
+	background-color: #909090;
+	color:white;
+}
+
+.btnSettingOpen:hover {
+   	 background-color: #909090;
+	color:white;
+}
+.btnSettingOpen {
+	width: auto;
+	height: 30px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	background-color: #505050;
+	color:white;
+	text-align: center;
+	line-height: 30px;
+	vertical-align: middle;
+	border: solid 1px black;
+	cursor: pointer;
+	font-size:80%;
+	font-weight:600;
+
+}
+
+.btnLayout {
+	padding: 3px 3px;
+	background-color: #EBF0F5;
+	border: solid 1px grey;
+	border-radius: 6px;
+	cursor: pointer;
+	text-align: center;
+}
+
+.btnLayout:hover {
+	background-color: #C3C7CC;
+}
+
+.btnLayout:active {
+	background-color: #AFDEF8;
+}
+
+.exArea {
+	width: auto;
+	height: 34px;
+}
+
+.btnExCol {
+	width: 70px;
+	height: 22px;
+	background-color: white;
+	float: left;
+	cursor: pointer;
+	margin-top: 4px;
+	margin-left: 10px;
+	font-size: 12px;
+	border: solid 1px;
+	border-radius: 6px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 22px;
+}
+
+.btnExCol:active {
+	background-color: blue;
+}
+
+.settingArea {
+	margin-bottom: 2px;
+	width: auto;
+	height: auto;
+	padding: 7px;
+	background-color: white;
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	border-bottom: 1px solid black;
+
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+
+}
+
+
+#showMS, #showML, #showLW, #showMO, #showLO {
+		font-size:80%;
+		margin-top:7px;
+	}
+#fps, #versio {
+	font-size:80%;
+}
+
+/* -----------------------------
+	Player control - osio alkaa
+   ----------------------------- */
+
+#mobileControls {
+	display: none;
+}
+
+#player {
+	height: 40px;
+	width: 100%;
+	background-color: #C0C0C0;
+	border-top: solid 1px;
+	position: absolute;
+	bottom: 0px;
+	z-index: 999999;
+}
+
+#btnPlay {
+	margin-left: 12px;
+	width: 70px;
+	height: 26px;
+	background-color: #505050;
+	margin-top: 7px;
+	border-radius: 6px;
+	float: left;
+}
+
+#btnPlay:hover {
+	background-color: #0099FF;
+}
+
+#btnPlay:active{
+	background-color: #0066FF;
+}
+
+#timeline {
+	margin-left: 8px;
+	height: 30px;
+	margin-top: 5px;
+	border-radius: 6px;
+	float: left;
+}
+
+#timeline {
+	width: 90%; /* fallback */
+    width: calc(100% - 164px);
+}
+
+#speed-select, #progressBar {
+	float: left;
+}
+
+#speed-select {
+	height: 22px;
+	width: 60px;
+	margin-left: 10px;
+    margin-top: 9px;
+	border: solid 1px;
+}
+
+
+#progressBar {
+	padding-left: 12px;
+	padding-right: 12px;
+	padding-top: 2px;
+	margin-top: 5px;
+	height: auto;
+	width: 87%; /* fallback */
+	width: calc(100% - 200px);
+	position: relative;
+}
+
+#arrowsLeftCont  {
+	margin-top: 2px;
+	margin-right: 2px;
+	margin-left: 8px;
+	width: 76px;
+	height: 31px;
+	float: left;
+}
+
+#arrowsRightCont  {
+	margin-top: 2px;
+	margin-left: 2px;
+	width: 76px;
+	height: 31px;
+	float: left;
+}
+
+#arrowsLeftContMob, #arrowsRightContMob {
+	display: none;
+}
+
+/* KUVAT */
+.a1lc {
+	margin-top: 5.5px;
+	float: left;
+	width: 0;
+	height: 0;
+	border-top: 8px solid transparent;
+	border-right: 16px solid #505050;
+	border-bottom: 8px solid transparent;
+}
+.a2lc {
+	margin-top: 3.5px;
+	float: left;
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-right: 16px solid #505050;
+	border-bottom: 10px solid transparent;
+}
+.a3lc {
+	margin-top: 1.5px;
+	float: left;
+	width: 0;
+	height: 0;
+	border-top: 12px solid transparent;
+	border-right: 16px solid #505050;
+	border-bottom: 12px solid transparent;
+}
+.a4lc {
+	margin-top: 0px;
+	float: left;
+	width: 0;
+	height: 0;
+	border-top: 14px solid transparent;
+	border-right: 16px solid #505050;
+	border-bottom: 14px solid transparent;
+}
+.a1rc {
+	margin-top: 5.5px;
+	float: left;
+	width: 0;
+	height: 0;
+	border-top: 8px solid transparent;
+	border-left: 16px solid #505050;
+	border-bottom: 8px solid transparent;
+}
+.a2rc {
+	margin-top: 3.5px;
+	float: left;
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-left: 16px solid #505050;
+	border-bottom: 10px solid transparent;
+}
+.a3rc {
+	margin-top: 1.5px;
+	float: left;
+	width: 0;
+	height: 0;
+	border-top: 12px solid transparent;
+	border-left: 16px solid #505050;
+	border-bottom: 12px solid transparent;
+}
+.a4rc {
+	margin-top: 0px;
+	float: left;
+	width: 0;
+	height: 0;
+	border-top: 14px solid transparent;
+	border-left: 16px solid #505050;
+	border-bottom: 14px solid transparent;
+}
+/* KUVAT - PÄÄTTYY */
+.paused {
+	background-image: url("../images/btnPlay.png");
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.playing {
+	background-image: url("../images/btnPaused.png");
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+#statusBox {
+	top: 10px;
+	height: auto;
+	width: 100px;
+	position: fixed;
+	z-index: 1000;
+	right: 20px;
+	background-color: white;
+	border-radius: 7px !important;
+	border: 1px solid black !important;
+}
+.onlyReplay {
+	background-color: white;
+	color: black;
+	cursor: default;
+}
+.liveMode {
+	background-color: black;
+	cursor: pointer;
+	color: white;
+}
+.replayMode {
+	background-color: white;
+	color: black;
+	cursor: pointer;
+}
+.liveMode:hover {
+	background-color: #505050;
+}
+.replayMode:hover {
+	background-color: #b8b8b8;
+	color: white;
+}
+
+#btnMassStart {
+	height: 22px;
+	cursor: pointer;
+}
+.btnMSoff {
+	background-color: black;
+}
+.btnMSoff:hover {
+	background-color: #505050;
+}
+
+.btnMSon {
+	background-color: #D10404;
+}
+.btnMSon:hover {
+	background-color: #ff0505;
+}
+
+#btnMassStartText {
+	font-size: 14px;
+	text-decoration: none;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 22px;
+	padding: 0px;
+	color: white;
+}
+#playTime, #playDate, #liveStatus, #btnMassStart {
+	width: 100%;
+	border-bottom: solid 1px;
+	float: left;
+}
+#playTime, #playDate {
+	height: 26px;
+}
+#playDate {
+	display:none;
+}
+
+#liveStatus {
+	height: 22px;
+	border-color: black;
+	display:none;
+}
+#curTime {
+	font-size: 18px;
+	font-family: Consolas, Menlo, Monaco, Lucida Console;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+	padding: 0px;
+	font-weight: bold;
+	cursor: default;
+}
+
+#curDate {
+	font-size: 16px;
+	font-family: Consolas, Menlo, Monaco, Lucida Console;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+	padding: 0px;
+	font-weight: bold;
+	cursor: default;
+}
+
+#scalebox {
+	text-align: center;
+	float: left;
+	height: 22px;
+}
+
+#scaleline {
+	font-size: 11px;
+	border-width: medium 2px 2px;
+	border-style: none solid solid;
+	border-color: -moz-use-text-color #777 #777;
+	width:80px;
+	text-align: center;
+	left:8px;
+	top: 4px;
+	height: 13px;
+	position: relative;
+}
+
+#text {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 22px;
+	font-size: 14px;
+}
+#ball {
+	border-radius: 50%;
+	width: 10px;
+	height: 10px;
+	margin-top: 6px;
+	margin-left: 8px;
+	background-color: red;
+	float: left;
+}
+#hideStatusBox {
+	height: 16px;
+	width: 100px;
+	float: left;
+	cursor: pointer;
+	background-color: #505050;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+}
+#hideStatusBox:hover {
+	background-color: #B8B8B8;
+}
+.hideStatusBox, .showStatusBox {
+	background-repeat: no-repeat;
+	background-position: center;
+}
+.hideStatusBox {
+	background-image: url("../images/arrowUp.png");
+}
+.showStatusBox {
+	background-image: url("../images/arrowDown.png");
+}
+
+/* SLIDER */
+
+.slider-frame {
+  position: relative;
+  display: block;
+  margin: 0 auto;
+  width: 120px;
+  height: 27px;
+  background-color: rgb(246, 249, 251);
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0px 0px 4px 0 rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: inset 0px 0px 4px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0px 0px 4px 0 rgba(0, 0, 0, 0.25);
+}
+.slider-button {
+  display: block;
+  width: 60px;
+  height: 27px;
+  line-height: 27px;
+  background: #EDF2F7;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-transition: all 0.25s ease-in-out;
+  -moz-transition: all 0.25s ease-in-out;
+  transition: all 0.25s ease-in-out;
+  color: #000;
+  font-family:sans-serif;
+  font-size:11px;
+  font-weight:bold;
+  text-align: center;
+  cursor: pointer;
+  -webkit-box-shadow: inset 0px 0px 4px 0 rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: inset 0px 0px 4px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0px 0px 4px 0 rgba(0, 0, 0, 0.25);
+}
+.slider-button.on {
+  margin-left: 60px;
+  background: #EDF2F7;
+}
+
+/**
+ * Checkbox Four
+ */
+#competitorCont input[type=checkbox] {
+	visibility: hidden;
+}
+
+.checkboxFour {
+	width: 18px;
+	height: 18px;
+	background: black;
+	margin-top: 6px;
+	margin-left: 3px;
+
+	border-radius: 100%;
+	position: relative;
+	-webkit-box-shadow: 0px 1px 3px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0px 1px 3px rgba(0,0,0,0.5);
+	box-shadow: 0px 1px 3px rgba(0,0,0,0.5);
+}
+
+/**
+ * Create the checkbox button
+ */
+.checkboxFour label {
+	display: block;
+	width: 14px;
+	height: 14px;
+	border-radius: 100px;
+
+	-webkit-transition: all .2s ease;
+	-moz-transition: all .2s ease;
+	-o-transition: all .2s ease;
+	-ms-transition: all .2s ease;
+	transition: all .2s ease;
+	cursor: pointer;
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	z-index: 1;
+
+	background: #EEEEEE;
+
+	-webkit-box-shadow:inset 0px 1px 3px rgba(0,0,0,0.5);
+	-moz-box-shadow:inset 0px 1px 3px rgba(0,0,0,0.5);
+	box-shadow:inset 0px 1px 3px rgba(0,0,0,0.5);
+}
+
+.checkboxFour label:hover {
+	/*box-shadow: 0 0 5px 5px #0033CC;*/
+	box-shadow: 0 0 5px 5px #333333;
+
+	border-radius: 100px;
+}
+
+/**
+ * Create the checked state
+ */
+.checkboxFour input[type=checkbox]:checked + label {
+	background: #EEEEEE !important;
+	/*background: #26ca28;*/
+}
+
+/* ----------------------------------*/
+/* OPTIONS : TAIL - tyylimääritykset */
+
+.textboxOptions {
+	border-radius: 6px;
+	border: 1px solid black;
+	height: 24px;
+	width: 90px;
+	font-size: 18px;
+	margin-top: 1px;
+	margin-left: 5px;
+	text-align: center;
+	float: left;
+}
+
+.tailContHolder {
+	width: auto;
+	height: 105px;
+	margin-top: 10px;
+	background-color: white;
+	border: solid 1px grey;
+	border-radius: 6px;
+}
+
+.tailTextCont {
+	width: 18%;
+	height: 80px;
+	text-align: center;
+	line-height: 82px;
+	vertical-align: middle;
+	float: left;
+	font-size:80%;
+}
+
+.tailSetCont {
+	width: 104px;
+	height: 80px;
+	float: left;
+}
+
+.tailBtnCont {
+	width: 110px;
+	height: 25px;
+	float: left;
+	white-space: nowrap;
+	overflow: hidden;
+
+}
+
+.tailBtnCont {
+	width: 110px;
+	height: 25px;
+	float: left;
+	white-space: nowrap;
+	overflow: hidden;
+
+}
+
+.tailEndCont {
+		float: right;
+		font-size:80%;
+		padding-right:10px;
+
+
+}
+
+.tailTbCont {
+	height: 30px;
+	width: 104px;
+	float: left;
+}
+
+.tailApplyCont {
+	width: 16%;
+	height: 80px;
+	float: left;
+}
+
+.tailChangeBtn {
+	height: 20px;
+	width: 30px;
+	margin-top: 3px;
+	margin-left: 3.33px;
+	border-radius: 4px;
+	background-color: grey;
+}
+
+a.addbtn{
+    float: left;
+    margin-top: 4px;
+    margin-left: 5.5px;
+    cursor: pointer;
+    color: #fff;
+    border-radius: 6px;
+    background: #808080;
+    width: 26px;
+    height: 18px;
+    background-image: url("../images/plus.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+a.addbtn:hover, a.minusbtn:hover{
+
+    background-color: #505050;
+
+}
+
+a.addbtn:active {
+	background-color: #505050;
+}
+
+a.minusbtn{
+    float: left;
+    margin-top: 4px;
+    margin-left: 5.5px;
+    cursor: pointer;
+    color: #fff;
+    border-radius: 6px;
+    background: #808080;
+    width: 26px;
+    height: 18px;
+    background-image: url("../images/minus.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+a.minusbtn:active {
+	background-color: #808080;
+}
+
+#changeTailLength {
+	/*width: 30px;*/
+	height: 30px;
+	float: left;
+	margin-top: 24px;
+	/*background-color: white;*/
+	/*border: solid 1px;*/
+	border-radius: 6px;
+	font-size: 14px;
+	text-align: center;
+	line-height: 32px;
+	vertical-align: middle;
+	cursor: pointer;
+	font-size:70%;
+}
+
+
+
+
+#tailOnOffRadio label, #appModeRadio label, #rallymodeRadio label {
+	width:70px;
+	font-size:70%;
+
+}
+#unitRadios label {
+	width:55px;
+	font-size:60%;
+}
+
+#unitRadios label span{
+	padding-left:0;
+	padding-right:0;
+}
+
+
+#tailOnOffRadio, #appModeRadio, #rallymodeRadio  {
+	margin: 0px auto;
+	width:140px;
+}
+ #unitRadios {
+	margin: 0px auto;
+	width:165px;
+}
+
+ #infoRadios {
+	margin:  0px auto 10px auto;
+	width:165px;
+}
+
+ #infoRadios label {
+	width:82px;
+	font-size:70%;
+}
+
+#resetOff {
+	font-size:70%;
+	margin: 0px auto;
+	display: block !important;
+}
+
+#offokbutton {
+	font-size:70%;
+	margin: 9px auto 0 5px;
+	height: 28px;
+}
+
+
+/* Offset tyyli */
+.showSelOffName {
+	width: 100%;
+	height: 14px;
+	font-size: 80%;
+	text-align: center;
+	line-height: 14px;
+	vertical-align: middle;
+	margin-bottom: 5px;
+}
+
+.showSelOffID {
+    display: none;
+}
+
+.offsetContHolder {
+	width: auto;
+	height: 46px;
+	margin-top: 10px;
+	background-color: white;
+	border: solid 1px grey;
+	border-radius: 6px;
+	margin-bottom: 5px;
+}
+
+.textboxSetOff {
+	border-radius: 6px;
+	border: 1px solid black;
+	height: 24px;
+	width: 100px;
+	font-size: 18px;
+	margin-top: 9px;
+	margin-left: 8px;
+	text-align: center;
+	float: left;
+}
+
+.offOkBtn {
+	width: 30px;
+	height: 30px;
+	float: left;
+	margin-top: 7px;
+	margin-left: 10px;
+	background-color: white;
+	border: solid 1px;
+	border-radius: 6px;
+	font-size: 14px;
+	text-align: center;
+	line-height: 32px;
+	vertical-align: middle;
+	cursor: pointer;
+	font-size:70%;
+}
+
+.offOkBtn:hover {
+	background-color: #ededed;
+}
+
+/* competitor info tyyli */
+.unitContHolder {
+	width: auto;
+	height: 34px;
+	margin-top: 10px;
+	background-color: white;
+	border: solid 1px grey;
+	border-radius: 6px;
+}
+
+.unitBtnLayout, .unitBtnLayoutSelected  {
+	margin-top: 4px;
+	margin-left: 4px;
+	width: 42px;
+	height: 20px;
+	font-size: 12px;
+	text-align: center;
+	padding: 2px;
+	border: solid 1px;
+	border-radius: 4px;
+	line-height: 20px;
+	vertical-align: middle;
+	float: left;
+	cursor: pointer;
+}
+
+.unitBtnLayoutSelected {
+	background-color: #90C05E;
+	cursor: default;
+}
+
+.unitBtnLayout:hover {
+	background-color: #A1D9F2;
+}
+
+.unitBtnLayout:active {
+	background-color: #2E90BD;
+}
+
+#splitlist, #sectorlist, #roglist {
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: auto;
+	font-size:12px;
+	white-space: nowrap;
+	padding-top:3px;
+}
+
+#setMenuTabs {
+	 height:calc(100%);
+	padding: 0px;
+	margin: 0px;
+}
+#tabs-2 {
+	padding: 5px;
+	 height:calc(100% - 140px);
+	padding-right: 0px;
+
+}
+#tabs-2b,#tabs-4 {
+	padding: 5px;
+	 height:calc(100% - 230px);
+	padding-right: 0px;
+
+}
+#tabs-1,#tabs-3   {
+	overflow: auto;
+	padding: 5px;
+	padding-right: 0px;
+	height:calc(100% - 140px);
+	font-size:70%;
+
+}
+
+
+.hlsectorname, .hlrogname {
+	border:1px solid black;
+	padding-left:5px;
+	padding-right:10px;
+	border-radius:5px;
+}
+
+#lapselspan {
+	display:none;
+}
+
+#lap1selspan, #lap2selspan {
+	font-size:70%;
+}
+#lap1selspinner, #lap2selspinner {
+	width: 20px;
+
+}
+
+#sectorroutescb, #sectorroutescblabel {
+	padding-top:10px;
+}
+
+#calcSectorButton {
+	font-size:70%;
+}
+
+#lapselspinner{
+	width: 30px;
+
+}
+.smallerdiff {
+	font-size:80%;
+}
+
+#mindiffspinner, #maxdiffspinner {
+	width:40px;
+}
+
+.splitsettingsdiv {
+	margin-bottom:10px;
+}
+
+#diffBehindselect, #diffFirstselect {
+
+	width:80%;
+}
+
+
+#showLetNamesRadio label, #showDiffTimeRadio label, #timeToUseRadio label, #showHideLinesRadio label, #showAllCheckRadio label {
+	width: 72px;
+}
+
+
+.ui-button .ui-icon.settingsiconbutton {
+	background: url("../images/settings2.png");
+	width: 19px;
+    	height: 19px;
+	background-position: center center;
+}
+
+#splitlinesettings {
+	display: none;
+	margin-bottom: 2px;
+	width: auto;
+	height: auto;
+	padding: 7px;
+	background-color: #FFF;
+	border-left: 1px solid #000;
+	border-right: 1px solid #000;
+	border-bottom: 1px solid #000;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+	font-size: 80%;
+}
+
+.ignoredialog {
+	font-size: 0.7em !important;
+}
+#ignore-dialog-form {
+	padding: 2px !important;
+}
+
+
+#ignoreRT:disabled {
+    color:white;
+}
+#ignoreTFS:disabled {
+    color:white;
+}
+
+
+.ui-tabs-nav {
+	font-size:80% !important;
+
+}
+.ui-tabs-anchor {
+	padding: 0.3em !important;
+}
+#fontSizeSpan {
+	color:black !important;
+}
+
+
+.smallertext {
+	font-size:70%;
+	vertical-align:bottom;
+}
+.boldertext {
+	font-weight:bold;
+}
+.hlsplit {
+  background-color:black;
+  color:white;
+  padding-left:1em;
+  padding-right:1em;
+  border-radius:0.5em;
+
+}
+
+.ui-front { z-index: 1000000 !important; }
+.ui-dialog { z-index: 1000001 !important; }
+
+.ui-tabs>.ui-tabs-nav>.ui-state-disabled {
+    display: none; /* disabled tabs don't show up */
+}

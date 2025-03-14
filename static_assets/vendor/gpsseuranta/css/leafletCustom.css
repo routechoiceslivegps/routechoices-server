@@ -1,0 +1,81 @@
+/*
+	OMIEN LEAFLET CONTROLLIEN ULKOASU
+
+.ui-widget {
+    -ms-touch-action: none;
+}
+
+.ui-slider-handle {
+	-ms-touch-action: none !important;
+	touch-action:none !important;
+}
+*/
+
+
+
+.btnOffsetReset {
+    height: auto;
+    /*line-height: 28px;*/
+    width: auto;
+    background-color: #DADADA;
+    border-radius: 4px;
+    text-align:center;
+    padding: 0.5em 1em 0.5em 1em;
+    font-size: 12px;
+    text-align: center;
+    border: solid 1px;
+    display: none;
+}
+
+
+
+/**
+* Leaflet marker styles by Pekka
+*/
+.Leaf_marker {
+	position: absolute;
+}
+
+.Leaf_balloon {
+	border-radius: 50%;
+	width:12px;
+	height: 12px;
+	position: absolute;
+	left: -8px;
+	top: -8px;
+	border-width: 2px;
+	border-color:rgb(0, 0, 0);
+	border-style: solid;
+}
+
+.Leaf_label_black {
+	font: 16px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-weight : bold;
+	position: absolute;
+	left: 8px;
+	top: -8px;
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	white-space: nowrap;
+}
+
+.Leaf_label_white {
+	font: 16px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-weight : bold;
+	position: absolute;
+	left: 8px;
+	top: -8px;
+	text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	white-space: nowrap;
+}
