@@ -834,6 +834,7 @@ def sitemap(
 
 def gpsseuranta_time(request):
     import time
+
     return HttpResponse(time.time() - 1136073600)
 
 
