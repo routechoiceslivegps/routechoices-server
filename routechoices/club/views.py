@@ -691,12 +691,6 @@ def robots_txt(request, **kwargs):
     )
 
 
-def time(request, **kwargs):
-    import time
-
-    return HttpResponse(time.time() - 1136073600)
-
-
 def manifest(request, **kwargs):
     bypass_resp = handle_legacy_request(request, "manifest", kwargs.get("club_slug"))
     if bypass_resp:

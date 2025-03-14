@@ -13,7 +13,6 @@ urlpatterns = [
     path("gps/time.php", views.gpsseuranta_time, name="gpsseuranta_time"),
     path("manifest.json", views.manifest, name="manifest"),
     path("robots.txt", views.robots_txt, name="robots.txt"),
-    path("gps/time.php", views.time, name="time"),
     path(
         "sitemap.xml", views.sitemap_index, {"sitemaps": sitemaps}, name="club_sitemap"
     ),
