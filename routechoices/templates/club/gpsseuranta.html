@@ -1,61 +1,25 @@
-<!DOCTYPE HTML>
+{% load static %}<!DOCTYPE HTML>
 <html lang="en">
-	<head>
-	  <script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/strings.js"></script>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-		<title>GPS-seuranta</title>
-		<meta charset="utf-8">
-		<meta name="author" content="GPS-seuranta">
-		<link id="cssMode" rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/style.css" />
-		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/start/jquery-ui.css" />
-		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leaflet180.css" />
-		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leafletCustom.css" />
-		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leaflet.contextmenu.css"/>
-		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leaflet.viewcenter.css"/>
-		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/leaflet.fullscreen.css"/>
-		<link rel="stylesheet" type="text/css" href="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/css/colpick.css"/>
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0, minimal-ui">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<script>
-			var cdnpath = "//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/";
-			var isgpxseuranta = false;
-			var hideallmenus = false;
-			var langu = 0;
-		</script>
-		<script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/libs/jquery-2.1.3.min.js"></script>
-		<script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/libs/jquery-ui.min.js"></script>
-        <script>
-            var langu = 0;
-            var Strings_AppMode = ['App Mode','moodi',decodeURIComponent('&#32735&#26790&#38597')];
-            var Strings_Real = ['REAL', 'reaali', decodeURIComponent('&#32735&#26790&#38597')];
-
-            var sessionid="";
-            var issessioned = false;
-            var sessioneventPath = new String(document.location);
-            var sessionpathArray = sessioneventPath.split("?");
-            if(sessionpathArray.length > 1) {
-                var sessionparams =  sessionpathArray[1];
-                    var sessionpathArray2 = sessionparams.split("&");
-                        for(sii=0;sii<sessionpathArray2.length;sii++) {
-                        if(sessionpathArray2[sii].indexOf("GpsSeurantaSessionID=")==0) {
-                        sessionid =  sessionpathArray2[sii].substring(21);
-                        issessioned = true;
-                        break;
-                }
-
-            }
-
-
-            }
-            console.log("session: "+sessionid);
-
-            window.addEventListener("message", function(event) {
-                kasky = event.data;
-                if(kasky.startsWith("center:"))  trevent.centercompetitorid(mapHeight, kasky.substring(7));
-            });
-	</script>
-	<script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/load3.js"></script>
+<head>
+    <title>GPS-seuranta</title>
+    <meta charset="utf-8">
+    <meta name="author" content="GPS-seuranta">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/gpsseuranta/css/font.css' %}" >
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/gpsseuranta/css/style.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/gpsseuranta/css/jquery-ui.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/gpsseuranta/css/leaflet180.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/gpsseuranta/css/leafletCustom.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/gpsseuranta/css/leaflet.contextmenu.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/gpsseuranta/css/leaflet.viewcenter.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/gpsseuranta/css/leaflet.fullscreen.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/gpsseuranta/css/colpick.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}">
+    <script src="{% static '/vendor/gpsseuranta/js/libs/jquery-2.1.3.min.js' %}"></script>
+    <script src="{% static '/vendor/gpsseuranta/js/libs/jquery-ui.min.js' %}"></script>
+    <script src="{% static '/vendor/gpsseuranta/js/strings.js' %}"></script>
+    <script src="{% static '/vendor/gpsseuranta/js/load3.js' %}"></script>
     <style>
         #shield {
             position: absolute;
@@ -279,6 +243,6 @@
 				</div>
 			</div>
 		</div>
-		<script src="//dln0s0v92ab5h.cloudfront.net/gps/client/ver20181107/js/compliled20.js"></script>
+		<script src="{% static '/vendor/gpsseuranta/js/compliled20.js' %}"></script>
 	</body>
 </html>
