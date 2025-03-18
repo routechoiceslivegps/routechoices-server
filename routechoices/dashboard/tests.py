@@ -388,7 +388,7 @@ class TestDashboard(EssentialDashboardBase):
 
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertContains(res, f"MyTrckr;{device.aid};012345678901237\n")
+        self.assertContains(res, f"MyTrckr;{device.aid};012345678901237\r\n")
 
     def test_delete_club(self):
         url = self.reverse_and_check(
