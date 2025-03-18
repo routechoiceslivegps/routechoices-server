@@ -1615,7 +1615,7 @@ function RCEvent(infoURL, clockURL, locale) {
 		splitTimes = [];
 		for (const competitor of Object.values(competitorList)) {
 			const route = competitorRoutes[competitor.id];
-			if (removeSplitLinesContextMenuItem.find((a) => !!a)) {
+			if (route && removeSplitLinesContextMenuItem.find((a) => !!a)) {
 				const allPoints = route.getArray();
 				let crossCount = 0;
 				let startPointIdx = null;
