@@ -1114,9 +1114,8 @@ def event_competitors_csv_view(request, event_id):
     datawriter = csv.writer(csvfile, delimiter=";")
 
     for c in qs:
-        datawriter.writerow(
-            [c.name, c.short_name, c.start_time.isoformat(), c.device.aid]
-        )
+        device_id = c.device.aid if c.device else ""
+        datawriter.writerow([c.name, c.short_name, c.start_time.isoformat(), device_id])
 
     response = StreamingHttpRangeResponse(
         request, csvfile.getvalue().encode("utf-8"), content_type="text/csv"
