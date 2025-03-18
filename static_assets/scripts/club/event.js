@@ -160,12 +160,14 @@ function RCEvent(infoURL, clockURL, locale) {
 					rankingFromSplit = null;
 				}
 				u("#from-lap").val(1).trigger("change");
+				computeSplitTimes();
 			});
 			u("#from-lap").on("change", (e) => {
 				if (rankingFromSplit == null) {
 					e.target.value = 1;
 				}
 				rankingFromLap = Math.max(1, Number.parseInt(e.target.value));
+				computeSplitTimes();
 			});
 			u("#to-split").on("change", (e) => {
 				if (e.target.value !== "") {
@@ -174,9 +176,11 @@ function RCEvent(infoURL, clockURL, locale) {
 					rankingToSplit = null;
 				}
 				u("#to-lap").val(1).trigger("change");
+				computeSplitTimes();
 			});
 			u("#to-lap").on("change", (e) => {
 				rankingToLap = Math.max(1, Number.parseInt(e.target.value));
+				computeSplitTimes();
 			});
 			u("#from-lap").trigger("change");
 			u("#to-lap").trigger("change");
@@ -970,6 +974,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					u("#real_time_button").on("click", (e) => {
 						e.preventDefault();
 						isRealTime = true;
+						computeSplitTimes();
 						if (resetMassStartContextMenuItem) {
 							map.contextmenu.removeItem(resetMassStartContextMenuItem);
 							resetMassStartContextMenuItem = null;
@@ -1101,7 +1106,6 @@ function RCEvent(infoURL, clockURL, locale) {
 		u("#replay_mode_buttons").hide();
 		u("#replay_control_buttons").hide();
 		onAppResize();
-
 		function renderLive(ts) {
 			if (
 				ts - routesLastFetched > fetchPositionInterval * 1e3 &&
@@ -1132,6 +1136,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			}
 		}
 		window.requestAnimationFrame(whileLive);
+		computeSplitTimes();
 	}
 
 	function getCompetitionStartDate(nullIfNone = false) {
@@ -1260,6 +1265,7 @@ function RCEvent(infoURL, clockURL, locale) {
 		}
 		rankControl.setSplitSelectors();
 		splitLineCount = splitLineCount + 1;
+		computeSplitTimes();
 	}
 
 	function drawSplitLineTmp(e) {
@@ -1515,6 +1521,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			}
 		}
 		window.requestAnimationFrame(whileReplay);
+		computeSplitTimes();
 	}
 
 	this.getTailLength = () => tailLength;
@@ -1601,6 +1608,172 @@ function RCEvent(infoURL, clockURL, locale) {
 
 	function updateCompetitorList(newList) {
 		newList.forEach(updateCompetitor);
+	}
+
+	function computeSplitTimes() {
+		startLineCrosses = [];
+		splitTimes = [];
+		for (const competitor of Object.values(competitorList)) {
+			const route = competitorRoutes[competitor.id];
+			if (removeSplitLinesContextMenuItem.find((a) => !!a)) {
+				const allPoints = route.getArray();
+				let crossCount = 0;
+				let startPointIdx = null;
+				for (let i = 1; i < allPoints.length; i++) {
+					const prevPoint = allPoints[i - 1];
+					const currPoint = allPoints[i];
+					if (
+						!isLive &&
+						!isRealTime &&
+						isCustomStart &&
+						competitor.custom_offset &&
+						currPoint[0] < competitor.custom_offset
+					) {
+						continue;
+					}
+					if (rankingFromSplit != null) {
+						const prevXY = map.project(
+							L.latLng([prevPoint[1], prevPoint[2]]),
+							intersectionCheckZoom,
+						);
+						const currXY = map.project(
+							L.latLng([currPoint[1], currPoint[2]]),
+							intersectionCheckZoom,
+						);
+						const lineAXY = map.project(
+							splitLinesPoints[rankingFromSplit][0],
+							intersectionCheckZoom,
+						);
+						const lineBXY = map.project(
+							splitLinesPoints[rankingFromSplit][1],
+							intersectionCheckZoom,
+						);
+						if (
+							L.LineUtil.segmentsIntersect(prevXY, currXY, lineAXY, lineBXY)
+						) {
+							crossCount++;
+							if (crossCount === rankingFromLap) {
+								let competitorTime =
+									prevPoint[0] +
+									intersectRatio(prevXY, currXY, lineAXY, lineBXY) *
+										(currPoint[0] - prevPoint[0]);
+								if (
+									!isLive &&
+									!isRealTime &&
+									!isCustomStart &&
+									competitor.start_time
+								) {
+									competitorTime -=
+										new Date(competitor.start_time) - getCompetitionStartDate();
+								}
+								if (
+									!isLive &&
+									!isRealTime &&
+									isCustomStart &&
+									competitor.custom_offset
+								) {
+									competitorTime -= Math.max(
+										0,
+										competitor.custom_offset - getCompetitorsMinCustomOffset(),
+									);
+								}
+
+								if (getRelativeTime(competitorTime) < 0) {
+									crossCount--;
+									continue;
+								}
+
+								startLineCrosses.push({
+									competitor: competitor,
+									time: competitorTime,
+								});
+								startPointIdx =
+									i + (rankingFromSplit !== rankingToSplit ? 0 : 1);
+								break;
+							}
+						}
+					} else {
+						startPointIdx = i;
+						break;
+					}
+				}
+				crossCount = 0;
+				if (startPointIdx != null) {
+					for (let i = startPointIdx; i < allPoints.length; i++) {
+						const prevPoint = allPoints[i - 1];
+						const currPoint = allPoints[i];
+						const prevXY = map.project(
+							L.latLng([prevPoint[1], prevPoint[2]]),
+							intersectionCheckZoom,
+						);
+						const currXY = map.project(
+							L.latLng([currPoint[1], currPoint[2]]),
+							intersectionCheckZoom,
+						);
+						const lineAXY = map.project(
+							splitLinesPoints[rankingToSplit][0],
+							intersectionCheckZoom,
+						);
+						const lineBXY = map.project(
+							splitLinesPoints[rankingToSplit][1],
+							intersectionCheckZoom,
+						);
+						if (
+							L.LineUtil.segmentsIntersect(prevXY, currXY, lineAXY, lineBXY)
+						) {
+							crossCount++;
+							if (crossCount === rankingToLap) {
+								let competitorTime =
+									prevPoint[0] +
+									intersectRatio(prevXY, currXY, lineAXY, lineBXY) *
+										(currPoint[0] - prevPoint[0]);
+								if (
+									!isLive &&
+									!isRealTime &&
+									!isCustomStart &&
+									competitor.start_time
+								) {
+									competitorTime -=
+										new Date(competitor.start_time) - getCompetitionStartDate();
+								}
+								if (
+									!isLive &&
+									!isRealTime &&
+									isCustomStart &&
+									competitor.custom_offset
+								) {
+									competitorTime -= Math.max(
+										0,
+										competitor.custom_offset - getCompetitorsMinCustomOffset(),
+									);
+								}
+
+								if (getRelativeTime(competitorTime) < 0) {
+									crossCount--;
+									continue;
+								}
+
+								if (rankingFromSplit != null) {
+									competitorTime -= startLineCrosses.find(
+										(c) => c.competitor.id === competitor.id,
+									).time;
+									if (competitorTime < 0) {
+										crossCount--;
+										continue;
+									}
+								}
+
+								splitTimes.push({
+									competitor: competitor,
+									time: competitorTime,
+								});
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	function displayCompetitorList(force) {
@@ -1834,6 +2007,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					2,
 				);
 			}
+			computeSplitTimes();
 		}
 	}
 
@@ -1851,6 +2025,8 @@ function RCEvent(infoURL, clockURL, locale) {
 
 		u("#real_time_button").removeClass("active");
 		u("#mass_start_button").addClass("active");
+
+		computeSplitTimes();
 	}
 
 	function touchProgressBar(e) {
@@ -1915,6 +2091,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					map.fitBounds(runnerPoints, { maxZoom: 15 });
 					zoomOnRunners = false;
 				}
+				computeSplitTimes();
 				cb?.();
 			})
 			.catch(() => {
@@ -2772,9 +2949,6 @@ function RCEvent(infoURL, clockURL, locale) {
 
 		if (isMapMoving) return;
 
-		startLineCrosses = [];
-		splitTimes = [];
-
 		for (const competitor of Object.values(competitorList)) {
 			if (!competitor.isShown) {
 				continue;
@@ -2861,179 +3035,6 @@ function RCEvent(infoURL, clockURL, locale) {
 								tooltip._config.title = newText;
 								tooltip.update();
 								u(tooltip.tip).find(".tooltip-inner").text(newText);
-							}
-						}
-					}
-
-					// Splittimes
-					if (
-						refreshMeters &&
-						removeSplitLinesContextMenuItem.find((a) => !!a)
-					) {
-						const allPoints = route.getArray();
-						let crossCount = 0;
-						let startPointIdx = null;
-						for (let i = 1; i < allPoints.length; i++) {
-							const prevPoint = allPoints[i - 1];
-							const currPoint = allPoints[i];
-							if (
-								!isLive &&
-								!isRealTime &&
-								isCustomStart &&
-								competitor.custom_offset &&
-								currPoint[0] < competitor.custom_offset
-							) {
-								continue;
-							}
-							if (viewedTime < currPoint[0]) {
-								break;
-							}
-							if (rankingFromSplit != null) {
-								const prevXY = map.project(
-									L.latLng([prevPoint[1], prevPoint[2]]),
-									intersectionCheckZoom,
-								);
-								const currXY = map.project(
-									L.latLng([currPoint[1], currPoint[2]]),
-									intersectionCheckZoom,
-								);
-								const lineAXY = map.project(
-									splitLinesPoints[rankingFromSplit][0],
-									intersectionCheckZoom,
-								);
-								const lineBXY = map.project(
-									splitLinesPoints[rankingFromSplit][1],
-									intersectionCheckZoom,
-								);
-								if (
-									L.LineUtil.segmentsIntersect(prevXY, currXY, lineAXY, lineBXY)
-								) {
-									crossCount++;
-									if (crossCount === rankingFromLap) {
-										let competitorTime =
-											prevPoint[0] +
-											intersectRatio(prevXY, currXY, lineAXY, lineBXY) *
-												(currPoint[0] - prevPoint[0]);
-										if (
-											!isLive &&
-											!isRealTime &&
-											!isCustomStart &&
-											competitor.start_time
-										) {
-											competitorTime -=
-												new Date(competitor.start_time) -
-												getCompetitionStartDate();
-										}
-										if (
-											!isLive &&
-											!isRealTime &&
-											isCustomStart &&
-											competitor.custom_offset
-										) {
-											competitorTime -= Math.max(
-												0,
-												competitor.custom_offset -
-													getCompetitorsMinCustomOffset(),
-											);
-										}
-
-										if (getRelativeTime(competitorTime) < 0) {
-											crossCount--;
-											continue;
-										}
-
-										startLineCrosses.push({
-											competitor: competitor,
-											time: competitorTime,
-										});
-										startPointIdx =
-											i + (rankingFromSplit !== rankingToSplit ? 0 : 1);
-										break;
-									}
-								}
-							} else {
-								startPointIdx = i;
-								break;
-							}
-						}
-						crossCount = 0;
-						if (startPointIdx != null) {
-							for (let i = startPointIdx; i < allPoints.length; i++) {
-								const prevPoint = allPoints[i - 1];
-								const currPoint = allPoints[i];
-								if (viewedTime < currPoint[0]) {
-									break;
-								}
-								const prevXY = map.project(
-									L.latLng([prevPoint[1], prevPoint[2]]),
-									intersectionCheckZoom,
-								);
-								const currXY = map.project(
-									L.latLng([currPoint[1], currPoint[2]]),
-									intersectionCheckZoom,
-								);
-								const lineAXY = map.project(
-									splitLinesPoints[rankingToSplit][0],
-									intersectionCheckZoom,
-								);
-								const lineBXY = map.project(
-									splitLinesPoints[rankingToSplit][1],
-									intersectionCheckZoom,
-								);
-								if (
-									L.LineUtil.segmentsIntersect(prevXY, currXY, lineAXY, lineBXY)
-								) {
-									crossCount++;
-									if (crossCount === rankingToLap) {
-										let competitorTime =
-											prevPoint[0] +
-											intersectRatio(prevXY, currXY, lineAXY, lineBXY) *
-												(currPoint[0] - prevPoint[0]);
-										if (
-											!isLive &&
-											!isRealTime &&
-											!isCustomStart &&
-											competitor.start_time
-										) {
-											competitorTime -=
-												new Date(competitor.start_time) -
-												getCompetitionStartDate();
-										}
-										if (
-											!isLive &&
-											!isRealTime &&
-											isCustomStart &&
-											competitor.custom_offset
-										) {
-											competitorTime -= Math.max(
-												0,
-												competitor.custom_offset -
-													getCompetitorsMinCustomOffset(),
-											);
-										}
-
-										if (getRelativeTime(competitorTime) < 0) {
-											crossCount--;
-											continue;
-										}
-
-										if (rankingFromSplit != null) {
-											competitorTime -= startLineCrosses.find(
-												(c) => c.competitor.id === competitor.id,
-											).time;
-											if (competitorTime < 0) {
-												crossCount--;
-												continue;
-											}
-										}
-
-										splitTimes.push({
-											competitor: competitor,
-											time: competitorTime,
-										});
-										break;
-									}
-								}
 							}
 						}
 					}
