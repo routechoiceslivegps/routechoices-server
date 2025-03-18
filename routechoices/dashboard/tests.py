@@ -382,7 +382,7 @@ class TestDashboard(EssentialDashboardBase):
         )
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertContains(res, f"MyTrckr;{device.aid};\n")
+        self.assertContains(res, f"MyTrckr;{device.aid};\r\n")
 
         ImeiDevice.objects.create(imei="012345678901237", device=device)
 
