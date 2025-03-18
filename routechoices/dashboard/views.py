@@ -1,3 +1,4 @@
+import csv
 from copy import deepcopy
 from io import StringIO
 
@@ -1101,6 +1102,32 @@ def event_competitors_view(request, event_id):
 
 @login_required
 @requires_club_in_session
+def event_competitors_csv_view(request, event_id):
+    club = request.club
+    event = get_object_or_404(
+        Event,
+        aid=event_id,
+        club=club,
+    )
+    qs = event.competitors.select_related("device").all()
+    csvfile = StringIO()
+    datawriter = csv.writer(csvfile, delimiter=";")
+
+    for c in qs:
+        datawriter.writerow(
+            [c.name, c.short_name, c.start_time.isoformat(), c.device.aid]
+        )
+
+    response = StreamingHttpRangeResponse(
+        request, csvfile.getvalue().encode("utf-8"), content_type="text/csv"
+    )
+    filename = f"{event.name}_competitors.csv"
+    response["Content-Disposition"] = set_content_disposition(filename)
+    return response
+
+
+@login_required
+@requires_club_in_session
 def event_competitors_printer_view(request, event_id):
     club = request.club
     event = get_object_or_404(
@@ -1387,8 +1414,6 @@ def upgrade(request):
 @requires_club_in_session
 def device_list_download(request):
     club = request.club
-    out = StringIO()
-    out.write("Nickname;Device ID;IMEI\n")
     devices_qs = (
         DeviceClubOwnership.objects.filter(club_id=club.id)
         .select_related("device")
@@ -1404,10 +1429,15 @@ def device_list_download(request):
     )
     for imei in imeis:
         devices[imei.device.aid]["imei"] = imei.imei
+
+    csvfile = StringIO()
+    datawriter = csv.writer(csvfile, delimiter=";")
+    datawriter.writerow(["Nickname", "Device ID", "IMEI"])
     for dev in devices.values():
-        out.write(f'{dev.get("nickname")};{dev.get("aid")};{dev.get("imei", "")}\n')
+        datawriter.writerow([dev.get("nickname"), dev.get("aid"), dev.get("imei", "")])
+
     response = StreamingHttpRangeResponse(
-        request, out.getvalue().encode("utf-8"), content_type="text/csv"
+        request, csvfile.getvalue().encode("utf-8"), content_type="text/csv"
     )
     filename = f"device_list_{club.slug}.csv"
     response["Content-Disposition"] = set_content_disposition(filename)

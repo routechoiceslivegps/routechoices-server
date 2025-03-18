@@ -47,6 +47,8 @@
                             {% endif %}
                             <a href="{% url 'dashboard:club:event:competitors_printer_view' event_id=event.aid club_slug=request.club.slug %}"
                                class="btn btn-secondary btn-sm me-1 mb-1"><i class="fa-solid fa-print"></i> Competitor List For Printing</a>
+                            <a href="{% url 'dashboard:club:event:competitors_csv_view' event_id=event.aid club_slug=request.club.slug %}"
+                                class="btn btn-secondary btn-sm me-1 mb-1"><i class="fa-solid fa-table"></i> Competitor List as CSV</a>
                         </div>
                     </div>
                     {% if event.shortcut %}

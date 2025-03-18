@@ -198,6 +198,11 @@ urlpatterns = [
                                                                 name="competitors_view",
                                                             ),
                                                             path(
+                                                                "competitors.csv",
+                                                                views.event_competitors_csv_view,
+                                                                name="competitors_csv_view",
+                                                            ),
+                                                            path(
                                                                 "competitors-printer-friendly",
                                                                 views.event_competitors_printer_view,
                                                                 name="competitors_printer_view",
