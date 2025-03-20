@@ -41,7 +41,11 @@ from routechoices.core.models import (
     MapAssignation,
     Notice,
 )
-from routechoices.lib.helpers import check_cname_record, get_aware_datetime
+from routechoices.lib.helpers import (
+    check_cname_record,
+    get_aware_datetime,
+    initial_of_name,
+)
 from routechoices.lib.kmz import extract_ground_overlay_info
 from routechoices.lib.validators import validate_domain_name, validate_nice_slug
 
@@ -545,6 +549,7 @@ class CompetitorForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["start_time"].help_text = '<span class="local_time"></span>'
+        self.fields["short_name"].required = False
 
     class Meta:
         model = Competitor
@@ -554,6 +559,15 @@ class CompetitorForm(ModelForm):
                 attrs={"class": "datetimepicker", "autocomplete": "off"}
             ),
         }
+
+    def clean_short_name(self):
+        name = self.cleaned_data.get("name")
+        short_name = self.cleaned_data.get("short_name")
+        if name and not short_name:
+            short_name = initial_of_name(name)
+        if not short_name:
+            raise ValidationError("Field is required")
+        return short_name
 
     def clean_start_time(self):
         start = self.cleaned_data.get("start_time")
