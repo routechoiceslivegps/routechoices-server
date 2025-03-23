@@ -27,6 +27,10 @@ const supportedLanguages = {
 	sv: "Svenska",
 };
 
+function escapeRegExp(string) {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+}
+
 const printTime = (time) => {
 	const prependZero = (x) => `0${x}`.slice(-2);
 	const t = Math.round(time);

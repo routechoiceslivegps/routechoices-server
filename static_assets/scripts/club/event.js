@@ -1790,7 +1790,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			if (
 				searchText === null ||
 				searchText === "" ||
-				competitor.name.toLowerCase().search(searchText) !== -1
+				competitor.name.toLowerCase().search(escapeRegExp(searchText)) !== -1
 			) {
 				listDiv.append(
 					`<competitor-sidebar-el index="${i}" competitor-id="${competitor.id}"/>`,
