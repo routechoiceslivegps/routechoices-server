@@ -193,7 +193,11 @@ function RCEvent(infoURL, clockURL, locale) {
 				ranking.sort((a, b) => a.time - b.time);
 			}
 			const relativeTime = rankingFromSplit == null;
+			const cutoff = getRelativeTime(currentTime);
 			ranking.forEach((c, i) => {
+				if (cutoff < getRelativeTime(c.displayAt)) {
+					return;
+				}
 				innerOut.append(
 					`<div class="text-nowrap overflow-hidden text-truncate" style="clear: both; width: 200px;"><span class="text-nowrap d-inline-block float-start overflow-hidden text-truncate" style="width: 135px;">${i + 1} <span style="color: ${c.competitor.color}">&#11044;</span> ${u("<span/>").text(c.competitor.name).html()}</span><span class="text-nowrap overflow-hidden d-inline-block float-end" style="width: 55px; font-feature-settings: tnum; font-variant-numeric: tabular-nums lining-nums; margin-right: 10px;" title="${getProgressBarText(c.time, false, false, relativeTime)}">${getProgressBarText(c.time, false, false, relativeTime)}</span></div>`,
 				);
@@ -1753,6 +1757,7 @@ function RCEvent(infoURL, clockURL, locale) {
 									continue;
 								}
 
+								const displayTime = competitorTime;
 								if (rankingFromSplit != null) {
 									competitorTime -= startLineCrosses.find(
 										(c) => c.competitor.id === competitor.id,
@@ -1766,6 +1771,7 @@ function RCEvent(infoURL, clockURL, locale) {
 								splitTimes.push({
 									competitor: competitor,
 									time: competitorTime,
+									displayAt: displayTime,
 								});
 								break;
 							}
@@ -2972,7 +2978,7 @@ function RCEvent(infoURL, clockURL, locale) {
 				}
 				const loc = route.getByTime(viewedTime);
 				const hasRecentPoints = route.hasPointInInterval(
-					viewedTime - (sendInterval * 4 + fetchPositionInterval) * 1e3, //kayak
+					viewedTime - (sendInterval * 4 + fetchPositionInterval) * 1e3,
 					viewedTime,
 				);
 				if (competitor.focused) {
