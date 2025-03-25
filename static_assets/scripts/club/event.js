@@ -194,10 +194,10 @@ function RCEvent(infoURL, clockURL, locale) {
 			}
 			const relativeTime = rankingFromSplit == null;
 			const cutoff = getRelativeTime(currentTime);
-			ranking.forEach((c, i) => {
-				if (cutoff < getRelativeTime(c.displayAt)) {
-					return;
-				}
+			const rankingDisplay = ranking.filter(
+				(c) => cutoff >= getRelativeTime(c.displayAt),
+			);
+			rankingDisplay.forEach((c, i) => {
 				innerOut.append(
 					`<div class="text-nowrap overflow-hidden text-truncate" style="clear: both; width: 200px;"><span class="text-nowrap d-inline-block float-start overflow-hidden text-truncate" style="width: 135px;">${i + 1} <span style="color: ${c.competitor.color}">&#11044;</span> ${u("<span/>").text(c.competitor.name).html()}</span><span class="text-nowrap overflow-hidden d-inline-block float-end" style="width: 55px; font-feature-settings: tnum; font-variant-numeric: tabular-nums lining-nums; margin-right: 10px;" title="${getProgressBarText(c.time, false, false, relativeTime)}">${getProgressBarText(c.time, false, false, relativeTime)}</span></div>`,
 				);
@@ -211,7 +211,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			u(".leaflet-control-ranking #dl-ranking-btn").off("click");
 			u(".leaflet-control-ranking #dl-ranking-btn").on("click", () => {
 				let out = "";
-				ranking.forEach((c, i) => {
+				rankingDisplay.forEach((c, i) => {
 					out += `${c.competitor.name};${getProgressBarText(c.time, false, false, relativeTime)}\n`;
 				});
 				const element = document.createElement("a");
