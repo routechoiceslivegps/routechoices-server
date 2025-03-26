@@ -451,3 +451,7 @@ body {
 .status-indicator-default {
 	background-color: #808080;
 }
+
+img.leaflet-tile {
+	mix-blend-mode: normal !important;
+}
