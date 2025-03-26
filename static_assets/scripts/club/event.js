@@ -197,34 +197,41 @@ function RCEvent(infoURL, clockURL, locale) {
 			const rankingDisplay = ranking.filter(
 				(c) => cutoff >= getRelativeTime(c.displayAt),
 			);
-			rankingDisplay.forEach((c, i) => {
-				innerOut.append(
-					`<div class="text-nowrap overflow-hidden text-truncate" style="clear: both; width: 200px;"><span class="text-nowrap d-inline-block float-start overflow-hidden text-truncate" style="width: 135px;">${i + 1} <span style="color: ${c.competitor.color}">&#11044;</span> ${u("<span/>").text(c.competitor.name).html()}</span><span class="text-nowrap overflow-hidden d-inline-block float-end" style="width: 55px; font-feature-settings: tnum; font-variant-numeric: tabular-nums lining-nums; margin-right: 10px;" title="${getProgressBarText(c.time, false, false, relativeTime)}">${getProgressBarText(c.time, false, false, relativeTime)}</span></div>`,
-				);
-			});
-			if (innerOut.html() === "") {
+			if (rankingDisplay.length === 0) {
 				innerOut.append("<div>-</div>");
+			} else {
+				rankingDisplay.forEach((c, i) => {
+					innerOut.append(
+						`<div class="text-nowrap overflow-hidden text-truncate" style="clear: both; width: 200px;"><span class="text-nowrap d-inline-block float-start overflow-hidden text-truncate" style="width: 135px;">${i + 1} <span style="color: ${c.competitor.color}">&#11044;</span> ${u("<span/>").text(c.competitor.name).html()}</span><span class="text-nowrap overflow-hidden d-inline-block float-end" style="width: 55px; font-feature-settings: tnum; font-variant-numeric: tabular-nums lining-nums; margin-right: 10px;" title="${getProgressBarText(c.time, false, false, relativeTime)}">${getProgressBarText(c.time, false, false, relativeTime)}</span></div>`,
+					);
+				});
 			}
 			if (el.html() !== innerOut.html()) {
 				el.html(innerOut.html());
 			}
-			u(".leaflet-control-ranking #dl-ranking-btn").off("click");
-			u(".leaflet-control-ranking #dl-ranking-btn").on("click", () => {
-				let out = "";
-				rankingDisplay.forEach((c, i) => {
-					out += `${c.competitor.name};${getProgressBarText(c.time, false, false, relativeTime)}\n`;
+			u(".leaflet-control-ranking #dl-ranking-btn")
+				.off("click")
+				.on("click", () => {
+					const csvArray = rankingDisplay.map((c) => {
+						return [
+							c.competitor.name,
+							getProgressBarText(c.time, false, false, relativeTime),
+						];
+					});
+					const csvOut = csv_stringify_sync.stringify(csvArray, {
+						delimiter: ";",
+					});
+					const element = document.createElement("a");
+					element.setAttribute(
+						"href",
+						`data:text/plain;charset=utf-8,${encodeURIComponent(csvOut)}`,
+					);
+					element.setAttribute("download", "result.csv");
+					element.style.display = "none";
+					document.body.appendChild(element);
+					element.click();
+					document.body.removeChild(element);
 				});
-				const element = document.createElement("a");
-				element.setAttribute(
-					"href",
-					`data:text/plain;charset=utf-8,${encodeURIComponent(out)}`,
-				);
-				element.setAttribute("download", "result.csv");
-				element.style.display = "none";
-				document.body.appendChild(element);
-				element.click();
-				document.body.removeChild(element);
-			});
 		},
 
 		onRemove: (map) => {
