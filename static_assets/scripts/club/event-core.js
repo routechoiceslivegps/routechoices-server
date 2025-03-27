@@ -212,20 +212,27 @@ L.Control.Grouping = L.Control.extend({
 		return back;
 	},
 
-	setValues: (c, cl) => {
+	setValues: (c, clusters) => {
 		const el = u(".leaflet-control-grouping");
 		let out = "";
-		cl.forEach((k, i) => {
-			if (i !== 0) {
-				out += "<br>";
-			}
-			out += `<h6><span style="color: ${k.color}">&#11044;</span> ${banana.i18n("group")} ${alphabetizeNumber(i)}</h6>`;
-			for (const ci of k.parts) {
-				out += `<div class="text-nowrap" style="clear:both;width:200px;height:1em"><span class="text-nowrap overflow-hidden float-start d-inline-block text-truncate" style="width:195px;"><span style="color: ${c[ci].color}">&#11044;</span> ${u("<span/>").text(c[ci].name).html()}</span></div>`;
-			}
-		});
-		if (out === "") {
+		if (clusters.length === 0) {
 			out = `<h6>${banana.i18n("no-group")}</h6>`;
+		} else {
+			clusters.forEach((k, i) => {
+				if (i !== 0) {
+					out += "<br/>";
+				}
+				out += `<h6>
+				<span style="color: ${k.color}">&#11044;</span> ${banana.i18n("group")} ${alphabetizeNumber(i)}
+				</h6>`;
+				for (const ci of k.parts) {
+					out += `<div class="text-nowrap" style="clear:both;width:200px;height:1em">
+						<div class="text-nowrap overflow-hidden float-start d-inline-block text-truncate" style="width:195px;">
+							<span style="color: ${c[ci].color}">&#11044;</span> ${u("<span/>").text(c[ci].name).html()}
+						</div>
+					</div>`;
+				}
+			});
 		}
 		const testOut = u("<div>").html(out);
 		if (el.html() !== testOut.html()) {
