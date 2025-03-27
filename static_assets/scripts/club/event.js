@@ -187,50 +187,54 @@ function RCEvent(infoURL, clockURL, locale) {
 		},
 
 		setValues: (ranking) => {
-			const el = u(".leaflet-control-ranking").find(".result-name-list");
-			const innerOut = u('<div class="result-name-list"/>');
-			if (ranking.length > 0) {
-				ranking.sort((a, b) => a.time - b.time);
-			}
-			const relativeTime = rankingFromSplit == null;
 			const cutoff = getRelativeTime(currentTime);
-			const rankingDisplay = ranking.filter(
-				(c) => cutoff >= getRelativeTime(c.displayAt),
-			);
-			if (rankingDisplay.length === 0) {
-				innerOut.append("<div>-</div>");
+			const isRelativeTime = !rankingFromSplit;
+
+			const rankingData = ranking
+				.sort((a, b) => a.time - b.time)
+				.filter((c) => cutoff >= getRelativeTime(c.displayAt))
+				.map((c) => ({
+					name: c.competitor.name,
+					color: c.competitor.color,
+					resultText: getProgressBarText(c.time, false, false, isRelativeTime),
+				}));
+
+			const rankingDiv = u('<div class="result-name-list"/>');
+			if (rankingData.length === 0) {
+				rankingDiv.append("<div>-</div>");
 			} else {
-				rankingDisplay.forEach((c, i) => {
-					innerOut.append(
-						`<div class="text-nowrap overflow-hidden text-truncate" style="clear: both; width: 200px;"><span class="text-nowrap d-inline-block float-start overflow-hidden text-truncate" style="width: 135px;">${i + 1} <span style="color: ${c.competitor.color}">&#11044;</span> ${u("<span/>").text(c.competitor.name).html()}</span><span class="text-nowrap overflow-hidden d-inline-block float-end" style="width: 55px; font-feature-settings: tnum; font-variant-numeric: tabular-nums lining-nums; margin-right: 10px;" title="${getProgressBarText(c.time, false, false, relativeTime)}">${getProgressBarText(c.time, false, false, relativeTime)}</span></div>`,
+				rankingData.forEach((c, i) => {
+					rankingDiv.append(
+						`<div class="text-nowrap overflow-hidden text-truncate" style="clear: both; width: 200px;">
+							<div class="text-nowrap d-inline-block overflow-hidden float-start text-truncate" style="width: 145px;">${i + 1} <span style="color: ${c.color}">&#11044;</span> ${u("<span/>").text(c.name).html()}</div>
+							<div class="text-nowrap d-inline-block overflow-hidden float-end text-end" style="width: 55px;font-feature-settings: tnum;font-variant-numeric: tabular-nums lining-nums;padding-right: 15px;" title="${c.resultText}">${c.resultText}</div>
+						</div>`,
 					);
 				});
 			}
-			if (el.html() !== innerOut.html()) {
-				el.html(innerOut.html());
+			const el = u(".leaflet-control-ranking").find(".result-name-list");
+			if (el.html() !== rankingDiv.html()) {
+				el.html(rankingDiv.html());
 			}
 			u(".leaflet-control-ranking #dl-ranking-btn")
 				.off("click")
 				.on("click", () => {
-					const csvArray = rankingDisplay.map((c) => {
-						return [
-							c.competitor.name,
-							getProgressBarText(c.time, false, false, relativeTime),
-						];
+					const csvArray = rankingData.map((c) => {
+						return [c.name, c.resultText];
 					});
 					const csvOut = csv_stringify_sync.stringify(csvArray, {
 						delimiter: ";",
 					});
-					const element = document.createElement("a");
-					element.setAttribute(
+					const link = document.createElement("a");
+					link.style.display = "none";
+					link.setAttribute(
 						"href",
 						`data:text/plain;charset=utf-8,${encodeURIComponent(csvOut)}`,
 					);
-					element.setAttribute("download", "result.csv");
-					element.style.display = "none";
-					document.body.appendChild(element);
-					element.click();
-					document.body.removeChild(element);
+					link.setAttribute("download", "result.csv");
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
 				});
 		},
 
