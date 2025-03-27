@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
-from django.db.models import Case, Q, Value, When
+from django.db.models import Case, Prefetch, Q, Value, When
 from django.dispatch import receiver
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -1130,7 +1130,12 @@ def event_competitors_csv_view(request, event_id):
 def event_competitors_printer_view(request, event_id):
     club = request.club
     event = get_object_or_404(
-        Event.objects.prefetch_related("notice", "competitors", "competitors__device"),
+        Event.objects.prefetch_related(
+            "notice",
+            Prefetch(
+                "competitors", queryset=Competitor.objects.select_related("device")
+            ),
+        ),
         aid=event_id,
     )
 
