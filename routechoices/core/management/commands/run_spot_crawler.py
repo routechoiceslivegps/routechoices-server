@@ -41,7 +41,7 @@ class Command(BaseCommand):
         nb_new_points = 0
         messengers_id = list(locations.keys())
         if messengers_id:
-            db_devices = Device.objects.prefetch_related("spot_device").filter(
+            db_devices = Device.objects.select_related("spot_device").filter(
                 spot_device__messenger_id__in=messengers_id
             )
             for db_device in db_devices:
