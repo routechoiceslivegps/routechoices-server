@@ -58,7 +58,7 @@ class Tractrac(ThirdPartyTrackingSolution):
             map_url = map_data.get("location")
             if map_url.startswith("//"):
                 map_url = f"http:{map_url}"
-            r = requests.get(map_url, verify=False)
+            r = requests.get(map_url)
             if r.status_code != 200:
                 map_obj.delete()
                 raise MapsImportError("API returned error code")
