@@ -1059,7 +1059,8 @@ function RCEvent(infoURL, clockURL, locale) {
 										padding: [25, 25],
 									});
 								}
-							});
+							})
+							.catch(() => {});
 					}
 
 					u(".main").removeClass("loading");
@@ -1334,7 +1335,8 @@ function RCEvent(infoURL, clockURL, locale) {
 				}
 				displayAnouncement(response.announcement);
 				displayMaps(response.maps);
-			});
+			})
+			.catch(() => {});
 	}
 
 	function displayAnouncement(announcement) {
@@ -2073,8 +2075,8 @@ function RCEvent(infoURL, clockURL, locale) {
 					cb?.();
 					return;
 				}
+				isCurrentlyFetchingRoutes = false;
 				const runnerPoints = [];
-				// const aaaa = performance.now();
 				for (const competitor of response.competitors) {
 					let route = null;
 					if (competitor.encoded_data) {
@@ -2099,11 +2101,9 @@ function RCEvent(infoURL, clockURL, locale) {
 						competitorBatteyLevels[competitor.id] = null;
 					}
 				}
-				// console.log(performance.now() - aaaa);
 				updateCompetitorList(response.competitors);
 				displayCompetitorList();
 				routesLastFetched = performance.now();
-				isCurrentlyFetchingRoutes = false;
 				if (zoomOnRunners && runnerPoints.length) {
 					map.fitBounds(runnerPoints, { maxZoom: 15 });
 					zoomOnRunners = false;
@@ -2112,7 +2112,9 @@ function RCEvent(infoURL, clockURL, locale) {
 				cb?.();
 			})
 			.catch(() => {
-				isCurrentlyFetchingRoutes = false;
+				setTimeout(() => {
+					isCurrentlyFetchingRoutes = false;
+				}, 1000);
 			});
 	}
 

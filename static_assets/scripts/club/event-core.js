@@ -385,7 +385,8 @@ function updateText(locale) {
 		.then((response) => response.json())
 		.then((messages) => {
 			banana.load(messages, banana.locale);
-		});
+		})
+		.catch(() => {});
 }
 
 const coordsFormatters = {
