@@ -92,16 +92,20 @@ def club_favicon(request, icon_name, **kwargs):
     )
     if bypass_resp:
         return bypass_resp
-    club_slug = request.club_slug
-    club = get_object_or_404(Club, slug__iexact=club_slug)
-    if club.domain and not request.use_cname:
-        return redirect(f"{club.nice_url}{icon_name}")
-    icon_info = {
+    icon_infos = {
         "favicon.ico": {"size": 32, "format": "ICO", "mime": "image/x-icon"},
         "apple-touch-icon.png": {"size": 180, "format": "PNG", "mime": "image/png"},
         "icon-192.png": {"size": 192, "format": "PNG", "mime": "image/png"},
         "icon-512.png": {"size": 512, "format": "PNG", "mime": "image/png"},
-    }.get(icon_name)
+    }
+    if icon_name not in icon_infos.keys():
+        raise Http404()
+    icon_info = icon_infos.get(icon_name)
+
+    club_slug = request.club_slug
+    club = get_object_or_404(Club, slug__iexact=club_slug)
+    if club.domain and not request.use_cname:
+        return redirect(f"{club.nice_url}{icon_name}")
     if not club.logo:
         with open(f"{settings.BASE_DIR}/static_assets/{icon_name}", "rb") as fp:
             data = fp.read()

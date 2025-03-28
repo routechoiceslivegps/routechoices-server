@@ -3,6 +3,7 @@ import hashlib
 import math
 import os
 import os.path
+import re
 import secrets
 import struct
 import time
@@ -28,7 +29,9 @@ UTC_TZ = zoneinfo.ZoneInfo("UTC")
 
 
 def get_remote_image_sizes(uri):
-    # get file size *and* image size (None if not known)
+    # Get file size *and* image size (None if not known)
+    if not re.match("https?://", uri.lower()):
+        raise Exception("Invalid Protocol")
     with urllib.request.urlopen(uri) as file:
         size = file.headers.get("content-length")
         if size:
