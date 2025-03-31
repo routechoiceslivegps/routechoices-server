@@ -163,9 +163,9 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
         courses = []
         # first determine the course for this leg if is relay
         relay_leg = self.init_data["relay_leg"]
-        if relay_leg and self.init_data["class"]["relayLegGroups"]:
+        groups = self.init_data["class"]["relayLegGroups"]
+        if relay_leg and groups:
             course_ids = []
-            groups = self.init_data["class"]["relayLegGroups"]
             for group in groups:
                 if relay_leg in group["relayLegs"]:
                     course_ids += [c["id"] for c in group["courses"]]
