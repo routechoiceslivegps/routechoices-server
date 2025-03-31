@@ -1,5 +1,6 @@
 {% extends "club/base.html" %}
 {% load compress hosts static %}
+
 {% block head_title %}
     {{ event.name }} data export | Powered by {{ site.name }}
 {% endblock head_title %}
@@ -7,6 +8,26 @@
 {% block head_description %}
     {{ event.name }} by {{ event.club.name }} data export page
 {% endblock head_description %}
+
+{% block extra_head %}
+    <meta property="og:title" content="{{ event.name }} data export" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="{{ site.name }}" />
+    <meta property="og:description"
+          content="{{ event.name }} by {{ event.club.name }} data export page" />
+    <meta property="og:url" content="{{ event.get_absolute_url }}/export" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:image"
+          content="{{ event.club.nice_url }}{{ event.slug }}/thumbnail" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {% if request.is_secure %}
+        <meta property="og:image:secure_url"
+              content="{{ event.club.nice_url }}{{ event.slug }}/thumbnail" />
+    {% endif %}
+    <link rel="canonical" href="{{ event.get_absolute_url }}/export">
+{% endblock extra_head %}
 
 {% block contentup %}
     <div class="container-fluid p-0">

@@ -612,8 +612,15 @@ def event_contribute_view(request, slug, **kwargs):
             {"club": club},
             status=status.HTTP_404_NOT_FOUND,
         )
-    if event.club.domain and not request.use_cname:
-        return redirect(f"{event.club.nice_url}{event.slug}/contribute")
+    if event.club.domain and request.use_cname:
+        return redirect(
+            reverse(
+                "event_contribute_view",
+                host="clubs",
+                kwargs={"slug": slug},
+                host_kwargs={"club_slug": club_slug},
+            )
+        )
 
     if request.GET.get("competitor-added", None):
         messages.success(request, "Competitor added!")

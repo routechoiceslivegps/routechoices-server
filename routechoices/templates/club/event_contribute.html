@@ -1,10 +1,5 @@
 {% extends "club/base.html" %}
 {% load compress django_bootstrap5 hosts static %}
-{% block extra_head %}
-    {{ block.super }}
-    <link rel="stylesheet"
-          href="{% static '/vendor/tom-select-2.0.1/tom-select.bootstrap5.min.css' %}" />
-{% endblock extra_head %}
 
 {% block head_title %}
     {{ event.name }} contribution page | Powered by {{ site.name }}
@@ -13,6 +8,30 @@
 {% block head_description %}
     {{ event.name }} by {{ event.club.name }} contribution page
 {% endblock head_description %}
+
+{% block extra_head %}
+    <meta property="og:title" content="{{ event.name }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="{{ site.name }}" />
+    <meta property="og:description"
+          content="{{ event.name }} by {{ event.club.name }} contribution page" />
+    <meta property="og:url" content="{{ event.get_absolute_url }}/contribute" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:image"
+          content="{{ event.club.nice_url }}{{ event.slug }}/thumbnail" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {% if request.is_secure %}
+        <meta property="og:image:secure_url"
+              content="{{ event.club.nice_url }}{{ event.slug }}/thumbnail" />
+    {% endif %}
+    <link rel="canonical" href="{{ event.get_absolute_url }}/contribute">
+    {% compress css %}
+        <link rel="stylesheet"
+            href="{% static '/vendor/tom-select-2.0.1/tom-select.bootstrap5.min.css' %}" />
+    {% endcompress %}
+{% endblock extra_head %}
 
 {% block contentup %}
     <div class="container-fluid p-0">
