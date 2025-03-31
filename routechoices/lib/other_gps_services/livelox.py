@@ -10,6 +10,7 @@ from operator import itemgetter
 import arrow
 import cairosvg
 from curl_cffi import requests
+from django.core.cache import cache
 from django.core.files.base import ContentFile
 from PIL import Image, ImageDraw, ImageFont
 
@@ -31,6 +32,11 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
     }
 
     def parse_init_data(self, uid):
+        self.uid = uid
+        cache_key = f"3rd_part_init_data:livelox:uid:{uid}"
+        if data := cache.get(cache_key):
+            self.init_data = data
+            return
         if match := re.match(r"^(\d+)(-(\d+))?$", uid):
             details = {"classId": match[1]}
             if leg := match[3]:
@@ -86,7 +92,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
         self.init_data["xtra"] = r.json()
         self.init_data["relay_leg"] = int(relay_leg) if relay_leg else ""
         self.init_data["class_id"] = int(class_id)
-        self.uid = uid
+        cache.set(cache_key, self.init_data, 300)
 
     def get_competitor_device_id_prefix(self):
         return "LLX_"

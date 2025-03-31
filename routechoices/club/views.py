@@ -6,6 +6,7 @@ from django.contrib.sitemaps.views import (
     _get_latest_lastmod,
     x_robots_tag,
 )
+from django.core.cache import cache
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -442,6 +443,10 @@ def event_map_view(request, slug, index="1", **kwargs):
     club_slug = request.club_slug
 
     if club_slug in ("gpsseuranta", "loggator", "livelox"):
+        cache_key = f"3rd_party_map:{club_slug}:slug:{slug}"
+        if data := cache.get(cache_key):
+            mime_type = magic.from_buffer(data, mime=True)
+            return HttpResponse(data, content_type=mime_type)
         if club_slug == "gpsseuranta":
             proxy = GpsSeurantaNet()
         elif club_slug == "loggator":
@@ -455,8 +460,9 @@ def event_map_view(request, slug, index="1", **kwargs):
         rmap = proxy.get_map_file()
         with rmap.open("rb") as fp:
             data = fp.read()
+        cache.set(cache_key, data, 24 * 3600)
         mime_type = magic.from_buffer(data, mime=True)
-        return HttpResponse(rmap, content_type=mime_type)
+        return HttpResponse(data, content_type=mime_type)
 
     event = (
         Event.objects.all()
