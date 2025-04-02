@@ -27,6 +27,13 @@ const backdropMaps = {
 		className: "wms256",
 		layers: "peruskartta",
 	}),
+	"mapant-ee": L.tileLayer(
+		"https://tile-proxy.routechoices.com/ee/{z}/{x}/{y}.webp",
+		{
+			attribution: "&copy; mapantee.gokartor.se and Estonian Land Board",
+			className: "wms256",
+		},
+	),
 	"mapant-fi": L.tileLayer(
 		"https://wmts.mapant.fi/wmts_EPSG3857.php?z={z}&x={x}&y={y}",
 		{
@@ -178,6 +185,7 @@ const backgroundMapTitles = {
 	"gmap-street": "Google Map Street",
 	"gmap-hybrid": "Google Map Satellite",
 	"gmap-terrain": "Google Map Terrain",
+	"mapant-ee": "Mapant Estonia",
 	"mapant-fi": "Mapant Finland",
 	"mapant-no": "Mapant Norway",
 	"mapant-es": "Mapant Spain",
