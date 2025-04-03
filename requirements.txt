@@ -1,36 +1,36 @@
-aiohappyeyeballs==2.4.6
-aiohttp==3.11.13
+aiohappyeyeballs==2.6.1
+aiohttp==3.11.16
 aiosignal==1.3.2
 annotated-types==0.7.0
 arrow==1.3.0
 asgiref==3.8.1
 asn1crypto==1.5.1
-attrs==25.1.0
+attrs==25.3.0
 beautifulsoup4==4.13.3
-bleach[css]==6.2.0
-boto3==1.37.0
-botocore==1.37.0
+bleach==6.2.0
+boto3==1.37.26
+botocore==1.37.26
 cairocffi==1.7.1
 cairosvg==2.7.1
 cbor2==5.6.5
 certifi==2025.1.31
 cffi==1.17.1
 charset-normalizer==3.4.1
-coverage==7.6.12
-cryptography==44.0.1
-cssselect2==0.7.0
-curl-cffi==0.9.0
+coverage==7.8.0
+cryptography==44.0.2
+cssselect2==0.8.0
+curl-cffi==0.10.0
 defusedxml==0.7.1
 diskcache==5.6.3
-django==5.1.7
-django-admincommand @ git+https://github.com/rphlo/django-admincommand.git
-django-allauth==65.4.1
+django==5.2
+django-admincommand @ git+https://github.com/rphlo/django-admincommand.git@09f8b0ad150754be88d20c0e7c6a1473b8006872
+django-allauth==65.6.0
 django-appconf==1.1.0
 django-background-tasks @ git+https://github.com/rphlo/django-background-tasks@6b247d0b3a7565613656d0ec07b55f6c66aa03cc
-django-bootstrap5 @ git+https://github.com/rphlo/django-bootstrap5.git
+django-bootstrap5 @ git+https://github.com/rphlo/django-bootstrap5.git@8c80f8000f62028aa27624205a64e385d497ac42
 django-compressor==4.5.1
 django-cors-headers==4.7.0
-django-csp==3.8
+django-csp==4.0
 django-environ==0.12.0
 django-hijack==3.7.1
 django-hosts==6.0
@@ -41,13 +41,13 @@ django-permissions-policy==4.25.0
 django-qr-code==4.1.0
 django-s3-storage==0.15.0
 django-user-sessions==2.0.0
-djangorestframework==3.15.2
+djangorestframework==3.16.0
 drf-orjson-renderer==1.7.3
-drf-yasg==1.21.9
+drf-yasg==1.21.10
 frozenlist==1.5.0
 geoip2==5.0.1
 geojson-validator==0.6.0
-gps-data-codec @ git+https://github.com/routechoices/gps-data-codec
+gps-data-codec @ git+https://github.com/routechoices/gps-data-codec@8761135f92fe8e6fff9efe2c4bfb542d28dd16f2
 gpxpy==1.6.2
 gunicorn==23.0.0
 idna==3.10
@@ -59,36 +59,37 @@ loguru==0.7.3
 lxml==5.3.1
 markdown==3.7
 maxminddb==2.6.3
-minify-html==0.15.0
-multidict==6.1.0
-numpy==2.2.3
+minify-html==0.16.4
+multidict==6.2.0
+numpy==2.2.4
 oauthlib==3.2.2
 opencv-python==4.11.0.86
-orjson==3.10.15
+orjson==3.10.16
 packaging==24.2
 pillow==11.1.0
-pillow-heif==0.21.0
+pillow-heif==0.22.0
 pillow-jxl-plugin==1.3.2
-propcache==0.3.0
-psycopg[pool]==3.2.5
-psycopg-pool==3.2.5
+propcache==0.3.1
+psycopg==3.2.6
+psycopg-pool==3.2.6
 pycparser==2.22
-pydantic==2.10.6
-pydantic-core==2.27.2
+pydantic==2.11.1
+pydantic-core==2.33.0
 pyopenssl==25.0.0
 pypng==0.20220715.0
 python-dateutil==2.9.0.post0
 python-magic==0.4.27
-pytz==2025.1
+pytz==2025.2
 pyyaml==6.0.2
 qrcode==7.4.2
 rcssmin==1.1.2
 requests==2.32.3
 rjsmin==1.2.2
-s3transfer==0.11.2
-segno==1.6.1
-sentry-sdk==2.22.0
-sewer @ git+https://github.com/rphlo/sewer@0.8.4a
+s3transfer==0.11.4
+segno==1.6.6
+sentry-sdk==2.25.1
+setuptools==78.1.0
+sewer @ git+https://github.com/rphlo/sewer@8d25ea1f1e95e97f52c2354c1752d2adbbfdafaf
 shapely==2.0.7
 six==1.17.0
 soupsieve==2.6
@@ -96,7 +97,8 @@ sqlparse==0.5.3
 tinycss2==1.4.0
 tornado==6.4.2
 types-python-dateutil==2.9.0.20241206
-typing-extensions==4.12.2
+typing-extensions==4.13.0
+typing-inspection==0.4.0
 uritemplate==4.1.1
 urllib3==2.3.0
 webauthn==1.11.1
