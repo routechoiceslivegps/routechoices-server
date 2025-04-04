@@ -2198,22 +2198,27 @@ class Device(models.Model):
         return gpx.to_xml()
 
     def add_locations(self, loc_array, /, *, save=True):
-        if len(loc_array) == 0:
+        if not loc_array:
             if save:
                 self.save()
             return
-        new_pts = []
-        locations = self.locations_series
-        all_ts = set()
-        max_ts = None
-        if locations:
-            all_ts = set(list(zip(*locations))[LOCATION_TIMESTAMP_INDEX])
-            max_ts = max(all_ts)
-        for loc in loc_array:
+
+        sorted_new_locations = list(
+            sorted(loc_array, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
+        )
+        added_fresh_locs = []
+        clean_new_old_locs = []
+        prev_ts = None
+
+        last_old_ts = None
+        if self._last_location_datetime:
+            last_old_ts = self._last_location_datetime.timestamp()
+
+        for loc in sorted_new_locations:
             ts = int(loc[LOCATION_TIMESTAMP_INDEX])
             lat = loc[LOCATION_LATITUDE_INDEX]
             lon = loc[LOCATION_LONGITUDE_INDEX]
-            if max_ts and ts <= max_ts and ts in all_ts:
+            if prev_ts and ts == prev_ts:
                 continue
             try:
                 validate_latitude(lat)
@@ -2224,25 +2229,71 @@ class Device(models.Model):
                 lat = float(lat)
             if isinstance(lon, Decimal):
                 lon = float(lon)
-            all_ts.add(ts)
-            if not max_ts:
-                max_ts = ts
+            prev_ts = ts
+            if last_old_ts and ts <= last_old_ts:
+                clean_new_old_locs.append((ts, lat, lon))
             else:
-                max_ts = max(ts, max_ts)
-            new_pts.append((ts, lat, lon))
+                added_fresh_locs.append((ts, lat, lon))
 
-        if len(new_pts) == 0:
+        if not added_fresh_locs and not clean_new_old_locs:
             if save:
                 self.save()
             return
 
-        locations += new_pts
-        self.locations_series = locations
+        added_old_locs = []
+        if clean_new_old_locs:
+            locations = self.locations_series
+            all_old_ts = set(list(zip(*locations))[LOCATION_TIMESTAMP_INDEX])
+            for loc in loc_array:
+                ts = int(loc[LOCATION_TIMESTAMP_INDEX])
+                lat = loc[LOCATION_LATITUDE_INDEX]
+                lon = loc[LOCATION_LONGITUDE_INDEX]
+                if ts in all_old_ts:
+                    continue
+                all_old_ts.add(ts)
+                added_old_locs.append((ts, lat, lon))
+            if len(added_old_locs) == 0:
+                if save:
+                    self.save()
+                return
+            locations += added_old_locs
+            self.locations_series = locations
+        if added_fresh_locs:
+            # Only fresher points, can append string
+            locs_to_encode = []
+            if last_old_ts:
+                last_old_lat = self._last_location_latitude
+                last_old_lon = self._last_location_longitude
+                locs_to_encode = [(last_old_ts, last_old_lat, last_old_lon)]
+            # Encoding magic
+            locs_to_encode += added_fresh_locs
+            new_encoded = gps_data_codec.encode(locs_to_encode)
+            if last_old_ts:
+                offset = 0
+                number_count = 0
+                for i, character in enumerate(new_encoded):
+                    if ord(character) - 63 < 0x20:
+                        number_count += 1
+                        if number_count == 3:
+                            offset = i + 1
+                            break
+                new_encoded = new_encoded[offset:]
+            self.locations_encoded += new_encoded
+
+            # Updating cache
+            last_loc = added_fresh_locs[-1]
+            self._last_location_datetime = epoch_to_datetime(
+                last_loc[LOCATION_TIMESTAMP_INDEX]
+            )
+            self._last_location_latitude = last_loc[LOCATION_LATITUDE_INDEX]
+            self._last_location_longitude = last_loc[LOCATION_LONGITUDE_INDEX]
+
+        new_pts = added_old_locs + added_fresh_locs
+        self._location_count += len(new_pts)
 
         if save:
             self.save()
 
-        new_pts = list(sorted(new_pts, key=itemgetter(LOCATION_TIMESTAMP_INDEX)))
         archived_events_affected = self.get_events_between_dates(
             epoch_to_datetime(new_pts[0][LOCATION_TIMESTAMP_INDEX]),
             epoch_to_datetime(new_pts[-1][LOCATION_TIMESTAMP_INDEX]),

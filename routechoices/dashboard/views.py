@@ -2,7 +2,6 @@ import csv
 from copy import deepcopy
 from io import StringIO
 
-from allauth.account import app_settings as allauth_settings
 from allauth.account.adapter import get_adapter
 from allauth.account.forms import default_token_generator
 from allauth.account.models import EmailAddress
@@ -247,11 +246,7 @@ def account_delete_view(request):
             "account_deletion_url": f"{url}?confirmation_key={temp_key}",
             "request": request,
         }
-        if (
-            allauth_settings.AUTHENTICATION_METHOD
-            != allauth_settings.AuthenticationMethod.EMAIL
-        ):
-            context["username"] = user_username(user)
+        context["username"] = user_username(user)
         requester_email = EmailAddress.objects.filter(
             user_id=request.user.id, primary=True
         ).first()
