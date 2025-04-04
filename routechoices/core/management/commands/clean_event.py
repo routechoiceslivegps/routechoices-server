@@ -30,7 +30,7 @@ class Command(BaseCommand):
                 continue
             prev_point = None
             total_distance = 0
-            all_locations = competitor.device.locations_series
+            all_locations = competitor.device.locations
             crop_starttime = None
             for point in all_locations:
                 if start.timestamp() > point[0]:
@@ -63,8 +63,9 @@ class Command(BaseCommand):
                 ]
                 nb_points_cropped = len(all_locations) - len(cropped_locations)
                 if force:
-                    competitor.device.locations_series = cropped_locations
-                    competitor.device.save()
+                    device = competitor.device
+                    device.erase_locations()
+                    device.add_locations(cropped_locations)
                 self.stdout.write(
                     f"Cropping {nb_points_cropped} locations for {competitor}"
                 )

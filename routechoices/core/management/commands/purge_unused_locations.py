@@ -24,8 +24,6 @@ class Command(BaseCommand):
             devices = devices.filter(modification_date__gte=two_weeks_two_days_ago)
         for device in devices:
             orig_pts_count = device.location_count
-            device.remove_duplicates(force)
-            pts_count_after_deduplication = device.location_count
             locs = device.locations
             periods_used = []
             competitors = device.competitor_set.all()
@@ -39,7 +37,8 @@ class Command(BaseCommand):
                 if start < end:
                     periods_used.append((start, end))
             valid_indexes = []
-            for idx, timestamp in enumerate(locs["timestamps"]):
+            for idx, loc in enumerate(locs):
+                timestamp = loc[0]
                 is_valid = False
                 if timestamp >= two_weeks_ago.timestamp():
                     is_valid = True
@@ -51,31 +50,17 @@ class Command(BaseCommand):
                 if is_valid:
                     valid_indexes.append(idx)
             dev_del_loc_count_total = orig_pts_count - len(valid_indexes)
-            dev_del_loc_count_invalids = pts_count_after_deduplication - len(
-                valid_indexes
-            )
+            dev_del_loc_count_invalids = orig_pts_count - len(valid_indexes)
             if dev_del_loc_count_total:
-                if orig_pts_count - pts_count_after_deduplication > 0:
-                    self.stdout.write(
-                        f"Device {device.aid}, "
-                        f"extra {dev_del_loc_count_total} locations, "
-                        f"including {orig_pts_count - pts_count_after_deduplication} "
-                        "duplicates"
-                    )
-                else:
-                    self.stdout.write(
-                        f"Device {device.aid},"
-                        f" extra {dev_del_loc_count_total} locations"
-                    )
+                self.stdout.write(
+                    f"Device {device.aid},"
+                    f" extra {dev_del_loc_count_total} locations"
+                )
             deleted_count += dev_del_loc_count_total
             if force and dev_del_loc_count_invalids:
-                new_locs = {
-                    "timestamps": [locs["timestamps"][i] for i in valid_indexes],
-                    "latitudes": [locs["latitudes"][i] for i in valid_indexes],
-                    "longitudes": [locs["longitudes"][i] for i in valid_indexes],
-                }
-                device.locations = new_locs
-                device.save()
+                device.erase_locations()
+                new_locs = [locs[i] for i in valid_indexes]
+                device.add_locations(new_locs)
         if force:
             self.stdout.write(
                 self.style.SUCCESS(f"Successfully removed {deleted_count} Locations")

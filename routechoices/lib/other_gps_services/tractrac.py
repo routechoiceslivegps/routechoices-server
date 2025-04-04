@@ -157,9 +157,8 @@ class Tractrac(ThirdPartyTrackingSolution):
                     },
                 )
                 if not created:
-                    dev_obj.locations_series = []
+                    dev_obj.erase_locations()
                 dev_obj.add_locations(dev_data)
-                dev_obj.save()
                 competitor.device = dev_obj
             competitor.save()
             competitors.append(competitor)

@@ -2115,46 +2115,22 @@ class Device(models.Model):
         ]
 
     @property
-    def locations_series(self):
+    def locations(self):
         if not self.locations_encoded:
             return []
         return gps_data_codec.decode(self.locations_encoded)
 
-    @locations_series.setter
-    def locations_series(self, locations_list):
-        sorted_locations = list(
-            sorted(locations_list, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
-        )
-        self.locations_encoded = gps_data_codec.encode(sorted_locations)
-        self.update_cached_data()
-
-    @property
-    def locations(self):
-        if not self.locations_encoded:
-            return {"timestamps": [], "latitudes": [], "longitudes": []}
-        locs = self.locations_series
-        data = list(zip(*locs))
-        return {
-            "timestamps": list(data[LOCATION_TIMESTAMP_INDEX]),
-            "latitudes": list(data[LOCATION_LATITUDE_INDEX]),
-            "longitudes": list(data[LOCATION_LONGITUDE_INDEX]),
-        }
-
-    @locations.setter
-    def locations(self, locations_dict):
-        locations_list = list(
-            zip(
-                locations_dict["timestamps"],
-                locations_dict["latitudes"],
-                locations_dict["longitudes"],
-            )
-        )
-        self.locations_series = locations_list
+    def erase_locations(self):
+        self.locations_encoded = ""
+        self._last_location_datetime = None
+        self._last_location_latitude = None
+        self._last_location_longitude = None
+        self._location_count = 0
 
     def update_cached_data(self):
         self._location_count = self.location_count
         if self._location_count > 0:
-            last_loc = self.locations_series[-1]
+            last_loc = self.locations[-1]
             self._last_location_datetime = epoch_to_datetime(
                 last_loc[LOCATION_TIMESTAMP_INDEX]
             )
@@ -2168,7 +2144,7 @@ class Device(models.Model):
     def get_locations_between_dates(self, from_date, end_date, /, *, encode=False):
         from_ts = from_date.timestamp()
         end_ts = end_date.timestamp()
-        locs = self.locations_series
+        locs = self.locations
         from_idx = bisect.bisect_left(locs, from_ts, key=itemgetter(0))
         end_idx = bisect.bisect_right(locs, end_ts, key=itemgetter(0))
         locs = locs[from_idx:end_idx]
@@ -2242,7 +2218,7 @@ class Device(models.Model):
 
         added_old_locs = []
         if clean_new_old_locs:
-            locations = self.locations_series
+            locations = self.locations
             all_old_ts = set(list(zip(*locations))[LOCATION_TIMESTAMP_INDEX])
             for loc in clean_new_old_locs:
                 ts = int(loc[LOCATION_TIMESTAMP_INDEX])
@@ -2257,7 +2233,11 @@ class Device(models.Model):
                     self.save()
                 return
             locations += added_old_locs
-            self.locations_series = locations
+            sorted_locations = list(
+                sorted(locations, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
+            )
+            self.locations_encoded = gps_data_codec.encode(sorted_locations)
+            self._location_count = len(sorted_locations)
         if added_fresh_locs:
             # Only fresher points, can append string
             locs_to_encode = []
@@ -2319,37 +2299,6 @@ class Device(models.Model):
             if ord(x) - 63 < 0x20:
                 n += 1
         return n // 3
-
-    def remove_duplicates(self, save=True):
-        loc_count = self.location_count
-        if loc_count == 0:
-            return
-
-        orig_locations = self.locations_series
-        unique_ts = set(list(zip(*orig_locations))[LOCATION_TIMESTAMP_INDEX])
-        if len(unique_ts) == loc_count:
-            return
-
-        updated_locations_list = []
-        prev_t = None
-        for loc in orig_locations:
-            t = loc[LOCATION_TIMESTAMP_INDEX]
-            if t == prev_t:
-                continue
-            updated_locations_list.append(
-                (
-                    t,
-                    round(loc[LOCATION_LATITUDE_INDEX], 5),
-                    round(loc[LOCATION_LONGITUDE_INDEX], 5),
-                )
-            )
-            prev_t = t
-
-        updated_encoded = gps_data_codec.encode(updated_locations_list)
-        if self.locations_encoded != updated_encoded:
-            self.locations_series = updated_locations_list
-            if save:
-                self.save()
 
     @property
     def last_location(self):

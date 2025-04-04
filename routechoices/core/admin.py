@@ -670,7 +670,6 @@ class DeviceAdmin(admin.ModelAdmin):
         "competitor_count",
     )
     readonly_fields = ("locations_sample", "download_gpx", "imei")
-    actions = ["clean_positions"]
     search_fields = ("aid",)
     inlines = [
         DeviceCompetitorInline,
@@ -695,7 +694,7 @@ class DeviceAdmin(admin.ModelAdmin):
             return "\n".join(
                 [
                     f"time: {epoch_to_datetime(x[0])}, latlon: {x[1]}, {x[2]}"
-                    for x in obj.locations_series
+                    for x in obj.locations
                 ]
             )
         return "\n.\n.\n.\n".join(
@@ -703,13 +702,13 @@ class DeviceAdmin(admin.ModelAdmin):
                 "\n".join(
                     [
                         f"time: {epoch_to_datetime(x[0])}, latlon: {x[1]}, {x[2]}"
-                        for x in obj.locations_series[:15]
+                        for x in obj.locations[:15]
                     ]
                 ),
                 "\n".join(
                     [
                         f"time: {epoch_to_datetime(x[0])}, latlon: {x[1]}, {x[2]}"
-                        for x in obj.locations_series[-15:]
+                        for x in obj.locations[-15:]
                     ]
                 ),
             ]
@@ -757,12 +756,6 @@ class DeviceAdmin(admin.ModelAdmin):
     location_count.admin_order_field = "_location_count"
     competitor_count.admin_order_field = "competitor_count"
     last_location_datetime.admin_order_field = "_last_location_datetime"
-
-    def clean_positions(self, request, queryset):
-        for obj in queryset:
-            obj.remove_duplicates()
-
-    clean_positions.short_description = "Remove duplicate positions from storage"
 
     def device_name(self, obj):
         return get_device_name(obj.user_agent) or obj.user_agent

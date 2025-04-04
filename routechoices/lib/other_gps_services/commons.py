@@ -75,7 +75,7 @@ class ThirdPartyTrackingSolution:
         competitors = self.get_or_create_event_competitors(event)
         for competitor in competitors:
             if competitor.device and competitor.device.location_count > 0:
-                locations = competitor.device.locations_series
+                locations = competitor.device.locations
                 from_date = locations[0][0]
                 to_date = locations[-1][0]
                 if not start_date or start_date > from_date:
@@ -162,8 +162,8 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
                 defaults={"is_gpx": True},
             )
             if not created:
-                dev_obj.locations_series = []
-            dev_obj.locations_series = locations
+                dev_obj.erase_locations()
+            dev_obj.add_locations(locations, save=False)
             device_map[dev_id] = dev_obj
 
         competitors_map = self.get_competitors_data()

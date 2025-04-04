@@ -760,7 +760,7 @@ class LocationApiTestCase(EssentialApiBase):
             },
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        nb_points = len(Device.objects.get(aid=dev_id).locations["timestamps"])
+        nb_points = len(Device.objects.get(aid=dev_id).locations)
         self.assertEqual(nb_points, 2)
         # Add more location
         res = self.client.post(
@@ -774,7 +774,7 @@ class LocationApiTestCase(EssentialApiBase):
             },
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        nb_points = len(Device.objects.get(aid=dev_id).locations["timestamps"])
+        nb_points = len(Device.objects.get(aid=dev_id).locations)
         self.assertEqual(nb_points, 4)
         # post same location again
         res = self.client.post(
@@ -788,12 +788,7 @@ class LocationApiTestCase(EssentialApiBase):
             },
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        nb_points = len(Device.objects.get(aid=dev_id).locations["timestamps"])
-        self.assertEqual(nb_points, 4)
-        dev = Device.objects.get(aid=dev_id)
-        dev.remove_duplicates()
-        dev.save()
-        nb_points = len(Device.objects.get(aid=dev_id).locations["timestamps"])
+        nb_points = len(Device.objects.get(aid=dev_id).locations)
         self.assertEqual(nb_points, 4)
 
     def test_locations_api_gw_invalid_cast(self):

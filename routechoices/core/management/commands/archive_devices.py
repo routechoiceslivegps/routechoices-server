@@ -27,7 +27,6 @@ class Command(BaseCommand):
             periods_used = []
             last_start = None
             locs = device.locations
-            device.remove_duplicates(force)
             for competitor in competitors:
                 event = competitor.event
                 start = event.start_date
@@ -41,7 +40,8 @@ class Command(BaseCommand):
             archived_indexes = []
             if last_start is None:
                 continue
-            for idx, timestamp in enumerate(locs["timestamps"]):
+            for idx, loc in enumerate(locs):
+                timestamp = loc[0]
                 archive = False
                 if timestamp >= last_start.timestamp():
                     archive = False
@@ -61,17 +61,12 @@ class Command(BaseCommand):
                     f"Device {device.aid}, archiving {dev_archived_loc_count} locations"
                 )
             if force and dev_archived_loc_count:
-                archived_locs = {
-                    "timestamps": [locs["timestamps"][i] for i in archived_indexes],
-                    "latitudes": [locs["latitudes"][i] for i in archived_indexes],
-                    "longitudes": [locs["longitudes"][i] for i in archived_indexes],
-                }
                 archive_dev = Device(
                     aid=f"{short_random_key()}_ARC",
                     is_gpx=True,
                 )
-                archive_dev.locations = archived_locs
-                archive_dev.save()
+                archived_locs = [locs[i] for i in archived_indexes]
+                archive_dev.add_locations(archived_locs)
                 DeviceArchiveReference.objects.create(
                     original=device, archive=archive_dev
                 )
