@@ -1,4 +1,6 @@
+import bisect
 from datetime import timedelta
+from operator import itemgetter
 
 from django.core.management.base import BaseCommand
 from django.utils.timezone import now
@@ -6,26 +8,38 @@ from django.utils.timezone import now
 from routechoices.core.models import Device
 
 
+def simplify_periods(ps, idx=0):
+    if idx <= len(ps) - 2:
+        ps_o = ps[0:idx]
+        start_a, end_a = ps[idx]
+        start_b, end_b = ps[idx + 1]
+        if start_b <= end_a:
+            ps_o.append((start_a, max(end_a, end_b)))
+            ps_o += ps[idx + 2 :]
+            return simplify_periods(ps_o, idx)
+        else:
+            ps_o.append((start_a, end_a))
+            ps_o.append((start_b, end_b))
+            ps_o += ps[idx + 2 :]
+            return simplify_periods(ps_o, idx + 1)
+    return ps
+
+
 class Command(BaseCommand):
     help = "Delete unused locations after 14 days"
 
     def add_arguments(self, parser):
         parser.add_argument("--force", action="store_true", default=False)
-        parser.add_argument("--incremental", action="store_true", default=False)
 
     def handle(self, *args, **options):
         force = options["force"]
-        incremental = options["incremental"]
         deleted_count = 0
         two_weeks_ago = now() - timedelta(days=14)
         devices = Device.objects.all()
-        if incremental:
-            two_weeks_two_days_ago = now() - timedelta(days=16)
-            devices = devices.filter(modification_date__gte=two_weeks_two_days_ago)
         for device in devices:
             orig_pts_count = device.location_count
             locs = device.locations
-            periods_used = []
+            periods_used = [(now() - timedelta(days=16), now() + timedelta(weeks=5200))]
             competitors = device.competitor_set.all()
             for competitor in competitors:
                 event = competitor.event
@@ -36,34 +50,26 @@ class Command(BaseCommand):
                 end = min(event.end_date, two_weeks_ago)
                 if start < end:
                     periods_used.append((start, end))
-            valid_indexes = []
-            prev_ts = None
-            for idx, loc in enumerate(locs):
-                timestamp = loc[0]
-                if timestamp == prev_ts:
-                    continue
-                prev_ts = timestamp
-                is_valid = False
-                if timestamp >= two_weeks_ago.timestamp():
-                    is_valid = True
-                if not is_valid:
-                    for p in periods_used:
-                        if p[0].timestamp() <= timestamp <= p[1].timestamp():
-                            is_valid = True
-                            break
-                if is_valid:
-                    valid_indexes.append(idx)
-            dev_del_loc_count_total = orig_pts_count - len(valid_indexes)
-            if dev_del_loc_count_total:
+            periods_sorted = sorted(periods_used, key=itemgetter(0))
+            final_periods = simplify_periods(periods_sorted)
+
+            valid_locs = []
+            for valid_period in final_periods:
+                start = valid_period[0].timestamp()
+                end = valid_period[1].timestamp()
+                from_idx = bisect.bisect_left(locs, start, key=itemgetter(0))
+                end_idx = bisect.bisect_right(locs, end, key=itemgetter(0))
+                valid_locs += locs[from_idx:end_idx]
+            deleted_device_loc_count = orig_pts_count - len(valid_locs)
+            if deleted_device_loc_count:
                 self.stdout.write(
                     f"Device {device.aid},"
-                    f" extra {dev_del_loc_count_total} locations"
+                    f" extra {deleted_device_loc_count} locations"
                 )
-            deleted_count += dev_del_loc_count_total
-            if force and dev_del_loc_count_total:
+            deleted_count += deleted_device_loc_count
+            if force and deleted_device_loc_count:
                 device.erase_locations()
-                new_locs = [locs[i] for i in valid_indexes]
-                device.add_locations(new_locs)
+                device.add_locations(valid_locs)
         if force:
             self.stdout.write(
                 self.style.SUCCESS(f"Successfully removed {deleted_count} locations")

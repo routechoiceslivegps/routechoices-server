@@ -1,10 +1,29 @@
+import bisect
 from datetime import timedelta
+from operator import itemgetter
 
 from django.core.management.base import BaseCommand
 from django.utils.timezone import now
 
 from routechoices.core.models import Device, DeviceArchiveReference
 from routechoices.lib.helpers import short_random_key
+
+
+def simplify_periods(ps, idx=0):
+    if idx <= len(ps) - 2:
+        ps_o = ps[0:idx]
+        start_a, end_a = ps[idx]
+        start_b, end_b = ps[idx + 1]
+        if start_b <= end_a:
+            ps_o.append((start_a, max(end_a, end_b)))
+            ps_o += ps[idx + 2 :]
+            return simplify_periods(ps_o, idx)
+        else:
+            ps_o.append((start_a, end_a))
+            ps_o.append((start_b, end_b))
+            ps_o += ps[idx + 2 :]
+            return simplify_periods(ps_o, idx + 1)
+    return ps
 
 
 class Command(BaseCommand):
@@ -22,7 +41,7 @@ class Command(BaseCommand):
         n_device_archived = 0
         two_weeks_ago = now() - timedelta(days=14)
         for device in devices:
-            self.stdout.write(f"Device {(device.aid)}")
+            self.stdout.write(f"Device {(device.aid)}, {device.location_count}")
             competitors = device.competitor_set.all()
             periods_used = []
             last_start = None
@@ -32,41 +51,37 @@ class Command(BaseCommand):
                 start = event.start_date
                 if competitor.start_time:
                     start = competitor.start_time
-                if not last_start or last_start < competitor.start_time:
-                    if competitor.start_time < two_weeks_ago:
-                        last_start = competitor.start_time
                 end = min(event.end_date, now())
-                periods_used.append((start, end))
-            archived_indexes = []
-            if last_start is None:
-                continue
-            for idx, loc in enumerate(locs):
-                timestamp = loc[0]
-                archive = False
-                if timestamp >= last_start.timestamp():
-                    archive = False
-                for p in periods_used:
-                    if (
-                        p[0].timestamp() <= timestamp <= p[1].timestamp()
-                        and timestamp < last_start.timestamp()
-                    ):
-                        archive = True
-                        break
-                if archive:
-                    archived_indexes.append(idx)
-            dev_archived_loc_count = len(archived_indexes)
-            if dev_archived_loc_count:
+                if not (two_weeks_ago < end):
+                    periods_used.append((start, end))
+
+            periods_sorted = sorted(periods_used, key=itemgetter(0))
+            final_periods = simplify_periods(periods_sorted)
+
+            if final_periods:
+                last_start = final_periods[-1][0]
+            final_periods_without_last_start = final_periods[:-1]
+
+            locs_to_archive = []
+            for valid_period in final_periods_without_last_start:
+                start = valid_period[0].timestamp()
+                end = valid_period[1].timestamp()
+                from_idx = bisect.bisect_left(locs, start, key=itemgetter(0))
+                end_idx = bisect.bisect_right(locs, end, key=itemgetter(0))
+                locs_to_archive += locs[from_idx:end_idx]
+
+            device_archived_loc_count = len(locs_to_archive)
+            if device_archived_loc_count:
                 n_device_archived += 1
                 self.stdout.write(
-                    f"Device {device.aid}, archiving {dev_archived_loc_count} locations"
+                    f"Device {device.aid}, archiving {device_archived_loc_count} locations"
                 )
-            if force and dev_archived_loc_count:
+            if force and device_archived_loc_count:
                 archive_dev = Device(
                     aid=f"{short_random_key()}_ARC",
                     is_gpx=True,
                 )
-                archived_locs = [locs[i] for i in archived_indexes]
-                archive_dev.add_locations(archived_locs)
+                archive_dev.add_locations(locs_to_archive)
                 DeviceArchiveReference.objects.create(
                     original=device, archive=archive_dev
                 )
