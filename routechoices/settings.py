@@ -221,10 +221,9 @@ REST_FRAMEWORK = {
 }
 ACCOUNT_ADAPTER = "routechoices.lib.account_adapters.SiteAccountAdapter"
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 ACCOUNT_USERNAME_BLACKLIST = SLUG_BLACKLIST
-ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_USERNAME_MIN_LENGTH = "2"
 ACCOUNT_USERNAME_VALIDATORS = "routechoices.lib.validators.custom_username_validators"
 CACHES = {
