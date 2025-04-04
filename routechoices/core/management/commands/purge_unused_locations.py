@@ -37,8 +37,12 @@ class Command(BaseCommand):
                 if start < end:
                     periods_used.append((start, end))
             valid_indexes = []
+            prev_ts = None
             for idx, loc in enumerate(locs):
                 timestamp = loc[0]
+                if timestamp == prev_ts:
+                    continue
+                prev_ts = timestamp
                 is_valid = False
                 if timestamp >= two_weeks_ago.timestamp():
                     is_valid = True
