@@ -2194,7 +2194,7 @@ class Device(models.Model):
             ts = int(loc[LOCATION_TIMESTAMP_INDEX])
             lat = loc[LOCATION_LATITUDE_INDEX]
             lon = loc[LOCATION_LONGITUDE_INDEX]
-            if prev_ts and ts == prev_ts:
+            if ts == prev_ts:
                 continue
             try:
                 validate_latitude(lat)
