@@ -2230,7 +2230,7 @@ class Device(models.Model):
             if isinstance(lon, Decimal):
                 lon = float(lon)
             prev_ts = ts
-            if last_old_ts and ts <= last_old_ts:
+            if last_old_ts is not None and ts <= last_old_ts:
                 clean_new_old_locs.append((ts, lat, lon))
             else:
                 added_fresh_locs.append((ts, lat, lon))
@@ -2244,7 +2244,7 @@ class Device(models.Model):
         if clean_new_old_locs:
             locations = self.locations_series
             all_old_ts = set(list(zip(*locations))[LOCATION_TIMESTAMP_INDEX])
-            for loc in loc_array:
+            for loc in clean_new_old_locs:
                 ts = int(loc[LOCATION_TIMESTAMP_INDEX])
                 lat = loc[LOCATION_LATITUDE_INDEX]
                 lon = loc[LOCATION_LONGITUDE_INDEX]
@@ -2261,14 +2261,14 @@ class Device(models.Model):
         if added_fresh_locs:
             # Only fresher points, can append string
             locs_to_encode = []
-            if last_old_ts:
+            if last_old_ts is not None:
                 last_old_lat = self._last_location_latitude
                 last_old_lon = self._last_location_longitude
                 locs_to_encode = [(last_old_ts, last_old_lat, last_old_lon)]
             # Encoding magic
             locs_to_encode += added_fresh_locs
             new_encoded = gps_data_codec.encode(locs_to_encode)
-            if last_old_ts:
+            if last_old_ts is not None:
                 offset = 0
                 number_count = 0
                 for i, character in enumerate(new_encoded):
@@ -2279,7 +2279,6 @@ class Device(models.Model):
                             break
                 new_encoded = new_encoded[offset:]
             self.locations_encoded += new_encoded
-
             # Updating cache
             last_loc = added_fresh_locs[-1]
             self._last_location_datetime = epoch_to_datetime(
@@ -2287,10 +2286,10 @@ class Device(models.Model):
             )
             self._last_location_latitude = last_loc[LOCATION_LATITUDE_INDEX]
             self._last_location_longitude = last_loc[LOCATION_LONGITUDE_INDEX]
+            self._location_count += len(added_fresh_locs)
 
         new_pts = added_old_locs + added_fresh_locs
         if new_pts:
-            self._location_count += len(new_pts)
             if save:
                 self.save()
             archived_events_affected = self.get_events_between_dates(
@@ -2388,6 +2387,8 @@ class Device(models.Model):
         return {c.event for c in competitors}
 
     def get_events_between_dates(self, from_date, to_date, /, *, should_be_ended=False):
+        if not self.pk:
+            return []
         qs = (
             self.competitor_set.all()
             .filter(

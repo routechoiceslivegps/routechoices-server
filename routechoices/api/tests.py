@@ -162,6 +162,28 @@ class EssentialApiTestCase1(EssentialApiBase):
         res_json = json.loads(res.content)
         self.assertEqual(len(res_json), 1)
 
+    def test_add_locations(self):
+        device = Device()
+        self.assertEqual(device._location_count, 0)
+        device.add_locations([(0, 0, 0)], save=False)
+        self.assertEqual(device.locations_encoded, "~n|sfjA??")
+        self.assertEqual(device._location_count, 1)
+        device.add_locations([(0, 0, 0)], save=False)
+        self.assertEqual(device.locations_encoded, "~n|sfjA??")
+        self.assertEqual(device._location_count, 1)
+        device.add_locations([(-1, 0, 0)], save=False)
+        self.assertEqual(device.locations_encoded, "`o|sfjA??@??")
+        self.assertEqual(device._location_count, 2)
+        device.add_locations([(2, 0, 0)], save=False)
+        self.assertEqual(device.locations_encoded, "`o|sfjA??@??A??")
+        self.assertEqual(device._location_count, 3)
+        device.add_locations([(1, 0, 0), (3, 0, 0)], save=False)
+        self.assertEqual(device.locations_encoded, "`o|sfjA??@??@??@??@??")
+        self.assertEqual(device._location_count, 5)
+        device.save()
+        self.assertEqual(device.location_count, 5)
+        self.assertEqual(device.last_location, (3, 0, 0))
+
 
 class ImeiApiTestCase(EssentialApiBase):
     def setUp(self):
