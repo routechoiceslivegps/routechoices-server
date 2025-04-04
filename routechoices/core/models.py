@@ -2289,18 +2289,19 @@ class Device(models.Model):
             self._last_location_longitude = last_loc[LOCATION_LONGITUDE_INDEX]
 
         new_pts = added_old_locs + added_fresh_locs
-        self._location_count += len(new_pts)
-
-        if save:
+        if new_pts:
+            self._location_count += len(new_pts)
+            if save:
+                self.save()
+            archived_events_affected = self.get_events_between_dates(
+                epoch_to_datetime(new_pts[0][LOCATION_TIMESTAMP_INDEX]),
+                epoch_to_datetime(new_pts[-1][LOCATION_TIMESTAMP_INDEX]),
+                should_be_ended=True,
+            )
+            for archived_event_affected in archived_events_affected:
+                archived_event_affected.invalidate_cache()
+        elif save:
             self.save()
-
-        archived_events_affected = self.get_events_between_dates(
-            epoch_to_datetime(new_pts[0][LOCATION_TIMESTAMP_INDEX]),
-            epoch_to_datetime(new_pts[-1][LOCATION_TIMESTAMP_INDEX]),
-            should_be_ended=True,
-        )
-        for archived_event_affected in archived_events_affected:
-            archived_event_affected.invalidate_cache()
 
     def add_location(self, timestamp, lat, lon, /, *, save=True):
         self.add_locations(
