@@ -2228,16 +2228,13 @@ class Device(models.Model):
                     continue
                 all_old_ts.add(ts)
                 added_old_locs.append((ts, lat, lon))
-            if len(added_old_locs) == 0:
-                if save:
-                    self.save()
-                return
-            locations += added_old_locs
-            sorted_locations = list(
-                sorted(locations, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
-            )
-            self.locations_encoded = gps_data_codec.encode(sorted_locations)
-            self._location_count = len(sorted_locations)
+            if added_old_locs:
+                locations += added_old_locs
+                sorted_locations = list(
+                    sorted(locations, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
+                )
+                self.locations_encoded = gps_data_codec.encode(sorted_locations)
+                self._location_count = len(sorted_locations)
         if added_fresh_locs:
             # Only fresher points, can append string
             locs_to_encode = []
@@ -2247,18 +2244,18 @@ class Device(models.Model):
                 locs_to_encode = [(last_old_ts, last_old_lat, last_old_lon)]
             # Encoding magic
             locs_to_encode += added_fresh_locs
-            new_encoded = gps_data_codec.encode(locs_to_encode)
+            encoded = gps_data_codec.encode(locs_to_encode)
             if last_old_ts is not None:
                 offset = 0
                 number_count = 0
-                for i, character in enumerate(new_encoded):
+                for i, character in enumerate(encoded):
                     if ord(character) - 63 < 0x20:
                         number_count += 1
                         if number_count == 3:
                             offset = i + 1
                             break
-                new_encoded = new_encoded[offset:]
-            self.locations_encoded += new_encoded
+                encoded = encoded[offset:]
+            self.locations_encoded += encoded
             # Updating cache
             last_loc = added_fresh_locs[-1]
             self._last_location_datetime = epoch_to_datetime(
