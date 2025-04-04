@@ -50,20 +50,19 @@ class Command(BaseCommand):
                 if is_valid:
                     valid_indexes.append(idx)
             dev_del_loc_count_total = orig_pts_count - len(valid_indexes)
-            dev_del_loc_count_invalids = orig_pts_count - len(valid_indexes)
             if dev_del_loc_count_total:
                 self.stdout.write(
                     f"Device {device.aid},"
                     f" extra {dev_del_loc_count_total} locations"
                 )
             deleted_count += dev_del_loc_count_total
-            if force and dev_del_loc_count_invalids:
+            if force and dev_del_loc_count_total:
                 device.erase_locations()
                 new_locs = [locs[i] for i in valid_indexes]
                 device.add_locations(new_locs)
         if force:
             self.stdout.write(
-                self.style.SUCCESS(f"Successfully removed {deleted_count} Locations")
+                self.style.SUCCESS(f"Successfully removed {deleted_count} locations")
             )
         else:
-            self.stdout.write(f"Would remove {deleted_count} Locations")
+            self.stdout.write(f"Would remove {deleted_count} locations")
