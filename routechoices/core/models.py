@@ -2173,12 +2173,13 @@ class Device(models.Model):
             for competitor in modified_competitors:
                 competitor.device = archive_dev
 
+            # TODO: clean self locations
+
             if save:
                 archive_dev.save()
                 arc_reference.save()
                 for competitor in modified_competitors:
                     competitor.save()
-            # TODO: clean self locations
             return archive_dev
         return None
 
