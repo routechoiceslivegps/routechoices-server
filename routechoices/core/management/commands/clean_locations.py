@@ -3,9 +3,10 @@ from datetime import timedelta
 from operator import itemgetter
 
 from django.core.management.base import BaseCommand
+from django.db.models import Prefetch
 from django.utils.timezone import now
 
-from routechoices.core.models import Device
+from routechoices.core.models import Competitor, Device
 from routechoices.lib.helpers import simplify_periods
 
 
@@ -18,13 +19,18 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         force = options["force"]
         deleted_count = 0
+        devices = Device.objects.prefetch_related(
+            Prefetch(
+                "competitor_set",
+                queryset=Competitor.objects.select_related("event"),
+            )
+        ).all()
         two_weeks_ago = now() - timedelta(days=14)
-        devices = Device.objects.all()
         for device in devices:
             # TODO: Move into a Devices method
             orig_pts_count = device.location_count
 
-            #  method .active_periods()
+            #  method .get_active_periods()
             periods_used = [(now() - timedelta(days=16), now() + timedelta(weeks=5200))]
             competitors = device.competitor_set.all()
             for competitor in competitors:
@@ -38,7 +44,7 @@ class Command(BaseCommand):
                     periods_used.append((start, end))
             final_periods = simplify_periods(periods_used)
 
-            # method .locations_over_periods(periods)
+            # method .get_locations_over_periods(periods)
             locs = device.locations
             valid_locs = []
             for valid_period in final_periods:
