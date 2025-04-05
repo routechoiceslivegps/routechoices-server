@@ -24,14 +24,14 @@ class Command(BaseCommand):
                 "competitor_set",
                 queryset=Competitor.objects.select_related("event"),
             )
-        ).all()
+        ).exclude(_location_count=0)
         two_weeks_ago = now() - timedelta(days=14)
         for device in devices:
             # TODO: Move into a Devices method
             orig_pts_count = device.location_count
 
             #  method .get_active_periods()
-            periods_used = [(now() - timedelta(days=16), now() + timedelta(weeks=5200))]
+            periods_used = [(two_weeks_ago, max(now(), device.last_location_datetime))]
             competitors = device.competitor_set.all()
             for competitor in competitors:
                 event = competitor.event
