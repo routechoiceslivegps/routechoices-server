@@ -28,6 +28,25 @@ from routechoices.lib.validators import validate_nice_slug
 UTC_TZ = zoneinfo.ZoneInfo("UTC")
 
 
+def simplify_periods(ps):
+    idx = 0
+    ps = sorted(ps)
+    while idx <= len(ps) - 2:
+        ps_o = ps[0:idx]
+        start_a, end_a = ps[idx]
+        start_b, end_b = ps[idx + 1]
+        if start_b <= end_a:
+            ps_o.append((start_a, max(end_a, end_b)))
+            ps_o += ps[idx + 2 :]
+        else:
+            ps_o.append((start_a, end_a))
+            ps_o.append((start_b, end_b))
+            ps_o += ps[idx + 2 :]
+            idx += 1
+        ps = ps_o
+    return ps
+
+
 def get_remote_image_sizes(uri):
     # Get file size *and* image size (None if not known)
     if not re.match("https?://", uri.lower()):

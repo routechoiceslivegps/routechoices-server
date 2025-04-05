@@ -6,23 +6,7 @@ from django.core.management.base import BaseCommand
 from django.utils.timezone import now
 
 from routechoices.core.models import Device
-
-
-def simplify_periods(ps, idx=0):
-    if idx <= len(ps) - 2:
-        ps_o = ps[0:idx]
-        start_a, end_a = ps[idx]
-        start_b, end_b = ps[idx + 1]
-        if start_b <= end_a:
-            ps_o.append((start_a, max(end_a, end_b)))
-            ps_o += ps[idx + 2 :]
-            return simplify_periods(ps_o, idx)
-        else:
-            ps_o.append((start_a, end_a))
-            ps_o.append((start_b, end_b))
-            ps_o += ps[idx + 2 :]
-            return simplify_periods(ps_o, idx + 1)
-    return ps
+from routechoices.lib.helpers import simplify_periods
 
 
 class Command(BaseCommand):
@@ -50,8 +34,7 @@ class Command(BaseCommand):
                 end = min(event.end_date, two_weeks_ago)
                 if start < end:
                     periods_used.append((start, end))
-            periods_sorted = sorted(periods_used, key=itemgetter(0))
-            final_periods = simplify_periods(periods_sorted)
+            final_periods = simplify_periods(periods_used)
 
             valid_locs = []
             for valid_period in final_periods:
