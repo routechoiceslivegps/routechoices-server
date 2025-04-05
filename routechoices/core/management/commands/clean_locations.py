@@ -21,8 +21,10 @@ class Command(BaseCommand):
         two_weeks_ago = now() - timedelta(days=14)
         devices = Device.objects.all()
         for device in devices:
+            # TODO: Move into a Devices method
             orig_pts_count = device.location_count
-            locs = device.locations
+
+            #  method .active_periods()
             periods_used = [(now() - timedelta(days=16), now() + timedelta(weeks=5200))]
             competitors = device.competitor_set.all()
             for competitor in competitors:
@@ -36,6 +38,8 @@ class Command(BaseCommand):
                     periods_used.append((start, end))
             final_periods = simplify_periods(periods_used)
 
+            # method .locations_over_periods(periods)
+            locs = device.locations
             valid_locs = []
             for valid_period in final_periods:
                 start = valid_period[0].timestamp()
@@ -43,6 +47,7 @@ class Command(BaseCommand):
                 from_idx = bisect.bisect_left(locs, start, key=itemgetter(0))
                 end_idx = bisect.bisect_right(locs, end, key=itemgetter(0))
                 valid_locs += locs[from_idx:end_idx]
+
             deleted_device_loc_count = orig_pts_count - len(valid_locs)
             if deleted_device_loc_count:
                 self.stdout.write(
@@ -50,10 +55,14 @@ class Command(BaseCommand):
                     f" extra {deleted_device_loc_count} locations"
                 )
             deleted_count += deleted_device_loc_count
+
             if force and deleted_device_loc_count:
                 device.erase_locations()
                 device.add_locations(valid_locs)
-        if force:
+
+        if deleted_count == 0:
+            self.stdout.write(self.style.SUCCESS("No locations to removed"))
+        elif force:
             self.stdout.write(
                 self.style.SUCCESS(f"Successfully removed {deleted_count} locations")
             )

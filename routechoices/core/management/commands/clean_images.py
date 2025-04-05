@@ -34,8 +34,6 @@ class Command(BaseCommand):
             self.stdout.write(f"File {image_name} is unused")
             if force:
                 s3_delete_key(image_name, settings.AWS_S3_BUCKET)
-        else:
-            self.n_image_keeped += 1
 
     def handle(self, *args, **options):
         force = options["force"]
@@ -66,21 +64,16 @@ class Command(BaseCommand):
         )
 
         self.n_image_removed = 0
-        self.n_image_keeped = 0
         self.s3 = get_s3_client()
         for directory in ("banners", "geojson", "logos", "maps"):
             for filename in self.scan_directory(directory):
                 self.process_image_file(filename, force)
 
-        if force:
+        if self.n_image_removed == 0:
+            self.stdout.write(self.style.SUCCESS("No files to removed"))
+        elif force:
             self.stdout.write(
-                self.style.SUCCESS(
-                    f"Successfully removed {self.n_image_removed} files, "
-                    f"keeping {self.n_image_keeped}"
-                )
+                self.style.SUCCESS(f"Successfully removed {self.n_image_removed} files")
             )
         else:
-            self.stdout.write(
-                f"Would remove {self.n_image_removed} files, "
-                f"keeping {self.n_image_keeped}"
-            )
+            self.stdout.write(f"Would remove {self.n_image_removed} files")
