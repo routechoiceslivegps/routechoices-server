@@ -38,10 +38,8 @@ class Command(BaseCommand):
                 start = event.start_date
                 if competitor.start_time:
                     start = competitor.start_time
-                end = None
-                end = min(event.end_date, two_weeks_ago)
-                if start < end:
-                    periods_used.append((start, end))
+                end = event.end_date
+                periods_used.append((start, end))
             final_periods = simplify_periods(periods_used)
 
             # method .get_locations_over_periods(periods)
