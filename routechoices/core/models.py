@@ -2173,13 +2173,19 @@ class Device(models.Model):
             for competitor in modified_competitors:
                 competitor.device = archive_dev
 
-            # TODO: clean self locations
+            left_locations, _ = self.get_locations_between_dates(
+                last_start,
+                self.last_location_datetime,
+            )
+            self.device.erase_locations()
+            self.add_locations(left_locations)
 
             if save:
                 archive_dev.save()
                 arc_reference.save()
                 for competitor in modified_competitors:
                     competitor.save()
+                self.save()
             return archive_dev
         return None
 
