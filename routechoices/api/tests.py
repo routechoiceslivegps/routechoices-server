@@ -1,6 +1,7 @@
 import json
 import random
 import time
+from datetime import UTC, datetime
 
 import arrow
 from allauth.account.models import EmailAddress
@@ -183,6 +184,72 @@ class EssentialApiTestCase1(EssentialApiBase):
         device.save()
         self.assertEqual(device.location_count, 5)
         self.assertEqual(device.last_location, (3, 0, 0))
+
+    def test_archive(self):
+        club = Club.objects.create(name="Test club", slug="club")
+        device = Device()
+        device.add_locations([(0, 0, 0), (5, 0, 0), (10, 0, 0)])
+        event1 = Event.objects.create(
+            club=club,
+            name="test1",
+            slug="abc",
+            start_date=datetime.utcfromtimestamp(-1).replace(tzinfo=UTC),
+            end_date=datetime.utcfromtimestamp(1).replace(tzinfo=UTC),
+        )
+        Competitor.objects.create(
+            name="A",
+            short_name="A",
+            device=device,
+            event=event1,
+        )
+        event2 = Event.objects.create(
+            club=club,
+            name="test2",
+            slug="def",
+            start_date=datetime.utcfromtimestamp(8).replace(tzinfo=UTC),
+            end_date=datetime.utcfromtimestamp(12).replace(tzinfo=UTC),
+        )
+        Competitor.objects.create(
+            name="A",
+            short_name="A",
+            device=device,
+            event=event2,
+        )
+        arc = device.archive(until=datetime.utcfromtimestamp(13).replace(tzinfo=UTC))
+        self.assertEqual(arc.location_count, 1)
+        self.assertEqual(device.location_count, 1)
+
+        device.erase_locations()
+        device.add_locations([(0, 0, 0), (5, 0, 0), (10, 0, 0)])
+        arc = device.archive(until=datetime.utcfromtimestamp(7).replace(tzinfo=UTC))
+        self.assertIsNone(arc)
+        self.assertEqual(device.location_count, 3)
+
+        event3 = Event.objects.create(
+            club=club,
+            name="test2",
+            slug="ghi",
+            start_date=datetime.utcfromtimestamp(4).replace(tzinfo=UTC),
+            end_date=datetime.utcfromtimestamp(6).replace(tzinfo=UTC),
+        )
+        Competitor.objects.create(
+            name="A",
+            short_name="A",
+            device=device,
+            event=event3,
+        )
+        device.refresh_from_db()
+        device.erase_locations()
+        device.add_locations([(0, 0, 0), (5, 0, 0), (10, 0, 0)])
+        arc = device.archive(until=datetime.utcfromtimestamp(7).replace(tzinfo=UTC))
+        self.assertEqual(arc.location_count, 1)
+        self.assertEqual(device.location_count, 2)
+
+        device.erase_locations()
+        device.add_locations([(0, 0, 0), (5, 0, 0), (10, 0, 0)])
+        arc = device.archive(until=datetime.utcfromtimestamp(13).replace(tzinfo=UTC))
+        self.assertEqual(arc.location_count, 2)
+        self.assertEqual(device.location_count, 1)
 
 
 class ImeiApiTestCase(EssentialApiBase):
