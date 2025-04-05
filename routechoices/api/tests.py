@@ -185,7 +185,7 @@ class EssentialApiTestCase1(EssentialApiBase):
         self.assertEqual(device.location_count, 5)
         self.assertEqual(device.last_location, (3, 0, 0))
 
-    def test_archive(self):
+    def test_archive_device(self):
         club = Club.objects.create(name="Test club", slug="club")
         device = Device()
         device.add_locations([(0, 0, 0), (5, 0, 0), (10, 0, 0)])
