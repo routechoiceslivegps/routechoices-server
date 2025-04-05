@@ -58,9 +58,11 @@ from routechoices.lib.helpers import (
     random_device_id,
     random_key,
     safe64encodedsha,
+    short_random_key,
     short_random_slug,
     shortsafe64encodedsha,
     simplify_line,
+    simplify_periods,
     time_base32,
 )
 from routechoices.lib.jxl import register_jxl_opener
@@ -2129,6 +2131,63 @@ class Device(models.Model):
             return locs, len(locs)
         encoded_locs = gps_data_codec.encode(locs)
         return encoded_locs, len(locs)
+
+    def get_active_periods(self):
+        periods_used = []
+        competitors = self.competitor_set.all()
+        for competitor in competitors:
+            event = competitor.event
+            start = event.start_date
+            if competitor.start_time:
+                start = competitor.start_time
+            periods_used.append((start, event.end_date))
+        return simplify_periods(periods_used)
+
+    def archive(self, /, *, until, save=False):
+        last_start = None
+
+        periods_used = self.get_active_periods()
+        periods_used_till_limit = []
+        for period in periods_used:
+            end = period[1]
+            if end < until:
+                periods_used_till_limit.append(period)
+
+        if periods_used_till_limit:
+            last_start = periods_used_till_limit[-1][0]
+        periods_to_gather = periods_used_till_limit[:-1]
+
+        locs_to_archive = self.get_locations_over_periods(periods_to_gather)
+
+        if locs_to_archive:
+            archive_dev = Device(
+                aid=f"{short_random_key()}_ARC",
+                is_gpx=True,
+            )
+            arc_reference = DeviceArchiveReference(original=self, archive=archive_dev)
+            archive_dev.add_locations(locs_to_archive, save=False)
+            modified_competitors = [
+                c for c in self.competitor_set.all() if c.start_time < last_start
+            ]
+
+            for competitor in modified_competitors:
+                competitor.device = archive_dev
+
+            if save:
+                archive_dev.save()
+                arc_reference.save()
+                for competitor in modified_competitors:
+                    competitor.save()
+            # TODO: clean self locations
+            return archive_dev
+        return None
+
+    def get_locations_over_periods(self, periods):
+        locs = []
+        for period in periods:
+            p_locs, _ = self.get_locations_between_dates(*period)
+            locs += p_locs
+        return locs
 
     def gpx(self, from_date, end_date):
         current_site = get_current_site()
