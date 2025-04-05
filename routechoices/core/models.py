@@ -2177,7 +2177,7 @@ class Device(models.Model):
                 last_start,
                 self.last_location_datetime,
             )
-            self.device.erase_locations()
+            self.erase_locations()
             self.add_locations(left_locations)
 
             if save:
