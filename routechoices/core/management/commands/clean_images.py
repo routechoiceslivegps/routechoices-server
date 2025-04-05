@@ -35,7 +35,6 @@ class Command(BaseCommand):
             if force:
                 s3_delete_key(image_name, settings.AWS_S3_BUCKET)
         else:
-            self.stdout.write(f"File {image_name} is used")
             self.n_image_keeped += 1
 
     def handle(self, *args, **options):

@@ -41,7 +41,6 @@ class Command(BaseCommand):
         n_device_archived = 0
         two_weeks_ago = now() - timedelta(days=14)
         for device in devices:
-            self.stdout.write(f"Device {(device.aid)}, {device.location_count}")
             competitors = device.competitor_set.all()
             periods_used = []
             last_start = None
@@ -90,8 +89,13 @@ class Command(BaseCommand):
                         competitor.device = archive_dev
                         competitor.save()
         if force:
-            self.stdout.write(
-                self.style.SUCCESS(f"Successfully archived {n_device_archived} devices")
-            )
+            if n_device_archived:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Successfully archived {n_device_archived} devices"
+                    )
+                )
+            else:
+                self.stdout.write(self.style.SUCCESS("No devices to archive"))
         else:
             self.stdout.write(f"Would archive {n_device_archived} devices")

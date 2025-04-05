@@ -898,29 +898,6 @@ class Map(models.Model):
         tile_bounds_poly_prep = tile_bounds_poly.prepared
         return tile_bounds_poly_prep.intersects(map_bounds_poly)
 
-    def strip_exif(self):
-        if self.image.closed:
-            self.image.open()
-        with Image.open(self.image.file) as image:
-            rgba_img = image.convert("RGBA")
-            img_ext = "WEBP"
-            if rgba_img.size[0] > WEBP_MAX_SIZE or rgba_img.size[1] > WEBP_MAX_SIZE:
-                img_ext = "PNG"
-            out_buffer = BytesIO()
-            params = {
-                "dpi": (72, 72),
-            }
-            if img_ext == "WEBP":
-                params["quality"] = 80
-            rgba_img.save(out_buffer, img_ext, optimize=True, **params)
-            f_new = File(out_buffer, name=self.image.name)
-            self.image.save(
-                "filename",
-                f_new,
-                save=False,
-            )
-        self.image.close()
-
     @property
     def hash(self):
         return shortsafe64encodedsha(
