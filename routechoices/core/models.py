@@ -2262,10 +2262,11 @@ class Device(models.Model):
             if isinstance(lon, Decimal):
                 lon = float(lon)
             prev_ts = ts
+            new_loc = (ts, round(lat, 5), round(lon, 5))
             if last_old_ts is not None and ts <= last_old_ts:
-                clean_new_old_locs.append((ts, lat, lon))
+                clean_new_old_locs.append(new_loc)
             else:
-                added_fresh_locs.append((ts, lat, lon))
+                added_fresh_locs.append(new_loc)
 
         if not added_fresh_locs and not clean_new_old_locs:
             if save:
