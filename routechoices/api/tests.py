@@ -248,6 +248,54 @@ class EssentialApiTestCase1(EssentialApiBase):
         self.assertEqual(arc.location_count, 2)
         self.assertEqual(device.location_count, 1)
 
+    def test_clean_device(self):
+        club = Club.objects.create(name="Test club", slug="club")
+        device = Device()
+        device.add_locations([(0, 0, 0), (5, 0, 0), (10, 0, 0)])
+
+        device.remove_unused_location(
+            until=datetime.utcfromtimestamp(13).replace(tzinfo=UTC)
+        )
+        self.assertEqual(device.location_count, 0)
+
+        device.refresh_from_db()
+        device.remove_unused_location(
+            until=datetime.utcfromtimestamp(10).replace(tzinfo=UTC)
+        )
+        self.assertEqual(device.location_count, 1)
+
+        device.refresh_from_db()
+        device.remove_unused_location(
+            until=datetime.utcfromtimestamp(6).replace(tzinfo=UTC)
+        )
+        self.assertEqual(device.location_count, 1)
+
+        device.refresh_from_db()
+        device.remove_unused_location(
+            until=datetime.utcfromtimestamp(0).replace(tzinfo=UTC)
+        )
+        self.assertEqual(device.location_count, 3)
+
+        event1 = Event.objects.create(
+            club=club,
+            name="test1",
+            slug="abc",
+            start_date=datetime.utcfromtimestamp(-1).replace(tzinfo=UTC),
+            end_date=datetime.utcfromtimestamp(1).replace(tzinfo=UTC),
+        )
+        Competitor.objects.create(
+            name="A",
+            short_name="A",
+            device=device,
+            event=event1,
+        )
+
+        device.refresh_from_db()
+        device.remove_unused_location(
+            until=datetime.utcfromtimestamp(10).replace(tzinfo=UTC)
+        )
+        self.assertEqual(device.location_count, 2)
+
 
 class ImeiApiTestCase(EssentialApiBase):
     def setUp(self):

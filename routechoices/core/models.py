@@ -2143,6 +2143,19 @@ class Device(models.Model):
             periods_used.append((start, event.end_date))
         return simplify_periods(periods_used)
 
+    def remove_unused_location(self, /, *, until, save=False):
+        location_count = self.location_count
+
+        periods_used = [(until, max(now(), self.last_location_datetime))]
+        periods_used += self.get_active_periods()
+        periods_to_keep = simplify_periods(periods_used)
+
+        valid_locs = self.get_locations_over_periods(periods_to_keep)
+        deleted_location_count = location_count - len(valid_locs)
+        if deleted_location_count:
+            self.erase_locations()
+            self.add_locations(valid_locs, save=save)
+
     def archive(self, /, *, until, save=False):
         last_start = None
 
