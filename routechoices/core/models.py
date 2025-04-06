@@ -2290,7 +2290,6 @@ class Device(models.Model):
                     sorted(locations, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
                 )
                 self.locations_encoded = gps_data_codec.encode(sorted_locations)
-                self._location_count = len(sorted_locations)
         if added_fresh_locs:
             # Only fresher points, can append string
             locs_to_encode = []
@@ -2319,10 +2318,10 @@ class Device(models.Model):
             )
             self._last_location_latitude = last_loc[LOCATION_LATITUDE_INDEX]
             self._last_location_longitude = last_loc[LOCATION_LONGITUDE_INDEX]
-            self._location_count += len(added_fresh_locs)
 
         new_pts = added_old_locs + added_fresh_locs
         if new_pts:
+            self._location_count = self.location_count
             if save:
                 self.save()
             archived_events_affected = self.get_events_between_dates(
