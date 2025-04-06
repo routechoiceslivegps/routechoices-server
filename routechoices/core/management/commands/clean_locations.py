@@ -8,7 +8,7 @@ from routechoices.core.models import Competitor, Device
 
 
 class Command(BaseCommand):
-    help = "Delete unused locations after 14 days"
+    help = "Delete unused locations older than 14 days"
 
     def add_arguments(self, parser):
         parser.add_argument("--force", action="store_true", default=False)
