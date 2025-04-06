@@ -127,7 +127,7 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
     @gen_test
     async def test_mictrack_alt(self):
         gps_data = b"MT;6;866425031361423;R0;10+190109091803+22.63827+114.02922+2.14+69+2+3744+113"
-        gps_data2 = b"MT;6;866425031361423;R0;10+190109091804+22.63827+114.02922+2.14+69+2+3744+113"
+        gps_data2 = b"MT;6;866425031361423;R0;10+190109091804+22.63828+114.02923+2.14+69+2+3744+113"
 
         server = client = None
         device = await create_imei_device("866425031361423")

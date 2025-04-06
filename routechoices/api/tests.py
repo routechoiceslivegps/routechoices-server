@@ -184,6 +184,13 @@ class EssentialApiTestCase1(EssentialApiBase):
         device.save()
         self.assertEqual(device.location_count, 5)
         self.assertEqual(device.last_location, (3, 0, 0))
+        device.add_locations([(4, 0.00001, 0.00001)], save=False)
+        device.add_locations([(5, -0.00001, -0.00001)], save=False)
+        device.add_locations([(6, 0.00001, -0.00001)])
+        device.refresh_from_db()
+        device.add_locations([(7, -0.00001, 0.00001)], save=False)
+        device.add_locations([(7, 0.00002, 0.00002)], save=False)
+        self.assertEqual(device.last_location, (7, -0.00001, 0.00001))
 
     def test_archive_device(self):
         club = Club.objects.create(name="Test club", slug="club")

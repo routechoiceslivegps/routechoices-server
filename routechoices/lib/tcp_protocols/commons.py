@@ -47,7 +47,7 @@ def get_device_by_imei(imei):
 
 @sync_to_async
 def add_locations(device, locations):
-    device.refresh_from_db(fields=["locations_encoded"])
+    device.refresh_from_db()
     device.add_locations(locations)
     connection.close()
 
