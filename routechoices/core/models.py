@@ -2229,105 +2229,101 @@ class Device(models.Model):
         gpx_track.segments.append(gpx_segment)
         return gpx.to_xml()
 
-    def add_locations(self, loc_array, /, *, save=True):
-        if not loc_array:
+    def add_locations(self, new_locations, /, *, save=True):
+        if not new_locations:
             if save:
                 self.save()
             return
 
         sorted_new_locations = list(
-            sorted(loc_array, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
+            sorted(new_locations, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
         )
-        added_fresh_locs = []
-        clean_new_old_locs = []
-        prev_ts = None
 
-        last_old_ts = None
+        freshness_cutoff = None
         if self._last_location_datetime:
-            last_old_ts = self._last_location_datetime.timestamp()
+            freshness_cutoff = self._last_location_datetime.timestamp()
 
+        fresh_new_locs = []
+        old_new_locs = []
+        prev_ts = None
         for loc in sorted_new_locations:
-            ts = int(loc[LOCATION_TIMESTAMP_INDEX])
-            lat = loc[LOCATION_LATITUDE_INDEX]
-            lon = loc[LOCATION_LONGITUDE_INDEX]
+            try:
+                ts = int(loc[LOCATION_TIMESTAMP_INDEX])
+            except Exception:
+                continue
             if ts == prev_ts:
                 continue
             try:
+                lat = round(float(loc[LOCATION_LATITUDE_INDEX]), 5)
+                lon = round(float(loc[LOCATION_LONGITUDE_INDEX]), 5)
                 validate_latitude(lat)
                 validate_longitude(lon)
             except Exception:
                 continue
-            if isinstance(lat, Decimal):
-                lat = float(lat)
-            if isinstance(lon, Decimal):
-                lon = float(lon)
             prev_ts = ts
-            new_loc = (ts, round(lat, 5), round(lon, 5))
-            if last_old_ts is not None and ts <= last_old_ts:
-                clean_new_old_locs.append(new_loc)
-            else:
-                added_fresh_locs.append(new_loc)
 
-        if not added_fresh_locs and not clean_new_old_locs:
+            validated_loc = (ts, lat, lon)
+            if freshness_cutoff is not None and ts <= freshness_cutoff:
+                old_new_locs.append(validated_loc)
+            else:
+                fresh_new_locs.append(validated_loc)
+
+        if not fresh_new_locs and not old_new_locs:
             if save:
                 self.save()
             return
 
-        added_old_locs = []
-        if clean_new_old_locs:
+        cleaned_old_new_locs = []
+        if old_new_locs:
             locations = self.locations
-            all_old_ts = set(list(zip(*locations))[LOCATION_TIMESTAMP_INDEX])
-            for loc in clean_new_old_locs:
+            existing_ts = set(list(zip(*locations))[LOCATION_TIMESTAMP_INDEX])
+            for loc in old_new_locs:
                 ts = int(loc[LOCATION_TIMESTAMP_INDEX])
-                lat = loc[LOCATION_LATITUDE_INDEX]
-                lon = loc[LOCATION_LONGITUDE_INDEX]
-                if ts in all_old_ts:
+                if ts in existing_ts:
                     continue
-                all_old_ts.add(ts)
-                added_old_locs.append((ts, lat, lon))
-            if added_old_locs:
-                locations += added_old_locs
+                cleaned_old_new_locs.append(loc)
+                existing_ts.add(ts)
+            if cleaned_old_new_locs:
+                locations += cleaned_old_new_locs
                 sorted_locations = list(
                     sorted(locations, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
                 )
                 self.locations_encoded = gps_data_codec.encode(sorted_locations)
-        if added_fresh_locs:
+        if fresh_new_locs:
             # Only fresher points, can append string
             locs_to_encode = []
-            if last_old_ts is not None:
-                last_old_lat = self._last_location_latitude
-                last_old_lon = self._last_location_longitude
-                locs_to_encode = [(last_old_ts, last_old_lat, last_old_lon)]
+            if self.last_location is not None:
+                locs_to_encode = [self.last_location]
             # Encoding magic
-            locs_to_encode += added_fresh_locs
-            encoded = gps_data_codec.encode(locs_to_encode)
-            if last_old_ts is not None:
+            locs_to_encode += fresh_new_locs
+            encoded_addition = gps_data_codec.encode(locs_to_encode)
+            if self.last_location is not None:
                 offset = 0
                 number_count = 0
-                for i, character in enumerate(encoded):
+                for i, character in enumerate(encoded_addition):
                     if ord(character) - 63 < 0x20:
                         number_count += 1
                         if number_count == 3:
                             offset = i + 1
                             break
-                encoded = encoded[offset:]
-            self.locations_encoded += encoded
+                encoded_addition = encoded_addition[offset:]
+            self.locations_encoded += encoded_addition
             # Updating cache
-            last_loc = added_fresh_locs[-1]
+            new_last_loc = fresh_new_locs[-1]
             self._last_location_datetime = epoch_to_datetime(
-                last_loc[LOCATION_TIMESTAMP_INDEX]
+                new_last_loc[LOCATION_TIMESTAMP_INDEX]
             )
-            self._last_location_latitude = last_loc[LOCATION_LATITUDE_INDEX]
-            self._last_location_longitude = last_loc[LOCATION_LONGITUDE_INDEX]
+            self._last_location_latitude = new_last_loc[LOCATION_LATITUDE_INDEX]
+            self._last_location_longitude = new_last_loc[LOCATION_LONGITUDE_INDEX]
 
-        new_pts = added_old_locs + added_fresh_locs
-        if new_pts:
-            self._location_count = self.location_count
+        added_locs = cleaned_old_new_locs + fresh_new_locs
+        if added_locs:
+            self._location_count += len(added_locs)
             if save:
                 self.save()
             archived_events_affected = self.get_events_between_dates(
-                epoch_to_datetime(new_pts[0][LOCATION_TIMESTAMP_INDEX]),
-                epoch_to_datetime(new_pts[-1][LOCATION_TIMESTAMP_INDEX]),
+                epoch_to_datetime(added_locs[0][LOCATION_TIMESTAMP_INDEX]),
+                epoch_to_datetime(added_locs[-1][LOCATION_TIMESTAMP_INDEX]),
                 should_be_ended=True,
             )
             for archived_event_affected in archived_events_affected:

@@ -22,6 +22,7 @@ from routechoices.core.models import (
     Event,
     Map,
 )
+from routechoices.lib.helpers import epoch_to_datetime
 
 
 class EssentialApiBase(APITestCase):
@@ -201,8 +202,8 @@ class EssentialApiTestCase1(EssentialApiBase):
             club=club,
             name="test1",
             slug="abc",
-            start_date=datetime.utcfromtimestamp(-1).replace(tzinfo=UTC),
-            end_date=datetime.utcfromtimestamp(1).replace(tzinfo=UTC),
+            start_date=epoch_to_datetime(-1),
+            end_date=epoch_to_datetime(1),
         )
         Competitor.objects.create(
             name="A",
@@ -214,8 +215,8 @@ class EssentialApiTestCase1(EssentialApiBase):
             club=club,
             name="test2",
             slug="def",
-            start_date=datetime.utcfromtimestamp(8).replace(tzinfo=UTC),
-            end_date=datetime.utcfromtimestamp(12).replace(tzinfo=UTC),
+            start_date=epoch_to_datetime(8),
+            end_date=epoch_to_datetime(12),
         )
         Competitor.objects.create(
             name="A",
@@ -224,12 +225,12 @@ class EssentialApiTestCase1(EssentialApiBase):
             event=event2,
         )
 
-        arc = device.archive(until=datetime.utcfromtimestamp(13).replace(tzinfo=UTC))
+        arc = device.archive(until=epoch_to_datetime(13))
         self.assertEqual(arc.location_count, 1)
         self.assertEqual(device.location_count, 1)
 
         device.refresh_from_db()
-        arc = device.archive(until=datetime.utcfromtimestamp(7).replace(tzinfo=UTC))
+        arc = device.archive(until=epoch_to_datetime(7))
         self.assertIsNone(arc)
         self.assertEqual(device.location_count, 3)
 
@@ -237,8 +238,8 @@ class EssentialApiTestCase1(EssentialApiBase):
             club=club,
             name="test2",
             slug="ghi",
-            start_date=datetime.utcfromtimestamp(4).replace(tzinfo=UTC),
-            end_date=datetime.utcfromtimestamp(6).replace(tzinfo=UTC),
+            start_date=epoch_to_datetime(4),
+            end_date=epoch_to_datetime(6),
         )
         Competitor.objects.create(
             name="A",
@@ -247,12 +248,12 @@ class EssentialApiTestCase1(EssentialApiBase):
             event=event3,
         )
         device.refresh_from_db()
-        arc = device.archive(until=datetime.utcfromtimestamp(7).replace(tzinfo=UTC))
+        arc = device.archive(until=epoch_to_datetime(7))
         self.assertEqual(arc.location_count, 1)
         self.assertEqual(device.location_count, 2)
 
         device.refresh_from_db()
-        arc = device.archive(until=datetime.utcfromtimestamp(13).replace(tzinfo=UTC))
+        arc = device.archive(until=epoch_to_datetime(13))
         self.assertEqual(arc.location_count, 2)
         self.assertEqual(device.location_count, 1)
 
@@ -261,27 +262,19 @@ class EssentialApiTestCase1(EssentialApiBase):
         device = Device()
         device.add_locations([(0, 0, 0), (5, 0, 0), (10, 0, 0)])
 
-        device.remove_unused_location(
-            until=datetime.utcfromtimestamp(13).replace(tzinfo=UTC)
-        )
+        device.remove_unused_location(until=epoch_to_datetime(13))
         self.assertEqual(device.location_count, 0)
 
         device.refresh_from_db()
-        device.remove_unused_location(
-            until=datetime.utcfromtimestamp(10).replace(tzinfo=UTC)
-        )
+        device.remove_unused_location(until=epoch_to_datetime(10))
         self.assertEqual(device.location_count, 1)
 
         device.refresh_from_db()
-        device.remove_unused_location(
-            until=datetime.utcfromtimestamp(6).replace(tzinfo=UTC)
-        )
+        device.remove_unused_location(until=epoch_to_datetime(6))
         self.assertEqual(device.location_count, 1)
 
         device.refresh_from_db()
-        device.remove_unused_location(
-            until=datetime.utcfromtimestamp(0).replace(tzinfo=UTC)
-        )
+        device.remove_unused_location(until=epoch_to_datetime(0))
         self.assertEqual(device.location_count, 3)
 
         event1 = Event.objects.create(
@@ -289,7 +282,7 @@ class EssentialApiTestCase1(EssentialApiBase):
             name="test1",
             slug="abc",
             start_date=datetime.utcfromtimestamp(-1).replace(tzinfo=UTC),
-            end_date=datetime.utcfromtimestamp(1).replace(tzinfo=UTC),
+            end_date=epoch_to_datetime(1),
         )
         Competitor.objects.create(
             name="A",
@@ -299,9 +292,7 @@ class EssentialApiTestCase1(EssentialApiBase):
         )
 
         device.refresh_from_db()
-        device.remove_unused_location(
-            until=datetime.utcfromtimestamp(10).replace(tzinfo=UTC)
-        )
+        device.remove_unused_location(until=epoch_to_datetime(10))
         self.assertEqual(device.location_count, 2)
 
 
