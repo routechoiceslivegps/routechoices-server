@@ -686,10 +686,12 @@ def event_register(request, event_id):
         res = {"error": "No event match this id"}
         return Response(res)
 
+    is_event_admin = False
+    if request.user.is_authenticated:
+        is_event_admin = event.club.admins.filter(id=request.user.id).exists()
+
     if not event.open_registration:
-        if not request.user.is_authenticated or (
-            request.user not in event.club.admins.all()
-        ):
+        if not is_event_admin:
             raise PermissionDenied()
 
     lang = request.GET.get("lang", "en")
@@ -796,9 +798,11 @@ def event_register(request, event_id):
 
     if not name:
         errs.append(err_messages[lang]["no-name"])
+
     short_name = request.data.get("short_name")
     if name and not short_name:
         short_name = initial_of_name(name)
+
     start_time_query = request.data.get("start_time")
     if start_time_query:
         try:
@@ -816,29 +820,33 @@ def event_register(request, event_id):
     if start_time and (event_start > start_time or start_time > event_end):
         errs.append(err_messages[lang]["bad-start-time"])
 
-    if event.competitors.filter(name=name).exists():
-        errs.append(err_messages[lang]["bad-name"])
-
-    if event.competitors.filter(short_name=short_name).exists() and request.data.get(
-        "short_name"
-    ):
-        errs.append(err_messages[lang]["bad-sname"])
-
     device_id = request.data.get("device_id")
     device = Device.objects.filter(aid=device_id).defer("locations_encoded").first()
 
     if not device and device_id:
         errs.append(err_messages[lang]["no-device-id"])
 
-    if (
-        device
-        and Competitor.objects.filter(
-            start_time=start_time, device_id=device.id
-        ).exists()
-    ):
-        errs.append(err_messages[lang]["start-time-already-used"])
+    if not is_event_admin:
+        if event.competitors.filter(name=name).exists():
+            errs.append(err_messages[lang]["bad-name"])
 
-    color = request.data.get("color", "")
+        if event.competitors.filter(
+            short_name=short_name
+        ).exists() and request.data.get("short_name"):
+            errs.append(err_messages[lang]["bad-sname"])
+        if (
+            device
+            and Competitor.objects.filter(
+                start_time=start_time, device_id=device.id
+            ).exists()
+        ):
+            errs.append(err_messages[lang]["start-time-already-used"])
+
+    if not is_event_admin:
+        color = ""
+    else:
+        color = request.data.get("color", "")
+
     if color:
         try:
             color_hex_validator(color)
@@ -945,6 +953,7 @@ def competitor_api(request, competitor_id):
         return Response(res)
 
     event = competitor.event
+    other_competitors = event.competitors.exclude(id=competitor.id)
 
     is_user_event_admin = event.club.admins.filter(id=request.user.id).exists()
     if not is_user_event_admin and competitor.user != request.user:
@@ -955,29 +964,62 @@ def competitor_api(request, competitor_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     new_name = request.data.get("name")
-    if new_name:
-        competitor.name = new_name[:64]
-
     new_short_name = request.data.get("short_name")
-    if new_short_name:
-        competitor.short_name = new_short_name[:32]
-
-    if new_short_name == "":
-        competitor.short_name = initial_of_name(competitor.name)[:32]
-
     new_device_id = request.data.get("device_id")
+    if is_user_event_admin:
+        new_color = request.data.get("color")
+    else:
+        new_color = None
+
+    if new_name:
+        new_name = new_name[:64]
+    if new_short_name == "":
+        new_short_name = initial_of_name(competitor.name)
+    if new_short_name:
+        new_short_name = new_short_name[:32]
     if new_device_id:
         dev = Device.objects.filter(aid=new_device_id).first()
         if not dev:
             raise ValidationError("Invalid device ID")
-        competitor.device = dev
-
-    new_color = request.data.get("color")
+        new_device = dev
     if new_color is not None:
         try:
             color_hex_validator(new_color)
         except Exception:
             new_color = ""
+        new_color = new_color
+
+    if not is_user_event_admin:
+        if new_name and other_competitors.filter(name=new_name).exists():
+            raise ValidationError("Name already in use in this event")
+
+        if (
+            new_short_name
+            and request.data.get("short_name")
+            and other_competitors.filter(short_name=new_short_name).exists()
+        ):
+            raise ValidationError("Short name already in use in this event")
+
+        if (
+            new_device
+            and Competitor.objects.exclude(id=competitor.id)
+            .filter(
+                device_id=new_device.id,
+                start_time=competitor.start_time,
+            )
+            .exists()
+        ):
+            raise ValidationError(
+                "This device is already registered for the same start time"
+            )
+
+    if new_name:
+        competitor.name = new_name
+    if new_short_name:
+        competitor.short_name = new_short_name
+    if new_device:
+        competitor.device = new_device
+    if new_color:
         competitor.color = new_color
 
     if new_name or new_short_name or new_device_id or new_color:
