@@ -67,6 +67,7 @@ from routechoices.lib.other_gps_services.loggator import Loggator
 from routechoices.lib.s3 import serve_from_s3, serve_image_from_s3
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
 from routechoices.lib.validators import (
+    color_hex_validator,
     validate_imei,
     validate_latitude,
     validate_longitude,
@@ -634,7 +635,7 @@ def event_detail(request, event_id):
         properties={
             "device_id": openapi.Schema(
                 type=openapi.TYPE_STRING,
-                description="Device id",
+                description="Device ID",
             ),
             "name": openapi.Schema(
                 type=openapi.TYPE_STRING,
@@ -651,6 +652,10 @@ def event_detail(request, event_id):
                     " (YYYY-MM-DDThh:mm:ssZ)"
                 ),
             ),
+            "color": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Color, hexadecimal format, e.g. #ff9900",
+            ),
         },
         required=["name"],
     ),
@@ -664,6 +669,7 @@ def event_detail(request, event_id):
                     "short_name": "<short_name>",
                     "start_time": "<start_time>",
                     "device_id": "<device_id>",
+                    "color": "<color>",
                 }
             },
         ),
@@ -832,6 +838,13 @@ def event_register(request, event_id):
     ):
         errs.append(err_messages[lang]["start-time-already-used"])
 
+    color = request.data.get("color", "")
+    if color:
+        try:
+            color_hex_validator(color)
+        except Exception:
+            color = ""
+
     if errs:
         raise ValidationError(errs)
 
@@ -854,6 +867,9 @@ def event_register(request, event_id):
         "short_name": short_name,
         "start_time": start_time,
     }
+    if color:
+        output["color"] = color
+
     if device:
         output["device_id"] = device.aid
 
@@ -863,6 +879,43 @@ def event_register(request, event_id):
     )
 
 
+@swagger_auto_schema(
+    method="patch",
+    operation_id="patch_competitor",
+    operation_description="Edit a competitor",
+    tags=["Competitors"],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "device_id": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Device ID",
+            ),
+            "name": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Full name",
+            ),
+            "short_name": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Short version of the name",
+            ),
+            "color": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Color, hexadecimal format, e.g. #ff9900",
+            ),
+        },
+    ),
+    responses={
+        "200": openapi.Response(
+            description="Success response",
+            examples={"application/json": {"status": "ok"}},
+        ),
+        "400": openapi.Response(
+            description="Validation Error",
+            examples={"application/json": ["<error message>"]},
+        ),
+    },
+)
 @swagger_auto_schema(
     method="delete",
     operation_id="delete_competitor",
@@ -918,7 +971,15 @@ def competitor_api(request, competitor_id):
             raise ValidationError("Invalid device ID")
         competitor.device = dev
 
-    if new_name or new_short_name or new_device_id:
+    new_color = request.data.get("color")
+    if new_color is not None:
+        try:
+            color_hex_validator(new_color)
+        except Exception:
+            new_color = ""
+        competitor.color = new_color
+
+    if new_name or new_short_name or new_device_id or new_color:
         competitor.save()
         return Response({"status": "ok"})
     else:
@@ -1486,6 +1547,18 @@ def create_device_id(request):
 
 @swagger_auto_schema(
     method="get",
+    operation_id="server_time",
+    operation_description="Return the server epoch time",
+    tags=["Miscellaneous"],
+    responses={
+        "200": openapi.Response(
+            description="Success response",
+            examples={"application/json": {"time": 1615987017.7934635}},
+        ),
+    },
+)
+@swagger_auto_schema(
+    method="post",
     operation_id="server_time",
     operation_description="Return the server epoch time",
     tags=["Miscellaneous"],
