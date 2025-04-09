@@ -77,6 +77,38 @@
             </form>
         </div>
     </div>
+
+
+    <div class="modal"
+         id="color-modal"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="color-modal-label"
+         aria-hidden="true"
+         style="z-index: 10002">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="color-modal-label">Select Color</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="color-picker" class="text-center"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark"></i> <span class="cancel-text">Cancel</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="save-color">
+                        <i class="fa-solid fa-floppy-disk"></i> <span class="save-text">Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock sub_sub_content %}
 
 {% block extra_body %}
@@ -91,6 +123,7 @@
         <script src="{% static '/vendor/papaparse-5.3.2/papaparse.min.js' %}"></script>
         <script src="{% static '/vendor/dayjs-1.11.7/dayjs.min.js' %}"></script>
         <script src="{% static '/vendor/reqwest-2.0.5/reqwest.min.js' %}"></script>
+        <script src="{% static '/vendor/iro-5.5.2/iro.min.js' %}"></script>
         <script src="{% static '/scripts/dashboard/event_competitors.js' %}"></script>
         <script src="{% static '/scripts/submit-form-commons.js' %}"></script>
     {% endcompress %}
