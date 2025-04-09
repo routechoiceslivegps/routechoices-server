@@ -2,7 +2,12 @@ import re
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.validators import DomainNameValidator, ValidationError, validate_email
+from django.core.validators import (
+    DomainNameValidator,
+    RegexValidator,
+    ValidationError,
+    validate_email,
+)
 from django.utils.translation import gettext_lazy as _
 
 import routechoices.lib.luhn as luhn
@@ -11,6 +16,14 @@ FLOAT_RE = re.compile(r"^(\-?[0-9]+(\.[0-9]+)?)$")
 
 
 validate_domain_name = DomainNameValidator(message="Please enter a valid domain")
+
+
+COLOR_HEX_RE = re.compile("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
+color_hex_validator = RegexValidator(
+    COLOR_HEX_RE,
+    "Enter a valid hex color, eg. #000000",
+    "invalid",
+)
 
 
 def validate_emails(email_list_str):

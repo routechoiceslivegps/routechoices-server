@@ -593,4 +593,78 @@ function showLocalTime(el) {
 			.removeClass("fa-floppy-disk")
 			.addClass("fa-spinner fa-spin");
 	});
+
+	const colorModal = new bootstrap.Modal(
+		document.getElementById("color-modal"),
+	);
+
+	u(".color-input").each((i) => {
+		const originalInput = u(i);
+		originalInput.hide();
+		let color = originalInput.val();
+		const colorSelector = u("<b>")
+			.addClass("me-2")
+			.css({ color, cursor: "pointer" })
+			.html("&#11044;")
+			.on("click", (e) => {
+				e.preventDefault();
+
+				u("#color-picker").html("");
+				new iro.ColorPicker("#color-picker", {
+					color,
+					width: 150,
+					display: "inline-block",
+				}).on("color:change", (c) => {
+					color = c.hexString;
+				});
+
+				function saveColor() {
+					colorModal.hide();
+					u("#save-color").off("click");
+					u("#color-modal").off("keypress");
+
+					originalInput.val(color);
+					colorSelector.css({ color });
+				}
+
+				u("#save-color").on("click", saveColor);
+
+				u("#color-modal").on("keypress", (e) => {
+					e.preventDefault();
+					if (e.which === 13) {
+						saveColor();
+					}
+				});
+
+				colorModal.show();
+			});
+		const clearColor = u("<button>")
+			.addClass("btn btn-info btn-sm")
+			.html("Reset")
+			.on("click", (e) => {
+				e.preventDefault();
+				selectColorWidget.remove();
+				originalInput.after(setBtn);
+				originalInput.val("");
+			});
+		const selectColorWidget = u("<div>")
+			.addClass("text-nowrap")
+			.append(colorSelector)
+			.append(clearColor);
+		const setBtn = u("<button>")
+			.addClass("btn btn-info btn-sm")
+			.html('<i class="fa-solid fa-palette"></i>')
+			.on("click", (e) => {
+				e.preventDefault();
+				setBtn.remove();
+				color = `#${(((1 << 24) * Math.random()) | 0).toString(16).padStart(6, "0")}`;
+				colorSelector.css({ color });
+				u(i).after(selectColorWidget);
+			});
+		if (i.value === "") {
+			originalInput.after(setBtn);
+		} else {
+			originalInput.after(selectColorWidget);
+		}
+	});
 })();

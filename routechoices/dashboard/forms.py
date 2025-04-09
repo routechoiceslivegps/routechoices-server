@@ -27,6 +27,7 @@ from django.forms import (
     Textarea,
     inlineformset_factory,
 )
+from django.forms.widgets import TextInput
 from django.utils.timezone import is_naive, make_aware
 from PIL import Image
 
@@ -553,11 +554,12 @@ class CompetitorForm(ModelForm):
 
     class Meta:
         model = Competitor
-        fields = ("event", "name", "short_name", "device", "start_time")
+        fields = ("event", "name", "short_name", "device", "start_time", "color")
         widgets = {
             "start_time": DateTimeInput(
                 attrs={"class": "datetimepicker", "autocomplete": "off"}
             ),
+            "color": TextInput(attrs={"class": "color-input"}),
         }
 
     def clean_short_name(self):

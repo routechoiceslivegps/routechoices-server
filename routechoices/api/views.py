@@ -1075,6 +1075,7 @@ def competitor_route_upload(request, competitor_id):
                             "short_name": "Halden SK",
                             "start_time": "2019-06-15T20:00:00Z",
                             "battery_level": 84,
+                            "color": "#ff0000",
                         }
                     ],
                     "nb_points": 0,
@@ -1167,6 +1168,8 @@ def event_data(request, event_id):
             "short_name": competitor.short_name,
             "start_time": competitor.start_time,
         }
+        if competitor.color:
+            competitor_data["color"] = competitor.color
         if event.is_live and competitor.device_id:
             competitor_data["battery_level"] = competitor.device.battery_level
         competitors_data.append(competitor_data)

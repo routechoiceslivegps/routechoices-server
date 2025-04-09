@@ -68,6 +68,7 @@ from routechoices.lib.helpers import (
 from routechoices.lib.jxl import register_jxl_opener
 from routechoices.lib.storages import OverwriteImageStorage
 from routechoices.lib.validators import (
+    color_hex_validator,
     validate_corners_coordinates,
     validate_domain_name,
     validate_domain_slug,
@@ -2547,6 +2548,13 @@ class Competitor(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+    )
+    color = models.CharField(
+        verbose_name="Color",
+        max_length=7,
+        blank=True,
+        default="",
+        validators=[color_hex_validator],
     )
 
     class Meta:
