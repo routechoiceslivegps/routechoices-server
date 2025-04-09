@@ -26,6 +26,92 @@ const seletizeOptions = {
 	},
 };
 
+const createColorWidget = (i) => {
+	const originalInput = u(i);
+	originalInput.hide();
+	let color = originalInput.val();
+	const colorModal = bootstrap.Modal.getInstance(
+		document.getElementById("color-modal"),
+	);
+	const colorSelector = u("<b>")
+		.addClass("me-2")
+		.css({ color, cursor: "pointer" })
+		.html("&#11044;")
+		.on("click", (e) => {
+			e.preventDefault();
+
+			u("#color-picker").html("");
+			new iro.ColorPicker("#color-picker", {
+				color,
+				width: 150,
+				display: "inline-block",
+			}).on("color:change", (c) => {
+				color = c.hexString;
+			});
+
+			function saveColor() {
+				colorModal.hide();
+				u("#save-color").off("click");
+				u("#color-modal").off("keypress");
+
+				originalInput.val(color);
+				colorSelector.css({ color });
+			}
+
+			u("#save-color").on("click", saveColor);
+
+			u("#color-modal").on("keypress", (e) => {
+				e.preventDefault();
+				if (e.which === 13) {
+					saveColor();
+				}
+			});
+
+			colorModal.show();
+		});
+	const clearColor = u("<button>")
+		.addClass("btn btn-info btn-sm")
+		.attr("type", "button")
+		.html("Reset")
+		.on("click", (e) => {
+			e.preventDefault();
+			selectColorWidget.remove();
+			originalInput.after(setBtn);
+			originalInput.val("");
+		});
+	const selectColorWidget = u("<div>")
+		.addClass("text-nowrap")
+		.append(colorSelector)
+		.append(clearColor);
+	const setBtn = u("<button>")
+		.addClass("btn btn-info btn-sm")
+		.attr("type", "button")
+		.html('<i class="fa-solid fa-palette"></i>')
+		.on("click", (e) => {
+			e.preventDefault();
+			color = `#${(((1 << 24) * Math.random()) | 0).toString(16).padStart(6, "0")}`;
+			colorSelector.css({ color });
+			setBtn.remove();
+			originalInput.after(selectColorWidget);
+		});
+	originalInput.on("set", (e) => {
+		color = e.detail[0].color;
+		if (originalInput.val() === "") {
+			colorSelector.css({ color });
+			setBtn.remove();
+			originalInput.after(selectColorWidget);
+		} else {
+			colorSelector.css({ color });
+		}
+		originalInput.val(color);
+	});
+	if (i.value === "") {
+		originalInput.after(setBtn);
+	} else {
+		originalInput.after(selectColorWidget);
+	}
+};
+
 let lastDeviceSelectInput = null;
 function onAddedCompetitorRow(row) {
 	const options = {
@@ -76,7 +162,7 @@ function clearEmptyCompetitorRows() {
 	});
 }
 
-function addCompetitor(name, shortName, startTime, deviceId) {
+function addCompetitor(name, shortName, startTime, deviceId, color) {
 	u(".add-competitor-btn").first().click();
 	const inputs = u(u(".formset_row").last()).find("input").nodes;
 	if (startTime) {
@@ -85,6 +171,9 @@ function addCompetitor(name, shortName, startTime, deviceId) {
 	}
 	inputs[2].value = name;
 	inputs[3].value = shortName;
+	if (color) {
+		u(inputs[6]).trigger("set", { color });
+	}
 	if (deviceId) {
 		const myDeviceSelectInput = lastDeviceSelectInput;
 		reqwest({
@@ -240,8 +329,8 @@ function onCsvParsed(result) {
 			if (l.length === 1 && l[0] === "") {
 				empty = true;
 			}
-			if (!empty && l.length !== 4) {
-				errors = "Each row should have 4 columns";
+			if (!empty && ![4, 5].includes(l.length)) {
+				errors = "Each row should have 4 or 5 columns";
 			} else {
 				if (!empty && l[2]) {
 					try {
@@ -265,7 +354,7 @@ function onCsvParsed(result) {
 	clearEmptyCompetitorRows();
 	for (const l of result.data) {
 		if (l.length !== 1) {
-			addCompetitor(l[0], l[1], l[2], l?.[3]);
+			addCompetitor(l[0], l[1], l[2], l?.[3], l?.[4]);
 		}
 	}
 	u(".add-competitor-btn").first().click();
@@ -595,81 +684,6 @@ function showLocalTime(el) {
 			.addClass("fa-spinner fa-spin");
 	});
 
-	const colorModal = new bootstrap.Modal(
-		document.getElementById("color-modal"),
-	);
-
-	const createColorWidget = (i) => {
-		const originalInput = u(i);
-		originalInput.hide();
-		let color = originalInput.val();
-		const colorSelector = u("<b>")
-			.addClass("me-2")
-			.css({ color, cursor: "pointer" })
-			.html("&#11044;")
-			.on("click", (e) => {
-				e.preventDefault();
-
-				u("#color-picker").html("");
-				new iro.ColorPicker("#color-picker", {
-					color,
-					width: 150,
-					display: "inline-block",
-				}).on("color:change", (c) => {
-					color = c.hexString;
-				});
-
-				function saveColor() {
-					colorModal.hide();
-					u("#save-color").off("click");
-					u("#color-modal").off("keypress");
-
-					originalInput.val(color);
-					colorSelector.css({ color });
-				}
-
-				u("#save-color").on("click", saveColor);
-
-				u("#color-modal").on("keypress", (e) => {
-					e.preventDefault();
-					if (e.which === 13) {
-						saveColor();
-					}
-				});
-
-				colorModal.show();
-			});
-		const clearColor = u("<button>")
-			.addClass("btn btn-info btn-sm")
-			.attr("type", "button")
-			.html("Reset")
-			.on("click", (e) => {
-				e.preventDefault();
-				selectColorWidget.remove();
-				originalInput.after(setBtn);
-				originalInput.val("");
-			});
-		const selectColorWidget = u("<div>")
-			.addClass("text-nowrap")
-			.append(colorSelector)
-			.append(clearColor);
-		const setBtn = u("<button>")
-			.addClass("btn btn-info btn-sm")
-			.attr("type", "button")
-			.html('<i class="fa-solid fa-palette"></i>')
-			.on("click", (e) => {
-				e.preventDefault();
-				color = `#${(((1 << 24) * Math.random()) | 0).toString(16).padStart(6, "0")}`;
-				colorSelector.css({ color });
-				setBtn.remove();
-				originalInput.after(selectColorWidget);
-			});
-		if (i.value === "") {
-			originalInput.after(setBtn);
-		} else {
-			originalInput.after(selectColorWidget);
-		}
-	};
-
+	new bootstrap.Modal(document.getElementById("color-modal"));
 	u(".color-input").each(createColorWidget);
 })();
