@@ -859,6 +859,7 @@ def event_register(request, event_id):
         start_time=start_time,
         device=device,
         user=user,
+        color=color,
     )
 
     output = {
