@@ -656,10 +656,10 @@ function showLocalTime(el) {
 			.html('<i class="fa-solid fa-palette"></i>')
 			.on("click", (e) => {
 				e.preventDefault();
-				setBtn.remove();
 				color = `#${(((1 << 24) * Math.random()) | 0).toString(16).padStart(6, "0")}`;
 				colorSelector.css({ color });
-				u(i).after(selectColorWidget);
+				setBtn.remove();
+				originalInput.after(selectColorWidget);
 			});
 		if (i.value === "") {
 			originalInput.after(setBtn);
