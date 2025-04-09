@@ -171,7 +171,7 @@ function addCompetitor(name, shortName, startTime, deviceId, color) {
 	}
 	inputs[2].value = name;
 	inputs[3].value = shortName;
-	if (color) {
+	if (color && /^#([0-9a-fA-F]{3}){1,2}$/.test(color)) {
 		u(inputs[6]).trigger("set", { color });
 	}
 	if (deviceId) {
