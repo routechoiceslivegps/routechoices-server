@@ -1899,7 +1899,6 @@ function RCEvent(infoURL, clockURL, locale) {
 			if (competitorsTags.entries()) {
 				const categoryToggleBar = u("<div>");
 				const cats = [...competitorsTags.entries()].map((c) => c[0]);
-				console.log(cats);
 				cats.sort();
 				for (const cat of cats) {
 					const btn = u("<button>")
@@ -1921,7 +1920,6 @@ function RCEvent(infoURL, clockURL, locale) {
 									catSel,
 									_,
 								] of activeCompetitorCategories.entries()) {
-									console.log(catSel, c.name, c.categories);
 									if (!c.categories.includes(catSel)) {
 										shouldBeShown = false;
 									}
