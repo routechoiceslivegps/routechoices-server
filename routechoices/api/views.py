@@ -1183,8 +1183,9 @@ def event_data(request, event_id):
             "name": competitor.name,
             "short_name": competitor.short_name,
             "start_time": competitor.start_time,
-            "categories": competitor.categories,
         }
+        if competitor.tags:
+            competitor_data["categories"] = (competitor.categories,)
         if competitor.color:
             competitor_data["color"] = competitor.color
         if event.is_live and competitor.device_id:
@@ -2034,7 +2035,6 @@ def third_party_event_data(request, provider, uid):
                 "name": competitor.name,
                 "short_name": competitor.short_name,
                 "start_time": competitor.start_time,
-                "categories": [],
             }
         )
     try:
