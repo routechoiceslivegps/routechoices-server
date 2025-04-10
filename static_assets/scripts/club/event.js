@@ -2158,7 +2158,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					} else {
 						competitorBatteyLevels[competitor.id] = null;
 					}
-					for (const tag of competitor.categories) {
+					for (const tag of competitor?.categories || []) {
 						competitorsTags.add(tag);
 					}
 				}
