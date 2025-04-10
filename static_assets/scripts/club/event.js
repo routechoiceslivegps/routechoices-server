@@ -1909,10 +1909,8 @@ function RCEvent(infoURL, clockURL, locale) {
 						.on("click", (e) => {
 							e.preventDefault();
 							if (activeCompetitorCategories.has(cat)) {
-								btn.removeClass("active");
 								activeCompetitorCategories.delete(cat);
 							} else {
-								btn.addClass("active");
 								activeCompetitorCategories.add(cat);
 							}
 							for (const c of Object.values(competitorList)) {
@@ -1946,7 +1944,7 @@ function RCEvent(infoURL, clockURL, locale) {
 							}
 						});
 					if (activeCompetitorCategories.has(cat)) {
-						btn.addClass("active");
+						btn.addClass("active").attr("aria-pressed", "true")
 					}
 					categoryToggleBar.append(btn);
 				}
