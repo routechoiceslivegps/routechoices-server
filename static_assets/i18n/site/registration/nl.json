@@ -13,5 +13,12 @@
 	"registration-info-time": "Je kan je GPS data streamen naar 1 atleet per sessie. Als je nu registreert,zal je GPS data stream verandert worden naar deze atleet ten laatste op",
 	"error": "Er ging iets verkeerd",
 	"register": "Registreer voor event",
-	"no-device-id": "Toestel ID niet gevonden"
+	"no-device-id": "Toestel ID niet gevonden",
+	"no-name": "Naam ontbreekt",
+	"invalid-start-time": "Start tijd kan niet worden ontleed",
+	"bad-start-time": "Starttijd van de atleet is tijdens de event tijd",
+	"bad-name": "Naam al in gebruik in dit evenement",
+	"bad-sname": "Korte naam al in gebruik in dit evenement",
+	"registration-closed": "Inschrijvingen zijn gesloten",
+	"start-time-already-used": "Dit toestel is al aangemeld voor dezelfde starttijd"
 }

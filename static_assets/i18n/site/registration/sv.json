@@ -13,5 +13,12 @@
 	"registration-info-time": "Du kan sända din GPS-data till endast en person åt gången. Om du registrerar dig nu kommer din GPS-data att bytas till denna person senast $1",
 	"error": "Något gick fel",
 	"register": "Registrera till ett evenemang",
-	"no-device-id": "Enhets-ID hittades inte"
+	"no-device-id": "Enhets-ID hittades inte",
+	"no-name": "Namn saknas",
+	"invalid-start-time": "Starttiden kunde inte hittas",
+	"bad-start-time": "Tävlandes starttid bör vara under evenemangstiden",
+	"bad-name": "Namnet används redan i det här evenemanget",
+	"bad-sname": "Kortnamn används redan i det här evenemanget",
+	"registration-closed": "Anmälningarna är stängda",
+	"start-time-already-used": "Enheten är redan registrerad för samma starttid."
 }

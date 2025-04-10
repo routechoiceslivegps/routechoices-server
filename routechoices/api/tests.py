@@ -1305,13 +1305,13 @@ class RegistrationApiTestCase(EssentialApiBase):
             end_date=arrow.get().shift(hours=1).datetime,
         )
         url = self.reverse_and_check(
-            "event_register",
-            f"/events/{event.aid}/register",
-            extra_kwargs={"event_id": event.aid},
+            "competitor_creation_view",
+            "/competitors/",
         )
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Alice",
                 "short_name": "🇺🇸 A",

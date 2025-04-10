@@ -18,13 +18,25 @@ const banana = new Banana();
 
 function updateText() {
 	banana.setLocale(locale);
-	const langFile = `${window.local.staticRoot}i18n/site/registration/${locale}.json?v=2024020300`;
+	const langFile = `${window.local.staticRoot}i18n/site/registration/${locale}.json?v=2025041000`;
 	return fetch(langFile)
 		.then((response) => response.json())
 		.then((messages) => {
 			banana.load(messages, banana.locale);
 		});
 }
+
+const errorMessages = {
+	"Device ID not found": "no-device-id",
+	"Name is missing": "no-name",
+	"Start time could not be parsed": "invalid-start-time",
+	"Competitor start time should be during the event time": "bad-start-time",
+	"Name already in use in this event": "bad-name",
+	"Short name already in use in this event": "bad-sname",
+	"Registration is closed": "registration-closed",
+	"This device is already registered for this same start time":
+		"start-time-already-used",
+};
 
 window.onload = () => {
 	updateText().then(() => {
@@ -104,15 +116,16 @@ document.getElementById("form1").onsubmit = async (ev) => {
 };
 document.getElementById("form2").onsubmit = (ev) => {
 	ev.preventDefault();
-	data = {};
-	data.name = document.getElementById("name").value;
-	data.short_name = document.getElementById("sname").value;
-	data.device_id = document.getElementById("devid").value;
-	ev_id = document.getElementById("events").value;
-	if (!ev_id) {
+	data = {
+		event_id: document.getElementById("events").value,
+		name: document.getElementById("name").value,
+		short_name: document.getElementById("sname").value,
+		device_id: document.getElementById("devid").value,
+	};
+	if (!data.event_id) {
 		return;
 	}
-	fetch(`${window.local.apiRoot}events/${ev_id}/register?lang=${locale}`, {
+	fetch(`${window.local.apiRoot}competitors/`, {
 		method: "POST",
 		credentials: "include",
 		mode: "cors",
@@ -126,7 +139,16 @@ document.getElementById("form2").onsubmit = (ev) => {
 		.then((data) => {
 			if (!data.id) {
 				if (Array.isArray(data)) {
-					swal(data.join("\r\n"));
+					swal({
+						html: true,
+						title: banana.i18n("error"),
+						text: data
+							.map((errorMessageEn) => {
+								const errorMessage = banana.i18n(errorMessages[errorMessageEn]);
+								return `<small>- ${errorMessage}.</small>`;
+							})
+							.join("<br/>"),
+					});
 				} else {
 					swal(banana.i18n("error"));
 				}

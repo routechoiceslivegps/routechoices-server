@@ -13,5 +13,12 @@
 	"registration-info-time": "Vous pouvez diffuser vos données GPS à un seul concurrent à la fois. Si vous vous inscrivez maintenant, votre flux de données GPS sera basculé vers ce concurrent au plus tard le $1",
 	"error": "Quelque chose s'est mal passé.",
 	"register": "Inscription à un événement",
-	"no-device-id": "Identifiant de l'appareil introuvable"
+	"no-device-id": "Identifiant de l'appareil introuvable",
+	"no-name": "Nom est manquant",
+	"invalid-start-time": "Impossible d'extraire l'heure de début",
+	"bad-start-time": "L'heure de départ du concurrent doit être durant l'événement",
+	"bad-name": "Nom déjà utilisé dans cet événement",
+	"bad-sname": "Nom abrégé déjà utilisé dans cet événement",
+	"registration-closed": "Les inscriptions sont closes",
+	"start-time-already-used": "Cet appareil est déjà enregistré pour cette même heure de départ"
 }

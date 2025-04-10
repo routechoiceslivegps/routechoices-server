@@ -103,11 +103,6 @@ urlpatterns = [
                                 name="event_detail",
                             ),
                             path(
-                                "register",
-                                views.event_register,
-                                name="event_register",
-                            ),
-                            path(
                                 "data",
                                 views.event_data,
                                 name="event_data",
@@ -179,24 +174,36 @@ urlpatterns = [
             ]
         ),
     ),
-    re_path(
-        r"^competitors/(?P<competitor_id>[0-9a-zA-Z_-]+)/",
+    path(
+        "competitors/",
         include(
             [
                 path(
                     "",
-                    views.competitor_api,
-                    name="competitor_api",
+                    views.create_competitor,
+                    name="competitor_creation_view",
                 ),
-                path(
-                    "route",
-                    views.competitor_route_upload,
-                    name="competitor_route_upload",
-                ),
-                path(
-                    "gpx",
-                    views.competitor_gpx_download,
-                    name="competitor_gpx_download",
+                re_path(
+                    r"^(?P<competitor_id>[0-9a-zA-Z_-]+)/",
+                    include(
+                        [
+                            path(
+                                "",
+                                views.competitor_api,
+                                name="competitor_api",
+                            ),
+                            path(
+                                "route",
+                                views.competitor_route_upload,
+                                name="competitor_route_upload",
+                            ),
+                            path(
+                                "gpx",
+                                views.competitor_gpx_download,
+                                name="competitor_gpx_download",
+                            ),
+                        ]
+                    ),
                 ),
             ]
         ),

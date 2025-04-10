@@ -183,7 +183,7 @@ def event_set_creation(request):
 )
 @swagger_auto_schema(
     method="post",
-    operation_id="create_event",
+    operation_id="event_create",
     operation_description="Create event",
     tags=["Events"],
     request_body=openapi.Schema(
@@ -627,15 +627,15 @@ def event_detail(request, event_id):
 
 @swagger_auto_schema(
     method="post",
-    operation_id="register_competitor",
-    operation_description="Register a competitor to a given event",
-    tags=["Events"],
+    operation_id="competitor_create",
+    operation_description="Create a competitor to a given event",
+    tags=["Competitors"],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
-            "device_id": openapi.Schema(
+            "event_id": openapi.Schema(
                 type=openapi.TYPE_STRING,
-                description="Device ID",
+                description="Event ID",
             ),
             "name": openapi.Schema(
                 type=openapi.TYPE_STRING,
@@ -652,12 +652,16 @@ def event_detail(request, event_id):
                     " (YYYY-MM-DDThh:mm:ssZ)"
                 ),
             ),
+            "device_id": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Device ID",
+            ),
             "color": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description="Color, hexadecimal format, e.g. #ff9900",
             ),
         },
-        required=["name"],
+        required=["event_id", "name"],
     ),
     responses={
         "201": openapi.Response(
@@ -680,11 +684,11 @@ def event_detail(request, event_id):
     },
 )
 @api_POST_view
-def event_register(request, event_id):
+def create_competitor(request):
+    event_id = request.data.get("event_id")
     event = Event.objects.select_related("club").filter(aid=event_id).first()
     if not event:
-        res = {"error": "No event match this id"}
-        return Response(res)
+        raise ValidationError("No event match this id")
 
     is_event_admin = False
     if request.user.is_authenticated:
@@ -694,110 +698,15 @@ def event_register(request, event_id):
         if not is_event_admin:
             raise PermissionDenied()
 
-    lang = request.GET.get("lang", "en")
-    if lang not in ("en", "es", "fi", "fr", "nl", "sv"):
-        lang = "en"
-
-    err_messages = {
-        "en": {
-            "no-device-id": "Device ID not found",
-            "no-name": "Name is missing",
-            "invalid-start-time": "Start time could not be parsed",
-            "bad-start-time": "Competitor start time should be during the event time",
-            "bad-name": "Name already in use in this event",
-            "bad-sname": "Short name already in use in this event",
-            "registration-closed": "Registration is closed",
-            "start-time-already-used": (
-                "This device is already registered for this same start time"
-            ),
-        },
-        "es": {
-            "no-device-id": "ID del dispositivo no encontrado",
-            "no-name": "Falta el nombre",
-            "invalid-start-time": "La hora de inicio no pudo ser analizada",
-            "bad-start-time": (
-                "La hora de inicio del competidor debe ser durante la hora del evento."
-            ),
-            "bad-name": "Nombre ya en uso en este evento",
-            "bad-sname": "Nombre corto ya en uso en este evento",
-            "registration-closed": "Las inscripciones están cerradas",
-            "start-time-already-used": (
-                "Este dispositivo ya está registrado para esta misma hora de inicio"
-            ),
-        },
-        "fr": {
-            "no-device-id": "Identifiant de l'appareil introuvable",
-            "no-name": "Nom est manquant",
-            "invalid-start-time": "Impossible d'extraire l'heure de début",
-            "bad-start-time": (
-                "L'heure de départ du concurrent doit être durant l'événement"
-            ),
-            "bad-name": "Nom déjà utilisé dans cet événement",
-            "bad-sname": "Nom abrégé déjà utilisé dans cet événement",
-            "registration-closed": "Les inscriptions sont closes",
-            "start-time-already-used": (
-                "Cet appareil est déjà enregistré pour cette même heure de départ"
-            ),
-        },
-        "fi": {
-            "no-device-id": "Laitetunnusta ei löydy",
-            "no-name": "Nimi puuttuu",
-            "invalid-start-time": "Aloitusaikaa ei voitu jäsentää",
-            "bad-start-time": "Kilpailijan aloitusajan tulee olla tapahtuman aikana",
-            "bad-name": "Nimi on jo käytössä tässä tapahtumassa",
-            "bad-sname": "Lyhyt nimi jo käytössä tässä tapahtumassa",
-            "registration-closed": "Ilmoittautumiset on suljettu",
-            "start-time-already-used": (
-                "Tämä laite on jo rekisteröity samalle aloitusajalle"
-            ),
-        },
-        "nl": {
-            "no-device-id": "Toestel ID niet gevonden",
-            "no-name": "Naam ontbreekt",
-            "invalid-start-time": "Start tijd kan niet worden ontleed",
-            "bad-start-time": "Starttijd van de atleet is tijdens de event tijd",
-            "bad-name": "Naam al in gebruik in dit evenement",
-            "bad-sname": "Korte naam al in gebruik in dit evenement",
-            "registration-closed": "Inschrijvingen zijn gesloten",
-            "start-time-already-used": (
-                "Dit toestel is al aangemeld voor dezelfde starttijd"
-            ),
-        },
-        "pl": {
-            "no-device-id": "Nie znaleziono urządzenia",
-            "no-name": "Brak imienia",
-            "invalid-start-time": "Niepoprawny zapis czasu",
-            "bad-start-time": "Godzina startu musi mieścić się w czasie trwania zawodów",
-            "bad-name": "Zawodnik o tym imieniu już istnieje",
-            "bad-sname": "Identyfikator uczestnika już istnieje",
-            "registration-closed": "Anmälningarna är stängda",
-            "start-time-already-used": (
-                "To urządzenie jest już zarejestrowane na ten sam czas rozpoczęcia"
-            ),
-        },
-        "sv": {
-            "no-device-id": "Enhets-ID hittades inte",
-            "no-name": "Namn saknas",
-            "invalid-start-time": "Starttiden kunde inte hittas",
-            "bad-start-time": "Tävlandes starttid bör vara under evenemangstiden",
-            "bad-name": "Namnet används redan i det här evenemanget",
-            "bad-sname": "Kortnamn används redan i det här evenemanget",
-            "registration-closed": "Anmälningarna är stängda",
-            "start-time-already-used": (
-                "Enheten är redan registrerad för samma starttid."
-            ),
-        },
-    }
-
     if event.end_date < now() and not event.allow_route_upload:
-        raise ValidationError(err_messages[lang]["registration-closed"])
+        raise ValidationError("Registration is closed")
 
-    errs = []
+    errors = []
 
     name = request.data.get("name")
 
     if not name:
-        errs.append(err_messages[lang]["no-name"])
+        errors.append("Name is missing")
 
     short_name = request.data.get("short_name")
     if name and not short_name:
@@ -809,7 +718,7 @@ def event_register(request, event_id):
             start_time = arrow.get(start_time_query).datetime
         except Exception:
             start_time = None
-            errs.append(err_messages[lang]["invalid-start-time"])
+            errors.append("Start time could not be parsed")
     elif event.start_date < now() < event.end_date:
         start_time = now()
     else:
@@ -818,29 +727,29 @@ def event_register(request, event_id):
     event_end = event.end_date
 
     if start_time and (event_start > start_time or start_time > event_end):
-        errs.append(err_messages[lang]["bad-start-time"])
+        errors.append("Competitor start time should be during the event time")
 
     device_id = request.data.get("device_id")
     device = Device.objects.filter(aid=device_id).defer("locations_encoded").first()
 
     if not device and device_id:
-        errs.append(err_messages[lang]["no-device-id"])
+        errors.append("Device ID not found")
 
     if not is_event_admin:
         if event.competitors.filter(name=name).exists():
-            errs.append(err_messages[lang]["bad-name"])
+            errors.append("Name already in use in this event")
 
         if event.competitors.filter(
             short_name=short_name
         ).exists() and request.data.get("short_name"):
-            errs.append(err_messages[lang]["bad-sname"])
+            errors.append("Short name already in use in this event")
         if (
             device
             and Competitor.objects.filter(
                 start_time=start_time, device_id=device.id
             ).exists()
         ):
-            errs.append(err_messages[lang]["start-time-already-used"])
+            errors.append("This device is already registered for this same start time")
 
     if not is_event_admin:
         color = ""
@@ -853,8 +762,8 @@ def event_register(request, event_id):
         except Exception:
             color = ""
 
-    if errs:
-        raise ValidationError(errs)
+    if errors:
+        raise ValidationError(errors)
 
     user = None
     if request.user.is_authenticated:
@@ -890,7 +799,7 @@ def event_register(request, event_id):
 
 @swagger_auto_schema(
     method="patch",
-    operation_id="patch_competitor",
+    operation_id="competitor_update",
     operation_description="Edit a competitor",
     tags=["Competitors"],
     request_body=openapi.Schema(
@@ -927,7 +836,7 @@ def event_register(request, event_id):
 )
 @swagger_auto_schema(
     method="delete",
-    operation_id="delete_competitor",
+    operation_id="competitor_delete",
     operation_description="Delete a competitor",
     tags=["Competitors"],
     responses={
@@ -1367,8 +1276,8 @@ def ip_latlon(request):
 
 @swagger_auto_schema(
     method="post",
-    operation_id="upload_device_locations",
-    operation_description="Upload a list of device location",
+    operation_id="device_add_locations",
+    operation_description="Uploads some location for given device",
     tags=["Devices"],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -1519,8 +1428,8 @@ def get_version(request):
 
 @swagger_auto_schema(
     method="post",
-    operation_id="create_device_id",
-    operation_description="Create a device id",
+    operation_id="device_create",
+    operation_description="Create a device",
     tags=["Devices"],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,

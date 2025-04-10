@@ -55,12 +55,13 @@
 			},
 			success: (res) => {
 				reqwest({
-					url: `${window.local.apiBaseUrl}events/${res.id}/register`,
+					url: `${window.local.apiBaseUrl}competitors/`,
 					method: "post",
 					type: "json",
 					withCredentials: true,
 					crossOrigin: true,
 					data: {
+						event_id: res.id,
 						name: formData.get("name"),
 						device_id: formData.get("device_id"),
 					},

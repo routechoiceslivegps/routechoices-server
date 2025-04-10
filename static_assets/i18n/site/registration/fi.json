@@ -13,5 +13,12 @@
 	"registration-info-time": "Voit suoratoistaa GPS-tietosi vain yhdelle kilpailijalle kerrallaan. Jos rekisteröidyt nyt, GPS-tietovirtasi vaihdetaan tälle kilpailijalle viimeistään $1",
 	"error": "Jotain meni pieleen.",
 	"register": "Ilmoittaudu tapahtumaan",
-	"no-device-id": "Laitetunnusta ei löydy"
+	"no-device-id": "Laitetunnusta ei löydy",
+	"no-name": "Nimi puuttuu",
+	"invalid-start-time": "Aloitusaikaa ei voitu jäsentää",
+	"bad-start-time": "Kilpailijan aloitusajan tulee olla tapahtuman aikana",
+	"bad-name": "Nimi on jo käytössä tässä tapahtumassa",
+	"bad-sname": "Lyhyt nimi jo käytössä tässä tapahtumassa",
+	"registration-closed": "Ilmoittautumiset on suljettu",
+	"start-time-already-used": "Tämä laite on jo rekisteröity samalle aloitusajalle"
 }

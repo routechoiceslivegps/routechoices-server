@@ -160,6 +160,7 @@ function selectizeDeviceInput(field) {
 			e.preventDefault();
 			const formData = new FormData(e.target);
 			const data = {
+				event_id: window.local.eventId,
 				name: formData.get("name"),
 				short_name: formData.get("short_name"),
 			};
@@ -167,7 +168,7 @@ function selectizeDeviceInput(field) {
 				data.device_id = formData.get("device_id");
 			}
 			reqwest({
-				url: `${window.local.apiBaseUrl}events/${window.local.eventId}/register`,
+				url: `${window.local.apiBaseUrl}competitors/`,
 				method: "post",
 				type: "json",
 				withCredentials: true,
