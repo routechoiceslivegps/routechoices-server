@@ -186,11 +186,9 @@ function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 	}
 	if (tags) {
 		const control = u(u(".formset_row").last())
-			.find(".tomselected")
-			.last().tomselect;
-		console.log(tags);
+			.find(".tag-input.tomselected")
+			.first().tomselect;
 		for (const t of tags) {
-			console.log(t);
 			control.addOption({ value: t, text: t });
 			control.addItem(t);
 		}
