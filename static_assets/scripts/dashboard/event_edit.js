@@ -26,6 +26,15 @@ const seletizeOptions = {
 	},
 };
 
+const createTagWidget = (i) => {
+	new TomSelect(i, {
+		persist: false,
+		createOnBlur: true,
+		create: true,
+		delimiter: " ",
+	});
+};
+
 const createColorWidget = (i) => {
 	const originalInput = u(i);
 	originalInput.hide();
@@ -125,6 +134,7 @@ function onAddedCompetitorRow(row) {
 	};
 	const el = u(row).find(".datetimepicker").first();
 	createColorWidget(u(row).find(".color-input").first());
+	createTagWidget(u(row).find(".tag-input").first());
 	new tempusDominus.TempusDominus(el, options);
 	u(row)
 		.find('select[name$="-device"]')
@@ -162,7 +172,7 @@ function clearEmptyCompetitorRows() {
 	});
 }
 
-function addCompetitor(name, shortName, startTime, deviceId, color) {
+function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 	u(".add-competitor-btn").first().click();
 	const inputs = u(u(".formset_row").last()).find("input").nodes;
 	if (startTime) {
@@ -173,6 +183,18 @@ function addCompetitor(name, shortName, startTime, deviceId, color) {
 	inputs[3].value = shortName;
 	if (color && /^#([0-9a-fA-F]{3}){1,2}$/.test(color)) {
 		u(inputs[6]).trigger("set", { color });
+	}
+	if (tags) {
+		const control = u(u(".formset_row").last())
+			.find(".tomselected")
+			.last().tomselect;
+		console.log(tags);
+		for (const t of tags) {
+			console.log(t);
+			control.addOption({ value: t, text: t });
+			control.addItem(t);
+		}
+		console.log(control);
 	}
 	if (deviceId) {
 		const myDeviceSelectInput = lastDeviceSelectInput;
@@ -329,8 +351,8 @@ function onCsvParsed(result) {
 			if (l.length === 1 && l[0] === "") {
 				empty = true;
 			}
-			if (!empty && ![4, 5].includes(l.length)) {
-				errors = "Each row should have 4 or 5 columns";
+			if (!empty && ![4, 5, 6].includes(l.length)) {
+				errors = "Each row should have between 4 and 6 columns";
 			} else {
 				if (!empty && l[2]) {
 					try {
@@ -354,7 +376,7 @@ function onCsvParsed(result) {
 	clearEmptyCompetitorRows();
 	for (const l of result.data) {
 		if (l.length !== 1) {
-			addCompetitor(l[0], l[1], l[2], l?.[3], l?.[4]);
+			addCompetitor(l[0], l[1], l[2], l?.[3], l?.[4], l?.[5]?.split(" "));
 		}
 	}
 	u(".add-competitor-btn").first().click();
@@ -686,4 +708,6 @@ function showLocalTime(el) {
 
 	new bootstrap.Modal(document.getElementById("color-modal"));
 	u(".color-input").each(createColorWidget);
+
+	u(".tag-input").each(createTagWidget);
 })();

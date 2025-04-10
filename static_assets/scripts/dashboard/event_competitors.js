@@ -26,6 +26,15 @@ const seletizeOptions = {
 	},
 };
 
+const createTagWidget = (i) => {
+	new TomSelect(i, {
+		persist: false,
+		createOnBlur: true,
+		create: true,
+		delimiter: " ",
+	});
+};
+
 function showLocalTime(el) {
 	const val = u(el).val();
 	if (val) {
@@ -169,4 +178,5 @@ function showLocalTime(el) {
 	};
 
 	u(".color-input").each(createColorWidget);
+	u(".tag-input").each(createTagWidget);
 })();

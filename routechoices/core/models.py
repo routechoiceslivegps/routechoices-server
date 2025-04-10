@@ -2556,6 +2556,12 @@ class Competitor(models.Model):
         default="",
         validators=[color_hex_validator],
     )
+    tags = models.CharField(
+        verbose_name="Categories",
+        max_length=256,
+        blank=True,
+        default="",
+    )
 
     class Meta:
         ordering = ["start_time", "name"]
@@ -2668,6 +2674,10 @@ class Competitor(models.Model):
                 "competitor_id": self.aid,
             },
         )
+
+    @property
+    def categories(self):
+        return self.tags.split(" ")
 
 
 @receiver([post_delete], sender=Competitor)

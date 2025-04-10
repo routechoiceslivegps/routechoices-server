@@ -1091,6 +1091,7 @@ def competitor_route_upload(request, competitor_id):
                             "start_time": "2019-06-15T20:00:00Z",
                             "battery_level": 84,
                             "color": "#ff0000",
+                            "categories": ["Black", "HE"],
                         }
                     ],
                     "nb_points": 0,
@@ -1182,6 +1183,7 @@ def event_data(request, event_id):
             "name": competitor.name,
             "short_name": competitor.short_name,
             "start_time": competitor.start_time,
+            "categories": competitor.categories,
         }
         if competitor.color:
             competitor_data["color"] = competitor.color

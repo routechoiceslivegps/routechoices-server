@@ -76,7 +76,8 @@ function RCEvent(infoURL, clockURL, locale) {
 	let showAll = true;
 	let rankControl = null;
 	let competitorsMinCustomOffset = null;
-
+	const competitorsTags = new Set();
+	const activeCompetitorCategories = new Set();
 	const getBatteryLevelTitle = (battery, route) => {
 		const lastTs = route?.getLastPosition()?.[0];
 		const whenLastPos = dayjs(lastTs).fromNow();
@@ -1886,12 +1887,71 @@ function RCEvent(infoURL, clockURL, locale) {
 					u("<div>")
 						.addClass("col-auto flex-fill ms-0 ps-0")
 						.append(
-							u('<input class="form-control" type="search" val=""/>')
+							u('<input class="form-control" type="search"/>')
 								.on("input", filterCompetitorList)
-								.attr("placeholder", banana.i18n("search-competitors")),
+								.attr("placeholder", banana.i18n("search-competitors"))
+								.val(searchText),
 						),
 				);
 				topDiv.append(searchBar);
+			}
+
+			if (competitorsTags.entries()) {
+				const categoryToggleBar = u("<div>");
+				const cats = [...competitorsTags.entries()].map((c) => c[0]);
+				console.log(cats);
+				cats.sort();
+				for (const cat of cats) {
+					const btn = u("<button>")
+						.addClass("me-1", "btn", "btn-xs", "btn-outline-secondary")
+						.text(cat)
+						.attr("type", "button")
+						.on("click", (e) => {
+							e.preventDefault();
+							if (activeCompetitorCategories.has(cat)) {
+								btn.removeClass("active");
+								activeCompetitorCategories.delete(cat);
+							} else {
+								btn.addClass("active");
+								activeCompetitorCategories.add(cat);
+							}
+							for (const c of Object.values(competitorList)) {
+								let shouldBeShown = true;
+								for (const [
+									catSel,
+									_,
+								] of activeCompetitorCategories.entries()) {
+									console.log(catSel, c.name, c.categories);
+									if (!c.categories.includes(catSel)) {
+										shouldBeShown = false;
+									}
+								}
+								if (c.isShown !== shouldBeShown) {
+									c.isShown = shouldBeShown;
+									if (!shouldBeShown) {
+										c.focused = false;
+										c.highlighted = false;
+										c.displayFullRoute = false;
+										for (const layerName of [
+											"mapMarker",
+											"nameMarker",
+											"tail",
+										]) {
+											c[layerName]?.remove();
+											c[layerName] = null;
+										}
+									}
+									updateCompetitor(c);
+								}
+								displayCompetitorList();
+							}
+						});
+					if (activeCompetitorCategories.has(cat)) {
+						btn.addClass("active");
+					}
+					categoryToggleBar.append(btn);
+				}
+				topDiv.append(categoryToggleBar);
 			}
 			mainDiv.append(topDiv);
 			mainDiv.append(listDiv);
@@ -2099,6 +2159,9 @@ function RCEvent(infoURL, clockURL, locale) {
 						competitorBatteyLevels[competitor.id] = competitor.battery_level;
 					} else {
 						competitorBatteyLevels[competitor.id] = null;
+					}
+					for (const tag of competitor.categories) {
+						competitorsTags.add(tag);
 					}
 				}
 				updateCompetitorList(response.competitors);

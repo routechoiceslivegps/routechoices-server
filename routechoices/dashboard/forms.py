@@ -554,12 +554,21 @@ class CompetitorForm(ModelForm):
 
     class Meta:
         model = Competitor
-        fields = ("event", "name", "short_name", "device", "start_time", "color")
+        fields = (
+            "event",
+            "name",
+            "short_name",
+            "device",
+            "start_time",
+            "color",
+            "tags",
+        )
         widgets = {
             "start_time": DateTimeInput(
                 attrs={"class": "datetimepicker", "autocomplete": "off"}
             ),
             "color": TextInput(attrs={"class": "color-input"}),
+            "tags": TextInput(attrs={"class": "tag-input"}),
         }
 
     def clean_short_name(self):
