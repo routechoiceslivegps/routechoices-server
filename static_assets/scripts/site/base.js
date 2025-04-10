@@ -120,10 +120,10 @@ if (needFlagsEmojiPolyfill) {
 
 async function checkVersion() {
 	try {
-		const resp = await fetch(`${window.local.apiRoot}version`).then((r) =>
-			r.json(),
-		);
-		if (resp.v !== window.local.siteVersion) {
+		const resp = await fetch(`${window.local.apiRoot}version`)
+			.then((r) => r.json())
+			.catch(() => {});
+		if (resp && resp.v !== window.local.siteVersion) {
 			window.local.siteVersion = resp.v;
 			console.log(`New Version Available! ${resp.v}`);
 		}

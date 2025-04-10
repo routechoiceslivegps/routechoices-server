@@ -35,6 +35,8 @@
         new XMLHttpRequest());
     i.open("POST", l, !0),
       i.setRequestHeader("Content-Type", "text/plain"),
+      i.onerror = function () {},
+      i.ontimeout = function () {},
       i.send(JSON.stringify(n)),
       (i.onreadystatechange = function () {
         4 === i.readyState && e && e.callback && e.callback();
