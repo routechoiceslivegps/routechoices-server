@@ -1905,6 +1905,7 @@ function RCEvent(infoURL, clockURL, locale) {
 						.addClass("me-1", "btn", "btn-xs", "btn-outline-secondary")
 						.text(cat)
 						.attr("type", "button")
+						.attr("data-bs-toggle", "button")
 						.on("click", (e) => {
 							e.preventDefault();
 							if (activeCompetitorCategories.has(cat)) {
