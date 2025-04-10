@@ -2677,6 +2677,8 @@ class Competitor(models.Model):
 
     @property
     def categories(self):
+        if not self.tags:
+            return []
         return self.tags.split(" ")
 
 
