@@ -2034,6 +2034,7 @@ def third_party_event_data(request, provider, uid):
                 "name": competitor.name,
                 "short_name": competitor.short_name,
                 "start_time": competitor.start_time,
+                "categories": [],
             }
         )
     try:
