@@ -1322,6 +1322,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Alice",
                 "short_name": "🇺🇸 Al",
@@ -1336,6 +1337,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Albert",
                 "short_name": "🇺🇸 A",
@@ -1350,6 +1352,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Albert",
                 "short_name": "🇺🇸 Al",
@@ -1367,6 +1370,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Bob",
                 "short_name": "🇺🇸 B",
@@ -1381,6 +1385,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "",
                 "short_name": "🇺🇸 B",
@@ -1394,6 +1399,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
             },
             format="json",
@@ -1413,6 +1419,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": "does not exists",
                 "name": "Bob",
                 "short_name": "🇺🇸 B",
@@ -1427,6 +1434,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Bob",
                 "short_name": "🇺🇸 B",
@@ -1441,6 +1449,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Charles",
                 "short_name": "🇺🇸 C",
@@ -1458,6 +1467,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Dick",
                 "short_name": "🇺🇸 D",
@@ -1471,6 +1481,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Elsa",
                 "short_name": "🇺🇸 E",
@@ -1484,6 +1495,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Frank",
                 "short_name": "🇺🇸 F",
@@ -1498,6 +1510,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "George",
                 "short_name": "🇺🇸 G",
@@ -1509,6 +1522,7 @@ class RegistrationApiTestCase(EssentialApiBase):
         res = self.client.post(
             url,
             {
+                "event_id": event.aid,
                 "device_id": device_id,
                 "name": "Hugh",
                 "short_name": "🇺🇸 H",

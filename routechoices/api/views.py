@@ -686,6 +686,8 @@ def event_detail(request, event_id):
 @api_POST_view
 def create_competitor(request):
     event_id = request.data.get("event_id")
+    if not event_id:
+        raise ValidationError("Event ID is missing")
     event = Event.objects.select_related("club").filter(aid=event_id).first()
     if not event:
         raise ValidationError("No event match this id")
