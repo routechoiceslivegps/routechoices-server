@@ -504,10 +504,10 @@ def club_list_view(request):
                     "maps": [
                         {
                             "coordinates": {
-                                "topLeft": {"lat": 61.45075, "lon": 24.18994},
-                                "topRight": {"lat": 61.44656, "lon": 24.24721},
-                                "bottomRight": {"lat": 61.42094, "lon": 24.23851},
-                                "bottomLeft": {"lat": 61.42533, "lon": 24.18156},
+                                "top_left": {"lat": 61.45075, "lon": 24.18994},
+                                "top_right": {"lat": 61.44656, "lon": 24.24721},
+                                "bottom_right": {"lat": 61.42094, "lon": 24.23851},
+                                "bottom_left": {"lat": 61.42533, "lon": 24.18156},
                             },
                             "rotation": 3.25,
                             "url": (
@@ -1813,20 +1813,20 @@ def two_d_rerun_race_status(request):
         "maph": raster_map.height,
         "calibration": [
             [
-                raster_map.bound["topLeft"]["lon"],
-                raster_map.bound["topLeft"]["lat"],
+                raster_map.bound["top_left"]["lon"],
+                raster_map.bound["top_left"]["lat"],
                 0,
                 0,
             ],
             [
-                raster_map.bound["topRight"]["lon"],
-                raster_map.bound["topRight"]["lat"],
+                raster_map.bound["top_right"]["lon"],
+                raster_map.bound["top_right"]["lat"],
                 raster_map.width,
                 0,
             ],
             [
-                raster_map.bound["bottomLeft"]["lon"],
-                raster_map.bound["bottomLeft"]["lat"],
+                raster_map.bound["bottom_left"]["lon"],
+                raster_map.bound["bottom_left"]["lat"],
                 0,
                 raster_map.height,
             ],

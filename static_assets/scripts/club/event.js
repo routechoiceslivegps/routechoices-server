@@ -1544,7 +1544,7 @@ function RCEvent(infoURL, clockURL, locale) {
 	this.getTailLength = () => tailLength;
 
 	function addRasterMapLayer(mapData, indexEventMap) {
-		const bounds = ["topLeft", "topRight", "bottomRight", "bottomLeft"].map(
+		const bounds = ["top_left", "top_right", "bottom_right", "bottom_left"].map(
 			(corner) => {
 				const cornerCoords = mapData.coordinates[corner];
 				return [cornerCoords.lat, cornerCoords.lon];

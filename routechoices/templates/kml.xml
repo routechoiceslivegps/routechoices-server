@@ -13,7 +13,7 @@
         <altitudeMode>clampToGround</altitudeMode>
         <gx:LatLonQuad>
           <coordinates>
-            {{ bound.bottomLeft.lon }},{{ bound.bottomLeft.lat }} {{ bound.bottomRight.lon }},{{ bound.bottomRight.lat }} {{ bound.topRight.lon }},{{ bound.topRight.lat }} {{ bound.topLeft.lon }},{{ bound.topLeft.lat }}
+            {{ bound.bottom_left.lon }},{{ bound.bottom_left.lat }} {{ bound.bottom_right.lon }},{{ bound.bottom_right.lat }} {{ bound.top_right.lon }},{{ bound.top_right.lat }} {{ bound.top_left.lon }},{{ bound.top_left.lat }}
           </coordinates>
         </gx:LatLonQuad>
       </GroundOverlay>

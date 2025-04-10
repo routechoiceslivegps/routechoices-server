@@ -565,37 +565,37 @@ class Map(models.Model):
     @property
     def min_lon(self):
         return min(
-            self.bound["topLeft"]["lon"],
-            self.bound["bottomLeft"]["lon"],
-            self.bound["bottomRight"]["lon"],
-            self.bound["topRight"]["lon"],
+            self.bound["top_left"]["lon"],
+            self.bound["bottom_left"]["lon"],
+            self.bound["bottom_right"]["lon"],
+            self.bound["top_right"]["lon"],
         )
 
     @property
     def max_lon(self):
         return max(
-            self.bound["topLeft"]["lon"],
-            self.bound["bottomLeft"]["lon"],
-            self.bound["bottomRight"]["lon"],
-            self.bound["topRight"]["lon"],
+            self.bound["top_left"]["lon"],
+            self.bound["bottom_left"]["lon"],
+            self.bound["bottom_right"]["lon"],
+            self.bound["top_right"]["lon"],
         )
 
     @property
     def min_lat(self):
         return min(
-            self.bound["topLeft"]["lat"],
-            self.bound["bottomLeft"]["lat"],
-            self.bound["bottomRight"]["lat"],
-            self.bound["topRight"]["lat"],
+            self.bound["top_left"]["lat"],
+            self.bound["bottom_left"]["lat"],
+            self.bound["bottom_right"]["lat"],
+            self.bound["top_right"]["lat"],
         )
 
     @property
     def max_lat(self):
         return max(
-            self.bound["topLeft"]["lat"],
-            self.bound["bottomLeft"]["lat"],
-            self.bound["bottomRight"]["lat"],
-            self.bound["topRight"]["lat"],
+            self.bound["top_left"]["lat"],
+            self.bound["bottom_left"]["lat"],
+            self.bound["bottom_right"]["lat"],
+            self.bound["top_right"]["lat"],
         )
 
     @property
@@ -614,13 +614,13 @@ class Map(models.Model):
     def alignment_points(self):
         width, height = self.quick_size
         a1 = Point(0, 0)
-        b1 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["topLeft"]))
+        b1 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["top_left"]))
         a2 = Point(0, height)
-        b2 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["bottomLeft"]))
+        b2 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["bottom_left"]))
         a3 = Point(width, 0)
-        b3 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["topRight"]))
+        b3 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["top_right"]))
         a4 = Point(width, height)
-        b4 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["bottomRight"]))
+        b4 = Point(GLOBAL_MERCATOR.latlon_to_meters(self.bound["bottom_right"]))
         return a1, a2, a3, a4, b1, b2, b3, b4
 
     @property
@@ -911,10 +911,10 @@ class Map(models.Model):
     def bound(self):
         coords = [float(x) for x in self.corners_coordinates.split(",")]
         return {
-            "topLeft": {"lat": coords[0], "lon": coords[1]},
-            "topRight": {"lat": coords[2], "lon": coords[3]},
-            "bottomRight": {"lat": coords[4], "lon": coords[5]},
-            "bottomLeft": {"lat": coords[6], "lon": coords[7]},
+            "top_left": {"lat": coords[0], "lon": coords[1]},
+            "top_right": {"lat": coords[2], "lon": coords[3]},
+            "bottom_right": {"lat": coords[4], "lon": coords[5]},
+            "bottom_left": {"lat": coords[6], "lon": coords[7]},
         }
 
     @classmethod
@@ -1083,7 +1083,7 @@ class Map(models.Model):
             bound = other_map.bound
             corners = [
                 self.wsg84_to_map_xy(bound[xx]["lat"], bound[xx]["lon"])
-                for xx in ("topLeft", "topRight", "bottomRight", "bottomLeft")
+                for xx in ("top_left", "top_right", "bottom_right", "bottom_left")
             ]
             all_corners.append(corners)
 
