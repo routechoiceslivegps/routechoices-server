@@ -192,7 +192,6 @@ function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 			control.addOption({ value: t, text: t });
 			control.addItem(t);
 		}
-		console.log(control);
 	}
 	if (deviceId) {
 		const myDeviceSelectInput = lastDeviceSelectInput;
