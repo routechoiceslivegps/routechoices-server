@@ -1905,7 +1905,7 @@ function RCEvent(infoURL, clockURL, locale) {
 						.addClass("me-1", "btn", "btn-xs", "btn-outline-secondary")
 						.text(cat)
 						.attr("type", "button")
-						.attr("data-bs-toggle", "button")
+						.data("bs-toggle", "button")
 						.on("click", (e) => {
 							e.preventDefault();
 							if (activeCompetitorCategories.has(cat)) {
@@ -1913,13 +1913,14 @@ function RCEvent(infoURL, clockURL, locale) {
 							} else {
 								activeCompetitorCategories.add(cat);
 							}
+							btn.toggleClass("active");
 							for (const c of Object.values(competitorList)) {
 								let shouldBeShown = true;
 								for (const [
 									catSel,
 									_,
 								] of activeCompetitorCategories.entries()) {
-									if (!c.categories.includes(catSel)) {
+									if (!c?.categories?.includes(catSel)) {
 										shouldBeShown = false;
 									}
 								}
@@ -1944,7 +1945,7 @@ function RCEvent(infoURL, clockURL, locale) {
 							}
 						});
 					if (activeCompetitorCategories.has(cat)) {
-						btn.addClass("active").attr("aria-pressed", "true")
+						btn.addClass("active").attr("aria-pressed", "true");
 					}
 					categoryToggleBar.append(btn);
 				}
