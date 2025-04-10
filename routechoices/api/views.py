@@ -1185,7 +1185,7 @@ def event_data(request, event_id):
             "start_time": competitor.start_time,
         }
         if competitor.tags:
-            competitor_data["categories"] = (competitor.categories,)
+            competitor_data["categories"] = competitor.categories
         if competitor.color:
             competitor_data["color"] = competitor.color
         if event.is_live and competitor.device_id:
