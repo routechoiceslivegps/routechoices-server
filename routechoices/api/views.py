@@ -511,7 +511,7 @@ def club_list_view(request):
                             },
                             "rotation": 3.25,
                             "url": (
-                                "https://www.routechoices.com/api/events/PlCG3xFS-f4/map",
+                                "https://www.routechoices.com/api/events/PlCG3xFS-f4/map"
                             ),
                             "title": "",
                             "hash": "u8cWoEiv",
