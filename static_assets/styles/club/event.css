@@ -6,6 +6,7 @@
 	--footer-size: 7px;
 	--navbar-size: 46px;
 	--runner-scale: 1;
+	--filter-bar-size: 0;
 }
 
 @font-face {
@@ -89,7 +90,8 @@
 	display: block !important;
 	max-height: calc(
 		var(--app-height) -
-		47px -
+		10px -
+		var(--filter-bar-size) -
 		var(--navbar-size) -
 		var(--footer-size) -
 		var(--ctrl-height)

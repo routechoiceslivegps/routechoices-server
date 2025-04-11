@@ -1585,6 +1585,10 @@ function RCEvent(infoURL, clockURL, locale) {
 			"--navbar-size",
 			document.fullscreenElement != null ? "0px" : "46px",
 		);
+		doc.style.setProperty(
+			"--filter-bar-size",
+			`${document.getElementById("filter-bar")?.clientHeight || 0}px`,
+		);
 		const width = window.innerWidth > 0 ? window.innerWidth : screen.width;
 		if (
 			u("#sidebar").hasClass("d-sm-block") &&
@@ -1833,7 +1837,7 @@ function RCEvent(infoURL, clockURL, locale) {
 			const mainDiv = u(
 				'<div id="competitorSidebar" class="d-flex flex-column"/>',
 			);
-			const topDiv = u("<div/>");
+			const topDiv = u("<div/>").attr("id", "filter-bar");
 			const searchBar = u("<form/>").addClass("row g-0 flex-nowrap");
 			if (Object.keys(competitorList).length) {
 				const toggleAllContent = u("<div/>")
