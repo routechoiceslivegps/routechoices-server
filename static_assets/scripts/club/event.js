@@ -1945,8 +1945,8 @@ function RCEvent(infoURL, clockURL, locale) {
 									}
 									updateCompetitor(c);
 								}
-								displayCompetitorList();
 							}
+							displayCompetitorList();
 						});
 					if (activeCompetitorCategories.has(cat)) {
 						btn.addClass("active").attr("aria-pressed", "true");
