@@ -1,61 +1,115 @@
-!(function () {
-  "use strict";
-  var a = window.location,
-    r = window.document,
-    o = r.currentScript,
-    l = o.getAttribute("data-api") || new URL(o.src).origin + "/api/event";
-  function s(t, e) {
-    t && console.warn("Ignoring Event: " + t), e && e.callback && e.callback();
+! function() {
+  var a, o = window.location,
+      r = window.document,
+      t = r.currentScript,
+      l = t.getAttribute("data-api") || new URL(t.src).origin + "/api/event",
+      s = t.getAttribute("data-domain");
+
+  function c(t, e, n) {
+      e && console.warn("Ignoring Event: " + e), n && n.callback && n.callback(), "pageview" === t && (a = !0)
   }
-  function t(t, e) {
-    if (
-      /^localhost$|^127(\.[0-9]+){0,2}\.[0-9]+$|^\[::1?\]$/.test(a.hostname) ||
-      "file:" === a.protocol
-    )
-      return s("localhost", e);
-    if (
-      window._phantom ||
-      window.__nightmare ||
-      window.navigator.webdriver ||
-      window.Cypress
-    )
-      return s(null, e);
-    try {
-      if ("true" === window.localStorage.plausible_ignore)
-        return s("localStorage flag", e);
-    } catch (t) {}
-    var n = {},
-      i =
-        ((n.n = t),
-        (n.u = e.u || a.href),
-        (n.d = e.d || o.getAttribute("data-domain")),
-        (n.r = r.referrer || null),
-        e && e.meta && (n.m = JSON.stringify(e.meta)),
-        e && e.props && (n.p = e.props),
-        new XMLHttpRequest());
-    i.open("POST", l, !0),
-      i.setRequestHeader("Content-Type", "text/plain"),
-      i.onerror = function () {},
-      i.ontimeout = function () {},
-      i.send(JSON.stringify(n)),
-      (i.onreadystatechange = function () {
-        4 === i.readyState && e && e.callback && e.callback();
-      });
+  var d = o.href,
+      u = {},
+      w = -1,
+      v = !1,
+      p = null,
+      h = 0;
+
+  function f() {
+      var t = r.body || {},
+          e = r.documentElement || {};
+      return Math.max(t.scrollHeight || 0, t.offsetHeight || 0, t.clientHeight || 0, e.scrollHeight || 0, e.offsetHeight || 0, e.clientHeight || 0)
   }
-  var e = (window.plausible && window.plausible.q) || [];
-  window.plausible = t;
-  for (var n, i = 0; i < e.length; i++) t.apply(this, e[i]);
-})();
-window.plausible =
-  window.plausible ||
-  function () {
-    (window.plausible.q = window.plausible.q || []).push(arguments);
-  };
-var clubSlug = window.document.currentScript.dataset.clubSlug;
-var analyticsUrl = clubSlug
-  ? "https://www.routechoices.com/" + clubSlug + window.location.pathname
-  : window.location.href;
-window.plausible("pageview", { u: analyticsUrl }); // global stats
-if (clubSlug) {
-  window.plausible("pageview", { d: clubSlug + ".routechoices.com" }); // site stats
-}
+
+  function g() {
+      var t = r.body || {},
+          e = r.documentElement || {},
+          n = window.innerHeight || e.clientHeight || 0,
+          e = window.scrollY || e.scrollTop || t.scrollTop || 0;
+      return b <= n ? b : e + n
+  }
+
+  function e() {
+      return p ? h + (Date.now() - p) : h
+  }
+  var b = f(),
+      m = g();
+
+  function y(a) {
+      var t = e();
+      !a && (w < m || 3e3 <= t) && (w = m, t = {
+          n: "engagement",
+          sd: Math.round(m / b * 100),
+          d: a.d || s,
+          u: a.u || d,
+          p: u,
+          e: t,
+          v: 3
+      }, p = null, h = 0, E(l, t))
+  }
+
+  function S() {
+      "visible" === r.visibilityState && r.hasFocus() && null === p ? p = Date.now() : "hidden" !== r.visibilityState && r.hasFocus() || (h = e(), p = null, y())
+  }
+
+  function n(t, e) {
+      var n = "pageview" === t;
+      if (n && v && (y(e), b = f(), m = g()), /^localhost$|^127(\.[0-9]+){0,2}\.[0-9]+$|^\[::1?\]$/.test(o.hostname) || "file:" === o.protocol) return c(t, "localhost", e);
+      if ((window._phantom || window.__nightmare || window.navigator.webdriver || window.Cypress) && !window.__plausible) return c(t, null, e);
+      try {
+          if ("true" === window.localStorage.plausible_ignore) return c(t, "localStorage flag", e)
+      } catch (t) {}
+      var i = {};
+      i.n = t, i.v = 3, i.u = o.href, i.d = s, i.r = r.referrer || null, e && e.meta && (i.m = JSON.stringify(e.meta)), e && e.props && (i.p = e.props), n && (a = !1, d = i.u, u = i.p, w = -1, h = 0, p = Date.now(), v || (r.addEventListener("visibilitychange", S), window.addEventListener("blur", S), window.addEventListener("focus", S), v = !0)), E(l, i, e)
+  }
+
+  function E(t, e, n) {
+      window.fetch && fetch(t, {
+          method: "POST",
+          headers: {
+              "Content-Type": "text/plain"
+          },
+          keepalive: !0,
+          body: JSON.stringify(e)
+      }).then(function(t) {
+          n && n.callback && n.callback({
+              status: t.status
+          })
+      }).catch(function() {})
+  }
+  window.addEventListener("load", function() {
+      b = f();
+      var t = 0,
+          e = setInterval(function() {
+              b = f(), 15 == ++t && clearInterval(e)
+          }, 200)
+  }), r.addEventListener("scroll", function() {
+      b = f();
+      var t = g();
+      m < t && (m = t)
+  });
+  var i = window.plausible && window.plausible.q || [];
+  window.plausible = n;
+  for (var L, H = 0; H < i.length; H++) n.apply(this, i[H]);
+
+  var clubSlug = window.document.currentScript.dataset.clubSlug;
+  var analyticsUrl = clubSlug
+    ? "https://www.routechoices.com/" + clubSlug + window.location.pathname
+    : window.location.href;
+
+  function _(t) {
+      t && L === o.pathname || (L = o.pathname, n("pageview", { u: analyticsUrl }), clubSlug && n("pageview", { d: clubSlug + ".routechoices.com" }))
+  }
+
+  function k() {
+      _(!0)
+  }
+  var T, t = window.history;
+  t.pushState && (T = t.pushState, t.pushState = function() {
+      T.apply(this, arguments), k()
+  }, window.addEventListener("popstate", k)), "prerender" === r.visibilityState ? r.addEventListener("visibilitychange", function() {
+      L || "visible" !== r.visibilityState || _()
+  }) : _(), window.addEventListener("pageshow", function(t) {
+      t.persisted && _()
+  })
+}();
