@@ -40,19 +40,18 @@
       !a && (w < m || 3e3 <= t) && (w = m, t = {
           n: "engagement",
           sd: Math.round(m / b * 100),
-          d: a.d || s,
-          u: a.u || d,
+          d: a?.d || s,
+          u: a?.u || d,
           p: u,
           e: t,
           v: 3
       }, p = null, h = 0, E(l, t))
   }
 
-  function S() {
-      "visible" === r.visibilityState && r.hasFocus() && null === p ? p = Date.now() : "hidden" !== r.visibilityState && r.hasFocus() || (h = e(), p = null, y())
-  }
-
-  function n(t, e) {
+ function n(t, e) {
+      function S() {
+        "visible" === r.visibilityState && r.hasFocus() && null === p ? p = Date.now() : "hidden" !== r.visibilityState && r.hasFocus() || (h = e(), p = null, y(e))
+      }
       var n = "pageview" === t;
       if (n && v && (y(e), b = f(), m = g()), /^localhost$|^127(\.[0-9]+){0,2}\.[0-9]+$|^\[::1?\]$/.test(o.hostname) || "file:" === o.protocol) return c(t, "localhost", e);
       if ((window._phantom || window.__nightmare || window.navigator.webdriver || window.Cypress) && !window.__plausible) return c(t, null, e);
