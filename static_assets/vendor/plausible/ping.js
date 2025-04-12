@@ -11,7 +11,6 @@
   var d = o.href,
       u = {},
       w = -1,
-      v = !1,
       p = null,
       h = 0;
 
@@ -28,37 +27,17 @@
           e = window.scrollY || e.scrollTop || t.scrollTop || 0;
       return b <= n ? b : e + n
   }
-
-  function x() {
-      return p ? h + (Date.now() - p) : h
-  }
   var b = f(),
       m = g();
 
-  function y(z) {
-      var t = x();
-      !a && (w < m || 3e3 <= t) && (w = m, t = {
-          n: "engagement",
-          sd: Math.round(m / b * 100),
-          d: z?.d || s,
-          u: z?.u || d,
-          p: u,
-          e: t,
-          v: 3
-      }, p = null, h = 0, E(l, t))
-  }
  function n(t, e) {
-      function S() {
-       "visible" === r.visibilityState && r.hasFocus() && null === p ? p = Date.now() : "hidden" !== r.visibilityState && r.hasFocus() || (h = x(), p = null, y(e))
-      }
       var n = "pageview" === t;
-      if (n && v && (y(e), b = f(), m = g()), /^localhost$|^127(\.[0-9]+){0,2}\.[0-9]+$|^\[::1?\]$/.test(o.hostname) || "file:" === o.protocol) return c(t, "localhost", e);
       if ((window._phantom || window.__nightmare || window.navigator.webdriver || window.Cypress) && !window.__plausible) return c(t, null, e);
       try {
           if ("true" === window.localStorage.plausible_ignore) return c(t, "localStorage flag", e)
       } catch (t) {}
       var i = {};
-      i.n = t, i.v = 3, i.u = (e?.u || o.href), i.d = (e?.d || s), i.r = r.referrer || null, e && e.meta && (i.m = JSON.stringify(e.meta)), e && e.props && (i.p = e.props), n && (a = !1, d = i.u, u = i.p, w = -1, h = 0, p = Date.now(), v || (r.addEventListener("visibilitychange", S), window.addEventListener("blur", S), window.addEventListener("focus", S), v = !0)), E(l, i, e)
+      i.n = t, i.v = 3, i.u = (e?.u || o.href), i.d = (e?.d || s), i.r = r.referrer || null, e && e.meta && (i.m = JSON.stringify(e.meta)), e && e.props && (i.p = e.props), n && (a = !1, d = i.u, u = i.p, w = -1, h = 0, p = Date.now()), E(l, i, e)
   }
 
   function E(t, e, n) {
