@@ -29,14 +29,14 @@
       return b <= n ? b : e + n
   }
 
-  function e() {
+  function x() {
       return p ? h + (Date.now() - p) : h
   }
   var b = f(),
       m = g();
 
   function y(a) {
-      var t = e();
+      var t = x();
       !a && (w < m || 3e3 <= t) && (w = m, t = {
           n: "engagement",
           sd: Math.round(m / b * 100),
@@ -47,10 +47,9 @@
           v: 3
       }, p = null, h = 0, E(l, t))
   }
-
  function n(t, e) {
       function S() {
-        "visible" === r.visibilityState && r.hasFocus() && null === p ? p = Date.now() : "hidden" !== r.visibilityState && r.hasFocus() || (h = e(), p = null, y(e))
+       "visible" === r.visibilityState && r.hasFocus() && null === p ? p = Date.now() : "hidden" !== r.visibilityState && r.hasFocus() || (h = x(), p = null, y(e))
       }
       var n = "pageview" === t;
       if (n && v && (y(e), b = f(), m = g()), /^localhost$|^127(\.[0-9]+){0,2}\.[0-9]+$|^\[::1?\]$/.test(o.hostname) || "file:" === o.protocol) return c(t, "localhost", e);
