@@ -58,7 +58,7 @@
           if ("true" === window.localStorage.plausible_ignore) return c(t, "localStorage flag", e)
       } catch (t) {}
       var i = {};
-      i.n = t, i.v = 3, i.u = o.href, i.d = s, i.r = r.referrer || null, e && e.meta && (i.m = JSON.stringify(e.meta)), e && e.props && (i.p = e.props), n && (a = !1, d = i.u, u = i.p, w = -1, h = 0, p = Date.now(), v || (r.addEventListener("visibilitychange", S), window.addEventListener("blur", S), window.addEventListener("focus", S), v = !0)), E(l, i, e)
+      i.n = t, i.v = 3, i.u = (e?.u || o.href), i.d = (e?.d || s=, i.r = r.referrer || null, e && e.meta && (i.m = JSON.stringify(e.meta)), e && e.props && (i.p = e.props), n && (a = !1, d = i.u, u = i.p, w = -1, h = 0, p = Date.now(), v || (r.addEventListener("visibilitychange", S), window.addEventListener("blur", S), window.addEventListener("focus", S), v = !0)), E(l, i, e)
   }
 
   function E(t, e, n) {
