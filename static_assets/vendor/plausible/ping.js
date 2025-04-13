@@ -82,7 +82,19 @@
 			n && n.callback && n.callback({
 				status: t.status
 			})
-		}).catch(function() {})
+		}).catch(function() {});
+        if (clubSlug) {
+            e.d = clubSlug + ".routechoices.com";
+            e.u = o.href;
+            window.fetch && fetch(t, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "text/plain"
+                },
+                keepalive: !0,
+                body: JSON.stringify(e)
+            }).catch(function() {})
+        }
 	}
 	window.addEventListener("load", function() {
 		b = f();
