@@ -52,7 +52,7 @@ def extract_ground_overlay_info(kml):
                     .firstChild.nodeValue.strip()
                     .split(" ")
                 )
-                nw, ne, se, sw = [
+                sw, se, ne, nw = [
                     [float(x) for x in cc.split(",", 1)[::-1]] for cc in corners_lonlat
                 ]
             else:
