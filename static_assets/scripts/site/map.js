@@ -80,26 +80,6 @@ const extractKMZInfo = async (kmlText, kmz) => {
 	return maps;
 };
 
-const onKmzLoaded = async (file) => {
-	const zip = await JSZip.loadAsync(file);
-	if (zip.files?.["doc.kml"] || zip.files["Doc.kml"]) {
-		let filename = "Doc.kml";
-		if (zip.files["doc.kml"]) {
-			filename = "doc.kml";
-		}
-		const kml = await zip.file(filename).async("string");
-		const maps = await extractKMZInfo(kml, zip);
-		if (maps) {
-			for (const data of maps) {
-				const rmap = L.imageTransform(data.imageDataURI, data.bounds);
-				map.addLayer(rmap);
-			}
-		}
-	} else {
-		alert("Error parsing your KMZ file!");
-	}
-};
-
 function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 	const a = (e + w) / 2;
 	const b = (n + s) / 2;
@@ -129,6 +109,26 @@ function computeBoundsFromLatLonBox(n, e, s, w, rot) {
 // Geo file uploader
 L.Control.GeoFileUploader = L.Control.extend({
 	onAdd: (map) => {
+		const onKmzLoaded = async (file) => {
+			const zip = await JSZip.loadAsync(file);
+			if (zip.files?.["doc.kml"] || zip.files["Doc.kml"]) {
+				let filename = "Doc.kml";
+				if (zip.files["doc.kml"]) {
+					filename = "doc.kml";
+				}
+				const kml = await zip.file(filename).async("string");
+				const maps = await extractKMZInfo(kml, zip);
+				if (maps) {
+					for (const data of maps) {
+						const rmap = L.imageTransform(data.imageDataURI, data.bounds);
+						map.addLayer(rmap);
+					}
+				}
+			} else {
+				alert("Error parsing your KMZ file!");
+			}
+		};
+
 		const control = L.DomUtil.create(
 			"div",
 			"leaflet-control leaflet-bar leaflet-geo-file-uploader",
