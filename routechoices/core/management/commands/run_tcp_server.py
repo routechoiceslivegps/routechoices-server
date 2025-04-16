@@ -46,22 +46,22 @@ class Command(BaseCommand):
         signal.signal(signal.SIGTERM, sigterm_handler)
         if options.get("gt06_port"):
             gt06_server = gt06.GT06Server()
-            gt06_server.listen(options["gt06_port"])
+            gt06_server.listen(options["gt06_port"], reuse_port=True)
         if options.get("mictrack_port"):
             mictrack_server = mictrack.MicTrackServer()
-            mictrack_server.listen(options["mictrack_port"])
+            mictrack_server.listen(options["mictrack_port"], reuse_port=True)
         if options.get("queclink_port"):
             queclink_server = queclink.QueclinkServer()
-            queclink_server.listen(options["queclink_port"])
+            queclink_server.listen(options["queclink_port"], reuse_port=True)
         if options.get("tmt250_port"):
             tmt250_server = tmt250.TMT250Server()
-            tmt250_server.listen(options["tmt250_port"])
+            tmt250_server.listen(options["tmt250_port"], reuse_port=True)
         if options.get("tracktape_port"):
             tracktape_server = tracktape.TrackTapeServer()
-            tracktape_server.listen(options["tracktape_port"])
+            tracktape_server.listen(options["tracktape_port"], reuse_port=True)
         if options.get("xexun_port"):
             xexun_server = xexun.XexunServer()
-            xexun_server.listen(options["xexun_port"])
+            xexun_server.listen(options["xexun_port"], reuse_port=True)
         try:
             print("Start listening TCP data...", flush=True)
             IOLoop.current().start()
