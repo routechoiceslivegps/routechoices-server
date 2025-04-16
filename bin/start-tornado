@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-systemctl --user start routechoices-tornado
+systemctl --user start 'routechoices-tornado@*'
