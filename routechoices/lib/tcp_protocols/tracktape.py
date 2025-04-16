@@ -13,7 +13,7 @@ from routechoices.lib.validators import validate_imei
 
 class TrackTapeConnection:
     def __init__(self, stream, address, logger):
-        print(f"received a new connection from {address} on tracktape port")
+        print(f"Tracktape - New connection from {address}")
         self.aid = random_key()
         self.imei = None
         self.address = address
@@ -35,10 +35,10 @@ class TrackTapeConnection:
         if not self.db_device:
             raise Exception("Imei not registered")
         self.imei = imei
-        print(f"{self.imei} is connected")
+        print(f"Tracktape - {self.imei} is connected")
 
     async def start_listening(self):
-        print(f"Start listening from {self.address}")
+        print(f"Tracktape - listening from {self.address}")
         while True:
             imei = None
             try:
@@ -46,17 +46,16 @@ class TrackTapeConnection:
                 while not data_raw:
                     data_bin = await self.stream.read_until(b"\n")
                     data_raw = data_bin.decode("ascii").strip()
-                print(f"Received data ({data_raw})", flush=True)
                 data = json.loads(data_raw)
                 imei = data["id"]
             except Exception as e:
-                print(f"Could not read data {e}", flush=True)
+                print(f"Tracktape - Could not read data ({e})", flush=True)
                 self.stream.close()
                 return
             try:
                 await self.process_identification(imei)
             except Exception as e:
-                print(f"Could not identify device {e}", flush=True)
+                print(f"Tracktape - Could not identify device ({e})", flush=True)
                 self.stream.close()
                 return
             self.logger.info(
@@ -65,7 +64,7 @@ class TrackTapeConnection:
             try:
                 await self.process_data(data)
             except Exception as e:
-                print(f"Could not parse location {e}", flush=True)
+                print(f"Tracktape - Could not parse location ({e})", flush=True)
                 self.stream.close()
                 return
 
@@ -90,10 +89,13 @@ class TrackTapeConnection:
                 loc_array.append((tim, lat, lon))
         if loc_array:
             await add_locations(self.db_device, loc_array)
-            print(f"{len(loc_array)} locations wrote to DB", flush=True)
+            print(
+                f"Tracktape - {self.imei} wrote {len(loc_array)} locations to DB",
+                flush=True,
+            )
 
     def _on_close(self):
-        print("Client quit", flush=True)
+        print("Tracktape - Client quit", flush=True)
 
 
 class TrackTapeServer(GenericTCPServer):

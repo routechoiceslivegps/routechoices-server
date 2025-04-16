@@ -13,7 +13,7 @@ from routechoices.lib.validators import validate_imei
 
 class XexunConnection:
     def __init__(self, stream, address, logger):
-        print(f"Received a new connection from {address} on xexun port")
+        print(f"Xexun - New connection from {address}")
         self.aid = random_key()
         self.imei = None
         self.address = address
@@ -35,10 +35,10 @@ class XexunConnection:
         if not self.db_device:
             raise Exception("Imei not registered")
         self.imei = imei
-        print(f"{self.imei} is connected")
+        print(f"Xexun - {self.imei} is connected")
 
     async def start_listening(self):
-        print(f"Start listening from {self.address}")
+        print(f"Xexun - listening from {self.address}")
         while True:
             imei = None
             try:
@@ -47,17 +47,16 @@ class XexunConnection:
                     data_bin = await self.stream.read_bytes(255, partial=True)
                     data_raw = data_bin.decode("ascii", "ignore")
                     data_raw = re.search(r"G[PN]RMC,.+", data_raw).group(0)
-                print(f"Received data ({data_raw})", flush=True)
                 imei = re.search(r"imei:(\d+)(,.*)?$", data_raw).group(1)
             except Exception as e:
-                print(f"Error parsing data: {e}", flush=True)
+                print(f"Xexun - Error parsing data ({e})", flush=True)
                 self.stream.close()
                 return
 
             try:
                 await self.process_identification(imei)
             except Exception as e:
-                print(f"Could not identify device {e}", flush=True)
+                print(f"Xexun - Could not identify device ({e})", flush=True)
                 self.stream.close()
                 return
             self.logger.info(
@@ -66,7 +65,7 @@ class XexunConnection:
             try:
                 await self.process_data(data_raw)
             except Exception as e:
-                print(f"Could not parse data {e}", flush=True)
+                print(f"Xexun - Could not parse data ({e})", flush=True)
                 self.stream.close()
                 return
 
@@ -86,10 +85,10 @@ class XexunConnection:
             lon *= -1
 
         await add_locations(self.db_device, [(tim, lat, lon)])
-        print("1 locations wrote to DB", flush=True)
+        print(f"Xexun - {self.imei} wrote 1 locations to DB", flush=True)
 
     def _on_close(self):
-        print("Client quit", flush=True)
+        print("Xexun - Client quit", flush=True)
 
 
 class XexunServer(GenericTCPServer):

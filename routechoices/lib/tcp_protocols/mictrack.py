@@ -12,7 +12,7 @@ from routechoices.lib.validators import validate_imei
 
 class MicTrackConnection:
     def __init__(self, stream, address, logger):
-        print(f"Received a new connection from {address} on mictrack port")
+        print(f"MicTrack - New connection from {address}")
         self.aid = random_key()
         self.imei = None
         self.address = address
@@ -23,7 +23,7 @@ class MicTrackConnection:
         self.protocol_version = None
 
     async def start_listening(self):
-        print(f"Start listening from {self.address}")
+        print(f"MicTrack - listening from {self.address}")
         while True:
             imei = None
             try:
@@ -43,7 +43,7 @@ class MicTrackConnection:
                 elif self.protocol_version != protocol:
                     raise Exception("Cannot change protocol")
             except Exception as e:
-                print(f"Invalid protocol {e}", flush=True)
+                print(f"MicTrack - Invalid protocol ({e})", flush=True)
                 self.stream.close()
                 return
 
@@ -70,15 +70,14 @@ class MicTrackConnection:
                     else:
                         data_bin = await self.stream.read_bytes(90, partial=True)
                         data_raw += data_bin.decode("ascii")
-                print(f"Received data ({data_raw})", flush=True)
             except Exception:
-                print("Cannot read data", flush=True)
+                print("MicTrack - Cannot read data", flush=True)
                 self.stream.close()
                 return
             try:
                 await self.process_identification(imei)
             except Exception as e:
-                print(f"Invalid identification {e}", flush=True)
+                print(f"MicTrack - Invalid identification ({e})", flush=True)
                 self.stream.close()
                 return
             try:
@@ -87,7 +86,7 @@ class MicTrackConnection:
                 )
                 await self.process_data(data)
             except Exception as e:
-                print(f"Couldn't parse data {e}", flush=True)
+                print(f"MicTrack - Couldn't parse data ({e})", flush=True)
                 self.stream.close()
                 return
 
@@ -104,7 +103,7 @@ class MicTrackConnection:
         if not self.db_device:
             raise Exception("Unknown IMEI")
         self.imei = imei
-        print(f"{self.imei} is connected")
+        print(f"MicTrack - {self.imei} is connected")
 
     async def process_data(self, data):
         if self.protocol_version == 1:
@@ -137,10 +136,10 @@ class MicTrackConnection:
                 [0, min([100, int((int(batt_volt) - 33) / 9 * 100)])]
             )
         except Exception:
-            print("Invalid battery level value", flush=True)
+            print("MicTrack - Invalid battery level value", flush=True)
 
         await add_locations(self.db_device, [(tim, lat, lon)])
-        print("1 location wrote to DB", flush=True)
+        print(f"MicTrack - {self.imei} wrote 1 location to DB", flush=True)
 
         sos_triggered = data[4] == "SOS"
         if sos_triggered:
@@ -149,7 +148,7 @@ class MicTrackConnection:
             )
             print(
                 (
-                    f"SOS triggered by device {sos_device_aid}, "
+                    f"MicTrack - SOS triggered by device {sos_device_aid}, "
                     f"{sos_lat}, {sos_lon} email sent to {sos_sent_to}"
                 ),
                 flush=True,
@@ -174,10 +173,10 @@ class MicTrackConnection:
                 [0, min([100, int((int(batt_volt) - 3500) / 700 * 100)])]
             )
         except Exception:
-            print("Invalid battery level value", flush=True)
+            print("MicTrack - Invalid battery level value", flush=True)
 
         await add_locations(self.db_device, [(tim, lat, lon)])
-        print("1 location wrote to DB", flush=True)
+        print(f"MicTrack - {self.imei} wrote 1 location to DB", flush=True)
 
         sos_triggered = gps_data[6] == "5"
         if sos_triggered:
@@ -186,14 +185,14 @@ class MicTrackConnection:
             )
             print(
                 (
-                    f"SOS triggered by device {sos_device_aid}, "
+                    f"MicTrack - SOS triggered by device {sos_device_aid}, "
                     f"{sos_lat}, {sos_lon} email sent to {sos_sent_to}"
                 ),
                 flush=True,
             )
 
     def _on_close(self):
-        print("Client quit", flush=True)
+        print("MicTrack - Client quit", flush=True)
 
 
 class MicTrackServer(GenericTCPServer):

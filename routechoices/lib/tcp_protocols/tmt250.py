@@ -73,7 +73,7 @@ class TMT250Decoder:
 
 class TMT250Connection:
     def __init__(self, stream, address, logger):
-        print(f"Received a new connection from {address} on teltonika port")
+        print(f"Teltonika - New connection from {address}")
         self.aid = random_key()
         self.imei = None
         self.address = address
@@ -101,7 +101,8 @@ class TMT250Connection:
             is_valid_imei = False
         if imei_len != len(imei) or not is_valid_imei:
             print(
-                f"invalid identification {self.address}, {imei}, {imei_len}", flush=True
+                f"Teltonika - invalid identification {self.address}, {imei}, {imei_len}",
+                flush=True,
             )
             await self.stream.write(b"\x00")
             self.stream.close()
@@ -109,7 +110,9 @@ class TMT250Connection:
 
         self.db_device = await get_device_by_imei(imei)
         if not self.db_device:
-            print(f"imei {imei} not registered ({self.address})", flush=True)
+            print(
+                f"Teltonika - imei {imei} not registered ({self.address})", flush=True
+            )
             await self.stream.write(b"\x00")
             self.stream.close()
             return
@@ -119,26 +122,23 @@ class TMT250Connection:
         self.logger.info(
             f"TMT250 CONN, {self.aid}, {self.address}, {self.imei}: {safe64encode(bytes(data))}"
         )
-        print(f"{self.imei} is connected", flush=True)
+        print(f"Teltonika - {self.imei} is connected", flush=True)
 
     async def start_listening(self):
-        print("Start listening from", self.address)
+        print("Teltonika - listening from", self.address)
 
         while True:
             try:
                 data = bytearray(b"\x00" * 2048)
                 data_len = await self.stream.read_into(data, partial=True)
                 if self.imei:
-                    print(f"{self.imei} is sending {data_len} bytes")
                     self.logger.info(
                         f"TMT250 DATA, {self.aid}, {self.address}, {self.imei}: "
                         f"{safe64encode(bytes(data[:data_len]))}"
                     )
-                else:
-                    print(f"{self.address} is sending {data_len} bytes")
 
                 if data_len == 1 and data[0] == b"\xff":
-                    print("heartbeat", flush=True)
+                    print("Teltonika - heartbeat", flush=True)
                 elif data_len > 2:
                     imei_len = (data[0] << 8) + data[1]
                     if imei_len > 0:
@@ -159,13 +159,13 @@ class TMT250Connection:
         await self._on_full_data()
 
     def _on_close(self):
-        print("Client quit", self.address)
+        print("Teltonika - Client quit", self.address)
 
     async def _on_full_data(self):
         try:
             decoded = self.decoder.decode_alv(self.buffer)
         except Exception:
-            print("error decoding packet")
+            print("Teltonika - error decoding packet")
             await self.stream.write(self.decoder.generate_response(False))
         else:
             loc_array = []
@@ -176,14 +176,17 @@ class TMT250Connection:
             if self.decoder.battery_level:
                 self.db_device.battery_level = self.decoder.battery_level
             await add_locations(self.db_device, loc_array)
-            print(f"{len(loc_array)} locations wrote to DB", flush=True)
+            print(
+                f"Teltonika - {self.imei} wrote {len(loc_array)} locations to DB",
+                flush=True,
+            )
             self.waiting_for_content = True
             if self.decoder.alarm_triggered:
                 sos_device_aid, sos_lat, sos_lon, sos_sent_to = await send_sos(
                     self.db_device
                 )
                 print(
-                    f"SOS triggered by device {sos_device_aid}, {sos_lat}, {sos_lon}"
+                    f"Teltonika - SOS triggered by device {sos_device_aid}, {sos_lat}, {sos_lon}"
                     f" email sent to {sos_sent_to}",
                     flush=True,
                 )

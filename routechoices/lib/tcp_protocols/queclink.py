@@ -17,7 +17,7 @@ from routechoices.lib.validators import validate_imei
 
 class QueclinkConnection:
     def __init__(self, stream, address, logger):
-        print(f"Received a new connection from {address} on queclink port")
+        print(f"Queclink - New connection from {address}")
         self.aid = random_key()
         self.imei = None
         self.address = address
@@ -39,16 +39,15 @@ class QueclinkConnection:
         if not self.db_device:
             raise Exception("Imei not registered")
         self.imei = imei
-        print(f"{self.imei} is connected")
+        print(f"Queclink - {self.imei} is connected")
 
     async def start_listening(self):
-        print(f"Start listening from {self.address}")
+        print(f"Queclink - listening from {self.address}")
         while True:
             imei = None
             try:
                 data_bin = await self.stream.read_until(b"$")
                 data = data_bin.decode("ascii")
-                print(f"Received data ({data})", flush=True)
                 parts = data.split(",")
                 if parts[0][:7] == "+ACK:GT" or parts[0][:8] in (
                     "+RESP:GT",
@@ -56,7 +55,9 @@ class QueclinkConnection:
                 ):
                     imei = parts[2]
             except Exception as e:
-                print(f"Error parsing initial message: {str(e)}", flush=True)
+                print(
+                    f"Queclink - Error parsing initial message ({str(e)})", flush=True
+                )
                 self.stream.close()
                 return
 
@@ -67,19 +68,19 @@ class QueclinkConnection:
             try:
                 await self.process_identification(imei)
             except Exception as e:
-                print(f"Could not identify device {e}", flush=True)
+                print(f"Queclink - Could not identify device ({e})", flush=True)
                 self.stream.close()
                 return
 
             try:
                 await self.send_pending_commands()
             except Exception:
-                print("Could not send pending command")
+                print(f"Queclink - {self.imei} Could not send pending command")
 
             try:
                 await self.process_line(data)
             except Exception:
-                print("Could not parse incomming data")
+                print(f"Queclink - {self.imei} Could not parse incomming data")
 
     async def send_pending_commands(self):
         if not self.imei:
@@ -89,7 +90,7 @@ class QueclinkConnection:
             await self.stream.write(command.encode())
         commands_count = len(commands)
         if commands_count > 0:
-            print(f"{commands_count} commands sent")
+            print(f"Queclink - {self.imei} {commands_count} commands sent")
             await mark_pending_commands_sent(self.imei, access_date)
 
     async def process_line(self, data):
@@ -108,14 +109,12 @@ class QueclinkConnection:
             "LOC",
         ):
             nb_pts = int(parts[6])
-            print(f"Contains {nb_pts} pts")
             if 12 * nb_pts + 10 == len(parts):
                 len_points = 12
             elif 11 * nb_pts + 11 == len(parts):
                 len_points = 11
             else:
                 len_points = math.floor((len(parts) - 10) / nb_pts)
-            print(f"Each point has {len_points} data")
             pts = []
             for i in range(nb_pts):
                 try:
@@ -125,7 +124,10 @@ class QueclinkConnection:
                         parts[13 + i * len_points], "YYYYMMDDHHmmss"
                     ).int_timestamp
                 except Exception as e:
-                    print(f"Error parsing position: {str(e)}", flush=True)
+                    print(
+                        f"Queclink - {self.imei} Error parsing position ({str(e)})",
+                        flush=True,
+                    )
                     continue
                 else:
                     pts.append((tim, lat, lon))
@@ -140,7 +142,7 @@ class QueclinkConnection:
                     self.db_device
                 )
                 print(
-                    f"SOS triggered by device {sos_device_aid}, {sos_lat},"
+                    f"Queclink - SOS triggered by device {sos_device_aid}, {sos_lat},"
                     f" {sos_lon} email sent to {sos_sent_to}",
                     flush=True,
                 )
@@ -150,10 +152,15 @@ class QueclinkConnection:
             )
         elif parts[0][:8] == "+RESP:GT" and parts[0][8:] == "INF":
             try:
-                print(f"Battery level at {parts[18]}%", flush=True)
+                print(
+                    f"Queclink - {self.imei} Battery level at {parts[18]}%", flush=True
+                )
                 batt = int(parts[18])
             except Exception as e:
-                print(f"Error parsing battery level: {str(e)}", flush=True)
+                print(
+                    f"Queclink - {self.imei} Error parsing battery level ({str(e)})",
+                    flush=True,
+                )
             self.db_device.battery_level = batt
             await save_device(self.db_device)
 
@@ -162,10 +169,10 @@ class QueclinkConnection:
             self.db_device.battery_level = batt
         loc_array = pts
         await add_locations(self.db_device, loc_array)
-        print(f"{len(pts)} Locations wrote to DB", flush=True)
+        print(f"Queclink - {self.imei} wrote {len(pts)} locations to DB", flush=True)
 
     def on_close(self):
-        print("Client quit", flush=True)
+        print("Queclink - Client quit", flush=True)
 
 
 class QueclinkServer(GenericTCPServer):

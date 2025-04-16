@@ -16,7 +16,7 @@ from routechoices.lib.validators import validate_imei
 
 class GT06Connection:
     def __init__(self, stream, address, logger):
-        print(f"Received a new connection from {address} on gt06 port")
+        print(f"GT06 - New connection from {address}")
         self.aid = random_key()
         self.imei = None
         self.address = address
@@ -26,7 +26,7 @@ class GT06Connection:
         self.logger = logger
 
     async def start_listening(self):
-        print(f"Start listening from {self.address}")
+        print(f"GT06 - listening from {self.address}")
 
         while True:
             try:
@@ -36,7 +36,7 @@ class GT06Connection:
                 return
 
             if header not in (b"\x78\x78", b"\x79\x79"):
-                print(f"Unknown protocol ({header})")
+                print(f"GT06 - Unknown protocol ({header})")
                 self.stream.close()
                 return
 
@@ -51,7 +51,7 @@ class GT06Connection:
                 try:
                     await self.decode_extented(data_bin)
                 except Exception:
-                    print(f"Error parsing data ({self.address})", flush=True)
+                    print(f"GT06 - Error parsing data ({self.address})", flush=True)
                     self.stream.close()
                     return
                 continue
@@ -63,7 +63,7 @@ class GT06Connection:
                     await self.process_identification(data_bin)
                 except Exception:
                     print(
-                        f"Error parsing identification data ({self.address})",
+                        f"GT06 - Error parsing identification data ({self.address})",
                         flush=True,
                     )
                     self.stream.close()
@@ -73,7 +73,10 @@ class GT06Connection:
                 try:
                     await self.process_heartbeat(data_bin)
                 except Exception:
-                    print(f"Error parsing heartbeat data ({self.address})", flush=True)
+                    print(
+                        f"GT06 - Error parsing heartbeat data ({self.address})",
+                        flush=True,
+                    )
                     self.stream.close()
                     return
             elif (
@@ -108,7 +111,7 @@ class GT06Connection:
                 try:
                     await self.process_data(data_bin)
                 except Exception:
-                    print(f"Error parsing data ({self.address})", flush=True)
+                    print(f"GT06 - Error parsing data ({self.address})", flush=True)
                     self.stream.close()
                     return
             else:
@@ -146,7 +149,7 @@ class GT06Connection:
                         lon *= -1
                     loc_array = [(ts, lat, lon)]
                     await add_locations(self.db_device, loc_array)
-                    print("1 locations wrote to DB", flush=True)
+                    print(f"GT06 - {self.imei} wrote 1 locations to DB", flush=True)
                 offset += 4 + pck_len
 
         elif data_type in (0x32, 0x33):
@@ -182,7 +185,7 @@ class GT06Connection:
                 lon *= -1
             loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
             await add_locations(self.db_device, loc_array)
-            print("1 locations wrote to DB", flush=True)
+            print(f"GT06 - {self.imei} wrote 1 locations to DB", flush=True)
 
         elif data_type == 0x21:
             pck_data = data[offset + 5 : -6]
@@ -206,9 +209,9 @@ class GT06Connection:
                 date_str = f"{locmatch.group(5)}T{locmatch.group(6)}Z"
                 loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
                 await add_locations(self.db_device, loc_array)
-                print("1 locations wrote to DB", flush=True)
+                print(f"GT06 - {self.imei} wrote 1 locations to DB", flush=True)
         else:
-            print("Data without positions", flush=True)
+            print(f"GT06 - {self.imei} send data without positions", flush=True)
         return
 
     async def process_identification(self, data_bin):
@@ -228,7 +231,7 @@ class GT06Connection:
         if not self.db_device.user_agent:
             self.db_device.user_agent = "GT06"
         self.imei = imei
-        print(f"{self.imei} is connected")
+        print(f"GT06 - {self.imei} is connected")
         serial_number = data_bin[12:14]
         data_to_send = b"\x05\x01" + serial_number
         checksum = pack(">H", crc16(data_to_send))
@@ -275,10 +278,10 @@ class GT06Connection:
 
         loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
         await add_locations(self.db_device, loc_array)
-        print("1 locations wrote to DB", flush=True)
+        print(f"GT06 - {self.imei} wrote 1 locations to DB", flush=True)
 
     def _on_close(self):
-        print("Client quit", flush=True)
+        print("GT06 - Client quit", flush=True)
 
 
 class GT06Server(GenericTCPServer):
