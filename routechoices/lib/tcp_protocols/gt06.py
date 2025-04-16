@@ -211,7 +211,7 @@ class GT06Connection:
                 await add_locations(self.db_device, loc_array)
                 print(f"GT06 - {self.imei} wrote 1 locations to DB", flush=True)
         else:
-            print(f"GT06 - {self.imei} send data without positions", flush=True)
+            print(f"GT06 - {self.imei} sent data without positions", flush=True)
         return
 
     async def process_identification(self, data_bin):
