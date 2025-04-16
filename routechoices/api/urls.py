@@ -19,7 +19,7 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
-    url=f"https://www.{settings.PARENT_HOST}/",
+    url=f"https://www.{settings.PARENT_HOST}",
 )
 
 
