@@ -209,7 +209,7 @@ function fetchEvents() {
 				)
 				.map((e) => ({
 					id: e.id,
-					name: `${e.name} - ${e.club}`,
+					name: `${e.name} - ${e.club.name}`,
 					start_date: e.start_date,
 				}));
 			if (events.length === 0) {
