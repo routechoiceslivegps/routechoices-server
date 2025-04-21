@@ -1,11 +1,29 @@
 (async function updateStatus() {
-	await fetch("https://j9njnl3qx7d8.statuspage.io/api/v2/status.json")
+	const statusTexts = {
+		none: "All systems are operational",
+		major: "Partial System Outage",
+		critical: "Major System Outage",
+	};
+
+	await fetch(
+		"https://raw.githubusercontent.com/routechoices/upptime/master/history/summary.json",
+	)
 		.then((r) => r.json())
 		.then((data) => {
-			const className = `status-indicator-${data.status.indicator}`;
+			const statuses = data.map((s) => s.status);
+
+			let status = "major";
+			if (statuses.every((s) => s === "up")) {
+				status = "none";
+			} else if (statuses.every((s) => s === "down")) {
+				status = "critical";
+			}
+
 			const el = document.getElementById("status-indicator");
 			el.classList.remove("status-indicator-default");
+
+			const className = `status-indicator-${status}`;
 			el.classList.add(className);
-			el.parentNode.title = data.status.description;
+			el.parentNode.title = statusTexts[status];
 		});
 })();
