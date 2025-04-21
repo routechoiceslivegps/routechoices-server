@@ -374,6 +374,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                                 controlLoc["latitude"],
                                 controlLoc["longitude"],
                             )
+                            loc = (loc[0] * upscale, loc[1] * upscale)
                         else:
                             prev_ctrl = ctrls[i]
                             curr_ctrl = ctrls[i + 1]
