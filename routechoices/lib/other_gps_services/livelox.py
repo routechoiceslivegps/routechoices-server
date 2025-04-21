@@ -391,8 +391,10 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                             avg_angle = (prev_angle + angle_diff / 2) % (2 * math.pi)
                             opp_angle = avg_angle + math.pi
                             loc = (
-                                curr_ctrl[0] * upscale + math.cos(opp_angle) * circle_size * 2,
-                                curr_ctrl[1] * upscale + math.sin(opp_angle) * circle_size * 2,
+                                curr_ctrl[0] * upscale
+                                + math.cos(opp_angle) * circle_size * 2,
+                                curr_ctrl[1] * upscale
+                                + math.sin(opp_angle) * circle_size * 2,
                             )
 
                         numbersLoc[text].append((loc[0], loc[1]))
