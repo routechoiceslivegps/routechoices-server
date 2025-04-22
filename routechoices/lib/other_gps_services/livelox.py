@@ -404,7 +404,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                                 controlLoc["latitude"],
                                 controlLoc["longitude"],
                             )
-                            loc = (int(x * upscale) for x in loc)
+                            loc = [int(x * upscale) for x in loc]
                         else:
                             prev_ctrl = ctrls[i]
                             curr_ctrl = ctrls[i + 1]
@@ -453,7 +453,8 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                             width=line_width,
                         )
                 fnt = ImageFont.truetype(
-                    "routechoices/assets/fonts/arial.ttf", circle_radius * 2
+                    "routechoices/assets/fonts/arial.ttf",
+                    int(upscale * circle_radius * 2),
                 )
                 finalLoc = defaultdict(list)
                 for text, locs in numbersLoc.items():
