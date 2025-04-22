@@ -484,7 +484,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                 for text, locs in finalLoc.items():
                     for loc in locs:
                         draw.text(
-                            (loc[0], loc[1]),
+                            loc,
                             text,
                             font=fnt,
                             fill=line_color,
