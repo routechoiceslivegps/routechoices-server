@@ -256,8 +256,8 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                         map_angle - math.floor(map_angle // (2 * math.pi)) * 2 * math.pi
                     )
 
-                circle_size = int(40 * map_resolution) * upscale
-                line_width = int(8 * map_resolution) * upscale
+                line_width = int(8 * map_resolution * upscale)
+                circle_radius = 40 * map_resolution
                 line_color = (185, 42, 247, 180)
                 ctrls = [
                     map_obj.wsg84_to_map_xy(
@@ -274,26 +274,50 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                         # draw start triangle
                         draw.line(
                             [
-                                int(pt[0] * upscale + circle_size * math.cos(angle)),
-                                int(pt[1] * upscale + circle_size * math.sin(angle)),
                                 int(
-                                    pt[0] * upscale
-                                    + circle_size * math.cos(angle + 2 * math.pi / 3)
+                                    upscale * (pt[0] + circle_radius * math.cos(angle))
                                 ),
                                 int(
-                                    pt[1] * upscale
-                                    + circle_size * math.sin(angle + 2 * math.pi / 3)
+                                    upscale * (pt[1] + circle_radius * math.sin(angle))
                                 ),
                                 int(
-                                    pt[0] * upscale
-                                    + circle_size * math.cos(angle - 2 * math.pi / 3)
+                                    upscale
+                                    * (
+                                        pt[0]
+                                        + circle_radius
+                                        * math.cos(angle + 2 * math.pi / 3)
+                                    )
                                 ),
                                 int(
-                                    pt[1] * upscale
-                                    + circle_size * math.sin(angle - 2 * math.pi / 3)
+                                    upscale
+                                    * (
+                                        pt[1]
+                                        + circle_radius
+                                        * math.sin(angle + 2 * math.pi / 3)
+                                    )
                                 ),
-                                int(pt[0] * upscale + circle_size * math.cos(angle)),
-                                int(pt[1] * upscale + circle_size * math.sin(angle)),
+                                int(
+                                    upscale
+                                    * (
+                                        pt[0]
+                                        + circle_radius
+                                        * math.cos(angle - 2 * math.pi / 3)
+                                    )
+                                ),
+                                int(
+                                    upscale
+                                    * (
+                                        pt[1]
+                                        + circle_radius
+                                        * math.sin(angle - 2 * math.pi / 3)
+                                    )
+                                ),
+                                int(
+                                    upscale * (pt[0] + circle_radius * math.cos(angle))
+                                ),
+                                int(
+                                    upscale * (pt[1] + circle_radius * math.sin(angle))
+                                ),
                             ],
                             fill=line_color,
                             width=line_width,
@@ -323,13 +347,19 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                     else:
                         draw.line(
                             [
-                                int(pt[0] * upscale + circle_size * math.cos(angle)),
-                                int(pt[1] * upscale + circle_size * math.sin(angle)),
                                 int(
-                                    next_pt[0] * upscale - circle_size * math.cos(angle)
+                                    upscale * (pt[0] + circle_radius * math.cos(angle))
                                 ),
                                 int(
-                                    next_pt[1] * upscale - circle_size * math.sin(angle)
+                                    upscale * (pt[1] + circle_radius * math.sin(angle))
+                                ),
+                                int(
+                                    upscale
+                                    * (next_pt[0] - circle_radius * math.cos(angle))
+                                ),
+                                int(
+                                    upscale
+                                    * (next_pt[1] - circle_radius * math.sin(angle))
                                 ),
                             ],
                             fill=line_color,
@@ -346,10 +376,10 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                             )
                             draw.arc(
                                 [
-                                    int(next_pt[0] * upscale - circle_size),
-                                    int(next_pt[1] * upscale - circle_size),
-                                    int(next_pt[0] * upscale + circle_size),
-                                    int(next_pt[1] * upscale + circle_size),
+                                    int(upscale * (next_pt[0] - circle_radius)),
+                                    int(upscale * (next_pt[1] - circle_radius)),
+                                    int(upscale * (next_pt[0] + circle_radius)),
+                                    int(upscale * (next_pt[1] + circle_radius)),
                                 ],
                                 fill=line_color,
                                 width=line_width,
@@ -359,10 +389,10 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                     else:
                         draw.ellipse(
                             [
-                                int(next_pt[0] * upscale - circle_size),
-                                int(next_pt[1] * upscale - circle_size),
-                                int(next_pt[0] * upscale + circle_size),
-                                int(next_pt[1] * upscale + circle_size),
+                                int(upscale * (next_pt[0] - circle_radius)),
+                                int(upscale * (next_pt[1] - circle_radius)),
+                                int(upscale * (next_pt[0] + circle_radius)),
+                                int(upscale * (next_pt[1] + circle_radius)),
                             ],
                             outline=line_color,
                             width=line_width,
@@ -374,7 +404,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                                 controlLoc["latitude"],
                                 controlLoc["longitude"],
                             )
-                            loc = (loc[0] * upscale, loc[1] * upscale)
+                            loc = (int(x * upscale) for x in loc)
                         else:
                             prev_ctrl = ctrls[i]
                             curr_ctrl = ctrls[i + 1]
@@ -392,28 +422,38 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                             avg_angle = (prev_angle + angle_diff / 2) % (2 * math.pi)
                             opp_angle = avg_angle + math.pi
                             loc = (
-                                curr_ctrl[0] * upscale
-                                + math.cos(opp_angle) * circle_size * 2,
-                                curr_ctrl[1] * upscale
-                                + math.sin(opp_angle) * circle_size * 2,
+                                int(
+                                    upscale
+                                    * (
+                                        curr_ctrl[0]
+                                        + math.cos(opp_angle) * 2 * circle_radius
+                                    )
+                                ),
+                                int(
+                                    upscale
+                                    * (
+                                        curr_ctrl[1]
+                                        + math.sin(opp_angle) * 2 * circle_radius
+                                    )
+                                ),
                             )
 
                         numbersLoc[text].append((loc[0], loc[1]))
                     # draw finish
                     if i == (len(ctrls) - 2):
-                        inner_circle_size = int(30 * map_resolution) * upscale
+                        inner_circle_radius = 30 * map_resolution
                         draw.ellipse(
                             [
-                                int(next_pt[0] * upscale - inner_circle_size),
-                                int(next_pt[1] * upscale - inner_circle_size),
-                                int(next_pt[0] * upscale + inner_circle_size),
-                                int(next_pt[1] * upscale + inner_circle_size),
+                                int(upscale * (next_pt[0] - inner_circle_radius)),
+                                int(upscale * (next_pt[1] - inner_circle_radius)),
+                                int(upscale * (next_pt[0] + inner_circle_radius)),
+                                int(upscale * (next_pt[1] + inner_circle_radius)),
                             ],
                             outline=line_color,
                             width=line_width,
                         )
                 fnt = ImageFont.truetype(
-                    "routechoices/assets/fonts/arial.ttf", circle_size * 2
+                    "routechoices/assets/fonts/arial.ttf", circle_radius * 2
                 )
                 finalLoc = defaultdict(list)
                 for text, locs in numbersLoc.items():
