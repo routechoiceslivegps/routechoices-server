@@ -2,7 +2,7 @@ wsgi_app = "routechoices.wsgi:application"
 preload_app = True
 daemon = False
 raw_env = ["DJANGO_SETTINGS_MODULE=routechoices.settings"]
-pythonpath = "/app/routechoices-server/env/bin/python3"
+pythonpath = "/apps/routechoices-server/env/bin/python3"
 bind = ":8852"
 workers = 4
 threads = 3
