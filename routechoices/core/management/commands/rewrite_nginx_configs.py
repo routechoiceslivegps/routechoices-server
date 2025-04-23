@@ -19,9 +19,7 @@ class Command(BaseCommand):
         nginx_need_restart = False
         domains = options["domains"]
         if not domains:
-            clubs_w_domain = Club.objects.exclude(domain="").exclude(
-                domain__isnull=True
-            )
+            clubs_w_domain = Club.objects.exclude(domain="")
             for club in clubs_w_domain:
                 domain = club.domain
                 if Path(f"{settings.BASE_DIR}/nginx/certs/{domain}.key").exists():

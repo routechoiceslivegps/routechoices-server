@@ -229,11 +229,7 @@ class CsrfViewMiddleware(OrigCsrfViewMiddleware):
     @cached_property
     def allowed_origins_exact(self):
         allowed = super().allowed_origins_exact
-        domains = (
-            Club.objects.exclude(domain__isnull=True)
-            .exclude(domain="")
-            .values_list("domain", flat=True)
-        )
+        domains = Club.objects.exclude(domain="").values_list("domain", flat=True)
         for domain in domains:
             allowed.add(f"http://{domain}")
             allowed.add(f"https://{domain}")

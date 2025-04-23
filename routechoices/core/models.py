@@ -1375,7 +1375,6 @@ class Event(models.Model):
         verbose_name="Club",
         related_name="events",
         on_delete=models.CASCADE,
-        db_index=True,
     )
     name = models.CharField(verbose_name="Name", max_length=255)
     slug = models.CharField(
@@ -1386,7 +1385,10 @@ class Event(models.Model):
         help_text="This is used to build the url of this event",
         default=short_random_slug,
     )
-    start_date = models.DateTimeField(verbose_name="Start Date (UTC)")
+    start_date = models.DateTimeField(
+        verbose_name="Start Date (UTC)",
+        db_index=True,
+    )
     end_date = models.DateTimeField(
         verbose_name="End Date (UTC)",
     )
@@ -1411,7 +1413,6 @@ class Event(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        db_index=True,
     )
     map_title = models.CharField(
         max_length=255,
@@ -1462,7 +1463,6 @@ class Event(models.Model):
             "Events within the same event set will be grouped together "
             "on the event listing page."
         ),
-        db_index=True,
     )
     emergency_contacts = models.TextField(
         default="",
@@ -2528,7 +2528,6 @@ class Competitor(models.Model):
         Event,
         related_name="competitors",
         on_delete=models.CASCADE,
-        db_index=True,
     )
     device = models.ForeignKey(
         Device,
