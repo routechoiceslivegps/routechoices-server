@@ -122,8 +122,8 @@
                             </ul>
                             <div class="tab-content">
                                 <div id="android-ios" class="tab-pane show active">
-                                    <div>
-                                        <p>
+                                    <div class="mb-4">
+                                        <p >
                                             Install the app from Google Play app or the Apple App Store
                                             <br>
                                             Search "Routechoices Tracker", by OneHertz.
@@ -143,33 +143,53 @@
                                                      src="{% static 'img/apple-app-store-badge.svg' %}" />
                                             </a>
                                         </p>
-                                        <p>Upon opening the app, it will display a device ID.</p>
                                         <p>
-                                            Before starting a event, click the "Start live GPS" button to start sharing the location of the phone. When the event is over, Turn off the app with the "Stop live GPS" button.
-                                        </p>
-                                        <p>Once the GPS signal is good, the device ID turns green and the app starts uploading locations.</p>
-                                        <p>
-                                            <i class="fa-solid fa-triangle-exclamation"
-                                               style="color:red;
-                                                      font-size:1.2em"></i> <b>Ensure that GPS location provider with high accuracy is enabled in the system settings for the app and that GPS access is allowed all the time. If not, uploading GPS data will stop when screen goes to sleep.</b>
+                                            The <b>Routechoices Tracker App</b> lets you stream your live location to Routechoices.com. It provides you with a unique device ID, which you can share with event organizers to be registered.
                                         </p>
                                         <p>
-                                            Note: Google and Apple are trying to restrict background processes to give user better battery life, but it affects application like Routechoices Tracker which require persistent background execution. Common issues to check for:
+                                            <b>How It Works:</b>
+                                        </p>
+                                        <ol>
+                                            <li>
+                                                Open the app.
+                                            </li>
+                                            <li>
+                                                Grant it access to high accuracy location at all time, as well as background execution permission.<br/>
+                                                This ensures uninterrupted GPS tracking throughout your event..
+                                            </li>
+                                            <li>
+                                                Press "Start Live GPS" when you're ready to begin your run. The Device ID turns green when you are "Live".
+                                            </li>
+                                            <li>
+                                                Go on your adventure!
+                                            </li>
+                                            <li>
+                                                Press "Stop Live GPS" when you've finished.
+                                            </li>
+                                        </ol>
+                                    </div>
+                                    <div>
+                                        <p>
+                                            <b><i class="fa-solid fa-triangle-exclamation" style="color:red;font-size:1.2em"></i> Troubleshooting:</b>
                                             <ul>
                                                 <li>
-                                                    On recent versions of Android make sure that Routechoices Tracker has been added to battery optimization exceptions.
+                                                    Ensure that high-accuracy GPS is enabled in your phone's system settings.
                                                 </li>
                                                 <li>
-                                                    Some Android vendors have their own battery optimization in addition to standard Android system. Make sure those are disabled or the app is added to exceptions.
-                                                </p>
-                                            </li>
-                                            <li>
-                                                On iOS, make sure that in settings background execution is allowed and Routechoices Tracker has permission to always access location services.
-                                            </li>
-                                            <li>
-                                                Also on iOS, ensure that the settings in "Settings &gt; Privacy &gt; Location Services &gt; Routechoices Tracker" is set to "Always"
-                                            </li>
-                                        </ul>
+                                                    Recent Android versions may restrict background processes to improve battery life, which can affect apps like Routechoices Tracker.<br/>
+                                                    To ensure continuous tracking, add Routechoices Tracker to battery optimization exceptions in your device settings.
+                                                </li>
+                                                <li>
+                                                    Some Android manufacturers have additional battery-saving settings—make sure to disable them or add the app to their exceptions list.
+                                                </li>
+                                                <li>
+                                                    iOS restricts applications that can run in the background, make sure that background execution is allowed and Routechoices Tracker has permission to access location services at all times.
+                                                </li>
+                                                <li>
+                                                    iOS also limits when an application can fetch location data, ensure that the privacy setting for location access in "Settings > Privacy > Location Services > Routechoices Tracker" is set to "Always"
+                                                </li>
+                                            </ul>
+                                        </p>
                                     </div>
                                 </div>
                                 <div id="hardware" class="tab-pane">
