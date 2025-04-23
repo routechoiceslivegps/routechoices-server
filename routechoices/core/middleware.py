@@ -235,6 +235,14 @@ class CsrfViewMiddleware(OrigCsrfViewMiddleware):
             allowed.add(f"https://{domain}")
         return allowed
 
+    def process_response(self, request, response):
+        if request.META.get("RESET_CSRF_ALLOWED_MIDDLEWARE"):
+            try:
+                del self.allowed_origins_exact
+            except AttributeError:
+                pass
+        return super().process_response(request, response)
+
 
 class FilterCountriesIPsMiddleware:
     def __init__(self, get_response):

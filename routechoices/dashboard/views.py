@@ -439,6 +439,7 @@ def club_custom_domain_view(request):
         # check whether it's valid:
         if form.is_valid():
             form.save()
+            request.META["RESET_CSRF_ALLOWED_MIDDLEWARE"] = True
             messages.success(request, "Changes saved successfully")
             return redirect("dashboard:club:edit_view", club_slug=club.slug)
     else:
