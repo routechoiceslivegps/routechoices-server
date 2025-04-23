@@ -518,6 +518,8 @@ class CompetitorInline(admin.TabularInline):
         "name",
         "short_name",
         "start_time",
+        "color",
+        "tags",
     )
     autocomplete_fields = ("device",)
 
@@ -635,7 +637,7 @@ class EventAdmin(admin.ModelAdmin):
 
 class DeviceCompetitorInline(admin.TabularInline):
     model = Competitor
-    fields = ("event", "name", "short_name", "start_time", "link")
+    fields = ("event", "name", "short_name", "start_time", "color", "tags", "link")
     readonly_fields = ("link",)
     ordering = ("-start_time",)
 
