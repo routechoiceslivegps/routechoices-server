@@ -145,3 +145,7 @@
 .text-block-white {
 	background-color: var(--bs-body-bg);
 }
+
+.flex-basis-200px {
+	flex-basis: 200px;
+}
