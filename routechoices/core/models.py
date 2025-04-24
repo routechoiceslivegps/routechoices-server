@@ -2645,6 +2645,20 @@ class Competitor(models.Model):
             end_time = next_competitor_start_time
         return end_time
 
+    @cached_property
+    def locations(self):
+        if not self.device:
+            return []
+        locs, _ = self.device.get_locations_between_dates(
+            self.start_datetime, self.end_datetime
+        )
+        return locs
+
+    @property
+    def encoded_data(self):
+        result = gps_data_codec.encode(self.locations)
+        return result
+
     @property
     def gpx(self):
         if not self.device:
