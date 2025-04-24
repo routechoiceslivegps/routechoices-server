@@ -6,7 +6,7 @@
 	};
 
 	await fetch(
-		"https://raw.githubusercontent.com/routechoices/upptime/master/history/summary.json",
+		`https://raw.githubusercontent.com/routechoices/upptime/master/history/summary.json?${+new Date()}`,
 	)
 		.then((r) => r.json())
 		.then((data) => {
