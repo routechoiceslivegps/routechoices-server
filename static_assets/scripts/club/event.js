@@ -78,6 +78,8 @@ function RCEvent(infoURL, clockURL, locale) {
 	let competitorsMinCustomOffset = null;
 	const competitorsTags = new Set();
 	const activeCompetitorCategories = new Set();
+	const targetFPS = 1000 / 30;
+
 	const getBatteryLevelTitle = (battery, route) => {
 		const lastTs = route?.getLastPosition()?.[0];
 		const whenLastPos = dayjs(lastTs).fromNow();
@@ -1132,12 +1134,13 @@ function RCEvent(infoURL, clockURL, locale) {
 			}
 			currentTime =
 				+clock.now() - (fetchPositionInterval + 5 + sendInterval + 5) * 1e3; // 25sec // Delay includes by the fetch interval (10s) + the cache interval (5sec) + the send interval (default 5sec) + smoothness delay (5sec)
-			if (ts - prevDisplayRefresh > 100) {
-				const mustRefreshMeters = ts - prevMeterDisplayRefresh > 500;
+			const elapsedSineRefresh = ts - prevDisplayRefresh;
+			if (elapsedSineRefresh >= targetFPS) {
+				const mustRefreshMeters = ts - prevMeterDisplayRefresh > 1000;
 				drawCompetitors(mustRefreshMeters);
-				prevDisplayRefresh = ts;
+				prevDisplayRefresh = ts - (elapsedSineRefresh % targetFPS);
 				if (mustRefreshMeters) {
-					prevMeterDisplayRefresh = ts;
+					prevMeterDisplayRefresh = prevDisplayRefresh;
 				}
 			}
 			const isStillLive = eventEnd >= clock.now();
@@ -1145,7 +1148,6 @@ function RCEvent(infoURL, clockURL, locale) {
 				onSwitchToReplay();
 			}
 		}
-
 		function whileLive(ts) {
 			renderLive(ts);
 			if (isLive) {
@@ -1500,13 +1502,14 @@ function RCEvent(infoURL, clockURL, locale) {
 					return;
 				}
 			}
-			if (ts - prevDisplayRefresh > 100) {
-				const mustRefreshMeters = ts - prevMeterDisplayRefresh > 500;
+			const elapsedSineRefresh = ts - prevDisplayRefresh;
+			if (elapsedSineRefresh > targetFPS) {
+				const mustRefreshMeters = ts - prevMeterDisplayRefresh > 1000;
 				drawCompetitors(mustRefreshMeters);
+				prevDisplayRefresh = ts - (elapsedSineRefresh % targetFPS);
 				if (mustRefreshMeters) {
-					prevMeterDisplayRefresh = ts;
+					prevMeterDisplayRefresh = prevDisplayRefresh;
 				}
-				prevDisplayRefresh = ts;
 				prevShownTime = currentTime;
 			}
 
