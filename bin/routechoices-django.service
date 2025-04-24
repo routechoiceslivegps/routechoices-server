@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 Type=Simple
-ExecStart=/apps/routechoices-server/env/bin/gunicorn -c /apps/routechoices-server/bin/gunicorn.conf.py
+ExecStart=/apps/routechoices-server/env/bin/gunicorn -c /apps/routechoices-server/bin/gunicorn.conf.py -b /apps/routechoices-server/var/django.sock
 Restart=always
 Environment="PATH=/apps/routechoices-server/env/bin/"
 WorkingDirectory=/apps/routechoices-server/
