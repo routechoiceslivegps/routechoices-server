@@ -140,7 +140,12 @@ def event_set_creation(request):
 @swagger_auto_schema(
     method="get",
     operation_id="events_list",
-    operation_description="List events",
+    operation_description=(
+        "List all public events sorted by decreasing start date. "
+        "If you are identified it will list also all your events you have created,"
+        " no matter their privacy settings. "
+        "Will also list a secret event if its url is specified in the event parameter."
+    ),
     tags=["Events"],
     manual_parameters=[club_param, event_param],
     responses={
@@ -188,7 +193,7 @@ def event_set_creation(request):
 @swagger_auto_schema(
     method="post",
     operation_id="event_create",
-    operation_description="Create event",
+    operation_description="Create an event. This endpoint requires you to be identified.",
     tags=["Events"],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -432,7 +437,7 @@ def event_list(request):
 @swagger_auto_schema(
     method="get",
     operation_id="club_list",
-    operation_description="List clubs",
+    operation_description="List all the clubs.",
     tags=["Clubs"],
     manual_parameters=[mine_param],
     responses={
@@ -483,7 +488,10 @@ def club_list_view(request):
 @swagger_auto_schema(
     method="get",
     operation_id="event_detail",
-    operation_description="Read an event detail",
+    operation_description=(
+        "Read an event details. For private events you need "
+        "to be identified as an admin of the event organiser to be able to get a valid answer"
+    ),
     tags=["Events"],
     responses={
         "200": openapi.Response(
@@ -642,7 +650,7 @@ def event_detail(request, event_id):
 @swagger_auto_schema(
     method="post",
     operation_id="competitor_create",
-    operation_description="Create a competitor to a given event",
+    operation_description="Create a competitor for a given event. Only those identified as admins of the event organiser can set the competitor color",
     tags=["Competitors"],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -816,7 +824,7 @@ def create_competitor(request):
 @swagger_auto_schema(
     method="patch",
     operation_id="competitor_update",
-    operation_description="Edit a competitor",
+    operation_description="Edit a competitor. Only those identified as admins of the event organiser can set the competitor color. You need to be identified as the user that created the competitor or as an events organiser admin to get a valid answer.",
     tags=["Competitors"],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -853,7 +861,7 @@ def create_competitor(request):
 @swagger_auto_schema(
     method="delete",
     operation_id="competitor_delete",
-    operation_description="Delete a competitor",
+    operation_description="Delete a competitor. You need to be identified as the user that created the competitor or as an event organiser admin to get a valid answer.",
     tags=["Competitors"],
     responses={
         "204": openapi.Response(
@@ -958,7 +966,7 @@ def competitor_api(request, competitor_id):
     method="post",
     operation_id="competitor_route_upload",
     operation_description=(
-        "Upload route for an existing competitor (Delete existing data)"
+        "Upload a full route for an existing competitor (Deletes existing location data). You need to be identified as the user that created the competitor or as an event organiser admin to get a valid answer unless the events allow route upload and that the competitor has no locations data yet assigned."
     ),
     tags=["Competitors"],
     request_body=openapi.Schema(
@@ -1089,7 +1097,7 @@ def competitor_route_upload(request, competitor_id):
 @swagger_auto_schema(
     method="get",
     operation_id="event_data",
-    operation_description="Read competitors data from an event",
+    operation_description="Read competitors data from an event. You need to be identified as event organiser admin to list private events data.",
     tags=["Events"],
     responses={
         "200": openapi.Response(
@@ -1296,7 +1304,7 @@ def ip_latlon(request):
 @swagger_auto_schema(
     method="post",
     operation_id="device_add_locations",
-    operation_description="Uploads some location for given device",
+    operation_description="Uploads some locations for a given device. You need to be identified to get a valid answer.",
     tags=["Devices"],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -1448,7 +1456,7 @@ def get_version(request):
 @swagger_auto_schema(
     method="post",
     operation_id="device_create",
-    operation_description="Create a device",
+    operation_description="Request a device ID. You need to be identified to get a valid answer unless you provide a valid IMEI.",
     tags=["Devices"],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -1519,7 +1527,7 @@ def create_device_id(request):
 @swagger_auto_schema(
     method="get",
     operation_id="server_time",
-    operation_description="Return the server epoch time",
+    operation_description="Return the server unix epoch time",
     tags=["Miscellaneous"],
     responses={
         "200": openapi.Response(
@@ -1531,7 +1539,7 @@ def create_device_id(request):
 @swagger_auto_schema(
     method="post",
     operation_id="server_time",
-    operation_description="Return the server epoch time",
+    operation_description="Return the server unix epoch time",
     tags=["Miscellaneous"],
     responses={
         "200": openapi.Response(
