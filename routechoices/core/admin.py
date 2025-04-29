@@ -1013,6 +1013,7 @@ class MyUserAdmin(HijackUserAdminMixin, UserAdmin):
 @admin.register(BackupCode)
 class BackupCodeAdmin(admin.ModelAdmin):
     list_display = ("user", "code")
+    autocomplete_fields = ["user"]
 
 
 @admin.register(TOTPDevice)
@@ -1030,6 +1031,7 @@ admin.site.unregister(WebAuthnKey)
 @admin.register(WebAuthnKey)
 class WebAuthnKeyAdmin(admin.ModelAdmin):
     list_display = ("user", "key_name")
+    autocomplete_fields = ["user"]
 
 
 @admin.register(FrontPageFeedback)
