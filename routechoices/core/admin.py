@@ -382,6 +382,8 @@ class EventSetAdmin(admin.ModelAdmin):
         "club",
     )
     show_facets = False
+    search_fields = ["Name"]
+    autocomplete_fields = ["club"]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -419,6 +421,10 @@ class ClubAdmin(admin.ModelAdmin):
         "map_count",
         "geojson_count",
         "domain",
+    )
+    autocomplete_fields = (
+        "creator",
+        "admins",
     )
     list_filter = (HasEventsFilter, HasMapsFilter, "upgraded", "o_club")
     show_facets = False
@@ -506,6 +512,7 @@ class ExtraMapInline(admin.TabularInline):
         "map",
         "title",
     )
+    autocomplete_fields = ("map",)
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("map__club")
@@ -556,6 +563,7 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ("name", "event_set__name", "club__name")
     inlines = [ExtraMapInline, NoticeInline, CompetitorInline]
     show_facets = False
+    autocomplete_fields = ("map", "club", "event_set")
 
     @admin.display(boolean=True)
     def has_geojson(self, obj):
@@ -640,6 +648,7 @@ class DeviceCompetitorInline(admin.TabularInline):
     fields = ("event", "name", "short_name", "start_time", "color", "tags", "link")
     readonly_fields = ("link",)
     ordering = ("-start_time",)
+    autocomplete_fields = ["event"]
 
     def link(self, obj):
         return format_html('<a href="{}">Open</a>', obj.event.get_absolute_url())
@@ -649,6 +658,7 @@ class DeviceOwnershipInline(admin.TabularInline):
     model = DeviceClubOwnership
     fields = ("club", "nickname")
     ordering = ("creation_date",)
+    autocomplete_fields = ["club"]
 
 
 @admin.register(Device)
@@ -771,6 +781,8 @@ class DeviceArchiveReferenceAdmin(admin.ModelAdmin):
         "creation_date",
     )
 
+    autocomplete_fields = ["original", "archive"]
+
     def original_link(self, obj):
         return format_html(
             '<a href="/core/device/{}/change">{}</a>', obj.original_id, obj.original
@@ -791,6 +803,7 @@ class ImeiDeviceAdmin(admin.ModelAdmin):
     list_filter = (ImeiDeviceClubFilter,)
 
     search_fields = ("imei", "device__aid")
+    autocomplete_fields = ["device"]
 
     def device_link(self, obj):
         return format_html(
@@ -841,6 +854,7 @@ class MapAdmin(admin.ModelAdmin):
     show_facets = False
 
     search_fields = ("name", "club__name")
+    autocomplete_fields = ["club"]
 
     def get_queryset(self, request):
         return (
@@ -889,6 +903,7 @@ class MapAdmin(admin.ModelAdmin):
 class DeviceClubOwnershipAdmin(admin.ModelAdmin):
     list_display = ("device", "club_link", "nickname")
     list_filter = ("club",)
+    autocomplete_fields = ["device", "club"]
 
     def get_queryset(self, request):
         return (
@@ -1003,6 +1018,7 @@ class BackupCodeAdmin(admin.ModelAdmin):
 @admin.register(TOTPDevice)
 class TOTPDeviceAdmin(admin.ModelAdmin):
     list_display = ("user", "secret_base32")
+    autocomplete_fields = ["user"]
 
     def secret_base32(self, obj):
         return b32encode(obj.key).decode()
@@ -1025,9 +1041,17 @@ class FrontPageFeedbackAdmin(admin.ModelAdmin):
 class SpotDeviceAdmin(admin.ModelAdmin):
     list_display = (
         "messenger_id",
-        "device",
+        "device_link",
         "creation_date",
     )
+
+    search_fields = ["messenger_id", "device__aid"]
+    autocomplete_fields = ["device"]
+
+    def device_link(self, obj):
+        return format_html(
+            '<a href="/core/device/{}/change">{}</a>', obj.device_id, obj.device
+        )
 
 
 @admin.register(SpotFeed)
