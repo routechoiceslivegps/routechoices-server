@@ -168,10 +168,12 @@ def deg2rad(deg):
 def get_device_name(ua):
     if ua in ("Teltonika", "Queclink"):
         return ua
-    if ua.startswith("Traccar"):
-        return ua
     if ua.startswith("Routechoices-ios-tracker"):
         return "iOS"
+    if ua.startswith("ConnectMobile"):
+        return "Garmin"
+    if ua.startswith("Traccar"):
+        return ua
     return device_name(ua)
 
 
