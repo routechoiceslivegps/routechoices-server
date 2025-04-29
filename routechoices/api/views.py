@@ -490,7 +490,7 @@ def club_list_view(request):
     operation_id="event_detail",
     operation_description=(
         "Read an event details. For private events you need "
-        "to be identified as an admin of the event organiser to be able to get a valid answer"
+        "to be identified as an admin of the event organiser to be able to get a valid answer."
     ),
     tags=["Events"],
     responses={
@@ -650,7 +650,7 @@ def event_detail(request, event_id):
 @swagger_auto_schema(
     method="post",
     operation_id="competitor_create",
-    operation_description="Create a competitor for a given event. Only those identified as admins of the event organiser can set the competitor color",
+    operation_description="Create a competitor for a given event. Only those identified as admins of the event organiser can set the competitor color.",
     tags=["Competitors"],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -1527,7 +1527,7 @@ def create_device_id(request):
 @swagger_auto_schema(
     method="get",
     operation_id="server_time",
-    operation_description="Return the server unix epoch time",
+    operation_description="Return the server unix epoch time.",
     tags=["Miscellaneous"],
     responses={
         "200": openapi.Response(
@@ -1539,7 +1539,7 @@ def create_device_id(request):
 @swagger_auto_schema(
     method="post",
     operation_id="server_time",
-    operation_description="Return the server unix epoch time",
+    operation_description="Return the server unix epoch time.",
     tags=["Miscellaneous"],
     responses={
         "200": openapi.Response(
