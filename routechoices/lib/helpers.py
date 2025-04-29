@@ -170,6 +170,8 @@ def get_device_name(ua):
         return ua
     if ua.startswith("Routechoices-ios-tracker"):
         return "iOS"
+    if ua.startswith("Dalvik"):
+        return "Android"
     if ua.startswith("ConnectMobile"):
         return "Garmin"
     if ua.startswith("Traccar"):
