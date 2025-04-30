@@ -1,4 +1,4 @@
-{% load compress i18n %}
+{% load i18n static %}
 <h3>{% blocktranslate with filter_title=title %} By {{ filter_title }} {% endblocktranslate %}</h3>
 <ul class="admin-filter-{{ title|cut:' ' }}">
 {% if choices|slice:"20:" %}
@@ -10,15 +10,7 @@
     {% endfor %}
     </select>
     </li>
-    {% compress js %}
-    <script type="text/javascript">
-        django.jQuery(".admin-filter-{{ title|cut:' ' }} select").on("change", function(e) {
-            const opt = this.options[this.selectedIndex].value;
-            console.log(opt)
-            window.location = window.location.pathname + opt;
-        });
-    </script>
-    {% endcompress %}
+    <script type="text/javascript" data-title="{{ title|cut:' ' }}" src="{% static 'scripts/admin/filter.js' %}"></script>
 {% else %}
     {% for choice in choices %}
             <li{% if choice.selected %} class="selected"{% endif %}>
