@@ -2476,6 +2476,9 @@ class DeviceArchiveReference(models.Model):
         Device, related_name="archives_ref", on_delete=models.CASCADE
     )
 
+    def __str__(self):
+        return f"Archive {self.archive.aid} of {self.original.aid}"
+
 
 class ImeiDevice(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -2514,6 +2517,9 @@ class DeviceClubOwnership(models.Model):
         unique_together = (("device", "club"),)
         verbose_name = "Device ownership"
         verbose_name_plural = "Device ownerships"
+
+    def __str__(self):
+        return f"{self.device.aid} for {self.club.name}"
 
 
 class Competitor(models.Model):
@@ -2748,6 +2754,9 @@ class SpotFeed(models.Model):
         unique=True,
     )
     last_fetched = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return self.feed_id
 
 
 class SpotDevice(models.Model):

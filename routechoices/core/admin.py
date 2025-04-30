@@ -248,6 +248,23 @@ class HasLocationFilter(admin.SimpleListFilter):
             return queryset.filter(_location_count__gt=0)
 
 
+class HasDeviceFilter(admin.SimpleListFilter):
+    title = "whether it has devices"
+    parameter_name = "has_devices"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("true", "With devices"),
+            ("false", "Without devices"),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "false":
+            return queryset.filter(device_count=0)
+        if self.value():
+            return queryset.filter(device_count__gt=0)
+
+
 class HasCompetitorFilter(admin.SimpleListFilter):
     title = "whether it has competitors associated with"
     parameter_name = "has_competitors"
@@ -459,13 +476,20 @@ class ClubAdmin(admin.ModelAdmin):
         "event_count",
         "map_count",
         "geojson_count",
+        "device_count",
         "domain",
     )
     autocomplete_fields = (
         "creator",
         "admins",
     )
-    list_filter = (HasEventsFilter, HasMapsFilter, "upgraded", "o_club")
+    list_filter = (
+        HasEventsFilter,
+        HasMapsFilter,
+        HasDeviceFilter,
+        "upgraded",
+        "o_club",
+    )
     show_facets = False
     search_fields = ("name",)
 
@@ -493,6 +517,7 @@ class ClubAdmin(admin.ModelAdmin):
             .prefetch_related("admins")
             .annotate(event_count=Count("events", distinct=True))
             .annotate(map_count=Count("maps", distinct=True))
+            .annotate(device_count=Count("device_ownerships", distinct=True))
             .annotate(
                 geojson_count=Count(
                     "events",
@@ -519,6 +544,13 @@ class ClubAdmin(admin.ModelAdmin):
             obj.map_count,
         )
 
+    def device_count(self, obj):
+        return format_html(
+            '<a href="/core/deviceclubownership/?club__id__exact={}">{}</a>',
+            obj.pk,
+            obj.device_count,
+        )
+
     def geojson_count(self, obj):
         return format_html(
             '<a href="/core/event/?club__id__exact={}&has_geojson=true">{}</a>',
@@ -541,6 +573,7 @@ class ClubAdmin(admin.ModelAdmin):
     event_count.admin_order_field = "event_count"
     map_count.admin_order_field = "map_count"
     geojson_count.admin_order_field = "geojson_count"
+    device_count.admin_order_field = "device_count"
 
 
 class ExtraMapInline(admin.TabularInline):
@@ -699,6 +732,9 @@ class DeviceOwnershipInline(admin.TabularInline):
     ordering = ("creation_date",)
     autocomplete_fields = ["club"]
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("device", "club")
+
 
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
@@ -822,6 +858,9 @@ class DeviceArchiveReferenceAdmin(admin.ModelAdmin):
     )
 
     autocomplete_fields = ["original", "archive"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("archive", "original")
 
     def original_link(self, obj):
         return format_html(
