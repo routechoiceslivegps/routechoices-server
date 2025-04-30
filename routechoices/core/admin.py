@@ -8,7 +8,18 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
-from django.db.models import Case, Count, Exists, F, OuterRef, Prefetch, Q, Value, When
+from django.db.models import (
+    Case,
+    Count,
+    Exists,
+    F,
+    OuterRef,
+    Prefetch,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -260,9 +271,9 @@ class HasDeviceFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "false":
-            return queryset.filter(device_count=0)
+            return queryset.filter(device_count__isnull=True)
         if self.value():
-            return queryset.filter(device_count__gt=0)
+            return queryset.filter(device_count__isnull=False)
 
 
 class HasCompetitorFilter(admin.SimpleListFilter):
@@ -515,10 +526,16 @@ class ClubAdmin(admin.ModelAdmin):
             super()
             .get_queryset(request)
             .prefetch_related("admins")
-            .annotate(event_count=Count("events", distinct=True))
-            .annotate(map_count=Count("maps", distinct=True))
-            .annotate(device_count=Count("device_ownerships", distinct=True))
             .annotate(
+                device_count=Subquery(
+                    DeviceClubOwnership.objects.filter(club_id=OuterRef("pk"))
+                    .order_by()
+                    .values("club_id")
+                    .annotate(count=Count("club_id"))
+                    .values("count")
+                ),
+                event_count=Count("events", distinct=True),
+                map_count=Count("maps", distinct=True),
                 geojson_count=Count(
                     "events",
                     filter=~(
@@ -526,7 +543,7 @@ class ClubAdmin(admin.ModelAdmin):
                         | Q(events__geojson_layer__isnull=True)
                     ),
                     distinct=True,
-                )
+                ),
             )
         )
 

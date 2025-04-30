@@ -2508,7 +2508,7 @@ class DeviceClubOwnership(models.Model):
         Device, related_name="club_ownerships", on_delete=models.CASCADE
     )
     club = models.ForeignKey(
-        Club, related_name="device_ownerships", on_delete=models.CASCADE
+        Club, related_name="device_ownerships", on_delete=models.CASCADE, db_index=True
     )
     creation_date = models.DateTimeField(auto_now_add=True)
     nickname = models.CharField(max_length=12, default="")
