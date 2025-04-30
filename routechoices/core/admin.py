@@ -565,7 +565,7 @@ class ClubAdmin(admin.ModelAdmin):
         return format_html(
             '<a href="/core/deviceclubownership/?club__id__exact={}">{}</a>',
             obj.pk,
-            obj.device_count,
+            obj.device_count or 0,
         )
 
     def geojson_count(self, obj):
