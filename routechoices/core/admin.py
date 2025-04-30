@@ -335,7 +335,7 @@ class HasClubsFilter(admin.SimpleListFilter):
             return queryset.filter(club_count__gt=0)
 
 
-class IsGPXFilter(admin.SimpleListFilter):
+class VirtualDeviceFilter(admin.SimpleListFilter):
     title = "whether it is an actual device"
     parameter_name = "device_type"
 
@@ -365,6 +365,45 @@ class IsGPXFilter(admin.SimpleListFilter):
         if self.value():
             return queryset.all()
         return queryset.filter(virtual=False)
+
+
+class DeviceBrandFilter(admin.SimpleListFilter):
+    title = "device brand"
+    parameter_name = "device_brand"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("android", "Android"),
+            ("garmin", "Garmin"),
+            ("gt06", "GT06"),
+            ("ios", "iOS"),
+            ("mictrack", "MicTrack"),
+            ("queclink", "Queclink"),
+            ("teltonika", "Teltonika"),
+            ("tracktape", "TrackTape"),
+            ("xexun", "Xexun"),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "android":
+            return queryset.filter(user_agent__startswith="Dalvik/")
+        if self.value() == "garmin":
+            return queryset.filter(user_agent__startswith="ConnectMobile/")
+        if self.value() == "gt06":
+            return queryset.filter(user_agent="GT06")
+        if self.value() == "ios":
+            return queryset.filter(user_agent__startswith="Routechoices-ios-tracker/")
+        if self.value() == "mictrack":
+            return queryset.filter(user_agent__startswith="MicTrack ")
+        if self.value() == "queclink":
+            return queryset.filter(user_agent="Queclink")
+        if self.value() == "teltonika":
+            return queryset.filter(user_agent="Teltonika")
+        if self.value() == "tracktape":
+            return queryset.filter(user_agent="TrackTape")
+        if self.value() == "xexun":
+            return queryset.filter(user_agent__startswith="Xexun ")
+        return queryset
 
 
 @admin.register(EventSet)
@@ -688,7 +727,8 @@ class DeviceAdmin(admin.ModelAdmin):
         DeviceOwnershipInline,
     ]
     list_filter = (
-        IsGPXFilter,
+        VirtualDeviceFilter,
+        DeviceBrandFilter,
         ModifiedDateFilter,
         HasCompetitorFilter,
         HasLocationFilter,
