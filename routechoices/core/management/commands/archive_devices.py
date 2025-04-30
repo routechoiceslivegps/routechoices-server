@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 "competitor_set",
                 queryset=Competitor.objects.select_related("event"),
             )
-        ).filter(_location_count__gt=24 * 3600, is_gpx=False)
+        ).filter(_location_count__gt=24 * 3600, virtual=False)
 
         device_archived_count = 0
         two_weeks_ago = now() - timedelta(days=14)

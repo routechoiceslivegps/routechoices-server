@@ -159,7 +159,7 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
             dev_hash = f"{self.get_competitor_device_id_prefix()}{dev_hash}"
             dev_obj, created = Device.objects.get_or_create(
                 aid=dev_hash,
-                defaults={"is_gpx": True},
+                defaults={"virtual": True},
             )
             if not created:
                 dev_obj.erase_locations()

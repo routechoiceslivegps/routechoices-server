@@ -16,7 +16,7 @@ class Command(BaseCommand):
         devices = Device.objects.annotate(
             competitor_count=Count("competitor_set")
         ).filter(
-            is_gpx=True,
+            virtual=True,
             competitor_count=0,
             _location_count=0,
         )

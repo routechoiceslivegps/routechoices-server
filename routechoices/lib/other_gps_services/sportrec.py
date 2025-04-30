@@ -135,7 +135,7 @@ class SportRec(ThirdPartyTrackingSolution):
                         f"{dev_id}:{self.init_data['competition']['hashlink']}"
                     )[:8],
                     defaults={
-                        "is_gpx": True,
+                        "virtual": True,
                     },
                 )
                 if not created:

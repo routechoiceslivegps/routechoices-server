@@ -133,7 +133,7 @@ class OTracker(ThirdPartyTrackingSolution):
                 dev_obj, created = Device.objects.get_or_create(
                     aid="OTR_" + safe64encodedsha(f"{dev_id}:{self.uid}")[:8],
                     defaults={
-                        "is_gpx": True,
+                        "virtual": True,
                     },
                 )
                 if not created:

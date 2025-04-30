@@ -1075,7 +1075,7 @@ def competitor_route_upload(request, competitor_id):
         device = Device.objects.create(
             aid=f"{short_random_key()}_GPX",
             user_agent=request.session.user_agent[:200],
-            is_gpx=True,
+            virtual=True,
         )
         device.add_locations(loc_array)
         competitor.device = device
@@ -1594,7 +1594,7 @@ def device_search(request):
     devices = []
     q = request.GET.get("q")
     if q and len(q) > 4:
-        devices = Device.objects.filter(aid__startswith=q, is_gpx=False).values_list(
+        devices = Device.objects.filter(aid__startswith=q, virtual=False).values_list(
             "id", "aid"
         )[:10]
     return Response({"results": [{"id": d[0], "device_id": d[1]} for d in devices]})
@@ -1606,7 +1606,7 @@ def device_search(request):
 )
 @api_GET_view
 def device_info(request, device_id):
-    device = Device.objects.filter(aid=device_id, is_gpx=False).first()
+    device = Device.objects.filter(aid=device_id, virtual=False).first()
     if not device:
         res = {"error": "No device match this id"}
         return Response(res)
@@ -1635,7 +1635,7 @@ def device_info(request, device_id):
 )
 @api_GET_view
 def device_registrations(request, device_id):
-    device = get_object_or_404(Device, aid=device_id, is_gpx=False)
+    device = get_object_or_404(Device, aid=device_id, virtual=False)
     competitors = device.competitor_set.filter(event__end_date__gte=now())
     return Response({"count": competitors.count()})
 
@@ -1648,7 +1648,7 @@ def device_registrations(request, device_id):
 @login_required
 def device_ownership_api_view(request, club_slug, device_id):
     club = get_object_or_404(Club, slug=club_slug)
-    device = get_object_or_404(Device, aid=device_id, is_gpx=False)
+    device = get_object_or_404(Device, aid=device_id, virtual=False)
 
     ownership, _created = DeviceClubOwnership.objects.get_or_create(
         device=device, club=club

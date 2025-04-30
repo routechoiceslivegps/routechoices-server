@@ -2012,7 +2012,7 @@ class Device(models.Model):
         ],
     )
     user_agent = models.CharField(max_length=200, blank=True)
-    is_gpx = models.BooleanField(default=False)
+    virtual = models.BooleanField(default=False)
     owners = models.ManyToManyField(
         Club,
         through="DeviceClubOwnership",
@@ -2176,7 +2176,7 @@ class Device(models.Model):
         if locs_to_archive:
             archive_dev = Device(
                 aid=f"{short_random_key()}_ARC",
-                is_gpx=True,
+                virtual=True,
             )
             arc_reference = DeviceArchiveReference(original=self, archive=archive_dev)
             archive_dev.add_locations(locs_to_archive, save=False)

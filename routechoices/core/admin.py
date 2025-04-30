@@ -361,10 +361,10 @@ class IsGPXFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "virtual":
-            return queryset.filter(is_gpx=True)
+            return queryset.filter(virtual=True)
         if self.value():
             return queryset.all()
-        return queryset.filter(is_gpx=False)
+        return queryset.filter(virtual=False)
 
 
 @admin.register(EventSet)
