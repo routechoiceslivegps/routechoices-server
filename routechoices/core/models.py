@@ -31,7 +31,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator, validat
 from django.db import models
 from django.db.models import F, Min, Q
 from django.db.models.functions import ExtractMonth, ExtractYear, Upper
-from django.db.models.signals import post_delete, pre_delete
+from django.db.models.signals import post_delete, pre_delete, pre_save
 from django.dispatch import receiver
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404
@@ -2687,7 +2687,7 @@ class Competitor(models.Model):
         return self.tags.split(" ")
 
 
-@receiver([post_delete], sender=Competitor)
+@receiver([pre_save, post_delete], sender=Competitor)
 def invalidate_competitor_event_cache(sender, instance, **kwargs):
     instance.event.invalidate_cache()
     if instance.device:
