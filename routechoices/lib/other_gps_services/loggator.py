@@ -62,7 +62,10 @@ class Loggator(ThirdPartyTrackingSolutionWithProxy):
 
     def get_competitor_devices_data(self, event):
         devices_data = {}
-        r = requests.get(self.init_data["tracks"], timeout=20)
+        try:
+            r = requests.get(self.init_data["tracks"], timeout=20)
+        except Exception:
+            return {}
         if r.status_code == 200:
             try:
                 tracks_raw = r.json()["data"]

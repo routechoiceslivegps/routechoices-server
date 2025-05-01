@@ -69,8 +69,11 @@ class Command(BaseCommand):
                         f"/rest-api/2.0/public/feed/{feed.feed_id}/message.xml?"
                         f"startDate={last_fetched.strftime('%Y-%m-%dT%H:%I:%S-0000')}&endDate={now.strftime('%Y-%m-%dT%H:%I:%S-0000')}"
                     )
-                    res = requests.get(url, timeout=10)
-                    if res.status_code == 200:
+                    try:
+                        res = requests.get(url, timeout=10)
+                    except Exception:
+                        res = None
+                    if res and res.status_code == 200:
                         try:
                             n += self.parse_response(res.text)
                         except Exception():
