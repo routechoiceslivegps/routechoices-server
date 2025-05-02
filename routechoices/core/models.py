@@ -2579,50 +2579,15 @@ class Competitor(models.Model):
     def save(self, *args, **kwargs):
         if not self.start_time:
             self.start_time = self.event.start_date
-        new_event = self.event
-        new_event.invalidate_cache()
-        current_self = None
         if self.pk:
-            current_self = Competitor.objects.get(id=self.id)
-            new_device = self.device
-            new_start = self.start_time
-            old_device = current_self.device
-            old_start = current_self.start_time
-            old_event = current_self.event
-            # We proceed the future device before save so we can properly fetch
-            # data as they are before update
-            if new_device and new_device != old_device:
-                if new_start != old_start:
-                    from_time = min(old_start, new_start)
-                    to_time = max(old_start, new_start)
-                    events_between_old_and_new_starts = (
-                        new_device.get_events_between_dates(from_time, to_time)
-                    )
-                    for event_in_range in events_between_old_and_new_starts:
-                        event_in_range.invalidate_cache()
-                else:
-                    events_at_start = new_device.get_events_at_date(new_start)
-                    for event_then in events_at_start:
-                        event_then.invalidate_cache()
+            instance_before = Competitor.objects.only("device_id").get(pk=self.pk)
+            if self.device_id != instance_before.device_id:
+                device_competitors = Competitor.objects.select_related("event").filter(
+                    device_id=instance_before.device_id
+                )
+                for c in device_competitors:
+                    c.event.invalidate_cache()
         super().save(*args, **kwargs)
-        if current_self:
-            if old_event != new_event:
-                old_event.invalidate_cache()
-            # We proceed the old device after save so we can properly fetch
-            # data as they are after update
-            if old_device:
-                if new_start != old_start:
-                    from_time = min(old_start, new_start)
-                    to_time = max(old_start, new_start)
-                    events_between_old_and_new_starts = (
-                        old_device.get_events_between_dates(from_time, to_time)
-                    )
-                    for event_in_range in events_between_old_and_new_starts:
-                        event_in_range.invalidate_cache()
-                else:
-                    events_at_start = old_device.get_events_at_date(new_start)
-                    for event_then in events_at_start:
-                        event_then.invalidate_cache()
 
     @property
     def start_datetime(self):
@@ -2689,14 +2654,15 @@ class Competitor(models.Model):
 
 @receiver([pre_save, post_delete], sender=Competitor)
 def invalidate_competitor_event_cache(sender, instance, **kwargs):
+    if not instance.start_time:
+        instance.start_time = instance.event.start_date
     instance.event.invalidate_cache()
-    if instance.device:
-        start_time = instance.start_time
-        if not start_time:
-            start_time = instance.event.start_date
-        new_events_for_device = instance.device.get_events_at_date(start_time)
-        for event in new_events_for_device:
-            event.invalidate_cache()
+    if instance.device_id:
+        device_competitors = Competitor.objects.select_related("event").filter(
+            device_id=instance.device_id
+        )
+        for c in device_competitors:
+            c.event.invalidate_cache()
 
 
 class TcpDeviceCommand(models.Model):
