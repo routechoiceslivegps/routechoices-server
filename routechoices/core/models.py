@@ -2395,6 +2395,7 @@ class Device(models.Model):
                 start_time__lte=to_date,
             )
             .select_related("event")
+            .only("event")
             .order_by("start_time")
         )
         if should_be_ended:
@@ -2579,17 +2580,17 @@ class Competitor(models.Model):
     def save(self, *args, **kwargs):
         if not self.start_time:
             self.start_time = self.event.start_date
+        instance_before = None
         if self.pk:
-            instance_before = Competitor.objects.only("device_id").get(pk=self.pk)
-            if self.device_id != instance_before.device_id:
-                device_competitors = (
-                    Competitor.objects.select_related("event")
-                    .only("event")
-                    .filter(device_id=instance_before.device_id)
-                )
-                for c in device_competitors:
-                    c.event.invalidate_cache()
+            instance_before = Competitor.objects.only("device", "event").get(pk=self.pk)
         super().save(*args, **kwargs)
+        if instance_before and self.device != instance_before.device:
+            events_affected = instance_before.device.get_events_between_dates(
+                instance_before.start_time,
+                instance_before.event.end_date,
+            )
+            for event in events_affected:
+                event.invalidate_cache()
 
     @property
     def start_datetime(self):
@@ -2660,13 +2661,12 @@ def invalidate_competitor_event_cache(sender, instance, **kwargs):
         instance.start_time = instance.event.start_date
     instance.event.invalidate_cache()
     if instance.device_id:
-        device_competitors = (
-            Competitor.objects.select_related("event")
-            .only("event")
-            .filter(device_id=instance.device_id)
+        events_affected = instance.device.get_events_between_dates(
+            instance.start_time,
+            instance.event.end_date,
         )
-        for c in device_competitors:
-            c.event.invalidate_cache()
+        for event in events_affected:
+            event.invalidate_cache()
 
 
 class TcpDeviceCommand(models.Model):

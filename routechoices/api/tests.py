@@ -628,6 +628,13 @@ class EventApiTestCase(EssentialApiBase):
             start_date=arrow.get().shift(hours=-2).datetime,
             end_date=arrow.get().shift(hours=-1).datetime,
         )
+        event_d = Event.objects.create(
+            club=club,
+            name="Test event D",
+            open_registration=True,
+            start_date=arrow.get().shift(minutes=-50).datetime,
+            end_date=arrow.get().shift(minutes=-20).datetime,
+        )
         url_data_a = self.reverse_and_check(
             "event_data",
             f"/events/{event_a.aid}/data",
@@ -645,6 +652,12 @@ class EventApiTestCase(EssentialApiBase):
             f"/events/{event_c.aid}/data",
             "api",
             {"event_id": event_c.aid},
+        )
+        url_data_d = self.reverse_and_check(
+            "event_data",
+            f"/events/{event_d.aid}/data",
+            "api",
+            {"event_id": event_d.aid},
         )
         device = Device.objects.create()
         device_b = Device.objects.create()
@@ -669,61 +682,81 @@ class EventApiTestCase(EssentialApiBase):
             device=device_b,
             start_time=arrow.get().shift(minutes=-73).datetime,
         )
+        Competitor.objects.create(
+            name="Alice D",
+            short_name="A",
+            event=event_d,
+            device=device_b,
+            start_time=arrow.get().shift(minutes=-23).datetime,
+        )
         # fetch so cache exist
         self.client.get(url_data_a)
         self.client.get(url_data_b)
         self.client.get(url_data_c)
+        self.client.get(url_data_d)
         # Assert cache exists
         res = self.client.get(url_data_a)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.headers["X-Cache-Hit"], "1")
-        # Upload data in event B timespan should invalidate cache
+        self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
+        # Upload data in event B timespan should invalidate cache for only event B
         device.add_location(arrow.get().shift(minutes=-72).timestamp(), 0.2, 0.1)
         res = self.client.get(url_data_a)
-        self.assertEqual(res.headers["X-Cache-Hit"], "1")
+        self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
         res = self.client.get(url_data_b)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
-        res = self.client.get(url_data_b)
-        self.assertEqual(res.headers["X-Cache-Hit"], "1")
         # Updating competitor A name should invalidate event A
         competitor_a.name = "Bob"
         competitor_a.save()
         res = self.client.get(url_data_a)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
-        # Updating competitor A start time should invalidate event A and B
+        # Updating competitor A start time forward should invalidate event A and B
         competitor_a.start_time = arrow.get().shift(minutes=-71).datetime
         competitor_a.save()
         res = self.client.get(url_data_a)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
         res = self.client.get(url_data_b)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
-        # Updating competitor A start time should invalidate event A and B
+        # Updating competitor A start time backward should invalidate event A and B
         competitor_a.start_time = arrow.get().shift(minutes=-76).datetime
         competitor_a.save()
         res = self.client.get(url_data_a)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
         res = self.client.get(url_data_b)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
-
+        # Updating competitor A device should invalidate event A and B and C but not event D
+        competitor_a.device = device_b
+        competitor_a.save()
+        res = self.client.get(url_data_a)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_b)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_c)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_d)
+        self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
         # Reset data
         competitor_a.device = device
         competitor_a.start_time = arrow.get().shift(minutes=-70).datetime
         competitor_a.save()
         self.client.get(url_data_a)
-        # Updating competitor A device should invalidate event A and B if
-        # time is after event C start
+        self.client.get(url_data_b)
+        self.client.get(url_data_c)
+        self.client.get(url_data_d)
+        # Changing competitor A device should invalidate event A, B and C
         competitor_a.device = device_b
         competitor_a.save()
         res = self.client.get(url_data_a)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_b)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
         res = self.client.get(url_data_c)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_d)
+        self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
 
-        res = self.client.get(url_data_a)
-        self.assertEqual(res.headers["X-Cache-Hit"], "1")
-
-        Competitor.objects.create(
-            name="Alice D",
+        # Creating a competitor on event B should update event A, B and C not D
+        bob = Competitor.objects.create(
+            name="Alice E",
             short_name="A",
             event=event_b,
             device=device_b,
@@ -731,6 +764,22 @@ class EventApiTestCase(EssentialApiBase):
         )
         res = self.client.get(url_data_a)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_b)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_c)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_d)
+        self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
+        # Deleting a competitor on event B should update event A, B and C not D
+        bob.delete()
+        res = self.client.get(url_data_a)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_b)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_c)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        res = self.client.get(url_data_d)
+        self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
 
     def test_events_endpoints(self):
         club = Club.objects.create(name="Test club", slug="club")
@@ -812,7 +861,7 @@ class EventApiTestCase(EssentialApiBase):
         self.assertEqual(res.data["competitors"], [])
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
         res = self.client.get(url)
-        self.assertEqual(res.headers["X-Cache-Hit"], "1")
+        self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
         event.save()
         res = self.client.get(url)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
