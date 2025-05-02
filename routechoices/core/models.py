@@ -2582,7 +2582,9 @@ class Competitor(models.Model):
             self.start_time = self.event.start_date
         instance_before = None
         if self.pk:
-            instance_before = Competitor.objects.only("device").get(pk=self.pk)
+            instance_before = Competitor.objects.only("device", "start_time").get(
+                pk=self.pk
+            )
         super().save(*args, **kwargs)
         if (
             instance_before
@@ -2663,7 +2665,7 @@ def invalidate_competitor_event_cache(sender, instance, **kwargs):
     if not instance.start_time:
         instance.start_time = instance.event.start_date
     instance.event.invalidate_cache()
-    if instance.device_id:
+    if instance.device:
         events_affected = instance.device.get_events_at_date(instance.start_time)
         for event in events_affected:
             event.invalidate_cache()

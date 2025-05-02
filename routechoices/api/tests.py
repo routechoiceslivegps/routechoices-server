@@ -725,13 +725,14 @@ class EventApiTestCase(EssentialApiBase):
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
         # Updating competitor A device should invalidate event A but not event B, C or D
         competitor_a.device = device_b
+        competitor_a.start_time = arrow.get().shift(minutes=-70).datetime
         competitor_a.save()
         res = self.client.get(url_data_a)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
         res = self.client.get(url_data_b)
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
         res = self.client.get(url_data_c)
-        self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
         res = self.client.get(url_data_d)
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
         # Reset data
