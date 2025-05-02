@@ -12,7 +12,7 @@ import sys
 
 import coverage
 
-cov = coverage.coverage(data_suffix=True)
+cov = coverage.coverage()
 cov.start()
 
 from .wsgi import application  # noqa
