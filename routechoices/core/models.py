@@ -2589,9 +2589,8 @@ class Competitor(models.Model):
             and instance_before.device
             and self.device != instance_before.device
         ):
-            events_affected = instance_before.device.get_events_between_dates(
-                instance_before.start_time,
-                instance_before.event.end_date,
+            events_affected = instance_before.device.get_events_at_date(
+                instance_before.start_time
             )
             for event in events_affected:
                 event.invalidate_cache()
@@ -2665,10 +2664,7 @@ def invalidate_competitor_event_cache(sender, instance, **kwargs):
         instance.start_time = instance.event.start_date
     instance.event.invalidate_cache()
     if instance.device_id:
-        events_affected = instance.device.get_events_between_dates(
-            instance.start_time,
-            instance.event.end_date,
-        )
+        events_affected = instance.device.get_events_at_date(instance.start_time)
         for event in events_affected:
             event.invalidate_cache()
 
