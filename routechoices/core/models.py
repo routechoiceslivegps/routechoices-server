@@ -2582,8 +2582,10 @@ class Competitor(models.Model):
         if self.pk:
             instance_before = Competitor.objects.only("device_id").get(pk=self.pk)
             if self.device_id != instance_before.device_id:
-                device_competitors = Competitor.objects.select_related("event").filter(
-                    device_id=instance_before.device_id
+                device_competitors = (
+                    Competitor.objects.select_related("event")
+                    .only("event")
+                    .filter(device_id=instance_before.device_id)
                 )
                 for c in device_competitors:
                     c.event.invalidate_cache()
@@ -2658,8 +2660,10 @@ def invalidate_competitor_event_cache(sender, instance, **kwargs):
         instance.start_time = instance.event.start_date
     instance.event.invalidate_cache()
     if instance.device_id:
-        device_competitors = Competitor.objects.select_related("event").filter(
-            device_id=instance.device_id
+        device_competitors = (
+            Competitor.objects.select_related("event")
+            .only("event")
+            .filter(device_id=instance.device_id)
         )
         for c in device_competitors:
             c.event.invalidate_cache()
