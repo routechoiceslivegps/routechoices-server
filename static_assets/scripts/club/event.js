@@ -191,7 +191,6 @@ function RCEvent(infoURL, clockURL, locale) {
 
 		setValues: (ranking) => {
 			const cutoff = getRelativeTime(currentTime);
-			const isRelativeTime = !rankingFromSplit;
 
 			const rankingData = ranking
 				.sort((a, b) => a.time - b.time)
@@ -199,7 +198,7 @@ function RCEvent(infoURL, clockURL, locale) {
 				.map((c) => ({
 					name: c.competitor.name,
 					color: c.competitor.color,
-					resultText: getProgressBarText(c.time, false, false, isRelativeTime),
+					resultText: getProgressBarText(c.time, false, false, true),
 				}));
 
 			const rankingDiv = u('<div class="result-name-list"/>');
@@ -1787,6 +1786,12 @@ function RCEvent(infoURL, clockURL, locale) {
 										crossCount--;
 										continue;
 									}
+								} else {
+									if (isCustomStart) {
+										competitorTime -= getCompetitorsMinCustomOffset();
+									} else {
+										competitorTime -= getCompetitionStartDate();
+									}
 								}
 
 								splitTimes.push({
@@ -2898,56 +2903,6 @@ function RCEvent(infoURL, clockURL, locale) {
 	}
 	this.getRelativeTime = getRelativeTime;
 
-	function getProgressBarText(
-		currentTime,
-		bg = false,
-		date = false,
-		relative = true,
-	) {
-		let result = "";
-		if (bg && isLive) {
-			return "";
-		}
-		let viewedTime = currentTime;
-		if (!isRealTime || !relative) {
-			if (currentTime === 0) {
-				return "00:00:00";
-			}
-			if (relative) {
-				if (isCustomStart) {
-					viewedTime -= getCompetitorsMinCustomOffset();
-				} else {
-					viewedTime -= getCompetitionStartDate();
-				}
-			}
-			const t = viewedTime / 1e3;
-
-			function to2digits(x) {
-				return `0${Math.floor(x)}`.slice(-2);
-			}
-			result += t > 3600 || bg ? `${Math.floor(t / 3600)}:` : "";
-			result += `${to2digits((t / 60) % 60)}:${to2digits(t % 60)}`;
-		} else {
-			const t = Math.round(viewedTime / 1e3);
-			if (t === 0) {
-				return "00:00:00";
-			}
-
-			if (date) {
-				result = dayjs(viewedTime).format("YYYY-MM-DD");
-				if (bg) {
-					result += `<br><span class="time">${dayjs(viewedTime).format("HH:mm:ss")}</span>`;
-				} else {
-					result += ` ${dayjs(viewedTime).format("HH:mm:ss")}`;
-				}
-			} else {
-				result = dayjs(viewedTime).format("HH:mm:ss");
-			}
-		}
-		return result;
-	}
-	this.getProgressBarText = getProgressBarText;
-
 	function formatSpeed(s) {
 		const min = Math.floor(s / 60);
 		const sec = Math.floor(s % 60);
@@ -3033,8 +2988,21 @@ function RCEvent(infoURL, clockURL, locale) {
 		u("#progress_bar")
 			.css({ width: `${perc}%` })
 			.attr("aria-valuenow", perc);
-		u("#progress_bar_text").text(getProgressBarText(currentTime));
-		eventStateControl.setClockEl(getProgressBarText(currentTime, true, true));
+
+		let timeShown = currentTime;
+		if (!isRealTime) {
+			if (isCustomStart) {
+				timeShown -= getCompetitorsMinCustomOffset();
+			} else {
+				timeShown -= getCompetitionStartDate();
+			}
+		}
+		u("#progress_bar_text").text(
+			getProgressBarText(timeShown, false, false, !isRealTime),
+		);
+		eventStateControl.setClockEl(
+			getProgressBarText(timeShown, isLive, true, !isRealTime, true),
+		);
 
 		if (isMapMoving) return;
 

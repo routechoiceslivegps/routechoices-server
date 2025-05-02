@@ -59,6 +59,50 @@ const printTime = (time) => {
 	return `${text + prependZero(s)}s`;
 };
 
+function getProgressBarText(
+	currentTime,
+	hide = false,
+	date = false,
+	relative = true,
+	split = false,
+) {
+	let result = "";
+	if (hide) {
+		return "";
+	}
+	const viewedTime = currentTime;
+	if (relative) {
+		if (currentTime === 0) {
+			return "00:00:00";
+		}
+
+		const t = viewedTime / 1e3;
+
+		function to2digits(x) {
+			return `0${Math.floor(x)}`.slice(-2);
+		}
+		result += t > 3600 || split ? `${Math.floor(t / 3600)}:` : "";
+		result += `${to2digits((t / 60) % 60)}:${to2digits(t % 60)}`;
+	} else {
+		const t = Math.round(viewedTime / 1e3);
+		if (t === 0) {
+			return "00:00:00";
+		}
+
+		if (date) {
+			result = dayjs(viewedTime).format("YYYY-MM-DD");
+			if (split) {
+				result += `<br><span class="time">${dayjs(viewedTime).format("HH:mm:ss")}</span>`;
+			} else {
+				result += ` ${dayjs(viewedTime).format("HH:mm:ss")}`;
+			}
+		} else {
+			result = dayjs(viewedTime).format("HH:mm:ss");
+		}
+	}
+	return result;
+}
+
 L.Control.EventState = L.Control.extend({
 	options: {
 		position: "topleft",
