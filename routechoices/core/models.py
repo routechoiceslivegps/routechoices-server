@@ -2582,9 +2582,13 @@ class Competitor(models.Model):
             self.start_time = self.event.start_date
         instance_before = None
         if self.pk:
-            instance_before = Competitor.objects.only("device", "event").get(pk=self.pk)
+            instance_before = Competitor.objects.only("device").get(pk=self.pk)
         super().save(*args, **kwargs)
-        if instance_before and self.device != instance_before.device:
+        if (
+            instance_before
+            and instance_before.device
+            and self.device != instance_before.device
+        ):
             events_affected = instance_before.device.get_events_between_dates(
                 instance_before.start_time,
                 instance_before.event.end_date,
