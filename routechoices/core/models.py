@@ -29,7 +29,7 @@ from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.core.validators import MaxValueValidator, MinValueValidator, validate_slug
 from django.db import models
-from django.db.models import F, Min, Q
+from django.db.models import F, Max, Q
 from django.db.models.functions import ExtractMonth, ExtractYear, Upper
 from django.db.models.signals import post_delete, pre_delete, pre_save
 from django.dispatch import receiver
@@ -2374,16 +2374,12 @@ class Device(models.Model):
         qs = (
             self.competitor_set.all()
             .filter(start_time__lte=at, event__end_date__gte=at)
-            .annotate(min_start=Min("start_time"))
-            .filter(start_time=F("min_start"))
+            .annotate(max_start=Max("start_time"))
+            .filter(start_time=F("max_start"))
         )
         if load_events:
             qs = qs.select_related("event")
         return qs
-
-    def get_events_at_date(self, at):
-        competitors = self.get_competitors_at_date(at, load_events=True)
-        return {c.event for c in competitors}
 
     def get_events_between_dates(self, from_date, to_date, /, *, should_be_ended=False):
         if not self.pk:
@@ -2401,6 +2397,9 @@ class Device(models.Model):
         if should_be_ended:
             qs = qs.filter(event__end_date__lt=now())
         return {c.event for c in qs}
+
+    def get_events_at_date(self, at):
+        return self.get_events_between_dates(at, at)
 
     def get_last_competitor(self, load_event=False):
         qs = self.competitor_set.order_by("-start_time")
