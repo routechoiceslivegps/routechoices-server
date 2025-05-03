@@ -62,5 +62,9 @@ def extract_ground_overlay_info(kml):
             )
         except Exception:
             raise BadKMLException("Invalid GroundOverlay.")
-        out.append((f"{main_name} - {name}", href, corners_coords))
+        if name == main_name:
+            fullname = name
+        else:
+            fullname = f"{main_name} - {name}"
+        out.append((fullname, href, corners_coords))
     return out
