@@ -1206,20 +1206,6 @@ MAP_CHOICES = (
 )
 
 
-class BackroundMapChoicesField(models.CharField):
-    def __init__(self, **kwargs):
-        kwargs["max_length"] = 16
-        kwargs["choices"] = MAP_CHOICES
-        kwargs["default"] = MAP_BLANK
-        super().__init__(**kwargs)
-
-    def deconstruct(self):  # pragma: no cover
-        # only run when creating migrations, so no-cover
-        name, path, args, kwargs = super().deconstruct()
-        kwargs.pop("choices", None)
-        return (name, path, args, kwargs)
-
-
 class EventSet(models.Model):
     aid = models.CharField(
         default=random_key,
@@ -1406,7 +1392,12 @@ class Event(models.Model):
         "Listed on Routechoices.com events page",
         default=False,
     )
-    backdrop_map = BackroundMapChoicesField(verbose_name="Background map")
+    backdrop_map = models.CharField(
+        verbose_name="Background map",
+        max_length=16,
+        choices=MAP_CHOICES,
+        default=MAP_BLANK,
+    )
     map = models.ForeignKey(
         Map,
         related_name="events_main_map",
@@ -1515,6 +1506,12 @@ class Event(models.Model):
                 "end_date",
                 name="core_event_listing_idx",
             ),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(backdrop_map__in=list(zip(*MAP_CHOICES))[0]),
+                name="%(app_label)s_%(class)s_bgmap_valid",
+            )
         ]
 
     def __str__(self):
