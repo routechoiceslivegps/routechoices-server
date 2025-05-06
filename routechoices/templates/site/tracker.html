@@ -54,6 +54,16 @@
                                     </div>
                                     <div class="col align-self-center text-center">
                                         <picture>
+                                            <source srcset="{% static '/img/garmin.webp' %}?v=20230801"
+                                                    type="image/webp" />
+                                            <img src="{% static '/img/garmin.png' %}?v=20230801"
+                                                 alt="Garmin"
+                                                 height="150"
+                                                 width="150" />
+                                        </picture>
+                                    </div>
+                                    <div class="col align-self-center text-center">
+                                        <picture>
                                             <source srcset="{% static '/img/TMT250.webp' %}?v=20230801" type="image/webp" />
                                             <img src="{% static '/img/TMT250.png' %}?v=20230801"
                                                  alt="Teltonika TMT250"
@@ -71,22 +81,12 @@
                                                  width="150" />
                                         </picture>
                                     </div>
-                                    <div class="col align-self-center text-center">
-                                        <picture>
-                                            <source srcset="{% static '/img/tracktape.webp' %}?v=20230801"
-                                                    type="image/webp" />
-                                            <img src="{% static '/img/tracktape.png' %}?v=20230801"
-                                                 alt="Tracktape"
-                                                 height="150"
-                                                 width="244" />
-                                        </picture>
-                                    </div>
                                 </div>
                             </div>
                             <div class="col-12 col-md-7">
                                 <h2 class="fw-bold">Sharing your position</h2>
                                 <p>
-                                    Sharing your position to provide live GPS tracking can be done in two different way. Using a smartphone application or using one of the supported dedicated GPS trackers.
+                                    Sharing your position to provide live GPS tracking can be done in different ways. Using our smartphone application, a modern Garmin watch loaded with our data field, or using one of the supported dedicated GPS trackers.
                                 </p>
                                 <p>
                                     In any case, the device you are using will be assigned a unique <i>Device ID</i> that is used to identify your device and that you can communicate to the events organisers so you can be tracked.
@@ -113,6 +113,16 @@
                                     <button type="button"
                                             role="button"
                                             class="nav-link"
+                                            id="garmin-tab-btn"
+                                            data-bs-toggle="tab"
+                                            data-bs-target="#garmin">
+                                            <svg width="15px" height="15px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M22.017 22.67H1.984c-.77 0-1.388-.383-1.694-1.002-.387-.61-.387-1.39 0-2.002L10.304 2.33c.385-.615 1.002-1 1.695-1 .77 0 1.386.385 1.69 1l10.02 17.336c.387.617.387 1.39 0 2.002-.31.695-.927 1.002-1.693 1.002z"/></svg> Garmin
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button type="button"
+                                            role="button"
+                                            class="nav-link"
                                             id="hardware-tab-btn"
                                             data-bs-toggle="tab"
                                             data-bs-target="#hardware">
@@ -124,7 +134,7 @@
                                 <div id="android-ios" class="tab-pane show active">
                                     <div class="mb-4">
                                         <p >
-                                            Install the app from Google Play app or the Apple App Store
+                                            Install the app from <a href="https://play.google.com/store/apps/details?id=com.routechoices.routechoicestracker">Google Play</a> or the <a href="https://apps.apple.com/us/app/routechoices-tracker/id1570437272?itsct=apps_box_link&itscg=30200">Apple App Store</a>
                                             <br>
                                             Search "Routechoices Tracker", by OneHertz.
                                         </p>
@@ -136,7 +146,7 @@
                                                      width="202"
                                                      src="{% static 'img/google-play-badge.svg' %}" />
                                             </a>
-                                            <a href="https://apps.apple.com/us/app/routechoices-tracker/id1570437272?itsct=apps_box_link&itscg=30200">
+                                            <a href="https://apps.apple.com/us/app/routechoices-tracker/id1570437272?itsct=apps_box_link&itscg=30200" class="me-1 text-decoration-none">
                                                 <img alt="Get it on Apple App Store"
                                                      height="60"
                                                      width="180"
@@ -189,6 +199,30 @@
                                                     iOS also limits when an application can fetch location data, ensure that the privacy setting for location access in "Settings > Privacy > Location Services > Routechoices Tracker" is set to "Always"
                                                 </li>
                                             </ul>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="garmin" class="tab-pane">
+                                    <div>
+                                        <p>
+                                            Install the data field for Garmin watches from the <a href="https://apps.garmin.com/apps/89f2f5e6-0885-4549-baf0-415eb502f59a">Garmin Connect IQ App Store</a>
+                                            <br>
+                                            Search "Routechoices Tracker"
+                                        </p>
+                                        <p>
+                                            <a href="https://apps.garmin.com/apps/89f2f5e6-0885-4549-baf0-415eb502f59a" class="me-1 text-decoration-none"><img src="{% static 'img/connectiq.jpg' %}" width="128" height="128" class="rounded"></a>
+                                        </p>
+                                        <p>
+                                            <b>How It Works:</b>
+                                        </p>
+                                        <p>
+                                            Once installed, add the data field to the activity profiles in which you want to be tracked.
+                                        </p>
+                                        <p>
+                                            You'll need a connection to a phone with bluetooth during the activity to be able send locations to the server.
+                                        </p>
+                                        <p>
+                                            The field displays a Device ID you can use to register to events and the status of connection with the server (OFFLINE/LIVE)
                                         </p>
                                     </div>
                                 </div>
