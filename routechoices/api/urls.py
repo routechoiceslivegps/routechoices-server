@@ -27,6 +27,7 @@ urlpatterns = [
     re_path(r"^$", schema_view.with_ui("redoc", cache_timeout=0), name="api_doc"),
     re_path(r"^check-latlon/?$", views.ip_latlon, name="ip_latlon"),
     re_path(r"^event-set/?$", views.event_set_creation, name="event_set"),
+    path(r"healthcheck/", include("health_check.urls")),
     re_path(r"^locations/?$", views.locations_api_gw, name="locations_api_gw"),
     re_path(
         r"^maps/(?P<map_id>[-0-9a-zA-Z_]+)/kmz$",

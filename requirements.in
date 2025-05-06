@@ -15,6 +15,7 @@ django-compressor
 django-cors-headers
 django-csp
 django-environ
+django-health-check
 django-hijack
 django-hosts
 django-markdownify
