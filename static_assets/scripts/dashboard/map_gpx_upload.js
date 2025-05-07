@@ -98,6 +98,9 @@ function saveGeoJSON(filename, data) {
 				const lineFeature = {
 					type: "Feature",
 					properties: {},
+					style: {
+						className: "stroke-light",
+					},
 					geometry: {
 						type: "LineString",
 						coordinates: latlons,
