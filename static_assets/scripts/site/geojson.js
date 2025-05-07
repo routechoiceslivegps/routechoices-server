@@ -46,6 +46,7 @@ const geoJSONs = [
 					color: "#0099ff",
 					weight: 9,
 					opacity: 0.7,
+					className: "stroke-light",
 				},
 				geometry: {
 					type: "LineString",
