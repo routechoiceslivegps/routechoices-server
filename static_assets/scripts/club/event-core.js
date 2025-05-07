@@ -336,7 +336,7 @@ function getRunnerNameMarker(
 	focused = false,
 	scale = 2,
 ) {
-	const iconStyle = `color: ${color};opacity: ${faded ? 0.4 : 0.75};${
+	const iconStyle = `color: ${color};opacity: ${faded ? 0.5 : 1};${
 		focused ? `padding-bottom: 0px;border-bottom: 4px solid ${color};` : ""
 	}`;
 	const iconHtml = `<span style="${iconStyle}">${u("<span/>")

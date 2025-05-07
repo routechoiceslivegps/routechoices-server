@@ -1245,7 +1245,7 @@ function RCEvent(infoURL, clockURL, locale) {
 		splitLinesPoints[splitLineCount][1] = e.latlng;
 		splitLinesLine[splitLineCount] = L.polyline(
 			splitLinesPoints[splitLineCount],
-			{ color: "purple" },
+			{ color: "purple", className: "stroke-light" },
 		);
 		const splitLineIcon = getSplitLineMarker(`${splitLineCount + 1}`);
 		const coordinates = splitLinesPoints[splitLineCount].sort(
@@ -1291,7 +1291,7 @@ function RCEvent(infoURL, clockURL, locale) {
 		if (!splitLinesLine[splitLineCount]) {
 			splitLinesLine[splitLineCount] = L.polyline(
 				splitLinesPoints[splitLineCount],
-				{ color: "purple" },
+				{ color: "purple", className: "stroke-light" },
 			);
 			map.addLayer(splitLinesLine[splitLineCount]);
 		} else {
