@@ -2308,7 +2308,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					color: competitor.color,
 					opacity: 0.75,
 					weight: 5 * runnerIconScale,
-					className: `${competitor.highlighted ? "runner-focused" : ""}·stroke-dark`,
+					className: `${competitor.highlighted ? "runner-focused" : ""} stroke-dark`,
 				}).addTo(map);
 				competitor.tail.closestLayerPoint(new L.Point(0, 0));
 				competitor.tailScale = runnerIconScale;
