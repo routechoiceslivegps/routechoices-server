@@ -312,7 +312,7 @@ function getContrastYIQ(hexcolorRaw) {
 
 function getRunnerIcon(color, faded = false, focused = false, scale = 2) {
 	const iconSize = 15 * scale;
-	const liveColor = tinycolor(color).setAlpha(faded ? 0.4 : 0.75);
+	const liveColor = tinycolor(color).setAlpha(faded ? 0.5 : 1);
 	const htmlRect = `<div class="runner-dot" style="background: ${liveColor.toRgbString()};"></div>`;
 	const runnerIcon = L.divIcon({
 		html: htmlRect,
