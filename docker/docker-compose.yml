@@ -52,6 +52,10 @@ services:
       - minio
       - django
     command: ['nginx', '-g', 'daemon off;']
+    build:
+      context: "."
+      platforms:
+        - "linux/amd64"
   django:
     container_name: rc_django
     image: rphlo/routechoices-dev-server
