@@ -177,7 +177,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
                             return redirect(
                                 f"//{club.slug}.{default_domain}{request.get_full_path()}"
                             )
-                        request.club_slug = True
+                        request.club_slug = slug
                         if request.path != "/":
                             return render(
                                 request, "404.html", status=status.HTTP_404_NOT_FOUND
