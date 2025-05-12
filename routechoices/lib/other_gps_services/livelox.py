@@ -238,7 +238,9 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
             if not course.get("courseImages") and not course_img_found:
                 route = course["controls"]
                 map_resolution = (
-                    map_resolution_orig * route[0]["control"].get("mapScale", 15000) / 15000
+                    map_resolution_orig
+                    * route[0]["control"].get("mapScale", 15000)
+                    / 15000
                 )
 
                 map_projection = self.init_data["xtra"]["map"].get("projection")
