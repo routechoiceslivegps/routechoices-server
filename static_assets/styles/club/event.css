@@ -232,8 +232,7 @@
 	opacity: 0.75;
 }
 
-.runner-tail,
-svg:has(.runner-tail) {
+.runner-tail {
 	opacity: 0.75;
 }
 
