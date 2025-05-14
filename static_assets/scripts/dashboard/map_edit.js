@@ -1,6 +1,3 @@
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-	"/static/vendor/pdfjs-3.3.122/pdf.worker.js";
-
 const extractCornersCoordsFromFilename = (filename) => {
 	const re = /(_[-]?\d+(\.\d+)?){8}_\.(gif|png|jpg|jpeg|webp)$/;
 	const found = filename.match(re);
@@ -14,6 +11,8 @@ const extractCornersCoordsFromFilename = (filename) => {
 };
 
 const onPDF = (ev, filenameRaw) => {
+	pdfjsLib.GlobalWorkerOptions.workerSrc =
+		"/static/vendor/pdfjs-5.2.133/pdf.worker.js";
 	const loadingTask = pdfjsLib.getDocument({
 		data: new Uint8Array(ev.target.result),
 	});

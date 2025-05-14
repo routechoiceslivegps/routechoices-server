@@ -263,6 +263,7 @@ class MapForm(ModelForm):
         self.fields["image"].help_text = (
             "Image of map as a PNG, JPEG, GIF, WEBP, or PDF file"
         )
+        self.fields["image"].widget.attrs["accept"] = "image/*, .pdf"
 
     class Meta:
         model = Map
