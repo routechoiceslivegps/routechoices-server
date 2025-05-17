@@ -355,12 +355,12 @@
 	font-family: "Atkinson Hyperlegible", sans-serif;
 }
 
-svg:has(path.stroke-dark) {
+path.stroke-dark {
 	filter: drop-shadow(-1px -1px #000) drop-shadow(1px -1px #000)
 		drop-shadow(-1px 1px #000) drop-shadow(1px 1px #000) !important;
 }
 
-svg:has(path.stroke-light) {
+path.stroke-light {
 	filter: drop-shadow(-1px -1px #fff) drop-shadow(1px -1px #fff)
 		drop-shadow(-1px 1px #fff) drop-shadow(1px 1px #fff) !important;
 }
