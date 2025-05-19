@@ -2160,16 +2160,19 @@ function RCEvent(infoURL, clockURL, locale) {
 							}
 						}
 					}
-					// if last position is not older than 30 minutes
+					// Show battery if last position is not older than 30 minutes
+					/* Disabled, always show last battery level known.
 					let lastTS;
 					if (route) {
 						lastTS = route.getLastPosition()[0];
 					}
-					if (route && lastTS > +new Date() - 30 * 60 * 1e3) {
+					if (route && lastTS > +new Date() - 1800000) {
 						competitorBatteyLevels[competitor.id] = competitor.battery_level;
 					} else {
 						competitorBatteyLevels[competitor.id] = null;
 					}
+					*/
+					competitorBatteyLevels[competitor.id] = competitor.battery_level;
 					if (competitor.categories) {
 						for (const tag of competitor.categories) {
 							competitorsTags.add(tag);
