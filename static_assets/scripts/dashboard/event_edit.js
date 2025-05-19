@@ -565,7 +565,7 @@ function showLocalTime(el) {
 		fileReader.onload = () => {
 			const array = new Uint8Array(fileReader.result);
 			let string = "";
-			for (let i = 0; i < array.length; ++i) {
+			for (let i = 0; i < array.length; i++) {
 				string += String.fromCharCode(array[i]);
 			}
 			const encodingDetected = jschardet.detect(string).encoding;
