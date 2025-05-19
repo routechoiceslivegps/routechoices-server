@@ -560,7 +560,21 @@ function showLocalTime(el) {
 		(el) => originalEventStart !== "" && u(el).val() === originalEventStart,
 	).nodes;
 	u("#csv_input").on("change", (e) => {
-		Papa.parse(e.target.files[0], { complete: onCsvParsed });
+		const csvFile = e.target.files[0];
+		const fileReader = new FileReader();
+		fileReader.onload = () => {
+			const array = new Uint8Array(fileReader.result);
+			let string = "";
+			for (let i = 0; i < array.length; ++i) {
+				string += String.fromCharCode(array[i]);
+			}
+			const encodingDetected = jschardet.detect(string).encoding;
+			Papa.parse(e.target.files[0], {
+				complete: onCsvParsed,
+				encoding: encodingDetected,
+			});
+		};
+		fileReader.readAsArrayBuffer(csvFile);
 	});
 
 	u("#iof_input").on("change", onIofXMLLoaded);
