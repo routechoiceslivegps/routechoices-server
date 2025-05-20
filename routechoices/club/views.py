@@ -854,7 +854,7 @@ def sitemap(
 def gpsseuranta_time(request):
     import time
 
-    return HttpResponse(time.time() - 1136073600)
+    return HttpResponse(time.time() - 1136073600, headers={"Cache-Control": "no-cache"})
 
 
 def event_gpsseuranta_init_view(request, slug, **kwargs):

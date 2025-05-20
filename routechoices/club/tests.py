@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from routechoices.api.tests import EssentialApiBase
-from routechoices.core.models import Club, Event, EventSet, Map
+from routechoices.core.models import Club, Competitor, Device, Event, EventSet, Map
 
 
 class ClubViewsTestCase(EssentialApiBase):
@@ -111,47 +111,7 @@ class ClubViewsTestCase(EssentialApiBase):
         self.assertEqual(response.headers["Content-Length"], "11")
         self.assertEqual(response.headers["Content-Range"], "bytes 10-20/286")
 
-    def test_event_set_page_loads(self):
-        s = EventSet.objects.create(
-            club=self.club,
-            name="Killa Cup",
-        )
-        Event.objects.create(
-            name="Kiila Cup A",
-            slug="kiila-cup-A",
-            club=self.club,
-            start_date=arrow.now().shift(days=-11).datetime,
-            end_date=arrow.now().shift(days=-10).datetime,
-            event_set=s,
-        )
-        Event.objects.create(
-            name="Kiila Cup B",
-            slug="kiila-cup-B",
-            club=self.club,
-            start_date=arrow.now().shift(hours=-1).datetime,
-            end_date=arrow.now().shift(hours=1).datetime,
-            event_set=s,
-        )
-        client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
-        url = self.reverse_and_check(
-            "event_view",
-            "/kiila-cup/",
-            host="clubs",
-            extra_kwargs={"slug": "kiila-cup"},
-            host_kwargs={"club_slug": "kiilat"},
-            prefix="kiilat",
-        )
-        response = client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-        s.create_page = True
-        s.slug = "kiila-cup"
-        s.save()
-
-        response = client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_sitemaps_loads(self):
+    def test_club_commons_load(self):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
         s = EventSet.objects.create(
             club=self.club, name="Killa Cup", create_page=True, slug="kiila-cup"
@@ -203,7 +163,67 @@ class ClubViewsTestCase(EssentialApiBase):
         response = client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_event_map_loads(self):
+        url = self.reverse_and_check(
+            "manifest",
+            "/manifest.json",
+            host="clubs",
+            host_kwargs={"club_slug": "kiilat"},
+            prefix="kiilat",
+        )
+        response = client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = self.reverse_and_check(
+            "robots.txt",
+            "/robots.txt",
+            host="clubs",
+            host_kwargs={"club_slug": "kiilat"},
+            prefix="kiilat",
+        )
+        response = client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_event_set_page_load(self):
+        s = EventSet.objects.create(
+            club=self.club,
+            name="Killa Cup",
+        )
+        Event.objects.create(
+            name="Kiila Cup A",
+            slug="kiila-cup-A",
+            club=self.club,
+            start_date=arrow.now().shift(days=-11).datetime,
+            end_date=arrow.now().shift(days=-10).datetime,
+            event_set=s,
+        )
+        Event.objects.create(
+            name="Kiila Cup B",
+            slug="kiila-cup-B",
+            club=self.club,
+            start_date=arrow.now().shift(hours=-1).datetime,
+            end_date=arrow.now().shift(hours=1).datetime,
+            event_set=s,
+        )
+        client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
+        url = self.reverse_and_check(
+            "event_view",
+            "/kiila-cup/",
+            host="clubs",
+            extra_kwargs={"slug": "kiila-cup"},
+            host_kwargs={"club_slug": "kiilat"},
+            prefix="kiilat",
+        )
+        response = client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        s.create_page = True
+        s.slug = "kiila-cup"
+        s.save()
+
+        response = client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_event_map_load(self):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
         raster_map = Map.objects.create(
             club=self.club,
@@ -290,7 +310,7 @@ class ClubViewsTestCase(EssentialApiBase):
         response = client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_event_pages_loads(self):
+    def test_event_pages_load(self):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
         e = Event.objects.create(
             name="Kiila Cup 1",
@@ -390,7 +410,7 @@ class ClubViewsTestCase(EssentialApiBase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "Start List")
 
-    def test_no_event_pages_loads(self):
+    def test_no_event_pages_load(self):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
         url = self.reverse_and_check(
             "event_view",
@@ -413,7 +433,7 @@ class ClubViewsTestCase(EssentialApiBase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("This page does not exist", response.content.decode())
 
-    def test_custom_domain_loads(self):
+    def test_custom_domain_load(self):
         client = APIClient(HTTP_HOST="gpstracking.kiilat.com")
 
         response = client.get("/")
@@ -440,7 +460,7 @@ class ClubViewsTestCase(EssentialApiBase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_no_club_pages_loads(self):
+    def test_no_club_pages_load(self):
         client = APIClient(HTTP_HOST="haldensk.routechoices.dev")
 
         response = client.get("/kiila-cup-69/does-not-exist")
@@ -451,7 +471,7 @@ class ClubViewsTestCase(EssentialApiBase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("Club not found", response.content.decode())
 
-    def test_future_event_pages_loads(self):
+    def test_future_event_pages_load(self):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
 
         Event.objects.create(
@@ -476,7 +496,7 @@ class ClubViewsTestCase(EssentialApiBase):
         self.assertContains(response, "Enter yourself")
         self.assertNotContains(response, "Upload GPX")
 
-    def test_past_event_pages_loads(self):
+    def test_past_event_pages_load(self):
         client = APIClient(HTTP_HOST="kiilat.routechoices.dev")
 
         Event.objects.create(
@@ -529,4 +549,61 @@ class ClubViewsTestCase(EssentialApiBase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = client.get("/kiila-cup-4/export")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_gpsseuranta_compat_pages_load(self):
+        club = Club.objects.create(name="Test club", slug="myclub")
+        event = Event.objects.create(
+            club=club,
+            slug="myevent",
+            name="Test event",
+            open_registration=True,
+            start_date=arrow.get().shift(hours=-2).datetime,
+            end_date=arrow.get().shift(hours=-1).datetime,
+        )
+        device = Device.objects.create()
+        device.add_locations(
+            [
+                (arrow.get().shift(minutes=-70).timestamp(), 0, 0),
+                (arrow.get().shift(minutes=-69).timestamp(), 0.00001, 0.00001),
+            ]
+        )
+        Competitor.objects.create(
+            name="Alice A",
+            short_name="A",
+            event=event,
+            device=device,
+            start_time=arrow.get().shift(minutes=-70).datetime,
+        )
+        client = APIClient(HTTP_HOST="myclub.routechoices.dev")
+        url = self.reverse_and_check(
+            "event_gpsseuranta_data_view",
+            "/myevent/data.lst",
+            host="clubs",
+            extra_kwargs={"ext": "lst", "slug": event.slug},
+            host_kwargs={"club_slug": club.slug},
+            prefix=club.slug,
+        )
+        response = client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = self.reverse_and_check(
+            "event_gpsseuranta_init_view",
+            "/myevent/init.txt",
+            host="clubs",
+            extra_kwargs={"slug": event.slug},
+            host_kwargs={"club_slug": club.slug},
+            prefix=club.slug,
+        )
+        response = client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = self.reverse_and_check(
+            "gpsseuranta_time",
+            "/gps/time.php",
+            host="clubs",
+            host_kwargs={"club_slug": club.slug},
+            prefix=club.slug,
+        )
+        response = client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
