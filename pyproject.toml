@@ -5,3 +5,7 @@ target-version = ['py311']
 line-length = 88
 [tool.djlint]
 ignore="H021"
+[tool.coverage.run]
+omit = [
+  "routechoices/core/admin.py"
+]

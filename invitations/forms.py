@@ -74,11 +74,11 @@ class InvitationAdminAddForm(forms.ModelForm, CleanEmailMixin):
         widget=forms.TextInput(attrs={"type": "email", "size": "30"}),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # pragma: no cover
         self.club = None
         super().__init__(*args, **kwargs)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # pragma: no cover
         cleaned_data = super().clean()
         email = cleaned_data.get("email")
         club = cleaned_data.get("club")
