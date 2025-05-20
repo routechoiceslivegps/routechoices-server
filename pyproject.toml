@@ -7,5 +7,6 @@ line-length = 88
 ignore="H021"
 [tool.coverage.run]
 omit = [
+  "invitations/admin.py"
   "routechoices/core/admin.py"
 ]
