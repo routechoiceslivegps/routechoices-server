@@ -284,8 +284,10 @@ def event_view(request, slug, **kwargs):
     response = render(request, "club/event.html", resp_args)
     if event.privacy == PRIVACY_PRIVATE:
         response["Cache-Control"] = "private"
-    if event.club.upgraded or event.club.o_club:
-        response.xframe_options_exempt = True
+
+    # Allow embeding in external site iframe
+    response.xframe_options_exempt = True
+
     return response
 
 
