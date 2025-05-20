@@ -563,15 +563,14 @@ function showLocalTime(el) {
 		const csvFile = e.target.files[0];
 		const fileReader = new FileReader();
 		fileReader.onload = () => {
-			const array = new Uint8Array(fileReader.result);
-			let string = "";
-			for (let i = 0; i < array.length; i++) {
-				string += String.fromCharCode(array[i]);
-			}
-			const encodingDetected = jschardet.detect(string).encoding;
-			Papa.parse(e.target.files[0], {
+			const csvStr = String.fromCharCode.apply(
+				null,
+				new Uint8Array(fileReader.result),
+			);
+			const encoding = jschardet.detect(csvStr).encoding;
+			Papa.parse(csvFile, {
 				complete: onCsvParsed,
-				encoding: encodingDetected,
+				encoding,
 			});
 		};
 		fileReader.readAsArrayBuffer(csvFile);
