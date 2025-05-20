@@ -2172,12 +2172,14 @@ function RCEvent(infoURL, clockURL, locale) {
 						competitorBatteyLevels[competitor.id] = null;
 					}
 					*/
-					competitorBatteyLevels[competitor.id] = competitor.battery_level;
+     if (route) {
+					 competitorBatteyLevels[competitor.id] = competitor.battery_level;
+					}
 					if (competitor.categories) {
-						for (const tag of competitor.categories) {
+					 for (const tag of competitor.categories) {
 							competitorsTags.add(tag);
 						}
-					}
+				 }
 				}
 				updateCompetitorList(response.competitors);
 				displayCompetitorList();
