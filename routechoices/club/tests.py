@@ -557,15 +557,16 @@ class ClubViewsTestCase(EssentialApiBase):
             club=club,
             slug="myevent",
             name="Test event",
-            open_registration=True,
             start_date=arrow.get().shift(hours=-2).datetime,
             end_date=arrow.get().shift(hours=-1).datetime,
         )
         device = Device.objects.create()
         device.add_locations(
             [
-                (arrow.get().shift(minutes=-70).timestamp(), 0, 0),
-                (arrow.get().shift(minutes=-69).timestamp(), 0.00001, 0.00001),
+                (arrow.get().shift(seconds=-4070).timestamp(), 0, 0),
+                (arrow.get().shift(seconds=-4069).timestamp(), 0.00001, 0.00001),
+                (arrow.get().shift(seconds=-4068).timestamp(), 0.00101, 0.00101),
+                (arrow.get().shift(seconds=-4067).timestamp(), 0.00121, 0.00039),
             ]
         )
         Competitor.objects.create(
@@ -573,7 +574,6 @@ class ClubViewsTestCase(EssentialApiBase):
             short_name="A",
             event=event,
             device=device,
-            start_time=arrow.get().shift(minutes=-70).datetime,
         )
         client = APIClient(HTTP_HOST="myclub.routechoices.dev")
         url = self.reverse_and_check(
@@ -596,7 +596,6 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix=club.slug,
         )
         response = client.get(url)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         url = self.reverse_and_check(
             "gpsseuranta_time",
