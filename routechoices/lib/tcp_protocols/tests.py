@@ -270,6 +270,7 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
             "FAAF00140CF13520220082287830002BF2DD0200130013D360EFD7F514006402010D46322C4A450BA026D460EFD7FA14006402010D46322C4A450BA026FAAF",
             "FAAF0014000C3520220082287830002DF3A001002A0062D9047400005E0280001E47001B400D4BA732DF505E40B4153AAF78FEF00109000000000042B36666FAAF",
         ]
+        nb_new_pos_expected = [0, 0, 0, 0, 2, 1]
 
         server = client = None
         device = await create_imei_device("352022008228783")
@@ -279,7 +280,6 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
         client = IOStream(socket.socket())
         await client.connect(("localhost", port))
 
-        nb_new_pos_expected = [0, 0, 0, 0, 2, 1]
         nb_pos = 0
         for gps_data, nb_new_pos in zip(gps_data_with_pos, nb_new_pos_expected):
             await client.write(bytes.fromhex(gps_data))
