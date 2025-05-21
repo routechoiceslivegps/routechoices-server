@@ -931,7 +931,7 @@ def event_gpsseuranta_data_view(request, slug, **kwargs):
         out = ""
         chunks = []
         nb_pt_per_line = 29
-        for i in range(0, len(locations) // nb_pt_per_line + 1):
+        for i in range(len(locations) // nb_pt_per_line + 1):
             chunks.append(locations[i * nb_pt_per_line : (i + 1) * nb_pt_per_line])
         for chunk in chunks:
             prev_pt = None
