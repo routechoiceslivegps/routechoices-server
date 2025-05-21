@@ -279,10 +279,12 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
         client = IOStream(socket.socket())
         await client.connect(("localhost", port))
 
-        nb_pos_expected = [0, 0, 0, 0, 2, 3]
-        for gps_data, nb_pos in zip(gps_data_with_pos, nb_pos_expected):
+        nb_new_pos_expected = [0, 0, 0, 0, 2, 1]
+        nb_pos = 0
+        for gps_data, nb_new_pos in zip(gps_data_with_pos, nb_new_pos_expected):
             await client.write(bytes.fromhex(gps_data))
             await asyncio.sleep(0.05)
+            nb_pos += nb_new_pos
             device = await refresh_device(device)
             self.assertEqual(device.location_count, nb_pos)
 
