@@ -54,6 +54,14 @@
 	font-size: 30pt;
 }
 
+.first-container .frontpage_text {
+	font-size: 15.5pt;
+}
+
+.first-container .frontpage_text_bold {
+	font-size: 25pt;
+}
+
 .image-banner {
 	margin: 0;
 	padding: 0;
@@ -132,6 +140,7 @@
 	font-size: 1em;
 	background: rgb(0, 0, 0, calc(var(--rc-opacity) - 0.3));
 	border-radius: 5px;
+	line-height: 2.5em;
 }
 
 .sponsors-block {
