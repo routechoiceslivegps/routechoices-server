@@ -11,6 +11,7 @@ from routechoices.lib.tcp_protocols import (
     tmt250,
     tracktape,
     xexun,
+    xexun2,
 )
 
 
@@ -33,13 +34,16 @@ class Command(BaseCommand):
             "--queclink-port", nargs="?", type=int, help="Queclink Handler Port"
         )
         parser.add_argument(
-            "--xexun-port", nargs="?", type=int, help="Xexun Handler Port"
-        )
-        parser.add_argument(
             "--tmt250-port", nargs="?", type=int, help="Teltonika Handler Port"
         )
         parser.add_argument(
             "--tracktape-port", nargs="?", type=int, help="Tracktape Handler Port"
+        )
+        parser.add_argument(
+            "--xexun-port", nargs="?", type=int, help="Xexun Handler Port"
+        )
+        parser.add_argument(
+            "--xexun2-port", nargs="?", type=int, help="Xexun2 Handler Port"
         )
 
     def handle(self, *args, **options):
@@ -62,6 +66,9 @@ class Command(BaseCommand):
         if options.get("xexun_port"):
             xexun_server = xexun.XexunServer()
             xexun_server.listen(options["xexun_port"], reuse_port=True)
+        if options.get("xexun2_port"):
+            xexun2_server = xexun2.Xexun2Server()
+            xexun2_server.listen(options["xexun2_port"], reuse_port=True)
         try:
             print("Start listening TCP data...", flush=True)
             IOLoop.current().start()
@@ -78,6 +85,8 @@ class Command(BaseCommand):
                 tracktape_server.stop()
             if options.get("xexun_port"):
                 xexun_server.stop()
+            if options.get("xexun2_port"):
+                xexun2_server.stop()
             IOLoop.current().stop()
         finally:
             print("Stopped listening TCP data...", flush=True)
