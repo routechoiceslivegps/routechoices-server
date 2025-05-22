@@ -55,8 +55,7 @@ class GenericConnection:
         if self.imei:
             if imei != self.imei:
                 raise Exception("Cannot change IMEI")
-            else:
-                return
+            return
         validate_imei(imei)
         self.db_device = await get_device_by_imei(imei)
         if not self.db_device:
