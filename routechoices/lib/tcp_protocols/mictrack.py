@@ -1,29 +1,23 @@
 import arrow
 
-from routechoices.lib.helpers import random_key, safe64encode
+from routechoices.lib.helpers import safe64encode
 from routechoices.lib.tcp_protocols.commons import (
+    GenericConnection,
     GenericTCPServer,
     add_locations,
-    get_device_by_imei,
     send_sos,
 )
-from routechoices.lib.validators import validate_imei
 
 
-class MicTrackConnection:
+class MicTrackConnection(GenericConnection):
+    protocol_name = "MicTrack"
+
     def __init__(self, stream, address, logger):
-        print(f"MicTrack - New connection from {address}")
-        self.aid = random_key()
-        self.imei = None
-        self.address = address
-        self.stream = stream
-        self.stream.set_close_callback(self._on_close)
-        self.db_device = None
-        self.logger = logger
+        super().__init__(stream, address, logger)
         self.protocol_version = None
 
     async def start_listening(self):
-        print(f"MicTrack - listening from {self.address}")
+        print(f"MicTrack - Listening from {self.address}")
         while True:
             imei = None
             try:
@@ -91,19 +85,8 @@ class MicTrackConnection:
                 return
 
     async def process_identification(self, imei):
-        if self.imei:
-            if imei != self.imei:
-                raise Exception("Cannot change IMEI")
-            else:
-                return
-        validate_imei(imei)
-        self.db_device = await get_device_by_imei(imei)
-        if not self.db_device.user_agent:
-            self.db_device.user_agent = f"MicTrack V{self.protocol_version}"
-        if not self.db_device:
-            raise Exception("Unknown IMEI")
-        self.imei = imei
-        print(f"MicTrack - {self.imei} is connected")
+        await super().process_identification(imei)
+        self.db_device.user_agent = f"{self.protocol_name} V{self.protocol_version}"
 
     async def process_data(self, data):
         if self.protocol_version == 1:
@@ -190,9 +173,6 @@ class MicTrackConnection:
                 ),
                 flush=True,
             )
-
-    def _on_close(self):
-        print("MicTrack - Client quit", flush=True)
 
 
 class MicTrackServer(GenericTCPServer):

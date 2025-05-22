@@ -2,43 +2,18 @@ import re
 
 import arrow
 
-from routechoices.lib.helpers import random_key
 from routechoices.lib.tcp_protocols.commons import (
+    GenericConnection,
     GenericTCPServer,
     add_locations,
-    get_device_by_imei,
 )
-from routechoices.lib.validators import validate_imei
 
 
-class XexunConnection:
-    def __init__(self, stream, address, logger):
-        print(f"Xexun - New connection from {address}")
-        self.aid = random_key()
-        self.imei = None
-        self.address = address
-        self.stream = stream
-        self.stream.set_close_callback(self._on_close)
-        self.db_device = None
-        self.logger = logger
-
-    async def process_identification(self, imei):
-        if self.imei:
-            if imei != self.imei:
-                raise Exception("Cannot change IMEI")
-            else:
-                return
-        validate_imei(imei)
-        self.db_device = await get_device_by_imei(imei)
-        if not self.db_device.user_agent:
-            self.db_device.user_agent = "Xexun"
-        if not self.db_device:
-            raise Exception("Imei not registered")
-        self.imei = imei
-        print(f"Xexun - {self.imei} is connected")
+class XexunConnection(GenericConnection):
+    protocol_name = "Xexun"
 
     async def start_listening(self):
-        print(f"Xexun - listening from {self.address}")
+        print(f"Xexun - Listening from {self.address}")
         while True:
             imei = None
             try:
@@ -86,9 +61,6 @@ class XexunConnection:
 
         await add_locations(self.db_device, [(tim, lat, lon)])
         print(f"Xexun - {self.imei} wrote 1 locations to DB", flush=True)
-
-    def _on_close(self):
-        print("Xexun - Client quit", flush=True)
 
 
 class XexunServer(GenericTCPServer):

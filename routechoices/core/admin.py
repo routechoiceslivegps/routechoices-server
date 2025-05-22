@@ -423,7 +423,7 @@ class DeviceBrandFilter(admin.SimpleListFilter):
         if self.value() == "ios":
             return queryset.filter(user_agent__startswith="Routechoices-ios-tracker/")
         if self.value() == "mictrack":
-            return queryset.filter(user_agent__startswith="MicTrack ")
+            return queryset.filter(user_agent="MicTrack")
         if self.value() == "queclink":
             return queryset.filter(user_agent="Queclink")
         if self.value() == "teltonika":

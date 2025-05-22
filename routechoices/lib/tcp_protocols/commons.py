@@ -9,6 +9,8 @@ from tornado.iostream import StreamClosedError
 from tornado.tcpserver import TCPServer
 
 from routechoices.core.models import Device, TcpDeviceCommand
+from routechoices.lib.helpers import random_key
+from routechoices.lib.validators import validate_imei
 
 logger = logging.getLogger("TCP Rotating Log")
 logger.setLevel(logging.INFO)
@@ -36,6 +38,36 @@ class GenericTCPServer(TCPServer):
             await c.start_listening()
         except StreamClosedError:
             pass
+
+
+class GenericConnection:
+    def __init__(self, stream, address, logger):
+        print(f"{self.protocol_name} - New connection from {address}")
+        self.aid = random_key()
+        self.imei = None
+        self.address = address
+        self.stream = stream
+        self.stream.set_close_callback(self._on_close)
+        self.db_device = None
+        self.logger = logger
+
+    async def process_identification(self, imei):
+        if self.imei:
+            if imei != self.imei:
+                raise Exception("Cannot change IMEI")
+            else:
+                return
+        validate_imei(imei)
+        self.db_device = await get_device_by_imei(imei)
+        if not self.db_device:
+            raise Exception("Imei not registered")
+        if not self.db_device.user_agent:
+            self.db_device.user_agent = self.protocol_name
+        self.imei = imei
+        print(f"{self.protocol_name} - {self.imei} is connected")
+
+    def _on_close(self):
+        print(f"{self.protocol_name} - Client quit", flush=True)
 
 
 @sync_to_async

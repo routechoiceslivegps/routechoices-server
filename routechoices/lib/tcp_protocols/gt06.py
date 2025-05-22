@@ -6,15 +6,16 @@ import arrow
 from routechoices.lib.crc_itu import crc16
 from routechoices.lib.helpers import random_key, safe64encode
 from routechoices.lib.tcp_protocols.commons import (
+    GenericConnection,
     GenericTCPServer,
     add_locations,
-    get_device_by_imei,
     save_device,
 )
-from routechoices.lib.validators import validate_imei
 
 
-class GT06Connection:
+class GT06Connection(GenericConnection):
+    protocol_name = "GT06"
+
     def __init__(self, stream, address, logger):
         print(f"GT06 - New connection from {address}")
         self.aid = random_key()
@@ -26,7 +27,7 @@ class GT06Connection:
         self.logger = logger
 
     async def start_listening(self):
-        print(f"GT06 - listening from {self.address}")
+        print(f"GT06 - Listening from {self.address}")
 
         while True:
             try:
@@ -60,7 +61,8 @@ class GT06Connection:
             if data_type == 0x01:
                 # IDENTIFICATION
                 try:
-                    await self.process_identification(data_bin)
+                    imei = data_bin[4:12].hex()[1:]
+                    await self.process_identification(imei)
                 except Exception:
                     print(
                         f"GT06 - Error parsing identification data ({self.address})",
@@ -68,6 +70,16 @@ class GT06Connection:
                     )
                     self.stream.close()
                     return
+                else:
+                    self.logger.info(
+                        f"GT06 CONN, {self.aid}, {self.address}: {safe64encode(data_bin)}"
+                    )
+                    serial_number = data_bin[12:14]
+                    data_to_send = b"\x05\x01" + serial_number
+                    checksum = pack(">H", crc16(data_to_send))
+                    await self.stream.write(
+                        b"\x78\x78" + data_to_send + checksum + b"\r\n"
+                    )
             elif data_type == 0x13:
                 # HEARTBEAT
                 try:
@@ -214,29 +226,6 @@ class GT06Connection:
             print(f"GT06 - {self.imei} sent data without positions", flush=True)
         return
 
-    async def process_identification(self, data_bin):
-        self.logger.info(
-            f"GT06 CONN, {self.aid}, {self.address}: {safe64encode(data_bin)}"
-        )
-        imei = data_bin[4:12].hex()[1:]
-        if self.imei:
-            if imei != self.imei:
-                raise Exception("Cannot change IMEI")
-            else:
-                return
-        validate_imei(imei)
-        self.db_device = await get_device_by_imei(imei)
-        if not self.db_device:
-            raise Exception("Imei not registered")
-        if not self.db_device.user_agent:
-            self.db_device.user_agent = "GT06"
-        self.imei = imei
-        print(f"GT06 - {self.imei} is connected")
-        serial_number = data_bin[12:14]
-        data_to_send = b"\x05\x01" + serial_number
-        checksum = pack(">H", crc16(data_to_send))
-        await self.stream.write(b"\x78\x78" + data_to_send + checksum + b"\r\n")
-
     async def process_heartbeat(self, data_bin):
         if not self.imei:
             raise Exception(f"Heartbeat from unknown device ({self.address})")
@@ -279,9 +268,6 @@ class GT06Connection:
         loc_array = [(arrow.get(date_str).timestamp(), lat, lon)]
         await add_locations(self.db_device, loc_array)
         print(f"GT06 - {self.imei} wrote 1 locations to DB", flush=True)
-
-    def _on_close(self):
-        print("GT06 - Client quit", flush=True)
 
 
 class GT06Server(GenericTCPServer):

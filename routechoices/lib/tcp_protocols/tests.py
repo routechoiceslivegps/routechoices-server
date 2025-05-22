@@ -101,7 +101,7 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
             client.close()
 
     @gen_test
-    async def test_mictrack(self):
+    async def test_mictrack_v1(self):
         gps_data = b"#867198059727390#MT710#0000#AUTO#1\r\n#38$GPRMC,123318.00,A,2238.8946,N,11402.0635,E,,,100124,,,A*5C\r\n##"
         gps_data2 = b"#867198059727390#MT710#0000#AUTO#1\r\n#38$GPRMC,123319.00,A,2238.8946,N,11402.0635,E,,,100124,,,A*5C\r\n##"
 
@@ -126,7 +126,7 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
             client.close()
 
     @gen_test
-    async def test_mictrack_alt(self):
+    async def test_mictrack_v2(self):
         gps_data = b"MT;6;866425031361423;R0;10+190109091803+22.63823+114.02923+2.14+69+2+3744+113"
         gps_data2 = b"MT;6;866425031361423;R0;10+190109091802+22.63822+114.02922+2.14+69+2+3744+113"
 

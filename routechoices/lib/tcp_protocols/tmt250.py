@@ -2,14 +2,13 @@ from struct import pack, unpack
 
 from tornado.iostream import StreamClosedError
 
-from routechoices.lib.helpers import random_key, safe64encode
+from routechoices.lib.helpers import safe64encode
 from routechoices.lib.tcp_protocols.commons import (
+    GenericConnection,
     GenericTCPServer,
     add_locations,
-    get_device_by_imei,
     send_sos,
 )
-from routechoices.lib.validators import validate_imei
 
 
 class TMT250Decoder:
@@ -71,61 +70,38 @@ class TMT250Decoder:
         return pointer
 
 
-class TMT250Connection:
+class TMT250Connection(GenericConnection):
+    protocol_name = "Teltonika"
+
     def __init__(self, stream, address, logger):
-        print(f"Teltonika - New connection from {address}")
-        self.aid = random_key()
-        self.imei = None
-        self.address = address
-        self.stream = stream
-        self.stream.set_close_callback(self._on_close)
-        self.decoder = TMT250Decoder()
-        self.packet_len = 0
+        super().__init__(stream, address, logger)
         self.buffer = None
-        self.db_device = None
-        self.logger = logger
+        self.packet_len = 0
+        self.decoder = TMT250Decoder()
 
     async def parse_imei(self, data):
         imei_len = (data[0] << 8) + data[1]
         imei = ""
-        is_valid_imei = True
         try:
             imei = data[2:17].decode("ascii")
-            validate_imei(imei)
-            if self.imei:
-                if imei != self.imei:
-                    raise Exception("Cannot change IMEI")
-                else:
-                    return
+            if imei_len != len(imei):
+                raise Exception("Invlid IMEI length")
+            await self.process_identification(imei)
         except Exception:
-            is_valid_imei = False
-        if imei_len != len(imei) or not is_valid_imei:
+            await self.stream.write(b"\x00")
+            self.stream.close()
             print(
                 f"Teltonika - invalid identification {self.address}, {imei}, {imei_len}",
                 flush=True,
             )
-            await self.stream.write(b"\x00")
-            self.stream.close()
-            return
-
-        self.db_device = await get_device_by_imei(imei)
-        if not self.db_device:
-            print(
-                f"Teltonika - imei {imei} not registered ({self.address})", flush=True
+        else:
+            await self.stream.write(b"\x01")
+            self.logger.info(
+                f"TMT250 CONN, {self.aid}, {self.address}, {self.imei}: {safe64encode(bytes(data))}"
             )
-            await self.stream.write(b"\x00")
-            self.stream.close()
-            return
-
-        self.imei = imei
-        await self.stream.write(b"\x01")
-        self.logger.info(
-            f"TMT250 CONN, {self.aid}, {self.address}, {self.imei}: {safe64encode(bytes(data))}"
-        )
-        print(f"Teltonika - {self.imei} is connected", flush=True)
 
     async def start_listening(self):
-        print("Teltonika - listening from", self.address)
+        print("Teltonika - Listening from", self.address)
 
         while True:
             try:
@@ -157,9 +133,6 @@ class TMT250Connection:
         self.packet_length = unpack(">i", data[4:8])[0] + 4
         self.buffer = bytes(data)
         await self._on_full_data()
-
-    def _on_close(self):
-        print("Teltonika - Client quit", self.address)
 
     async def _on_full_data(self):
         try:

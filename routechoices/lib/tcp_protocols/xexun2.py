@@ -1,43 +1,25 @@
 from struct import pack, unpack
 
-from routechoices.lib.helpers import random_key, safe64encode
+from routechoices.lib.helpers import safe64encode
 from routechoices.lib.tcp_protocols.commons import (
+    GenericConnection,
     GenericTCPServer,
     add_locations,
-    get_device_by_imei,
     send_sos,
 )
-from routechoices.lib.validators import validate_imei
 
 
-class Xexun2Connection:
-    def __init__(self, stream, address, logger):
-        print(f"Xexun2 - New connection from {address}")
-        self.aid = random_key()
-        self.imei = None
-        self.address = address
-        self.stream = stream
-        self.stream.set_close_callback(self._on_close)
-        self.db_device = None
-        self.logger = logger
+def convert_coords(val):
+    degrees = val // 100
+    minutes = val - degrees * 100
+    return degrees + minutes / 60
 
-    async def process_identification(self, imei):
-        if self.imei:
-            if imei != self.imei:
-                raise Exception("Cannot change IMEI")
-            else:
-                return
-        validate_imei(imei)
-        self.db_device = await get_device_by_imei(imei)
-        if not self.db_device.user_agent:
-            self.db_device.user_agent = "Xexun2"
-        if not self.db_device:
-            raise Exception("Imei not registered")
-        self.imei = imei
-        print(f"Xexun2 - {self.imei} is connected")
+
+class Xexun2Connection(GenericConnection):
+    protocol_name = "Xexun2"
 
     async def start_listening(self):
-        print(f"Xexun2 - listening from {self.address}")
+        print(f"Xexun2 - Listening from {self.address}")
         while True:
             imei = None
             try:
@@ -76,11 +58,6 @@ class Xexun2Connection:
     async def process_data(self, data_bin):
         data_type = unpack(">H", data_bin[2:4])[0]
         index = unpack(">H", data_bin[4:6])[0]
-
-        def convert_coords(val):
-            degrees = val // 100
-            minutes = val - degrees * 100
-            return degrees + minutes / 60
 
         if data_type == 0x07:
             self.send_response(data_type, index)
@@ -265,9 +242,6 @@ class Xexun2Connection:
                     f" email sent to {sos_sent_to}",
                     flush=True,
                 )
-
-    def _on_close(self):
-        print("Xexun2 - Client quit", flush=True)
 
 
 class Xexun2Server(GenericTCPServer):

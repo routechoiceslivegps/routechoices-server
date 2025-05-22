@@ -2,47 +2,22 @@ import math
 
 import arrow
 
-from routechoices.lib.helpers import random_key
 from routechoices.lib.tcp_protocols.commons import (
+    GenericConnection,
     GenericTCPServer,
     add_locations,
-    get_device_by_imei,
     get_pending_commands,
     mark_pending_commands_sent,
     save_device,
     send_sos,
 )
-from routechoices.lib.validators import validate_imei
 
 
-class QueclinkConnection:
-    def __init__(self, stream, address, logger):
-        print(f"Queclink - New connection from {address}")
-        self.aid = random_key()
-        self.imei = None
-        self.address = address
-        self.stream = stream
-        self.stream.set_close_callback(self.on_close)
-        self.db_device = None
-        self.logger = logger
-
-    async def process_identification(self, imei):
-        if self.imei:
-            if imei != self.imei:
-                raise Exception("Cannot change IMEI")
-            else:
-                return
-        validate_imei(imei)
-        self.db_device = await get_device_by_imei(imei)
-        if not self.db_device.user_agent:
-            self.db_device.user_agent = "Queclink"
-        if not self.db_device:
-            raise Exception("Imei not registered")
-        self.imei = imei
-        print(f"Queclink - {self.imei} is connected")
+class QueclinkConnection(GenericConnection):
+    protocol_name = "Queclink"
 
     async def start_listening(self):
-        print(f"Queclink - listening from {self.address}")
+        print(f"Queclink - Listening from {self.address}")
         while True:
             imei = None
             try:
@@ -170,9 +145,6 @@ class QueclinkConnection:
         loc_array = pts
         await add_locations(self.db_device, loc_array)
         print(f"Queclink - {self.imei} wrote {len(pts)} locations to DB", flush=True)
-
-    def on_close(self):
-        print("Queclink - Client quit", flush=True)
 
 
 class QueclinkServer(GenericTCPServer):
