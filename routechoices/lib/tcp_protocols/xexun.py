@@ -31,7 +31,7 @@ class XexunConnection:
         validate_imei(imei)
         self.db_device = await get_device_by_imei(imei)
         if not self.db_device.user_agent:
-            self.db_device.user_agent = "Xexun ARM"
+            self.db_device.user_agent = "Xexun"
         if not self.db_device:
             raise Exception("Imei not registered")
         self.imei = imei

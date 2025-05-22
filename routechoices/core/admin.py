@@ -431,7 +431,7 @@ class DeviceBrandFilter(admin.SimpleListFilter):
         if self.value() == "tracktape":
             return queryset.filter(user_agent="TrackTape")
         if self.value() == "xexun":
-            return queryset.filter(user_agent="Xexun ARM")
+            return queryset.filter(user_agent="Xexun")
         if self.value() == "xexun2":
             return queryset.filter(user_agent="Xexun2")
         return queryset
