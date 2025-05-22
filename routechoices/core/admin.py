@@ -410,6 +410,7 @@ class DeviceBrandFilter(admin.SimpleListFilter):
             ("teltonika", "Teltonika"),
             ("tracktape", "TrackTape"),
             ("xexun", "Xexun"),
+            ("xexun2", "Xexun2"),
         ]
 
     def queryset(self, request, queryset):
@@ -430,7 +431,9 @@ class DeviceBrandFilter(admin.SimpleListFilter):
         if self.value() == "tracktape":
             return queryset.filter(user_agent="TrackTape")
         if self.value() == "xexun":
-            return queryset.filter(user_agent__startswith="Xexun ")
+            return queryset.filter(user_agent="Xexun ARM")
+        if self.value() == "xexun2":
+            return queryset.filter(user_agent="Xexun2")
         return queryset
 
 
