@@ -136,6 +136,15 @@
 	height: auto;
 }
 
+.background-circular-gradient {
+	color: var(--bs-body-bg);
+	background: #1f1633 !important;
+}
+
+[data-bs-theme="dark"] .background-circular-gradient {
+	color: #aaa;
+}
+
 .engage-link {
 	font-size: 1em;
 	background: rgb(0, 0, 0, calc(var(--rc-opacity) - 0.3));
