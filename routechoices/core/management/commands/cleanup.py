@@ -23,3 +23,6 @@ class Command(BaseCommand):
 
         self.stdout.write("\nRemove unused devices")
         call_command("clean_devices", force=True)
+
+        self.stdout.write("\nDead clubs removals")
+        call_command("clean_clubs")
