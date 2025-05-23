@@ -24,7 +24,7 @@
 [data-bs-theme="dark"] {
 	color-scheme: dark;
 	--rc-opacity: 0.9;
-	--rc-opacity-cover: rgba(120, 130, 150, 0.5);
+	--rc-opacity-cover: rgba(120, 130, 150, 0.75);
 }
 
 .video_cover {
