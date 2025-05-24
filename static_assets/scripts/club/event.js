@@ -84,10 +84,10 @@ function RCEvent(infoURL, clockURL, locale) {
 		const lastTs = route?.getLastPosition()?.[0];
 		const whenLastPos = dayjs(lastTs).fromNow();
 
-		if (battery && lastTs) {
+		if (battery !== null && lastTs) {
 			return `${battery}% | ${banana.i18n("last-seen", whenLastPos)}`;
 		}
-		if (battery) {
+		if (battery !== null) {
 			return `${battery}%`;
 		}
 		if (lastTs) {
