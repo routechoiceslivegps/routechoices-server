@@ -605,7 +605,7 @@ function RCEvent(infoURL, clockURL, locale) {
 						`fa-battery-${batteryIconName(
 							competitorBatteyLevels[competitor.id],
 						)}`,
-						!competitorBatteyLevels[competitor.id]
+						competitorBatteyLevels[competitor.id] === null
 							? "text-muted opacity-50"
 							: "",
 					);
