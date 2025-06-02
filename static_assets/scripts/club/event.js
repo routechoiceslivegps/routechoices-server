@@ -1790,7 +1790,7 @@ function RCEvent(infoURL, clockURL, locale) {
 									if (isCustomStart) {
 										competitorTime -= getCompetitorsMinCustomOffset();
 									} else {
-										competitorTime -= getCompetitionStartDate();
+										competitorTime -= eventStart;
 									}
 								}
 
