@@ -899,6 +899,7 @@ def competitor_api(request, competitor_id):
     new_name = request.data.get("name")
     new_short_name = request.data.get("short_name")
     new_device_id = request.data.get("device_id")
+    new_device = None
     if is_user_event_admin:
         new_color = request.data.get("color")
     else:
