@@ -655,7 +655,7 @@ class LiveloxBase64Reader:
         self.header = self.read_n_bits(8)
         return (
             (-1 if (self.header & 2) else 1)
-            * (1e3 if (self.header & 1) else 1)
+            * (1000 if (self.header & 1) else 1)
             * self.read_n_bits(self.header >> 2)
         )
 

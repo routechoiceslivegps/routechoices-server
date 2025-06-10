@@ -218,7 +218,7 @@ class MtbDecoder:
                 r = self.get_int64()
                 h -= 8
             if s in (b"\x02", b"\x03"):
-                a = 1e3 * (self.get_int32() + 2147483648)
+                a = 1000 * (self.get_int32() + 2147483648)
                 h -= 4
             else:
                 a = self.get_int64()
