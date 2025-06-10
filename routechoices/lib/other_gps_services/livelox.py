@@ -665,8 +665,6 @@ class LiveloxBase64Reader:
         t = 0
         lat = 0
         lng = 0
-        if isinstance(k, float):
-            k = int(k)
         for _ in range(k):
             t += self.read_value()
             lat += self.read_value()
