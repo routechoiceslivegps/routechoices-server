@@ -474,3 +474,41 @@ def simplify_line(points, tolerance=11):
             new_coords.append(p)
     new_coords.append(points[-1])
     return new_coords
+
+
+def gpsseuranta_encode_small_number(val):
+    if val < -21:
+        return chr(79 + val)
+    if val < 5:
+        return chr(86 + val)
+    return chr(92 + val)
+
+
+def gpsseuranta_encode_data(competitor_id, locations):
+    out = ""
+    chunks = []
+    nb_pt_per_line = 29
+    for i in range(len(locations) // nb_pt_per_line + 1):
+        chunks.append(locations[i * nb_pt_per_line : (i + 1) * nb_pt_per_line])
+    for chunk in chunks:
+        prev_pt = None
+        for pt in chunk:
+            t = pt[0] - 1136073600
+            lng = round(pt[2] * 5e4)
+            lat = round(pt[1] * 1e5)
+            if prev_pt is None:
+                out += f"t{competitor_id}.{t}_{lng}_{lat}."
+            else:
+                dt = t - prev_pt[0]
+                dlat = lat - prev_pt[1]
+                dlng = lng - prev_pt[2]
+                if abs(dt) < 31 and abs(dlat) < 31 and abs(dlng) < 31:
+                    out += gpsseuranta_encode_small_number(dt)
+                    out += gpsseuranta_encode_small_number(dlng)
+                    out += gpsseuranta_encode_small_number(dlat)
+                    out += "."
+                else:
+                    out += f"{dt}_{dlng}_{dlat}."
+            prev_pt = [t, lat, lng]
+        out += "\n"
+    return out

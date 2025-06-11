@@ -4,6 +4,7 @@ import logging
 import math
 import os.path
 import re
+import socket
 import time
 from datetime import timedelta
 from decimal import Decimal
@@ -53,6 +54,7 @@ from routechoices.lib.helpers import (
     epoch_to_datetime,
     general_2d_projection,
     get_current_site,
+    gpsseuranta_encode_data,
     int_base32,
     project,
     random_device_id,
@@ -93,6 +95,32 @@ WEBP_MAX_SIZE = 16383
 LOCATION_TIMESTAMP_INDEX = 0
 LOCATION_LATITUDE_INDEX = 1
 LOCATION_LONGITUDE_INDEX = 2
+
+
+class GPSSeurantaClient:
+    def connect(self):
+        if not settings.GPSSEURANTA_SERVER_ADDR:
+            return
+        location = urlparse(settings.GPSSEURANTA_SERVER_ADDR)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((location.hostname, location.port))
+
+    def send(self, device_id, locations):
+        if not settings.GPSSEURANTA_SERVER_ADDR:
+            return
+        data_to_relay = gpsseuranta_encode_data(device_id, locations)
+        attempt = 0
+        while attempt < 2:
+            attempt += 1
+            try:
+                self.socket.sendall(data_to_relay.encode("ascii"))
+            except Exception:
+                self.connect()
+            else:
+                break
+
+
+gpsseuranta_client = GPSSeurantaClient()
 
 
 class Point:
@@ -2020,6 +2048,8 @@ class Device(models.Model):
     battery_level = models.PositiveIntegerField(
         null=True, default=None, validators=[MaxValueValidator(100)], blank=True
     )
+    gpsseuranta_known = models.BooleanField(default=False)
+    gpsseuranta_relay_until = models.DateTimeField(null=True, blank=True)
 
     _last_location_datetime = models.DateTimeField(
         null=True, blank=True, editable=False
@@ -2326,8 +2356,18 @@ class Device(models.Model):
             )
             for archived_event_affected in archived_events_affected:
                 archived_event_affected.invalidate_cache()
+            if self.should_relay_to_gpsseuranta:
+                gpsseuranta_client.send(f"rc{self.aid}", added_locs)
         elif save:
             self.save()
+
+    @property
+    def should_relay_to_gpsseuranta(self):
+        return (
+            self.gpsseuranta_known
+            and self.gpsseuranta_relay_until
+            and now() <= self.gpsseuranta_relay_until
+        )
 
     def add_location(self, timestamp, lat, lon, /, *, save=True):
         self.add_locations(
