@@ -494,13 +494,14 @@ def event_map_view(request, slug, index="1", **kwargs):
 
     redirect_view = "event_main_map_download"
     redirect_kwargs = {"event_id": event.aid}
-
     if index != "1":
         redirect_view = "event_map_download"
         redirect_kwargs["index"] = index
 
-    mime = get_image_mime_from_request(kwargs.get("extension"))
-
+    extension = kwargs.get("extension")
+    if extension is None and request.META["HTTP_USER_AGENT"].startswith("Java/"):
+        extension = "png"
+    mime = get_image_mime_from_request(extension)
     if mime:
         redirect_view += "_with_format"
         redirect_kwargs["extension"] = mime[6:]
