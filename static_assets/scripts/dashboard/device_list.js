@@ -101,4 +101,21 @@
 			},
 		);
 	});
+	u(".gpsseuranta-set-btn").on("click", function (ev) {
+		const devId = u(this).attr("data-dev-id");
+		reqwest({
+			url: `${window.local.apiBaseUrl}clubs/${window.local.clubSlug}/devices/${devId}`,
+			data: { "activate-gpsseuranta-relay": 1 },
+			headers: {
+				"X-CSRFToken": window.local.csrfToken,
+			},
+			crossOrigin: true,
+			withCredentials: true,
+			method: "patch",
+			type: "json",
+			success: (response) => {
+				window.location.reload();
+			},
+		});
+	});
 })();

@@ -2,6 +2,7 @@ import logging
 import re
 import time
 import urllib.parse
+from datetime import timedelta
 from io import BytesIO
 from zipfile import ZipFile
 
@@ -1371,12 +1372,14 @@ def locations_api_gw(request):
     device_id = request.data.get("device_id")
     if not device_id:
         raise ValidationError("Missing device_id parameter")
-    if (
-        not request.user.is_authenticated
-        and re.match(r"^[0-9]+$", device_id)
-        and secret_provided not in settings.POST_LOCATION_SECRETS
-    ):
-        raise PermissionDenied("Authentication Failed")
+    device_id = str(device_id)
+    if re.match(r"^[0-9]+$", device_id):
+        if secret_provided not in settings.POST_LOCATION_SECRETS and (
+            not request.user.is_authenticated or request.user.username != "apps"
+        ):
+            raise PermissionDenied(
+                "Authentication Failed. Only validated apps are allowed"
+            )
 
     device = Device.objects.filter(aid=device_id).first()
     if not device:
@@ -1648,19 +1651,35 @@ def device_registrations(request, device_id):
 @api_view(["PATCH", "DELETE"])
 @login_required
 def device_ownership_api_view(request, club_slug, device_id):
-    club = get_object_or_404(Club, slug=club_slug)
+    club = get_object_or_404(Club.objects.filter(admins=request.user), slug=club_slug)
     device = get_object_or_404(Device, aid=device_id, virtual=False)
 
-    ownership, _created = DeviceClubOwnership.objects.get_or_create(
+    ownership, created = DeviceClubOwnership.objects.get_or_create(
         device=device, club=club
     )
     if request.method == "PATCH":
-        nick = request.data.get("nickname", "")
+        nick = request.data.get("nickname")
         if nick and len(nick) > 12:
+            if created:
+                ownership.delete()
             raise ValidationError("Can not be more than 12 characters")
-        ownership.nickname = nick
-        ownership.save()
-        return Response({"nickname": nick})
+
+        activate_gpsseuranta = request.data.get("activate-gpsseuranta-relay")
+        if activate_gpsseuranta:
+            if not device.gpsseuranta_known:
+                raise ValidationError("Device is not known by GPSSeuranta.net")
+
+        response = {}
+        if activate_gpsseuranta:
+            device.gpsseuranta_relay_until = now() + timedelta(hours=24)
+            device.save()
+            response["gpsseuranta_until"] = device.gpsseuranta_relay_until
+        if nick:
+            ownership.nickname = nick
+            ownership.save()
+            response["nickname"] = nick
+
+        return Response(response)
 
     if request.method == "DELETE":
         ownership.delete()

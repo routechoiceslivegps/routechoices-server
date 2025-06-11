@@ -1048,8 +1048,11 @@ class LocationApiTestCase(EssentialApiBase):
         )
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_locations_api_gw_no_secret_but_logged_in(self):
-        self.client.force_login(self.user)
+    def test_locations_api_gw_no_secret_but_logged_in_as_apps(self):
+        validated_apps_user = User.objects.create_user(
+            "apps", f"apps{random.randrange(1000)}@example.com", "pa$$word123"
+        )
+        self.client.force_login(validated_apps_user)
         dev_id = self.get_device_id()
         t = time.time()
         res = self.client.post(
@@ -1064,6 +1067,21 @@ class LocationApiTestCase(EssentialApiBase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data.get("device_id"), dev_id)
         self.assertEqual(res.data.get("location_count"), 2)
+
+    def test_locations_api_gw_no_secret_but_logged_in_as_random_user(self):
+        self.client.force_login(self.user)
+        dev_id = self.get_device_id()
+        t = time.time()
+        res = self.client.post(
+            self.url,
+            {
+                "device_id": dev_id,
+                "latitudes": "1.1,1.2",
+                "longitudes": "3.1,3.2",
+                "timestamps": f"{t},{t+1}",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_locations_api_gw_old_dev_id_valid(self):
         # Original app didnt require any authentication to post location
