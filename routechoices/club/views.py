@@ -499,7 +499,9 @@ def event_map_view(request, slug, index="1", **kwargs):
         redirect_kwargs["index"] = index
 
     extension = kwargs.get("extension")
-    if extension is None and request.META["HTTP_USER_AGENT"].startswith("Java/"):
+    if extension is None and request.META.get("HTTP_USER_AGENT", "").startswith(
+        "Java/"
+    ):
         extension = "png"
     mime = get_image_mime_from_request(extension)
     if mime:
