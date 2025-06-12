@@ -1520,8 +1520,10 @@ def create_device_id(request):
         return Response(
             {"status": "ok", "device_id": device.aid, "imei": imei}, status=status_code
         )
-    if not request.user.is_authenticated:
-        raise PermissionDenied("Authentication Failed")
+    if not request.user.is_authenticated or request.user.username != "apps":
+        raise PermissionDenied(
+            "Authentication Failed, Only validated apps can create new device IDs"
+        )
     device = Device.objects.create(user_agent=request.session.user_agent[:200])
     return Response(
         {"status": "ok", "device_id": device.aid}, status=status.HTTP_201_CREATED

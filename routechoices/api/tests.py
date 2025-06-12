@@ -88,6 +88,13 @@ class EssentialApiTestCase1(EssentialApiBase):
 
         self.client.force_login(self.user)
         res = self.client.post(url)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        validated_apps_user = User.objects.create_user(
+            "apps", f"apps{random.randrange(1000)}@example.com", "pa$$word123"
+        )
+        self.client.force_login(validated_apps_user)
+        res = self.client.post(url)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         dev_id = res.data.get("device_id")
         self.assertTrue(dev_id.isdigit())
