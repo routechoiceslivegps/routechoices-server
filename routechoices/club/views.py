@@ -929,7 +929,7 @@ def event_gpsseuranta_data_view(request, slug, **kwargs):
             locations, _ = competitor.device.get_locations_between_dates(
                 from_date, end_date
             )
-            result += gpsseuranta_encode_data(competitor.aid, locations)
+            result += gpsseuranta_encode_data(f"t{competitor.aid}", locations)
 
     content_type = "text/plain; charset=utf-8"
 

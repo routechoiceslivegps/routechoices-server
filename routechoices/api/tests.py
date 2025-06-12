@@ -1068,6 +1068,38 @@ class LocationApiTestCase(EssentialApiBase):
         self.assertEqual(res.data.get("device_id"), dev_id)
         self.assertEqual(res.data.get("location_count"), 2)
 
+    @override_settings(GPSSEURANTA_SERVER_ADDR="tcp://tcpbin.com:4242")
+    def test_gpsseuranta_relay(self):
+        validated_apps_user = User.objects.create_user(
+            "apps", f"apps{random.randrange(1000)}@example.com", "pa$$word123"
+        )
+        self.client.force_login(validated_apps_user)
+        device = Device.objects.create()
+        device.gpsseuranta_known = True
+        device.gpsseuranta_relay_until = arrow.get().shift(hours=1).datetime
+        device.save()
+        t = 1749720074
+        res = self.client.post(
+            self.url,
+            {
+                "device_id": device.aid,
+                "latitudes": "1.0001,1.0002",
+                "longitudes": "3.00001,3.00002",
+                "timestamps": f"{t},{t+1}",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data.get("device_id"), device.aid)
+        self.assertEqual(res.data.get("location_count"), 2)
+
+        from routechoices.core.models import gpsseuranta_client
+
+        data = gpsseuranta_client.socket.recv(1024)
+        self.assertEqual(
+            data,
+            bytes(f"rc{device.aid}.613646474_150000_100010.WWf.\n", encoding="ascii"),
+        )
+
     def test_locations_api_gw_no_secret_but_logged_in_as_random_user(self):
         self.client.force_login(self.user)
         dev_id = self.get_device_id()

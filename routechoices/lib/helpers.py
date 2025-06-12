@@ -497,7 +497,7 @@ def gpsseuranta_encode_data(competitor_id, locations):
             lng = round(pt[2] * 5e4)
             lat = round(pt[1] * 1e5)
             if prev_pt is None:
-                out += f"t{competitor_id}.{t}_{lng}_{lat}."
+                out += f"{competitor_id}.{t}_{lng}_{lat}."
             else:
                 dt = t - prev_pt[0]
                 dlat = lat - prev_pt[1]
