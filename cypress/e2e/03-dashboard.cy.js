@@ -83,7 +83,7 @@ context("Dashboard actions", () => {
 		cy.contains("Upgrade my subscription").click();
 		cy.get("#price-per-month").focus().clear().type("7.99");
 		cy.contains("Proceed to payment").click();
-		cy.origin("https://store.routechoices.com", () => {
+		cy.origin("https://routechoices.lemonsqueezy.com", () => {
 			cy.contains("Test mode is currently enabled.");
 		});
 	});
