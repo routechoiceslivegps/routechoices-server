@@ -1164,5 +1164,5 @@ ADMIN_COMMAND_LIST = [
     "import_event",
     "export_device_list",
     "export_email_list",
-    "clean_admin_logs",
+    "clear_admin_logs",
 ]

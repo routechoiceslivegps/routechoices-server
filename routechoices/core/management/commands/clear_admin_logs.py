@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = "Clean Admin Logs"
+    help = "Clear admin logs"
 
     def handle(self, *args, **options):
         LogEntry.objects.all().delete()
