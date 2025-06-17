@@ -79,6 +79,7 @@ function RCEvent(infoURL, clockURL, locale) {
 	const competitorsTags = new Set();
 	const activeCompetitorCategories = new Set();
 	const targetFPS = 1000 / 30;
+	let loaded = false;
 
 	const getBatteryLevelTitle = (battery, route) => {
 		const lastTs = route?.getLastPosition()?.[0];
@@ -1817,7 +1818,12 @@ function RCEvent(infoURL, clockURL, locale) {
 		const listDiv = u("<div/>");
 		listDiv.addClass("mt-1");
 		listDiv.attr({ id: "competitorList", "data-bs-theme": getCurrentTheme() });
-
+		if (!loaded && Object.keys(competitorList).length > 199) {
+			Object.values(competitorList).forEach((c, i) => {
+				c.isShown = i === 0;
+			});
+		}
+		loaded = true;
 		Object.values(competitorList).forEach((competitor, i) => {
 			if (
 				searchText === null ||
