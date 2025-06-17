@@ -249,7 +249,7 @@ function RCEvent(infoURL, clockURL, locale) {
 
 	L.control.ranking = (opts) => new L.Control.Ranking(opts);
 
-	class CompetitorSidebarEl extends HTMLElement {
+	class CompetitorSidebarDiv extends HTMLElement {
 		constructor() {
 			super();
 
@@ -647,7 +647,7 @@ function RCEvent(infoURL, clockURL, locale) {
 		}
 	}
 
-	window.customElements.define("competitor-sidebar-div", CompetitorSidebarEl);
+	window.customElements.define("competitor-sidebar-div", CompetitorSidebarDiv);
 
 	function initializeMap() {
 		map = L.map("map", {
