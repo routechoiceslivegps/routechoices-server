@@ -1819,8 +1819,8 @@ function RCEvent(infoURL, clockURL, locale) {
 		listDiv.addClass("mt-1");
 		listDiv.attr({ id: "competitorList", "data-bs-theme": getCurrentTheme() });
 		if (!loaded && Object.keys(competitorList).length > 199) {
-			Object.values(competitorList).forEach((c, i) => {
-				c.isShown = i === 0;
+			Object.values(competitorList).forEach((competitor, i) => {
+				competitor.isShown = i === 0;
 			});
 		}
 		loaded = true;
