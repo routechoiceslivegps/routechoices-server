@@ -647,7 +647,7 @@ function RCEvent(infoURL, clockURL, locale) {
 		}
 	}
 
-	window.customElements.define("competitor-sidebar-el", CompetitorSidebarEl);
+	window.customElements.define("competitor-sidebar-div", CompetitorSidebarEl);
 
 	function initializeMap() {
 		map = L.map("map", {
@@ -1831,7 +1831,7 @@ function RCEvent(infoURL, clockURL, locale) {
 				competitor.name.toLowerCase().search(escapeRegExp(searchText)) !== -1
 			) {
 				listDiv.append(
-					`<competitor-sidebar-el index="${i}" competitor-id="${competitor.id}"/>`,
+					`<competitor-sidebar-div index="${i}" competitor-id="${competitor.id}"/>`,
 				);
 			}
 		});
