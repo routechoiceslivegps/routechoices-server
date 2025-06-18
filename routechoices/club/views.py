@@ -503,7 +503,7 @@ def event_map_view(request, slug, index="1", **kwargs):
     if extension is None and request.META.get("HTTP_USER_AGENT", "").startswith(
         "Java/"
     ):
-        extension = "png"
+        extension = "jpeg"
     mime = get_image_mime_from_request(extension)
     if mime:
         redirect_view += "_with_format"
