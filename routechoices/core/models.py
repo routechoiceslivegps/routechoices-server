@@ -793,7 +793,7 @@ class Map(models.Model):
             pil_img = Image.open(BytesIO(src_img)).convert("RGBA")
             cv2_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGRA)
         else:
-            src_bytes = np.fromstring(src_img, np.uint8)
+            src_bytes = np.frombuffer(src_img, np.uint8)
             cv2_img_raw = cv2.imdecode(src_bytes, cv2.IMREAD_UNCHANGED)
             cv2_img = cv2.cvtColor(np.array(cv2_img_raw), cv2.COLOR_BGR2BGRA)
 
@@ -1150,7 +1150,7 @@ class Map(models.Model):
                 pil_src_img = Image.open(BytesIO(src_data)).convert("RGBA")
                 cv2_img = cv2.cvtColor(np.array(pil_src_img), cv2.COLOR_RGB2BGRA)
             else:
-                img_bytes = np.fromstring(src_data, np.uint8)
+                img_bytes = np.frombuffer(src_data, np.uint8)
                 cv2_img_raw = cv2.imdecode(img_bytes, cv2.IMREAD_UNCHANGED)
                 cv2_img = cv2.cvtColor(np.array(cv2_img_raw), cv2.COLOR_BGR2BGRA)
             img_warped = cv2.warpPerspective(
