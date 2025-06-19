@@ -73,7 +73,7 @@ class MergeMapsForm(Form):
         qs = Map.objects.filter(club=club)
         self.fields["base"].queryset = qs
         self.fields["addend"].queryset = qs
-    
+
     base = ModelChoiceField(
         label="Base map",
         queryset=Map.objects.none(),
@@ -82,6 +82,15 @@ class MergeMapsForm(Form):
         label="Map to merge",
         queryset=Map.objects.none(),
     )
+
+    def clean_addend(self):
+        base = int(self.data.get("base"))
+        addend = self.cleaned_data.get("addend")
+        if base == addend.pk:
+            raise ValidationError(
+                "The map to merge should be different from the base map"
+            )
+        return addend
 
 
 class RequestInviteForm(Form):

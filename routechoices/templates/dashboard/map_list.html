@@ -29,7 +29,9 @@
                     </svg>
                 Create from GPX</a>
                 <a href="{% url 'dashboard:club:map:draw_view' club_slug=request.club.slug %}"
-                   class="btn btn-secondary mb-1"><i class="fa-solid fa-pencil"></i> Draw</a>
+                   class="btn btn-secondary me-1 mb-1"><i class="fa-solid fa-pencil"></i> Draw</a>
+                <a href="{% url 'dashboard:club:map:merge_maps_view' club_slug=request.club.slug %}"
+                   class="btn btn-secondary mb-1"><i class="fa-solid fa-object-ungroup"></i> Merge two maps</a>
             </div>
             {% if maps %}
                 {% if maps.paginator.num_pages > 1 %}
