@@ -1115,8 +1115,12 @@ class Map(models.Model):
             ]
             all_corners.append(corners)
 
-        all_x = [xy[0] for xy in corners for corners in all_corners]
-        all_y = [xy[1] for xy in corners for corners in all_corners]
+        all_x = []
+        all_y = []
+        for corners in all_corners:
+            for corner in corners:
+                all_x.append(corner[0])
+                all_y.append(corner[1])
 
         min_x = min(min_x, *all_x)
         min_y = min(min_y, *all_y)
@@ -1125,6 +1129,7 @@ class Map(models.Model):
 
         new_width = int(max_x - min_x)
         new_height = int(max_y - min_y)
+
         new_image = Image.new(
             mode="RGBA", size=(new_width, new_height), color=(0, 0, 0, 0)
         )
