@@ -66,6 +66,24 @@ class UserForm(ModelForm):
         return username
 
 
+class MergeMapsForm(Form):
+    def __init__(self, club, *args, **kwargs):
+        self.club = club
+        super().__init__(*args, **kwargs)
+        qs = Map.objects.filter(club=club)
+        self.fields["base"].queryset = qs
+        self.fields["addend"].queryset = qs
+    
+    base = ModelChoiceField(
+        label="Base map",
+        queryset=Map.objects.none(),
+    )
+    addend = ModelChoiceField(
+        label="Map to merge",
+        queryset=Map.objects.none(),
+    )
+
+
 class RequestInviteForm(Form):
     def __init__(self, user, *args, **kwargs):
         self.user = user

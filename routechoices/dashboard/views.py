@@ -50,6 +50,7 @@ from routechoices.dashboard.forms import (
     ExtraMapFormSet,
     InquiryOStatusForm,
     MapForm,
+    MergeMapsForm
     NoticeForm,
     RequestInviteForm,
     UploadGPXForm,
@@ -343,7 +344,37 @@ def device_list_view(request):
         {"club": club, "devices": devices, "last_usage": last_usage},
     )
 
+@login_required
+@requires_club_in_session
+def merge_maps(request):
+    club = self.club
+    if request.method == "POST":
+        form = MergeMapsForm(club, request.POST)
+        if form.is_valid():
+            base = form.cleaned_data["base"]
+            addend = form.cleaned_data["addend"]
+            try:
+                new_map = base.merge(addend)
+            except Exception:
+                messages.error(request, "Could not merge those two maps")
+            else:
+                new_map.name = f"{base.name} + {addend.name}"[:255]
+                new_map.club = club
+                new_map.save()
+                message.success(request, "New map created")
+                return redirect(
+                    "dashboard:club:map:list", club_slug=club.slug
+                )
+    else:
+        form = MergeMapsForm(club)
 
+    return render(
+        "dashboard/merge_maps.html",
+        {
+            "club": club,
+            "form": form,
+        },
+    )
 @login_required
 @requires_club_in_session
 def device_add_view(request):

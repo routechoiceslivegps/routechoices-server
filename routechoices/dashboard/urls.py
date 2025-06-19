@@ -140,6 +140,11 @@ urlpatterns = [
                                                     views.map_gpx_upload_view,
                                                     name="upload_gpx_view",
                                                 ),
+                                                path(
+                                                    "merge",
+                                                    views.merge_maps,
+                                                    name="merge_maps_view",
+                                                ),
                                                 re_path(
                                                     r"(?P<map_id>[A-Za-z0-9_-]+)/",
                                                     include(
