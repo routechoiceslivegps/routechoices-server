@@ -222,7 +222,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
 
                 out = BytesIO()
                 cairosvg.svg2png(
-                    bytestring=r.content, write_to=out, unsafe=True, scale=4
+                    bytestring=r.content, write_to=out, unsafe=True, scale=2
                 )
 
                 img_blob = ContentFile(out.getbuffer())
