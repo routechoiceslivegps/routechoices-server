@@ -15,6 +15,9 @@ START_PROCESS = parse("2025-05-24T00:00:00Z")
 class Command(BaseCommand):
     help = "Remove club without activity"
 
+    def add_arguments(self, parser):
+        parser.add_argument("-d", "--date", type=str, required=False)
+
     def send_warning(self, days, club):
         print(f"- {club.name} -> {days} warning")
         admins = club.admins.all().values_list("id", flat=True)
@@ -71,7 +74,18 @@ This email is to let you know that we have now deleted your inactive Routechoice
         club.delete()
 
     def handle(self, *args, **options):
-        nyt = now().replace(hour=0, minute=0, second=0, microsecond=0)
+        asked_date = options.get("date")
+        if asked_date:
+            try:
+                nyt = parse(asked_date)
+            except Exception:
+                self.stderr.write("Invalid date")
+                return
+        else:
+            nyt = now()
+
+        nyt = nyt.replace(hour=0, minute=0, second=0, microsecond=0)
+        print(nyt)
         today = nyt.date()
         tomorrow = (nyt + relativedelta(days=1)).date()
         seven_days_from_now = (nyt + relativedelta(days=7)).date()
