@@ -222,14 +222,16 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
 
                 out = BytesIO()
                 cairosvg.svg2png(
-                    bytestring=r.content, write_to=out, unsafe=True, scale=2
+                    bytestring=r.content, write_to=out, unsafe=True, scale=4
                 )
 
                 img_blob = ContentFile(out.getbuffer())
 
                 course_map.image.save("imported_image", img_blob, save=False)
-
+                max_pixels = Image.MAX_IMAGE_PIXELS
+                Image.MAX_IMAGE_PIXELS = None
                 im = Image.open(img_blob)
+                Image.MAX_IMAGE_PIXELS = max_pixels
                 width, height = im.size
                 course_map.width = width
                 course_map.height = height
