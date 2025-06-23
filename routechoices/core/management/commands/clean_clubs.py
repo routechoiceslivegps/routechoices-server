@@ -85,7 +85,6 @@ This email is to let you know that we have now deleted your inactive Routechoice
             nyt = now()
 
         nyt = nyt.replace(hour=0, minute=0, second=0, microsecond=0)
-        print(nyt)
         today = nyt.date()
         tomorrow = (nyt + relativedelta(days=1)).date()
         seven_days_from_now = (nyt + relativedelta(days=7)).date()
