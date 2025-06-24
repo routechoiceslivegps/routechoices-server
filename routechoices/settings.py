@@ -120,11 +120,11 @@ INSTALLED_APPS = [
     "django.contrib.sitemaps",
 ]
 MIDDLEWARE = [
-    "routechoices.core.middleware.SessionMiddleware",
-    "routechoices.core.middleware.HostsRequestMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "routechoices.core.middleware.XForwardedForMiddleware",
+    "routechoices.core.middleware.SessionMiddleware",
     "routechoices.core.middleware.FilterCountriesIPsMiddleware",
+    "routechoices.core.middleware.HostsRequestMiddleware",
     "routechoices.core.middleware.CorsMiddleware",
     "csp.middleware.CSPMiddleware",
     "django_permissions_policy.PermissionsPolicyMiddleware",
