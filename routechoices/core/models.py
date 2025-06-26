@@ -1297,7 +1297,11 @@ class EventSet(models.Model):
 
     class Meta:
         ordering = ["-creation_date", "name"]
-        unique_together = (("club", "name"),)
+        constraints = [
+            models.UniqueConstraint(
+                name="event_set_name_club_uc", fields=("name", "club")
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -1515,10 +1519,6 @@ class Event(models.Model):
 
     class Meta:
         ordering = ["-start_date", "name"]
-        unique_together = (
-            ("club", "event_set", "name"),
-            ("club", "slug"),
-        )
         verbose_name = "event"
         verbose_name_plural = "events"
         indexes = [
@@ -1551,7 +1551,12 @@ class Event(models.Model):
             models.CheckConstraint(
                 condition=models.Q(backdrop_map__in=list(zip(*MAP_CHOICES))[0]),
                 name="%(app_label)s_%(class)s_bgmap_valid",
-            )
+            ),
+            models.UniqueConstraint(
+                name="event_name_event_set_club_uc",
+                fields=("club", "event_set", "name"),
+            ),
+            models.UniqueConstraint(name="event_slug_club_uc", fields=("club", "slug")),
         ]
 
     def __str__(self):
@@ -2563,7 +2568,12 @@ class DeviceClubOwnership(models.Model):
     nickname = models.CharField(max_length=12, default="")
 
     class Meta:
-        unique_together = (("device", "club"),)
+        constraints = [
+            models.UniqueConstraint(
+                name="device_club_ownership_club_device_uc",
+                fields=("device", "club"),
+            )
+        ]
         verbose_name = "Device ownership"
         verbose_name_plural = "Device ownerships"
 
