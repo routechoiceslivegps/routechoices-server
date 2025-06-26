@@ -1,5 +1,5 @@
 from allauth.account import views as account_views
-from django.urls import include, re_path
+from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 
 from routechoices.site import feeds, views
@@ -46,7 +46,12 @@ urlpatterns = [
         views.site_favicon,
         name="site_favicon",
     ),
-    re_path(r"^robots\.txt$", views.robots_txt, name="robots.txt"),
+    path("robots.txt", views.robots_txt, name="robots.txt"),
+    path(
+        "llms.txt",
+        TemplateView.as_view(template_name="llms.txt", content_type="text/plain"),
+        name="llms.txt",
+    ),
     re_path(
         r"^(?P<club_slug>[0-9a-zA-Z][0-9a-zA-Z-]+)/",
         include(("routechoices.club.urls", "club"), namespace="club"),
