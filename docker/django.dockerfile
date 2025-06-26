@@ -38,6 +38,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/usr/local/lib"
 
 WORKDIR /app/
+COPY .env.dev ./.env
 ADD . /app/
 
 EXPOSE 8000
