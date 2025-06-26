@@ -138,9 +138,7 @@ class SportRec(ThirdPartyTrackingSolution):
                         "virtual": True,
                     },
                 )
-                if not created:
-                    dev_obj.erase_locations()
-                dev_obj.add_locations(dev_data)
+                dev_obj.add_locations(dev_data, reset=True)
                 competitor.device = dev_obj
             if start_time := c_data.get("time_start"):
                 competitor.start_time = arrow.get(start_time).datetime

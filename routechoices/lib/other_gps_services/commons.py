@@ -161,9 +161,7 @@ class ThirdPartyTrackingSolutionWithProxy(ThirdPartyTrackingSolution):
                 aid=dev_hash,
                 defaults={"virtual": True},
             )
-            if not created:
-                dev_obj.erase_locations()
-            dev_obj.add_locations(locations, save=False)
+            dev_obj.add_locations(locations, reset=True, save=False)
             device_map[dev_id] = dev_obj
 
         competitors_map = self.get_competitors_data()

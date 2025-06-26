@@ -64,8 +64,7 @@ class Command(BaseCommand):
                 nb_points_cropped = len(all_locations) - len(cropped_locations)
                 if force:
                     device = competitor.device
-                    device.erase_locations()
-                    device.add_locations(cropped_locations)
+                    device.add_locations(cropped_locations, reset=True)
                 self.stdout.write(
                     f"Cropping {nb_points_cropped} locations for {competitor}"
                 )

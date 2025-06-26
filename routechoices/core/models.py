@@ -2198,8 +2198,7 @@ class Device(models.Model):
         valid_locs = self.get_locations_over_periods(periods_to_keep)
         deleted_location_count = location_count - len(valid_locs)
         if deleted_location_count:
-            self.erase_locations()
-            self.add_locations(valid_locs, save=save)
+            self.add_locations(valid_locs, reset=True, save=save)
 
     def archive(self, /, *, until, save=False):
         last_start = None
@@ -2235,8 +2234,7 @@ class Device(models.Model):
                 last_start,
                 self.last_location_datetime,
             )
-            self.erase_locations()
-            self.add_locations(left_locations, save=False)
+            self.add_locations(left_locations, reset=True, save=False)
 
             if save:
                 archive_dev.save()
@@ -2274,7 +2272,10 @@ class Device(models.Model):
         gpx_track.segments.append(gpx_segment)
         return gpx.to_xml()
 
-    def add_locations(self, new_locations, /, *, save=True):
+    def add_locations(self, new_locations, /, *, reset=False, save=True):
+        if reset:
+            self.erase_locations()
+
         if not new_locations:
             if save:
                 self.save()
@@ -2386,11 +2387,12 @@ class Device(models.Model):
             and now() <= self.gpsseuranta_relay_until
         )
 
-    def add_location(self, timestamp, lat, lon, /, *, save=True):
+    def add_location(self, timestamp, lat, lon, /, *, reset=False, save=True):
         self.add_locations(
             [
                 (timestamp, lat, lon),
             ],
+            reset=reset,
             save=save,
         )
 
