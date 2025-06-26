@@ -129,7 +129,7 @@ class ClubForm(ModelForm):
         slug = self.cleaned_data["slug"].lower()
 
         club_with_slug_qs = Club.objects.filter(
-            Q(slug=slug)
+            Q(slug__iexact=slug)
             | Q(
                 slug_changed_from=slug,
                 slug_changed_at__gt=arrow.now().shift(hours=-72).datetime,

@@ -49,7 +49,7 @@ def lemonsqueezy_webhook(request):
         except KeyError:
             pass
         else:
-            club = Club.objects.filter(slug=slug).first()
+            club = Club.objects.filter(slug__iexact=slug).first()
         if not club:
             raise BadRequest("Missing attribute")
 

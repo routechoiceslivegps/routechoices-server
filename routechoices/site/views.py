@@ -116,7 +116,8 @@ def pay_view(request):
 
 
 def events_view(request):
-    return render(request, "site/event_list.html", Event.extract_event_lists(request))
+    event_list = Event.extract_event_lists(request)
+    return render(request, "site/event_list.html", event_list)
 
 
 def contact(request):

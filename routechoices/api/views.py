@@ -1653,7 +1653,9 @@ def device_registrations(request, device_id):
 @api_view(["PATCH", "DELETE"])
 @login_required
 def device_ownership_api_view(request, club_slug, device_id):
-    club = get_object_or_404(Club.objects.filter(admins=request.user), slug=club_slug)
+    club = get_object_or_404(
+        Club.objects.filter(admins=request.user), slug__iexact=club_slug
+    )
     device = get_object_or_404(Device, aid=device_id, virtual=False)
 
     ownership, created = DeviceClubOwnership.objects.get_or_create(

@@ -48,7 +48,7 @@
     <link rel="alternate"
           type="application/rss+xml"
           title="{% if club %}{{ club.name }} {% else %}{% endif %}GPS Tracking Event Feed"
-          href="{% if club %}{{ event.club.nice_url }}feed{% else %}{% url 'site:events_feed' %}{% endif %}" />
+          href="{% if club %}{{ club.nice_url }}feed{% else %}{% url 'site:events_feed' %}{% endif %}" />
     <meta property="og:title"
           content="Events{% if club %} by {{ club.name }} | Powered by {{ site.name }}{% else %} on {{ site.name }}{% endif %}" />
     <meta property="og:description"
@@ -189,7 +189,7 @@
                         {% endif %}
                         {% for event in event_set.events %}
                             <div class="card border-0 shadow mb-3 event-card"
-                                 data-bg-img="{% if event.map %}{{ event.club.nice_url }}{{ event.slug }}/thumbnail?no-logo=1{% endif %}"
+                                 data-bg-img="{% if event.map_id %}{{ event.club.nice_url }}{{ event.slug }}/thumbnail?no-logo=1{% endif %}"
                                  style="background: linear-gradient(to right, var(--rc-color-from-trans), var(--rc-color-to-trans));
                                         background-size: cover;
                                         background-position: center">
@@ -444,7 +444,7 @@
             {% endif %}
             {% for event in event_set.events %}
                 <div class="card border-0 shadow mb-3 event-card"
-                     data-bg-img="{% if event.map %}{{ event.club.nice_url }}{{ event.slug }}/thumbnail?no-logo=1{% endif %}"
+                     data-bg-img="{% if event.map_id %}{{ event.club.nice_url }}{{ event.slug }}/thumbnail?no-logo=1{% endif %}"
                      style="background:linear-gradient(to right, var(--rc-color-from-trans), var(--rc-color-to-trans));
                             background-size: cover;
                             background-position: center">

@@ -79,7 +79,7 @@ def requires_club_in_session(function):
 
         club = get_object_or_404(
             Club,
-            slug=club_slug,
+            slug__iexact=club_slug,
             admins=request.user,
         )
 

@@ -83,9 +83,9 @@ def club_view(request, **kwargs):
     if club.domain and not request.use_cname:
         return redirect(club.nice_url)
 
-    return render(
-        request, "site/event_list.html", Event.extract_event_lists(request, club)
-    )
+    event_list = Event.extract_event_lists(request, club)
+
+    return render(request, "site/event_list.html", event_list)
 
 
 def club_favicon(request, icon_name, **kwargs):
