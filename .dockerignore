@@ -12,7 +12,7 @@ logs/*
 media/*
 nginx/*
 node_modules/*
-static/*
+static
 tmp/*
 var/*
 .coverage

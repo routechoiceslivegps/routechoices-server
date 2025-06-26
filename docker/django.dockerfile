@@ -25,7 +25,8 @@ RUN . /opt/venv/bin/activate
 RUN uv pip install -r requirements.txt
 
 # final stage
-FROM python:3.13-slim
+FROM python:3.13-slim as final
+RUN adduser --disabled-password --gecos '' --no-create-home app
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends libcairo2 libgl1 libglib2.0-0 libmagic1 libgdal32 && \
     apt-get clean -y && \
@@ -37,7 +38,9 @@ ENV VIRTUAL_ENV="/opt/venv/"
 ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/usr/local/lib"
 
-WORKDIR /app/
+WORKDIR /app
+RUN chown -R app:app /app
+
 COPY .env.dev ./.env
 ADD . /app/
 
@@ -45,4 +48,7 @@ EXPOSE 8000
 EXPOSE 2000
 
 ENV DJANGO_SETTINGS_MODULE=routechoices.settings
+
+USER app
+
 RUN DATABASE_URL="sqlite://:memory:" python manage.py collectstatic --noinput
