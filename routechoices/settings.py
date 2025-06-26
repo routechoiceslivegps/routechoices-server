@@ -236,15 +236,9 @@ ACCOUNT_USERNAME_MIN_LENGTH = "2"
 ACCOUNT_USERNAME_VALIDATORS = "routechoices.lib.validators.custom_username_validators"
 CACHES = {
     "default": {
-        "BACKEND": "diskcache.DjangoCache",
-        "LOCATION": os.path.join(BASE_DIR, "cache"),
-        "TIMEOUT": 300,
-        # ^-- Django setting for default timeout of each key.
-        "SHARDS": 4,
-        "DATABASE_TIMEOUT": 0.10,  # 10 milliseconds
-        # ^-- Timeout for each DjangoCache database transaction.
-        "OPTIONS": {"size_limit": 2**30},  # 1 gigabyte
-    },
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
 }
 CACHE_TILES = True
 CACHE_THUMBS = True
