@@ -50,5 +50,5 @@ EXPOSE 2000
 ENV DJANGO_SETTINGS_MODULE=routechoices.settings
 
 USER app
-
+RUN mkdir cache
 RUN DATABASE_URL="sqlite://:memory:" python manage.py collectstatic --noinput
