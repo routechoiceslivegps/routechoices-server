@@ -1280,7 +1280,9 @@ def event_new_data(request, event_id, key):
     competitors_data = []
 
     for competitor in current_data.get("competitors"):
-        old_match = prev_competitors.get(competitor.get("id"))
+        old_match = None
+        if competitor["id"] in prev_competitors:
+            old_match = prev_competitors.get(competitor["id"])
         if not old_match:
             competitors_data.append(competitor)
         else:
