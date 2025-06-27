@@ -1231,7 +1231,7 @@ def event_data(request, event_id):
 
     if use_cache:
         try:
-            cache.set(cache_key, response, 20 if event.is_live else 7 * 24 * 3600 + 60)
+            cache.set(cache_key, response, 60 if event.is_live else 7 * 24 * 3600 + 60)
         except Exception:
             pass
 
@@ -1314,7 +1314,7 @@ def event_new_data(request, event_id, key):
 
     cache_key = f"event:{event_id}:data-diff:{key}:{cache_ts}"
     try:
-        cache.set(cache_key, response, 30)
+        cache.set(cache_key, response, 60)
     except Exception:
         pass
 
