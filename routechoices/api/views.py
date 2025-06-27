@@ -1286,6 +1286,10 @@ def event_new_data(request, event_id, key):
         if not old_match:
             competitors_data.append(competitor)
         else:
+            if cats := old_match.get("categories"):
+                old_match["categories"] = " ".join(cats)
+            if cats := competitor.get("categories"):
+                competitor["categories"] = " ".join(cats)
             old_version = set(old_match.items())
             new_version = set(competitor.items())
             diff = dict(new_version - old_version)
@@ -1306,6 +1310,8 @@ def event_new_data(request, event_id, key):
                         if loc[LOCATION_TIMESTAMP_INDEX] not in existing_ts
                     ]
                     diff["encoded_data"] = gps_data_codec.encode(added_locations)
+            if "categories" in diff:
+                diff["categories"] = competitor.get("categories").split(" ")
             if diff:
                 diff["id"] = competitor.get("id")
                 competitors_data.append(diff)
