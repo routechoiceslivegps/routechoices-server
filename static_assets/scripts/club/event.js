@@ -40,6 +40,7 @@ function RCEvent(infoURL, clockURL, locale) {
 	const competitorRoutes = {};
 	const competitorBatteyLevels = {};
 	let routesLastFetched = Number.NEGATIVE_INFINITY;
+	let liveDataLastKey = null;
 	const fetchPositionInterval = 10;
 	let playbackRate = 8;
 	let playbackPaused = true;
@@ -2136,7 +2137,11 @@ function RCEvent(infoURL, clockURL, locale) {
 
 	function fetchCompetitorRoutes(cb) {
 		isCurrentlyFetchingRoutes = true;
-		fetch(dataURL, {
+		let targetURL = dataURL;
+		if (isLive && liveDataLastKey) {
+			targetURL += `/${liveDataLastKey}`;
+		}
+		fetch(targetURL, {
 			method: "GET",
 			credentials: window.local.isPrivate ? "include" : "same-origin",
 			mode: "cors",
@@ -2145,19 +2150,29 @@ function RCEvent(infoURL, clockURL, locale) {
 			.then((response) => {
 				if (!response || !response.competitors) {
 					// Prevent fetching competitor data for 1 second
+					liveDataLastKey = null;
 					setTimeout(() => {
 						isCurrentlyFetchingRoutes = false;
 					}, 1000);
 					cb?.();
 					return;
 				}
+				liveDataLastKey = response.key;
 				isCurrentlyFetchingRoutes = false;
 				const runnerPoints = [];
 				for (const competitor of response.competitors) {
 					let route = null;
 					if (competitor.encoded_data) {
 						route = PositionArchive.fromEncoded(competitor.encoded_data);
-						competitorRoutes[competitor.id] = route;
+						if (response.partial) {
+							const newLocs = route.getArray();
+							for (const loc of newLocs) {
+								competitorRoutes[competitor.id].add(loc);
+							}
+							route = competitorRoutes[competitor.id];
+						} else {
+							competitorRoutes[competitor.id] = route;
+						}
 						if (zoomOnRunners) {
 							const length = route.getPositionsCount();
 							for (let i = 0; i < length; i++) {
@@ -2198,6 +2213,7 @@ function RCEvent(infoURL, clockURL, locale) {
 				cb?.();
 			})
 			.catch(() => {
+				liveDataLastKey = null;
 				setTimeout(() => {
 					isCurrentlyFetchingRoutes = false;
 				}, 1000);
