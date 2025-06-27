@@ -17,7 +17,7 @@ from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Prefetch, Q
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -1121,6 +1121,7 @@ def competitor_route_upload(request, competitor_id):
                     "nb_points": 0,
                     "duration": 0.009621381759643555,
                     "timestamp": 1615986763.638066,
+                    "key": 123456,
                 }
             },
         ),
@@ -1221,6 +1222,7 @@ def event_data(request, event_id):
         "nb_points": total_nb_pts,
         "duration": (time.perf_counter() - t0_perf),
         "timestamp": time.time(),
+        "key": cache_ts,
     }
 
     headers = {"ETag": f'W/"{safe64encodedsha(json.dumps(response))}"'}
@@ -1232,6 +1234,81 @@ def event_data(request, event_id):
             cache.set(cache_key, response, 20 if event.is_live else 7 * 24 * 3600 + 60)
         except Exception:
             pass
+
+    return Response(response, headers=headers)
+
+
+@swagger_auto_schema(
+    method="get",
+    auto_schema=None,
+)
+@api_GET_view
+def event_new_data(request, event_id, key):
+    t0_perf = time.perf_counter()
+    t0 = time.time()
+
+    cache_interval = EVENT_CACHE_INTERVAL
+    cache_ts = int(t0 // cache_interval)
+    cache_key = f"event:{event_id}:data-diff:{key}:{cache_ts}"
+
+    if cached_resp := cache.get(cache_key):
+        return Response(cached_resp, headers={"X-Cache-Hit": 1})
+
+    src_cache_key = f"event:{event_id}:data:{key}:live"
+    prev_data = cache.get(src_cache_key)
+    if not prev_data:
+        return Response(src_cache_key, status=status.HTTP_412_PRECONDITION_FAILED)
+
+    req = HttpRequest()
+    req.method = "GET"
+    current_resp = event_data(req, event_id)
+    if current_resp.data.get("error"):
+        return Response("", status=status.HTTP_412_PRECONDITION_FAILED)
+
+    current_data = current_resp.data
+
+    prev_competitors = {}
+    for competitor in prev_data.get("competitors"):
+        prev_competitors[competitor["id"]] = competitor
+
+    competitors_data = []
+
+    for competitor in current_data.get("competitors"):
+        old_match = prev_competitors.get(competitor.get("id"))
+        if not old_match:
+            competitors_data.append(competitor)
+        else:
+            old_version = set(old_match.items())
+            new_version = set(competitor.items())
+            diff = dict(new_version - old_version)
+            if "encoded_data" in diff:
+                old_locations = gps_data_codec.decode(old_match.get("encoded_data"))
+                new_locations = gps_data_codec.decode(competitor.get("encoded_data"))
+                existing_ts = set(list(zip(*old_locations))[LOCATION_TIMESTAMP_INDEX])
+                added_locations = [
+                    loc
+                    for loc in new_locations
+                    if loc[LOCATION_TIMESTAMP_INDEX] not in existing_ts
+                ]
+                diff["encoded_data"] = gps_data_codec.encode(added_locations)
+            competitors_data.append(diff)
+
+    response = {
+        "competitors": competitors_data,
+        "duration": (time.perf_counter() - t0_perf),
+        "timestamp": time.time(),
+        "key": current_data.get("key"),
+    }
+
+    headers = {"ETag": f'W/"{safe64encodedsha(json.dumps(response))}"'}
+    if cache_control := current_resp.headers.get("Cache-Control"):
+        headers["Cache-Control"] = cache_control
+
+    cache_key = f"event:{event_id}:data-diff:{key}:{cache_ts}"
+    try:
+        cache.set(cache_key, response, 30)
+    except Exception:
+        pass
 
     return Response(response, headers=headers)
 

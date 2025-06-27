@@ -108,6 +108,11 @@ urlpatterns = [
                                 views.event_data,
                                 name="event_data",
                             ),
+                            re_path(
+                                r"data/(?P<key>\d+)",
+                                views.event_new_data,
+                                name="event_new_data",
+                            ),
                             path(
                                 "zip",
                                 views.event_zip,
