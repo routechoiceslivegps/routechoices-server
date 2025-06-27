@@ -1136,7 +1136,7 @@ class Map(models.Model):
         new_width = int(max_x - min_x)
         new_height = int(max_y - min_y)
 
-        if new_width > 16383 or new_height > 16383:
+        if new_width * new_height > Image.MAX_IMAGE_PIXELS:
             raise TooLargeResult()
 
         new_image = Image.new(
