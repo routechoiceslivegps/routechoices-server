@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-ENV PYTHONUNBUFFERED 1 \
-    UV_COMPILE_BYTECODE 1
+ENV PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=1
 
 COPY requirements.txt .
 
