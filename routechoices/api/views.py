@@ -1257,13 +1257,19 @@ def event_new_data(request, event_id, key):
     src_cache_key = f"event:{event_id}:data:{key}:live"
     prev_data = cache.get(src_cache_key)
     if not prev_data:
-        return Response(src_cache_key, status=status.HTTP_412_PRECONDITION_FAILED)
+        return Response(
+            "Previous version is not cached anymore",
+            status=status.HTTP_412_PRECONDITION_FAILED,
+        )
 
     req = HttpRequest()
     req.method = "GET"
     current_resp = event_data(req, event_id)
     if current_resp.data.get("error"):
-        return Response("", status=status.HTTP_412_PRECONDITION_FAILED)
+        return Response(
+            "Could not fetch current version",
+            status=status.HTTP_412_PRECONDITION_FAILED,
+        )
 
     current_data = current_resp.data
 
