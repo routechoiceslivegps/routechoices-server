@@ -2193,7 +2193,7 @@ function RCEvent(infoURL, clockURL, locale) {
 						competitorBatteyLevels[competitor.id] = null;
 					}
 					*/
-					if (!response.partial || competitor.battery_level !== null) {
+					if (competitor.battery_level !== null || response.partial) {
 						competitorBatteyLevels[competitor.id] = route
 							? competitor.battery_level
 							: null;
