@@ -1297,8 +1297,9 @@ def event_new_data(request, event_id, key):
                     if loc[LOCATION_TIMESTAMP_INDEX] not in existing_ts
                 ]
                 diff["encoded_data"] = gps_data_codec.encode(added_locations)
-            diff["id"] = competitor.get("id")
-            competitors_data.append(diff)
+            if diff:
+                diff["id"] = competitor.get("id")
+                competitors_data.append(diff)
 
     response = {
         "competitors": competitors_data,
