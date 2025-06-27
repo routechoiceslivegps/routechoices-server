@@ -1311,7 +1311,7 @@ def event_new_data(request, event_id, key):
                     ]
                     diff["encoded_data"] = gps_data_codec.encode(added_locations)
             if "categories" in diff:
-                diff["categories"] = competitor.get("categories").split(" ")
+                diff["categories"] = competitor.get("categories", "").split(" ")
             if diff:
                 diff["id"] = competitor.get("id")
                 competitors_data.append(diff)
