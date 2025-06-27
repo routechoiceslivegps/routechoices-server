@@ -2193,9 +2193,11 @@ function RCEvent(infoURL, clockURL, locale) {
 						competitorBatteyLevels[competitor.id] = null;
 					}
 					*/
-					competitorBatteyLevels[competitor.id] = route
-						? competitor.battery_level
-						: null;
+					if (!response.partial || competitor.battery_level !== null) {
+						competitorBatteyLevels[competitor.id] = route
+							? competitor.battery_level
+							: null;
+					}
 					if (competitor.categories) {
 						for (const tag of competitor.categories) {
 							competitorsTags.add(tag);
