@@ -39,7 +39,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/usr/local/lib"
 
 WORKDIR /app
-RUN chown -R app:app /app
 
 COPY .env.dev ./.env
 ADD . /app/
@@ -51,4 +50,5 @@ ENV DJANGO_SETTINGS_MODULE=routechoices.settings
 
 RUN DATABASE_URL="sqlite://:memory:" python manage.py collectstatic --noinput
 
+RUN chown -R app:app /app
 USER app
