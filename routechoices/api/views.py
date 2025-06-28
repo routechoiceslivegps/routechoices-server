@@ -1274,12 +1274,12 @@ def event_new_data(request, event_id, key):
     current_data = current_resp.data
 
     prev_competitors = {}
-    for competitor in prev_data.get("competitors"):
+    for competitor in prev_data.get("competitors", []):
         prev_competitors[competitor["id"]] = competitor
 
     competitors_data = []
 
-    for competitor in current_data.get("competitors"):
+    for competitor in current_data.get("competitors", []):
         old_match = None
         if competitor["id"] in prev_competitors:
             old_match = prev_competitors.get(competitor["id"])
