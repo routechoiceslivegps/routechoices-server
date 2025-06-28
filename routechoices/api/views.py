@@ -1267,7 +1267,7 @@ def event_new_data(request, event_id, key):
     req.user = request.user
     req.session = request.session
     current_resp = event_data(req, event_id)
-    if current_resp.data.get("error"):
+    if not current_resp.data or current_resp.data.get("error"):
         return Response(
             "Could not fetch current version",
             status=status.HTTP_412_PRECONDITION_FAILED,
