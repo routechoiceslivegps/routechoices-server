@@ -84,7 +84,7 @@ context("Dashboard actions", () => {
 		cy.get("#price-per-month").focus().clear().type("7.99");
 		cy.contains("Proceed to payment").click();
 		cy.origin("https://routechoices.lemonsqueezy.com", () => {
-			cy.contains("Test mode is currently enabled.");
+			cy.contains("Test mode is currently enabled.", { timeout: 20_000 });
 		});
 	});
 
@@ -112,7 +112,7 @@ context("Dashboard actions", () => {
 			cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
 			cy.get("#id_file").selectFile(`cypress/fixtures/${kmzFileName}`);
 			cy.get("button:not([type]),button[type=submit]").click();
-			cy.get("#django-messages", { timeout: 10000 }).contains(
+			cy.get("#django-messages", { timeout: 10_000 }).contains(
 				"The import of the map was successful!",
 			);
 		}
@@ -181,7 +181,7 @@ context("Dashboard actions", () => {
 		cy.get("#id_banner").selectFile("cypress/fixtures/KSK_banner.jpg");
 
 		cy.get("button:not([type]),button[type=submit]").click();
-		cy.contains("Changes saved successfully", { timeout: 10000 });
+		cy.contains("Changes saved successfully", { timeout: 10_000 });
 	});
 
 	it("Create events", () => {
@@ -243,7 +243,7 @@ context("Dashboard actions", () => {
 		// Test the event view
 		// TODO: move to own test
 		cy.forceVisit("/halden-sk/Jukola-2019-1st-leg");
-		cy.contains("Niels Christian Hellerud", { timeout: 20000 }); // in competitor list
+		cy.contains("Niels Christian Hellerud", { timeout: 20_000 }); // in competitor list
 
 		//// toggle competitor
 		cy.get("#toggleAllSwitch").uncheck();
@@ -330,7 +330,7 @@ context("Dashboard actions", () => {
 
 		// test the event view
 		cy.forceVisit("/halden-sk/Jukola-2019-2nd-leg");
-		cy.contains("Björn Ekeberg", { timeout: 20000 });
-		cy.contains("Another map", { timeout: 20000 });
+		cy.contains("Björn Ekeberg", { timeout: 20_000 });
+		cy.contains("Another map", { timeout: 20_000 });
 	});
 });
