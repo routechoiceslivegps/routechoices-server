@@ -1264,6 +1264,7 @@ def event_new_data(request, event_id, key):
 
     req = HttpRequest()
     req.method = "GET"
+    req.user = request.user
     current_resp = event_data(req, event_id)
     if current_resp.data.get("error"):
         return Response(
