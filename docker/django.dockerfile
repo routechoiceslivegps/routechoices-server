@@ -48,7 +48,7 @@ EXPOSE 2000
 
 ENV DJANGO_SETTINGS_MODULE=routechoices.settings
 
-# RUN DATABASE_URL="sqlite://:memory:" python manage.py collectstatic --noinput
+RUN DATABASE_URL="sqlite://:memory:" python manage.py collectstatic --noinput
 
-RUN chown -R app:app /app
-USER app
+#RUN chown -R app:app /app
+#USER app
