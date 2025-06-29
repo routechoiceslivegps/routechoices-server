@@ -2942,7 +2942,7 @@ function RCEvent(infoURL, clockURL, locale) {
 	}
 
 	function checkVisible(elem) {
-		if (!sidebarShown) {
+		if (!elem || !sidebarShown) {
 			return false;
 		}
 		if (u(elem).hasClass("d-none")) {

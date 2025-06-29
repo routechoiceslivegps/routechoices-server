@@ -2176,7 +2176,7 @@ def third_party_event_data(request, provider, uid):
     event = proxy.get_event()
     dev_data = proxy.get_competitor_devices_data(event)
     competitors_data = proxy.get_competitors_data()
-    output = {"competitors": []}
+    output = {"competitors": [], "key": None}
     for c_id, competitor in competitors_data.items():
         locs = dev_data.get(c_id, [])
         output["competitors"].append(
