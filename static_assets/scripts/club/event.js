@@ -2164,7 +2164,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					let route = null;
 					if (competitor.encoded_data) {
 						route = PositionArchive.fromEncoded(competitor.encoded_data);
-						if (response.partial) {
+						if (response.partial && competitorRoutes[competitor.id]) {
 							const newLocs = route.getArray();
 							for (const loc of newLocs) {
 								competitorRoutes[competitor.id].add(loc);
