@@ -314,7 +314,7 @@ class MapForm(ModelForm):
         with Image.open(f_orig.file) as image:
             rgba_img = image.convert("RGBA")
             format = "WEBP"
-            if rgba_img.size[0] > WEBP_MAX_SIZE or rgba_img.size[1] > WEBP_MAX_SIZE:
+            if max(rgba_img.size[0], rgba_img.size[1]) > WEBP_MAX_SIZE:
                 format = "PNG"
             out_buffer = BytesIO()
             params = {
