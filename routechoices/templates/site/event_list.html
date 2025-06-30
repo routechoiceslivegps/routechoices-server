@@ -3,17 +3,17 @@
 {% block favicon %}
     {% if club %}
         <link rel="apple-touch-icon"
-              href="{{ club.nice_url }}apple-touch-icon.png{{ club.logo_last_mod }}">
+              href="{{ club.nice_url }}apple-touch-icon.png{{ club.logo_last_mod }}" />
         <link rel="icon"
               sizes="32x32"
-              href="{{ club.nice_url }}favicon.ico{{ club.logo_last_mod }}">
+              href="{{ club.nice_url }}favicon.ico{{ club.logo_last_mod }}" />
         <link rel="manifest"
-              href="{{ club.nice_url }}manifest.json{{ club.logo_last_mod }}">
+              href="{{ club.nice_url }}manifest.json{{ club.logo_last_mod }}" />
     {% else %}
         <link rel="apple-touch-icon"
-              href="{% static 'apple-touch-icon.png' %}?v=2024a">
-        <link rel="icon" sizes="32x32" href="{% static 'favicon.ico' %}?v=2024a">
-        <link rel="manifest" href="{% static 'manifest.json' %}?v=2024a">
+              href="{% static 'apple-touch-icon.png' %}?v=2024a" />
+        <link rel="icon" sizes="32x32" href="{% static 'favicon.ico' %}?v=2024a" />
+        <link rel="manifest" href="{% static 'manifest.json' %}?v=2024a" />
     {% endif %}
 {% endblock favicon %}
 
@@ -56,7 +56,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="{{ site.name }}" />
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary_large_image" />
     <meta property="og:image"
           content="{% if club %}{{ club.nice_url }}thumbnail{% else %}{% static '/img/og.jpg' %}?t=2022091500{% endif %}" />
     <meta property="og:image:width" content="1200" />

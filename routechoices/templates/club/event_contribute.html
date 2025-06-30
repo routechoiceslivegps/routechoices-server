@@ -17,7 +17,7 @@
     <meta property="og:description"
           content="{{ event.name }} by {{ event.club.name }} contribution page" />
     <meta property="og:url" content="{{ event.get_absolute_url }}/contribute" />
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary_large_image" />
     <meta property="og:image"
           content="{{ event.club.nice_url }}{{ event.slug }}/thumbnail" />
     <meta property="og:image:width" content="1200" />
@@ -26,7 +26,7 @@
         <meta property="og:image:secure_url"
               content="{{ event.club.nice_url }}{{ event.slug }}/thumbnail" />
     {% endif %}
-    <link rel="canonical" href="{{ event.get_absolute_url }}/contribute">
+    <link rel="canonical" href="{{ event.get_absolute_url }}/contribute" />
     {% compress css %}
         <link rel="stylesheet"
             href="{% static '/vendor/tom-select-2.0.1/tom-select.bootstrap5.min.css' %}" />
