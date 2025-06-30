@@ -18,11 +18,7 @@
               content="{% block head_description %}{{ site.name }} is an easy to use and powerful live GPS tracking solution designed for orienteering and outdoor events. View competitors locations in the forest on computer, tablet or smartphone.{% endblock %}" />
         <meta name="keywords"
               content="{% block head_keywords %}gps,tracking,orienteering,live,gps tracking,outdoor,tracker,orienteer,replay,trackers,gps seuranta,gps spårning,gps sporing,suunnistus,orientering{% endblock %}" />
-        <title>
-            {% block head_title %}
-                {{ site.name }} | Live GPS tracking
-            {% endblock head_title %}
-        </title>
+        <title>{% block head_title %}{{ site.name }} | Live GPS tracking{% endblock %}</title>
         {% compress css %}
             <link rel="stylesheet"
                   href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />

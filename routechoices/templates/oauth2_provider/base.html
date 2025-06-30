@@ -13,11 +13,7 @@
         <meta name="theme-color" content="#ffffff" />
         <meta name="description" content="OAuth page for {{ site.name }}" />
         <meta name="keywords" content="oauth,login" />
-        <title>
-            {% block head_title %}
-                {{ site.name }}
-            {% endblock head_title %}
-        </title>
+        <title>{% block head_title %}{{ site.name }}{% endblock %}</title>
         {% compress css %}
             <link rel="stylesheet"
                   href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
