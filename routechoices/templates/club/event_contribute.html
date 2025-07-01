@@ -1,13 +1,9 @@
 {% extends "club/base.html" %}
 {% load compress django_bootstrap5 hosts static %}
 
-{% block head_title %}
-    {{ event.name }} contribution page | Powered by {{ site.name }}
-{% endblock head_title %}
+{% block head_title %}{{ event.name }} contribution page | Powered by {{ site.name }}{% endblock %}
 
-{% block head_description %}
-    {{ event.name }} by {{ event.club.name }} contribution page
-{% endblock head_description %}
+{% block head_description %}{{ event.name }} by {{ event.club.name }} contribution page{% endblock %}
 
 {% block extra_head %}
     <meta property="og:title" content="{{ event.name }}" />

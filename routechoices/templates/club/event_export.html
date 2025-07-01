@@ -1,13 +1,9 @@
 {% extends "club/base.html" %}
 {% load compress hosts static %}
 
-{% block head_title %}
-    {{ event.name }} data export | Powered by {{ site.name }}
-{% endblock head_title %}
+{% block head_title %}{{ event.name }} data export | Powered by {{ site.name }}{% endblock %}
 
-{% block head_description %}
-    {{ event.name }} by {{ event.club.name }} data export page
-{% endblock head_description %}
+{% block head_description %}{{ event.name }} by {{ event.club.name }} data export page{% endblock %}
 
 {% block extra_head %}
     <meta property="og:title" content="{{ event.name }} data export" />

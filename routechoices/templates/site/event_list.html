@@ -17,32 +17,9 @@
     {% endif %}
 {% endblock favicon %}
 
-{% block head_title %}
-    {% if event_set_page %}
-        {{ event_set.name }}
-    {% else %}
-        Events
-    {% endif %}
-    {% if club %}
-        by {{ club.name }} | Powered by {{ site.name }}
-    {% else %}
-        | {{ site.name }}
-    {% endif %}
-    | Live GPS tracking
-{% endblock head_title %}
+{% block head_title %}{% if event_set_page %}{{ event_set.name }}{% else %}Events{% endif %}{% if club %} by {{ club.name }} | Powered by {{ site.name }}{% else %} | {{ site.name }}{% endif %} | Live GPS tracking{% endblock %}
 
-{% block head_description %}
-    {% if event_set_page %}
-        {{ event_set.name }}
-    {% else %}
-        List of public events
-    {% endif %}
-    {% if club %}
-        by {{ club.name }}
-    {% else %}
-        on {{ site.name }}, an easy to use and powerful live GPS tracking solution designed for orienteering and outdoor events.
-    {% endif %}
-{% endblock head_description %}
+{% block head_description %}{% if event_set_page %}{{ event_set.name }}{% else %}List of public GPS tracking events{% endif %}{% if club %} by {{ club.name }}{% else %} on {{ site.name }}, an easy to use and powerful live GPS tracking solution designed for orienteering and outdoor events.{% endif %}{% endblock %}
 
 {% block extra_head %}
     <link rel="alternate"
