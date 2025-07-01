@@ -870,6 +870,13 @@ class EventApiTestCase(EssentialApiBase):
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
         res = self.client.get(url)
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
+        key = res.data["key"]
+        res = self.client.get(f"{url}/{key}")
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+
+        res = self.client.get(f"{url}/{key}")
+        self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
+
         event.save()
         res = self.client.get(url)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
