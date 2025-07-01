@@ -14,6 +14,7 @@ if [ "$PREV_MD5SUM" != "$NEW_MD5SUM" ]
 then
   source $BASEDIR/env/bin/activate
   source ~/.cargo/env
+  source ~/.local/bin/env
   uv pip install --no-cache --requirement requirements.txt
 fi
 doppler secrets download --no-file --format=env 1> ".env"
