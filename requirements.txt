@@ -101,7 +101,7 @@ types-python-dateutil==2.9.0.20250516
 typing-extensions==4.14.0
 typing-inspection==0.4.1
 uritemplate==4.2.0
-urllib3==2.4.0
+urllib3==2.5.0
 webauthn==1.11.1
 webencodings==0.5.1
 yarl==1.20.1
