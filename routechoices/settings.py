@@ -138,7 +138,7 @@ MIDDLEWARE = [
     "django.middleware.http.ConditionalGetMiddleware",
     "hijack.middleware.HijackUserMiddleware",
 ]
-SESSION_ENGINE = "user_sessions.backends.db"
+SESSION_ENGINE = "routechoices.core.sessions_backend"
 ROOT_URLCONF = "routechoices.urls"
 ROOT_HOSTCONF = "routechoices.hosts"
 DEFAULT_HOST = "www"
