@@ -2336,7 +2336,7 @@ function RCEvent(infoURL, clockURL, locale) {
 				competitor.tail = L.polyline(tailLatLng, {
 					color: competitor.color,
 					opacity: 1,
-					weight: 5 * runnerIconScale,
+					weight: 3 * runnerIconScale,
 					className: `${competitor.highlighted ? "runner-focused" : ""} stroke-dark runner-tail`,
 				}).addTo(map);
 				competitor.tail.closestLayerPoint(new L.Point(0, 0));
