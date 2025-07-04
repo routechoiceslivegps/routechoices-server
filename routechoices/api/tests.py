@@ -1,5 +1,7 @@
 import json
 import random
+import socket
+import threading
 import time
 from datetime import UTC, datetime
 
@@ -1082,8 +1084,17 @@ class LocationApiTestCase(EssentialApiBase):
         self.assertEqual(res.data.get("device_id"), dev_id)
         self.assertEqual(res.data.get("location_count"), 2)
 
-    @override_settings(GPSSEURANTA_SERVER_ADDR="tcp://tcpbin.com:4242")
+    @override_settings(GPSSEURANTA_SERVER_ADDR="tcp://127.0.0.1:7777")
     def test_gpsseuranta_relay(self):
+        def run_fake_server():
+            with socket.socket() as server_sock:
+                server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                server_sock.bind(("127.0.0.1", 7777))
+                server_sock.listen(0)
+                client, addr = server_sock.accept()
+                self.data_recv = client.recv(1024)
+                client.close()
+
         validated_apps_user = User.objects.create_user(
             "apps", f"apps{random.randrange(1000)}@example.com", "pa$$word123"
         )
@@ -1093,6 +1104,10 @@ class LocationApiTestCase(EssentialApiBase):
         device.gpsseuranta_relay_until = arrow.get().shift(hours=1).datetime
         device.save()
         t = 1749720074
+
+        # Run a fake GPS Seuranta TCP server to collect data received
+        server_thread = threading.Thread(target=run_fake_server)
+        server_thread.start()
         res = self.client.post(
             self.url,
             {
@@ -1102,17 +1117,17 @@ class LocationApiTestCase(EssentialApiBase):
                 "timestamps": f"{t},{t+1}",
             },
         )
+        # Ensure the fake server thread is closed
+        server_thread.join()
+
+        self.assertEqual(
+            self.data_recv,
+            bytes(f"rc{device.aid}.613646474_150000_100010.WWf.\n", encoding="ascii"),
+        )
+
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data.get("device_id"), device.aid)
         self.assertEqual(res.data.get("location_count"), 2)
-
-        from routechoices.core.models import gpsseuranta_client
-
-        data = gpsseuranta_client.socket.recv(1024)
-        self.assertEqual(
-            data,
-            bytes(f"rc{device.aid}.613646474_150000_100010.WWf.\n", encoding="ascii"),
-        )
 
     def test_locations_api_gw_no_secret_but_logged_in_as_random_user(self):
         self.client.force_login(self.user)
