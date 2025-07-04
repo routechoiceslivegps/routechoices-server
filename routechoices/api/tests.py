@@ -1084,12 +1084,12 @@ class LocationApiTestCase(EssentialApiBase):
         self.assertEqual(res.data.get("device_id"), dev_id)
         self.assertEqual(res.data.get("location_count"), 2)
 
-    @override_settings(GPSSEURANTA_SERVER_ADDR="tcp://127.0.0.1:7777")
     def test_gpsseuranta_relay(self):
         def run_fake_server():
             with socket.socket() as server_sock:
-                server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                server_sock.bind(("127.0.0.1", 7777))
+                server_sock.bind(("127.0.0.1", 0))
+                port = server_sock.getsockname()[1]
+                settings.GPSSEURANTA_SERVER_ADDR = f"tcp://127.0.0.1:{port}"
                 server_sock.listen(0)
                 client, addr = server_sock.accept()
                 self.data_recv = client.recv(1024)
