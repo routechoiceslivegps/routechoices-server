@@ -866,16 +866,37 @@ class EventApiTestCase(EssentialApiBase):
         url = self.reverse_and_check(
             "event_data", f"/events/{event.aid}/data", "api", {"event_id": event.aid}
         )
+
+        device = Device.objects.create()
+
+        Competitor.objects.create(
+            name="Alice A",
+            short_name="A",
+            event=event,
+            device=device,
+            start_time=arrow.get().shift(seconds=-1).datetime,
+        )
+
+        device.add_location(arrow.get().timestamp(), 12.34567, 123.45678)
+
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data["competitors"], [])
+        self.assertNotEqual(res.data["competitors"][0]["encoded_data"], "")
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
         res = self.client.get(url)
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
         key = res.data["key"]
-        res = self.client.get(f"{url}/{key}")
-        self.assertIsNone(res.headers.get("X-Cache-Hit"))
 
+        device.add_location(
+            arrow.get().shift(seconds=2).timestamp(), 12.34568, 123.45677
+        )
+
+        time.sleep(5)
+        res = self.client.get(f"{url}/{key}")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIsNone(res.headers.get("X-Cache-Hit"))
+        self.assertNotEqual(res.data["competitors"][0]["encoded_data"], "")
+        self.assertEqual(res.data["partial"], True)
         res = self.client.get(f"{url}/{key}")
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
 

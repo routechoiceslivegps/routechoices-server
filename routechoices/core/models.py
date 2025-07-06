@@ -2284,7 +2284,6 @@ class Device(models.Model):
         sorted_new_locations = list(
             sorted(new_locations, key=itemgetter(LOCATION_TIMESTAMP_INDEX))
         )
-
         freshness_cutoff = None
         if self._last_location_datetime:
             freshness_cutoff = self._last_location_datetime.timestamp()
