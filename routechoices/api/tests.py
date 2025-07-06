@@ -1112,8 +1112,8 @@ class LocationApiTestCase(EssentialApiBase):
             self.url,
             {
                 "device_id": device.aid,
-                "latitudes": "1.0001,1.0002",
-                "longitudes": "3.00001,3.00002",
+                "latitudes": "0.0001,0.0002",
+                "longitudes": "3.00044,3",
                 "timestamps": f"{t},{t+1}",
             },
         )
@@ -1122,7 +1122,7 @@ class LocationApiTestCase(EssentialApiBase):
 
         self.assertEqual(
             self.data_recv,
-            bytes(f"rc{device.aid}.613646474_150000_100010.WWf.\n", encoding="ascii"),
+            bytes(f"rc{device.aid}.613646474_150022_10.W9f.\n", encoding="ascii"),
         )
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
