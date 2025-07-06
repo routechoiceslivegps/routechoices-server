@@ -874,10 +874,12 @@ class EventApiTestCase(EssentialApiBase):
             short_name="A",
             event=event,
             device=device,
-            start_time=arrow.get().shift(seconds=-1).datetime,
+            start_time=arrow.get().shift(seconds=-2).datetime,
         )
 
-        device.add_location(arrow.get().timestamp(), 12.34567, 123.45678)
+        device.add_location(
+            arrow.get().shift(seconds=-1).timestamp(), 12.34567, 123.45678
+        )
 
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -887,11 +889,9 @@ class EventApiTestCase(EssentialApiBase):
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
         key = res.data["key"]
 
-        device.add_location(
-            arrow.get().shift(seconds=2).timestamp(), 12.34568, 123.45677
-        )
+        device.add_location(arrow.get().shift().timestamp(), 12.34568, 123.45677)
 
-        time.sleep(5)
+        time.sleep((time.time() // 5 + 1) * 5 - time.time() + 0.1)
         res = self.client.get(f"{url}/{key}")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
