@@ -1,4 +1,4 @@
-# import os.path
+# import os.path    # Used in s3_rename_object
 import urllib.parse
 from io import BytesIO
 
