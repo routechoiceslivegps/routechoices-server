@@ -1,4 +1,4 @@
-import os.path
+# import os.path
 import urllib.parse
 from io import BytesIO
 
@@ -16,11 +16,23 @@ from routechoices.lib.helpers import (
 )
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
 
+# def bytes_to_str(b):
+#     if isinstance(b, str):
+#         return b
+#     return b.decode("utf-8")
 
-def bytes_to_str(b):
-    if isinstance(b, str):
-        return b
-    return b.decode("utf-8")
+
+# def s3_object_size(key, bucket):
+#     s3 = get_s3_client()
+#     return s3.head_object(Bucket=bucket, Key=key).get("ContentLength", 0)
+
+
+# def s3_rename_object(bucket, src, dest):
+#     src = bytes_to_str(src)
+#     dest = bytes_to_str(dest)
+#     s3 = get_s3_client()
+#     s3.copy_object(Bucket=bucket, CopySource=os.path.join(bucket, src), Key=dest)
+#     s3.delete_object(Bucket=bucket, Key=src)
 
 
 def get_s3_client():
@@ -40,25 +52,12 @@ def s3_object_url(method, key, bucket):
     )
 
 
-def s3_object_size(key, bucket):
-    s3 = get_s3_client()
-    return s3.head_object(Bucket=bucket, Key=key).get("ContentLength", 0)
-
-
 def s3_delete_key(key, bucket):
     s3 = get_s3_client()
     s3.delete_object(
         Bucket=bucket,
         Key=key,
     )
-
-
-def s3_rename_object(bucket, src, dest):
-    src = bytes_to_str(src)
-    dest = bytes_to_str(dest)
-    s3 = get_s3_client()
-    s3.copy_object(Bucket=bucket, CopySource=os.path.join(bucket, src), Key=dest)
-    s3.delete_object(Bucket=bucket, Key=src)
 
 
 def serve_from_s3(
