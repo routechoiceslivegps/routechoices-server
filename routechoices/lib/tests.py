@@ -1,5 +1,6 @@
 from unittest.mock import Mock, patch
 
+from django.core.validators import ValidationError
 from django.test import TestCase, override_settings
 
 from . import plausible
@@ -12,6 +13,16 @@ from .kmz import extract_ground_overlay_info
 
 # from .mtb_decoder import MtbDecoder
 from .slippy_tiles import latlon_to_tile_xy, tile_xy_to_north_west_latlon
+from .validators import (
+    validate_corners_coordinates,
+    validate_domain_slug,
+    validate_emails,
+    validate_esn,
+    validate_imei,
+    validate_latitude,
+    validate_longitude,
+    validate_nice_slug,
+)
 
 
 @override_settings(ANALYTICS_API_KEY=True)
@@ -147,8 +158,98 @@ class HelperTestCase(TestCase):
         )
 
 
-# class MtbDecoderTestCase(TestCase):
-#     def test_decode(self):
-#         with open("cypress/fixtures/tractrac.mtb", "rb") as lf:
-#             device_map = MtbDecoder(lf).decode()
-#         self.assertEqual(len(device_map), 11)
+class ValidatorsTestCase(TestCase):
+    def test_validate_emails(self):
+        self.assertRaises(ValidationError, validate_emails, "r a@a.aa")
+        validate_emails("r@example.com a@a.aa")
+
+    def test_validate_imei(self):
+        validate_imei("012345678901237")
+        self.assertRaises(ValidationError, validate_imei, "r a@a.aa")
+        self.assertRaises(ValidationError, validate_imei, "0123456789")
+        self.assertRaises(ValidationError, validate_imei, "01234567890123456")
+        self.assertRaises(ValidationError, validate_imei, "012345678901234")
+        self.assertRaises(ValidationError, validate_imei, None)
+
+    def test_validate_esn(self):
+        validate_esn("0-1234567")
+        self.assertRaises(ValidationError, validate_esn, "r a@a.aa")
+        self.assertRaises(ValidationError, validate_esn, "01234567")
+        self.assertRaises(ValidationError, validate_esn, "012345678")
+        self.assertRaises(ValidationError, validate_esn, "0123456")
+        self.assertRaises(ValidationError, validate_esn, None)
+
+    def test_validate_corners_coords(self):
+        validate_corners_coordinates("0,0,0,0,0,0,0,0")
+        validate_corners_coordinates("0,360,0,0,0,0,0,0")
+        self.assertRaises(ValidationError, validate_corners_coordinates, "r a@a.aa")
+        self.assertRaises(
+            ValidationError, validate_corners_coordinates, "0,0,0,0,0,0,0"
+        )
+        self.assertRaises(
+            ValidationError, validate_corners_coordinates, "0,0,0,0,0,0,0,"
+        )
+        self.assertRaises(
+            ValidationError, validate_corners_coordinates, "0,0,0,0,0,0,0,a"
+        )
+        self.assertRaises(
+            ValidationError, validate_corners_coordinates, "0,0,0,0,0,0,0,0,1"
+        )
+        self.assertRaises(
+            ValidationError, validate_corners_coordinates, "100,0,0,0,0,0,0,0"
+        )
+
+    def test_validate_domain(self):
+        validate_domain_slug("abc01")
+        validate_domain_slug("a-b-c-0-1")
+        validate_domain_slug("123")
+        validate_domain_slug("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        self.assertRaises(ValidationError, validate_domain_slug, "r a@a.aa")
+        self.assertRaises(ValidationError, validate_domain_slug, "r")
+        self.assertRaises(ValidationError, validate_domain_slug, "a.a")
+        self.assertRaises(
+            ValidationError, validate_domain_slug, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        )
+        self.assertRaises(ValidationError, validate_domain_slug, "-abc")
+        self.assertRaises(ValidationError, validate_domain_slug, "a_bc")
+        self.assertRaises(ValidationError, validate_domain_slug, "abc-")
+        self.assertRaises(ValidationError, validate_domain_slug, "ab--c")
+        self.assertRaises(ValidationError, validate_domain_slug, "test")
+
+    def test_validate_nice_slug(self):
+        validate_nice_slug("abc01")
+        validate_nice_slug("a-b-c-0-1")
+        validate_nice_slug("123")
+        validate_nice_slug("1_23")
+        validate_nice_slug("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        self.assertRaises(ValidationError, validate_nice_slug, "r a@a.aa")
+        self.assertRaises(ValidationError, validate_nice_slug, "r")
+        self.assertRaises(ValidationError, validate_nice_slug, "a.a")
+        self.assertRaises(
+            ValidationError, validate_nice_slug, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        )
+        self.assertRaises(ValidationError, validate_nice_slug, "-abc")
+        self.assertRaises(ValidationError, validate_nice_slug, "_abc")
+        self.assertRaises(ValidationError, validate_nice_slug, "abc-")
+        self.assertRaises(ValidationError, validate_nice_slug, "abc_")
+        self.assertRaises(ValidationError, validate_nice_slug, "ab--c")
+        self.assertRaises(ValidationError, validate_nice_slug, "ab_-c")
+        self.assertRaises(ValidationError, validate_nice_slug, "ab-_c")
+        self.assertRaises(ValidationError, validate_nice_slug, "ab__c")
+        self.assertRaises(ValidationError, validate_nice_slug, "test")
+
+    def test_validate_lat(self):
+        validate_latitude(0)
+        validate_latitude(90)
+        validate_latitude(-90)
+        self.assertRaises(ValidationError, validate_latitude, "r a@a.aa")
+        self.assertRaises(ValidationError, validate_latitude, 90.1)
+        self.assertRaises(ValidationError, validate_latitude, -90.1)
+
+    def test_validate_lon(self):
+        validate_longitude(0)
+        validate_longitude(180)
+        validate_longitude(-180)
+        self.assertRaises(ValidationError, validate_longitude, "r a@a.aa")
+        self.assertRaises(ValidationError, validate_longitude, 180.1)
+        self.assertRaises(ValidationError, validate_longitude, -180.1)
