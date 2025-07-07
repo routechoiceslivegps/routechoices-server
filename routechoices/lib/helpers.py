@@ -60,7 +60,6 @@ def get_remote_image_sizes(uri):
             p.feed(data)
             if p.image:
                 return size, p.image.size
-                break
         return size, None
 
 
@@ -127,12 +126,6 @@ def safe64encode(b):
     return base64.urlsafe_b64encode(b).decode().rstrip("=")
 
 
-def safe32encode(b):
-    if isinstance(b, str):
-        b = b.encode("utf-8")
-    return base64.b32encode(b).decode().rstrip("=")
-
-
 def safe64encodedsha(txt):
     if isinstance(txt, str):
         txt = txt.encode("utf-8")
@@ -145,15 +138,15 @@ def shortsafe64encodedsha(txt):
     return safe64encodedsha(txt)[:8]
 
 
-def safe64decode(b):
-    return base64.urlsafe_b64decode(b.encode() + b"==")
+# def safe64decode(b):
+#     return base64.urlsafe_b64decode(b.encode() + b"==")
 
 
 def int_base32(i):
     b = struct.pack(">Q", i)
     while b.startswith(b"\x00"):
         b = b[1:]
-    return safe32encode(b)
+    return base64.b32encode(b).decode().rstrip("=")
 
 
 def time_base32():
@@ -166,8 +159,6 @@ def deg2rad(deg):
 
 
 def get_device_name(ua):
-    if ua in ("Teltonika", "Queclink"):
-        return ua
     if ua.startswith("Routechoices-ios-tracker"):
         return "iOS"
     if ua.startswith("Dalvik"):
@@ -175,8 +166,10 @@ def get_device_name(ua):
     if ua.startswith("ConnectMobile"):
         return "Garmin"
     if ua.startswith("Traccar"):
-        return ua
-    return device_name(ua)
+        return "Traccar"
+    if name := device_name(ua):
+        return name
+    return ua
 
 
 def get_aware_datetime(date_str):

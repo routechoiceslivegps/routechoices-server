@@ -1,12 +1,16 @@
 from unittest.mock import Mock, patch
 
 from django.core.validators import ValidationError
+from django.http.response import Http404
 from django.test import TestCase, override_settings
 
 from . import plausible
 from .helpers import (
     check_cname_record,
     compute_corners_from_kml_latlonbox,
+    get_device_name,
+    get_image_mime_from_request,
+    simplify_periods,
     three_point_calibration_to_corners,
 )
 from .kmz import extract_ground_overlay_info
@@ -138,6 +142,8 @@ class HelperTestCase(TestCase):
 
     def test_check_dns(self):
         self.assertTrue(check_cname_record("live.kiilat.com"))
+        self.assertFalse(check_cname_record("doesnotexist.kiilat.com"))
+        self.assertFalse(check_cname_record("kiilat.com"))
 
     def test_slippy_map(self):
         xy = latlon_to_tile_xy(60, 20, 10)
@@ -155,6 +161,28 @@ class HelperTestCase(TestCase):
         self.assertEqual(
             coordinates,
             "37.91985,14.60206,37.91823,15.35910,37.46462,15.35755,37.46625,14.60051",
+        )
+
+    def test_get_image_mime_from_request(self):
+        self.assertEqual(get_image_mime_from_request("jpeg"), "image/jpeg")
+        self.assertEqual(get_image_mime_from_request("jpeg", "image/png"), "image/jpeg")
+        self.assertRaises(Http404, get_image_mime_from_request, "json", "image/jpeg")
+        self.assertEqual(get_image_mime_from_request(None, "image/webp"), "image/webp")
+
+    def test_simplify_periods(self):
+        self.assertEqual(simplify_periods([(0, 2), (5, 7), (1, 3)]), [(0, 3), (5, 7)])
+
+    def test_get_device_name(self):
+        self.assertEqual(get_device_name("Queclink"), "Queclink")
+        self.assertEqual(get_device_name("Routechoices-ios-tracker/1.3.2"), "iOS")
+        self.assertEqual(get_device_name("Dalvik/1.2.3"), "Android")
+        self.assertEqual(get_device_name("ConnectMobile/1.0.2"), "Garmin")
+        self.assertEqual(get_device_name("Traccar/2.1.3"), "Traccar")
+        self.assertEqual(
+            get_device_name(
+                "Mozilla/5.0 (Linux; Android 15; SM-S931B Build/AP3A.240905.015.A2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/127.0.6533.103 Mobile Safari/537.36"
+            ),
+            "Chrome on Android",
         )
 
 
