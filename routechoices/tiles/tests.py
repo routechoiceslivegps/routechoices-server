@@ -146,6 +146,12 @@ class MapApiTestCase(EssentialApiBase):
         res = client.get((f"{url}?z=17&y=36993&layers={event.aid}"))
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
+        # return error if mime is not supported
+        res = client.get(
+            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&format=image%2Fpdf")
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_should_hit_cache(self):
         cache.clear()
         client = APIClient(HTTP_HOST="tiles.routechoices.dev")
