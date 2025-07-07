@@ -130,7 +130,7 @@ def serve_tile(request):
     )
     headers = {"X-Cache-Hit": cache_hit}
     if request.event.privacy == PRIVACY_PRIVATE:
-        headers = {"Cache-Control": "Private"}
+        headers["Cache-Control"] = "Private"
     return StreamingHttpRangeResponse(
         request,
         data_out,
