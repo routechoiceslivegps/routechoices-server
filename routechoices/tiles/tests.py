@@ -101,36 +101,49 @@ class MapApiTestCase(EssentialApiBase):
 
         # serve png if asked
         res = client.get(
-            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&" f"format=image%2Fpng")
+            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&format=image%2Fpng")
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res["content-type"], "image/png")
+
+        # serve png if asked apng
+        res = client.get(
+            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&format=image%2Fapng")
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res["content-type"], "image/png")
 
         # serve webp if asked
         res = client.get(
-            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&" f"format=image%2Fwebp")
+            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&format=image%2Fwebp")
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res["content-type"], "image/webp")
 
         # serve avif if asked
         res = client.get(
-            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&" f"format=image%2Favif")
+            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&format=image%2Favif")
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res["content-type"], "image/avif")
 
         # serve jxl if asked
         res = client.get(
-            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&" f"format=image%2Fjxl")
+            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&format=image%2Fjxl")
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res["content-type"], "image/jxl")
 
-        # return error if gif is asked
-        res = client.get(
-            (f"{url}?z=17&x=74352&y=36993&layers={event.aid}&" f"format=image%2Fgif")
-        )
+        # return error if invalid tiles is asked
+        res = client.get((f"{url}?z=17&x=hello&y=36993&layers={event.aid}"))
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # return error if invalid layer
+        res = client.get((f"{url}?z=17&x=74352&y=36993&layers={event.aid}/0"))
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # return error if param is missing
+        res = client.get((f"{url}?z=17&y=36993&layers={event.aid}"))
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_should_hit_cache(self):
