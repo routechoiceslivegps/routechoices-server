@@ -1,6 +1,6 @@
 {% extends "club/base.html" %}
 {% load compress django_bootstrap5 hosts static %}
-{% block head_title %}{{ event.name }} | Powered by {{ site.name }}{% endblock %}
+{% block head_title %}{{ event.name }} | Powered by Routechoices — Live GPS{% endblock %}
 
 {% block head_description %}GPS Tracking of {{ event.name }} by {{ event.club.name }}{% endblock %}
 
@@ -8,7 +8,7 @@
     <meta property="og:title" content="{{ event.name }}" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:site_name" content="{{ site.name }}" />
+    <meta property="og:site_name" content="Routechoices | Live GPS" />
     <meta property="og:description"
           content="Live GPS Tracking of {{ event.name }} by {{ event.club.name }}" />
     <meta property="og:url" content="{{ event.get_absolute_url }}" />
@@ -90,27 +90,26 @@
                             <i class="fa-solid fa-fw fa-share-nodes"></i>
                         </button>
                     </div>
-                    <div class="px-0 py-1 powered-vert">
+                    <div class="px-0 py-3 powered-vert">
                         <a target="_blank"
                            href="https://www.routechoices.com"
-                           style="line-height: 25px;
+                           style="line-height: 30px;
+                                  font-weight: 700;
                                   color: var(--bs-primary-text);
-                                  margin-right: -3px;
+                                  margin-right: 3px;
                                   user-select: none;
-                                  -webkit-user-select: none"
+                                  -webkit-user-select: none;
+                                  font-family: Atkinson Hyperlegible, sans-serif;"
                            class="d-flex text-decoration-none fw-bold">
-                            <div>Powered by</div>
-                            <div class="pt-1">
-                                <div>Routechoices.com</div>
-                                <div style="font-size: 0.67em; line-height: 0px;">Live GPS Tracking Solution</div>
-                            </div>
                             <div>
-                                <img src="{% static 'img/logo.svg' %}"
+                                <img src="{% static 'img/logo.svg' %}?v=2025"
                                      alt="Site logo"
-                                     height="35"
                                      width="35"
-                                     style="vertical-align: top;
-                                            transform: rotate(90deg)">
+                                     style="vertical-align: bottom;transform: rotate(90deg);margin-right: -5px">
+                            </div>
+                            <div class="pt-3 pb-1">
+                                <div style="font-size:0.67em;line-height: 1em;">ROUTECHOICES</div>
+                                <div style="font-size:1.14em;line-height: 1em;">LIVE GPS</div>
                             </div>
                         </a>
                     </div>

@@ -11,14 +11,14 @@
             <link rel="icon" sizes="32x32" href="{% static 'favicon.ico' %}?v=2024a" />
             <link rel="manifest" href="{% static 'manifest.json' %}?v=2024a" />
         {% endblock favicon %}
-        <meta name="apple-mobile-web-app-title" content="{{ site.name }}" />
-        <meta name="application-name" content="{{ site.name }}" />
+        <meta name="apple-mobile-web-app-title" content="Routechoices" />
+        <meta name="application-name" content="Routechoices" />
         <meta name="theme-color" content="#ffffff" />
         <meta name="description"
-              content="{% block head_description %}{{ site.name }} is an easy to use and powerful live GPS tracking solution designed for orienteering and outdoor events. View competitors locations in the forest on computer, tablet or smartphone.{% endblock %}" />
+              content="{% block head_description %}Routechoices.com is an easy-to-use yet powerful live GPS tracking platform designed for orienteering and outdoor sports enthusiasts. Whether you're on a computer, tablet, or smartphone, you can effortlessly set up and view events where participants' live locations are displayed on high-precision maps.{% endblock %}" />
         <meta name="keywords"
               content="{% block head_keywords %}gps,tracking,orienteering,live,gps tracking,outdoor,tracker,orienteer,replay,trackers,gps seuranta,gps spårning,gps sporing,suunnistus,orientering{% endblock %}" />
-        <title>{% block head_title %}{{ site.name }} | Live GPS tracking{% endblock %}</title>
+        <title>{% block head_title %}Routechoices | Live GPS{% endblock %}</title>
         {% compress css %}
             <link rel="stylesheet"
                   href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
@@ -30,12 +30,12 @@
         {% endcompress %}
         {% block extra_head %}
             <meta property="og:title"
-                  content="{{ site.name }} | Live GPS tracking" />
+                  content="Routechoices | Live GPS" />
             <meta property="og:description"
-                  content="{{ site.name }} is an easy to use and powerful live GPS tracking solution designed for orienteering and outdoor events. View competitors locations in the forest on computer, tablet or smartphone." />
+                  content="Routechoices.com is an easy-to-use yet powerful live GPS tracking platform designed for orienteering and outdoor sports enthusiasts. Whether you're on a computer, tablet, or smartphone, you can effortlessly set up and view events where participants' live locations are displayed on high-precision maps." />
             <meta property="og:type" content="website" />
             <meta property="og:locale" content="en_US" />
-            <meta property="og:site_name" content="{{ site.name }}" />
+            <meta property="og:site_name" content="Routechoices | Live GPS" />
             <meta name="twitter:card" content="summary_large_image" />
             <meta property="og:image" content="{% static '/img/og.jpg' %}?t=2024090300" />
             <meta property="og:image:width" content="1200" />

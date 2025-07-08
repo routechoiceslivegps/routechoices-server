@@ -7,7 +7,7 @@
             Your club's pages are accessible at your custom domain <a href="{{ club.nice_url }}">{{ club.nice_url }}</a>
         </p>
         {% if not club.use_https %}
-            <p>{{ site.name }} is in process of issuing you a SSL certificate, it might take a couple of minutes.</p>
+            <p>Our server is in process of issuing you a SSL certificate, it might take a couple of minutes.</p>
         {% endif %}
         <form method="post" class="post-form">
             {% csrf_token %}
@@ -54,7 +54,7 @@
         <b class="mb-0">Notes:</b>
         <ul>
             <li>It may take some time for the DNS records to propagate.</li>
-            <li>{{ site.name }} automatically set up the SSL certificate for your custom domain.</li>
+            <li>Our server automatically set up the SSL certificate for your custom domain.</li>
             <li>Your old pages at {{ club.nice_url }}... will be seamlessly redirected to your new domain.</li>
         </ul>
     {% endif %}

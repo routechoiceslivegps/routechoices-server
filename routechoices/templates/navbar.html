@@ -4,17 +4,16 @@
                background-color: #111 !important">
     <div class="container">
         <a class="navbar-brand site-name d-inline-flex"
-           href="{% host_url 'site:landing_page' host 'www' %}">
+           href="{% host_url 'site:landing_page' host 'www' %}" style="margin-top:5px;">
             <div class="d-inline-block">
-                <img src="{% static 'img/logo.svg' %}"
+                <img src="{% static 'img/logo.svg' %}?v=2025"
                      alt="Site logo"
-                     height="25"
-                     width="34.66"
+                     height="33"
                      style="vertical-align: top">
             </div>
             <div class="px-2">
-                <div style="line-height:1.4em;margin-top:-5px;">{{ site.name }}</div>
-                <div style="font-size:0.67em; line-height:0">Live GPS Tracking Solution</div>
+                <div style="font-size:0.67em;line-height: 1em;">ROUTECHOICES</div>
+                <div style="font-size:1.14em;line-height: 1em;">LIVE GPS</div>
             </div>
         </a>
         <button id="navbar-toogler"

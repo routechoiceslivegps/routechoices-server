@@ -4,17 +4,19 @@
 Routechoices server
 ===================
 
-Server applications for the Routechoices.com live GPS tracking solution for orienteering and other outdoor sports.
+Code for the server of the Routechoices Live GPS platform.
 
 It includes:
 
-  - A web frontend for listing events and displaying live and archived events.
-  - A web dashboard for users to manage their events, maps, devices...
+  - The site static content.
+  - A frontend server for listing and displaying live and archived events.
+  - A dashboard for users to manage their events, maps, devices...
   - A REST API and its documentation.
-  - A TCP server for listening to dedicated trackers.
+  - A TCP server for listening to dedicated GPS trackers.
   - A WMS server for serving events maps.
-  - A full-fledged web admin interface for owners.
+  - A Tile server for serving background layers tiles.
+  - An admin interface for the staff.
 
-This project rely on the Django and the Tornado Web python frameworks.
+This project heavily rely on the Django and the Tornado Web python frameworks.
 
 Hosted at https://www.routechoices.com
