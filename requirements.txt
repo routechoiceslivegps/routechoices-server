@@ -105,3 +105,4 @@ urllib3==2.5.0
 webauthn==1.11.1
 webencodings==0.5.1
 yarl==1.20.1
+pyproj==3.7.1

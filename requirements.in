@@ -47,3 +47,4 @@ sentry-sdk
 setuptools
 sewer @ git+https://github.com/rphlo/sewer@0.8.4a
 tornado
+pyproj

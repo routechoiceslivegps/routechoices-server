@@ -24,7 +24,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 DEBUG = env.bool("DEBUG")
 
 SECRET_KEY = env.str("SECRET_KEY")
-
+ORDNANCE_SURVEY_API_KEY = env.str("ORDNANCE_SURVEY_API_KEY")
 PARENT_HOST = env.str("PARENT_HOST")
 LOGIN_URL = env.str("LOGIN_URL")
 REDIRECT_ALLOWED_DOMAINS = env.list("REDIRECT_ALLOWED_DOMAINS")

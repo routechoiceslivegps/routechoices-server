@@ -6,6 +6,12 @@ from routechoices.lib.globalmaptiles import GlobalMercator
 from routechoices.lib.helpers import get_best_image_mime, safe64encodedsha
 from routechoices.lib.slippy_tiles import tile_xy_to_north_west_latlon
 from routechoices.lib.streaming_response import StreamingHttpRangeResponse
+from routechoices.lib.tile_proxies import (
+    leisure_uk_proxy,
+    mapant_ch_proxy,
+    mapant_ee_proxy,
+    mapant_se_proxy,
+)
 
 GLOBAL_MERCATOR = GlobalMercator()
 
@@ -136,4 +142,22 @@ def serve_tile(request):
         data_out,
         content_type=request.image_request["mime"],
         headers=headers,
+    )
+
+
+def serve_tile_proxy(request, country, z, x, y):
+    proxy = None
+    if country == "ch":
+        proxy = mapant_ch_proxy
+    elif country == "ee":
+        proxy = mapant_ee_proxy
+    elif country == "se":
+        proxy = mapant_se_proxy
+    elif country == "uk":
+        proxy = leisure_uk_proxy
+    tile_data = proxy.get_tile(int(z), int(x), int(y))
+    return StreamingHttpRangeResponse(
+        request,
+        tile_data.getvalue(),
+        content_type="image/webp",
     )
