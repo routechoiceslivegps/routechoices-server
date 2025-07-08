@@ -7,7 +7,7 @@
             You were invited to manage club {{ invitation.club }}, however the email provided for the invite is not listed in your account's email addresses.
         </p>
         <p>
-            To continue you can either add that email address to your account <a href="{% url 'dashboard:account:email_list' %}">here</a>, or create a new account in which case you need to <a href="{% url 'site:account_logout' %}"">logout</a> first.
+            To continue you can either add that email address to your account <a href="{% url 'account_email_list' %}">here</a>, or create a new account in which case you need to <a href="{% url 'account_logout' %}"">logout</a> first.
         </p>
     {% elif not invitation %}
         <h3>Invite cannot be found</h3>

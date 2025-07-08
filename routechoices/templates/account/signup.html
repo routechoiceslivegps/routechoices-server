@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load compress django_bootstrap5 i18n static %}
+{% load compress django_bootstrap5 hosts i18n static %}
 {% block head_title %}{% translate "Sign Up" %}{% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@
                         <form class="signup"
                               id="signup_form"
                               method="post"
-                              action="{% url 'site:account_signup' %}">
+                              action="{% host_url 'account_signup' host 'dashboard' %}">
                             {% csrf_token %}
                             {% bootstrap_form form %}
                             {% if redirect_field_value %}

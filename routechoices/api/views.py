@@ -108,7 +108,7 @@ event_param = openapi.Parameter(
 )
 
 mine_param = openapi.Parameter(
-    "mine",
+    "only_mine",
     openapi.IN_QUERY,
     description="Filter weither you own it",
     type=openapi.TYPE_BOOLEAN,
@@ -466,7 +466,7 @@ def event_list(request):
 )
 @api_GET_view
 def club_list_view(request):
-    only_yours = request.GET.get("mine")
+    only_yours = request.GET.get("only_mine") == "true"
     clubs = Club.objects.all()
     owned_clubs = Club.objects.none()
     if request.user.is_authenticated:
@@ -479,7 +479,7 @@ def club_list_view(request):
             "name": club.name,
             "slug": club.slug,
             "url": club.nice_url,
-            "owned": only_yours or (club in owned_clubs),
+            "owned": True if only_yours or (club in owned_clubs) else False,
         }
         if not only_yours or data["owned"]:
             output.append(data)

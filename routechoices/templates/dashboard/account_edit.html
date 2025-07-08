@@ -10,29 +10,29 @@
         </div>
     </div>
     <div>
-        <a href="{% host_url 'site:account_logout' host 'www' %}"
+        <a href="{% host_url 'account_logout' host 'dashboard' %}"
            class="btn btn-info btn-sm mb-3">Logout <i class="fa-solid fa-arrow-right-from-bracket"></i></a>
     </div>
     <ul class="nav nav-tabs mb-3">
         <li>
-            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard:account:edit_view' %}active{% endif %}"
-               href="{% url 'dashboard:account:edit_view' %}"><i class="fa-solid fa-user"></i> Your Details</a>
+            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'account_edit_view' %}active{% endif %}"
+               href="{% url 'account_edit_view' %}"><i class="fa-solid fa-user"></i> Your Details</a>
         </li>
         <li>
-            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard:account:email_list' %}active{% endif %}"
-               href="{% url 'dashboard:account:email_list' %}"><i class="fa-solid fa-envelope"></i> Email Addresses</a>
+            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'account_email_list' %}active{% endif %}"
+               href="{% url 'account_email_list' %}"><i class="fa-solid fa-envelope"></i> Email Addresses</a>
         </li>
         <li>
-            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard:account:password_change_view' %}active{% endif %}"
-               href="{% url 'dashboard:account:password_change_view' %}"><i class="fa-solid fa-key"></i> Password</a>
+            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'account_password_change_view' %}active{% endif %}"
+               href="{% url 'account_password_change_view' %}"><i class="fa-solid fa-key"></i> Password</a>
         </li>
         <li>
             <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':5' == 'kagi:' %}active{% endif %}"
                href="{% url 'kagi:two-factor-settings' %}"><i class="fa-solid fa-shield-halved"></i> Two-Factor Authentication</a>
         </li>
         <li>
-            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard:account:session:list_view' %}active{% endif %}"
-               href="{% url 'dashboard:account:session:list_view' %}"><i class="fa-regular fa-window-restore"></i> Sessions</a>
+            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'account_session:list_view' %}active{% endif %}"
+               href="{% url 'account_session:list_view' %}"><i class="fa-regular fa-window-restore"></i> Sessions</a>
         </li>
     </ul>
     {% block sub_sub_content %}
@@ -42,7 +42,7 @@
             <button type="submit" class="btn btn-primary mb-1 me-1" id="submit-btn">
                 <i class="fa-solid fa-floppy-disk"></i> Save
             </button>
-            <a href="{% url 'dashboard:account:delete_view' %}"
+            <a href="{% url 'account_delete_view' %}"
                class="btn btn-danger mb-1"><i class="fa-solid fa-trash-can"></i> Delete account</a>
         </form>
     {% endblock sub_sub_content %}

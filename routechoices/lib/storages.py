@@ -54,4 +54,4 @@ class OverwriteImageStorage(S3Storage):
             r"\1/\2",
             name,
         )
-        return f"//www.{settings.PARENT_HOST}/dashboard/media/{simple_name}"
+        return f"//dashboard.{settings.PARENT_HOST}/media/{simple_name}"

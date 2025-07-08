@@ -133,21 +133,10 @@ class ClubViewsTestCase(EssentialApiBase):
             event_set=s,
         )
         url = self.reverse_and_check(
-            "club_sitemap",
+            "club_sitemap.xml",
             "/sitemap.xml",
             host="clubs",
             host_kwargs={"club_slug": "kiilat"},
-            prefix="kiilat",
-        )
-        response = client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        url = self.reverse_and_check(
-            "club_sitemap_sections",
-            "/sitemap-dynamic.xml",
-            host="clubs",
-            host_kwargs={"club_slug": "kiilat"},
-            extra_kwargs={"section": "dynamic"},
             prefix="kiilat",
         )
         response = client.get(url)
@@ -585,7 +574,7 @@ class ClubViewsTestCase(EssentialApiBase):
             "event_gpsseuranta_data_view",
             "/myevent/data.lst",
             host="clubs",
-            extra_kwargs={"ext": "lst", "slug": event.slug},
+            extra_kwargs={"extension": "lst", "slug": event.slug},
             host_kwargs={"club_slug": club.slug},
             prefix=club.slug,
         )

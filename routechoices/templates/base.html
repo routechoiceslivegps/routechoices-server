@@ -7,9 +7,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         {% block favicon %}
             <link rel="apple-touch-icon"
-                  href="{% static 'apple-touch-icon.png' %}?v=2024a" />
-            <link rel="icon" sizes="32x32" href="{% static 'favicon.ico' %}?v=2024a" />
-            <link rel="manifest" href="{% static 'manifest.json' %}?v=2024a" />
+                  href="{% static 'apple-touch-icon.png' %}?v=2025" />
+            <link rel="icon" sizes="32x32" href="{% static 'favicon.ico' %}?v=2025" />
+            <link rel="manifest" href="{% static 'manifest.json' %}?v=2025" />
         {% endblock favicon %}
         <meta name="apple-mobile-web-app-title" content="Routechoices" />
         <meta name="application-name" content="Routechoices" />
@@ -81,7 +81,7 @@
             <script defer
                     {% if request.club_slug %}data-club-slug="{{ request.club_slug }}"{% endif %}
                     data-domain="{{ site.domain }}"
-                    data-api="https://www.routechoices.com/api/ping"
+                    data-api="https://www.routechoices.com/ping"
                     src="{% static '/vendor/plausible/ping.js' %}?v=2025041302"></script>
         {% endif %}
         {% compress js %}

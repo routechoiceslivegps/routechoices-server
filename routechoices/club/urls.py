@@ -13,9 +13,7 @@ urlpatterns = [
     path("gps/time.php", views.gpsseuranta_time, name="gpsseuranta_time"),
     path("manifest.json", views.manifest, name="manifest"),
     path("robots.txt", views.robots_txt, name="robots.txt"),
-    path(
-        "sitemap.xml", views.sitemap_index, {"sitemaps": sitemaps}, name="club_sitemap"
-    ),
+    path("sitemap.xml", views.sitemap, {"sitemaps": sitemaps}, name="club_sitemap.xml"),
     re_path(r"^feed(\.rss)?$", views.club_live_event_feed, name="club_feed"),
     path(
         "thumbnail",
@@ -72,12 +70,6 @@ urlpatterns = [
         r"(?P<icon_name>favicon\.ico|apple-touch-icon\.png|icon-192\.png|icon-512\.png)",
         views.club_favicon,
         name="club_favicon",
-    ),
-    re_path(
-        r"^sitemap-(?P<section>[A-Za-z0-9-_]+).xml$",
-        views.sitemap,
-        {"sitemaps": sitemaps},
-        name="club_sitemap_sections",
     ),
     re_path(
         r"\.well-known/acme-challenge/(?P<challenge>.+)$",
@@ -179,7 +171,7 @@ urlpatterns = [
                 ),
                 path("geojson", views.event_geojson_view, name="event_geojson_view"),
                 re_path(
-                    r"^data\.(?P<ext>lst|php)$",
+                    r"^data\.(?P<extension>lst|php)$",
                     views.event_gpsseuranta_data_view,
                     name="event_gpsseuranta_data_view",
                 ),

@@ -353,14 +353,9 @@ Follow our events live or replay them later.
     def nice_url(self):
         if self.domain:
             return f"{self.url_protocol}://{self.domain}/"
-        if getattr(settings, "USE_CUSTOM_DOMAIN_PREFIX", True):
-            path = reverse(
-                "club_view", host="clubs", host_kwargs={"club_slug": self.slug.lower()}
-            )
-        else:
-            path = reverse(
-                "site:club:club_view", kwargs={"club_slug": self.slug.lower()}
-            )
+        path = reverse(
+            "club_view", host="clubs", host_kwargs={"club_slug": self.slug.lower()}
+        )
         return f"{self.url_protocol}:{path}"
 
     def logo_scaled(self, width, ext="PNG"):
@@ -542,16 +537,16 @@ class Map(models.Model):
     def kmz(self):
         doc_img = self.data
         mime_type = magic.from_buffer(doc_img, mime=True)
-        ext = mime_type[6:]
+        extension = mime_type[6:]
 
         doc_kml = render_to_string(
-            "kml.xml", {"name": self.name, "bound": self.bound, "ext": ext}
+            "kml.xml", {"name": self.name, "bound": self.bound, "extension": extension}
         )
         kmz = BytesIO()
         with ZipFile(kmz, "w") as fp:
             with fp.open("doc.kml", "w") as file1:
                 file1.write(doc_kml.encode("utf-8"))
-            with fp.open(f"files/doc.{ext}", "w") as file2:
+            with fp.open(f"files/doc.{extension}", "w") as file2:
                 file2.write(doc_img)
         return kmz.getvalue()
 

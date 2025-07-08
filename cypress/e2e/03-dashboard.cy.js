@@ -1,15 +1,13 @@
 context("Dashboard actions", () => {
-	before(() => {
-		cy.visit("/");
-	});
-
 	after(() => {
 		cy.wait(100);
 	});
 
 	it("Manage participations", () => {
 		cy.login();
-		cy.forceVisit("/halden-sk/open-registration-upload-allowed/contribute");
+		cy.forceVisit(
+			"//halden-sk.routechoices.dev/open-registration-upload-allowed/contribute",
+		);
 		cy.contains("Enter yourself");
 		cy.get("#id_name").type("Thierry Gueorgiou");
 		cy.get("#id_short_name").type("🇫🇷 T.Gueorgiou");
@@ -23,7 +21,7 @@ context("Dashboard actions", () => {
 		cy.get("#uploadRouteModal button:not([type]),button[type=submit]").click();
 		cy.contains("Data uploaded!");
 
-		cy.forceVisit("/dashboard/participations");
+		cy.forceVisit("https://dashboard.routechoices.dev/participations");
 		cy.contains(
 			"My event with open registration and upload allowed by Halden SK as Thierry Gueorgiou (🇫🇷 T.Gueorgiou)",
 		);
@@ -53,7 +51,7 @@ context("Dashboard actions", () => {
 
 	it("Manage devices", () => {
 		cy.login();
-		cy.visit("/dashboard/clubs/");
+		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 		cy.contains("Devices").click();
 		cy.contains("Add new device").click();
@@ -76,10 +74,10 @@ context("Dashboard actions", () => {
 
 	it("Upgrade account", () => {
 		cy.login();
-		cy.visit("/dashboard/clubs/");
+		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 		cy.contains("Upgrade to our paid plan!").click();
-		cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/upgrade");
+		cy.location("pathname").should("eq", "/clubs/halden-sk/upgrade");
 		cy.contains("Upgrade my subscription").click();
 		cy.get("#price-per-month").focus().clear().type("7.99");
 		cy.contains("Proceed to payment").click();
@@ -90,11 +88,13 @@ context("Dashboard actions", () => {
 
 	it("Import map", () => {
 		cy.login();
-		cy.visit("/dashboard/clubs/");
+		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 
 		for (const gpxFileName of ["trk", "waypoint", "waypoint+trk"]) {
-			cy.visit("/dashboard/clubs/halden-sk/maps/upload-gpx");
+			cy.forceVisit(
+				"https://dashboard.routechoices.dev/clubs/halden-sk/maps/upload-gpx",
+			);
 			cy.get("#id_gpx_file").selectFile(
 				`cypress/fixtures/gpx/${gpxFileName}.gpx`,
 			);
@@ -109,7 +109,9 @@ context("Dashboard actions", () => {
 			"maps/multiground.kml",
 			"maps/tiled.kmz",
 		]) {
-			cy.visit("/dashboard/clubs/halden-sk/maps/upload-kmz");
+			cy.forceVisit(
+				"https://dashboard.routechoices.dev/clubs/halden-sk/maps/upload-kmz",
+			);
 			cy.get("#id_file").selectFile(`cypress/fixtures/${kmzFileName}`);
 			cy.get("button:not([type]),button[type=submit]").click();
 			cy.get("#django-messages", { timeout: 10_000 }).contains(
@@ -120,10 +122,12 @@ context("Dashboard actions", () => {
 
 	it("Create map from image", () => {
 		cy.login();
-		cy.visit("/dashboard/clubs/");
+		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 
-		cy.visit("/dashboard/clubs/halden-sk/maps/new");
+		cy.forceVisit(
+			"https://dashboard.routechoices.dev/clubs/halden-sk/maps/new",
+		);
 
 		cy.get("#id_name").type("Jukola 2019 - 1st Leg (manual calibration)");
 
@@ -169,7 +173,7 @@ context("Dashboard actions", () => {
 		// Create club
 		cy.createClub();
 		cy.contains("Kangasala SK");
-		cy.location("pathname").should("eq", "/dashboard/clubs/kangasala-sk/");
+		cy.location("pathname").should("eq", "/clubs/kangasala-sk/");
 
 		// modify club
 		cy.get("#id_website").type("https://www.kangasalask.fi");
@@ -186,19 +190,16 @@ context("Dashboard actions", () => {
 
 	it("Create events", () => {
 		cy.login();
-		cy.visit("/dashboard/clubs/");
+		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 
 		// Create Map
 		cy.createMap();
 
 		// Create Event with minimal info
-		cy.visit("/dashboard/clubs/halden-sk/events/");
+		cy.forceVisit("https://dashboard.routechoices.dev/clubs/halden-sk/events/");
 		cy.get("a").contains("Create new event").click();
-		cy.location("pathname").should(
-			"eq",
-			"/dashboard/clubs/halden-sk/events/new",
-		);
+		cy.location("pathname").should("eq", "/clubs/halden-sk/events/new");
 
 		cy.get("#id_name").type("Jukola 2019 - 1st Leg");
 		cy.get("#id_event_set-ts-control").parent().click().wait(300);
@@ -210,7 +211,7 @@ context("Dashboard actions", () => {
 		cy.get("button:not([type]),button[type=submit]").first().click();
 
 		// Edit event we just created
-		cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
+		cy.location("pathname").should("eq", "/clubs/halden-sk/events/");
 		cy.get("a").contains("Jukola 2019 - 1st Leg").click();
 
 		cy.get("#csv_input").selectFile("cypress/fixtures/startlist.csv");
@@ -242,7 +243,7 @@ context("Dashboard actions", () => {
 
 		// Test the event view
 		// TODO: move to own test
-		cy.forceVisit("/halden-sk/Jukola-2019-1st-leg");
+		cy.forceVisit("//halden-sk.routechoices.dev/Jukola-2019-1st-leg");
 		cy.contains("Niels Christian Hellerud", { timeout: 20_000 }); // in competitor list
 
 		//// toggle competitor
@@ -300,10 +301,10 @@ context("Dashboard actions", () => {
 
 		// Create second event with all fields info
 		cy.createMap("Another map");
-		cy.intercept("POST", "/dashboard/clubs/halden-sk/events/new").as(
-			"eventSubmit",
+		cy.intercept("POST", "/clubs/halden-sk/events/new").as("eventSubmit");
+		cy.forceVisit(
+			"https://dashboard.routechoices.dev/clubs/halden-sk/events/new",
 		);
-		cy.visit("/dashboard/clubs/halden-sk/events/new");
 		cy.get("#id_name").type("Jukola 2019 - 2nd Leg");
 		cy.get("#id_event_set-ts-control").parent().click().wait(300);
 		cy.get("#id_event_set-ts-dropdown > .option").eq(1).click().wait(300);
@@ -326,10 +327,10 @@ context("Dashboard actions", () => {
 				'form-data; name="competitors-0-device"\r\n\r\n2\r\n',
 			);
 		});
-		cy.location("pathname").should("eq", "/dashboard/clubs/halden-sk/events/");
+		cy.location("pathname").should("eq", "/clubs/halden-sk/events/");
 
 		// test the event view
-		cy.forceVisit("/halden-sk/Jukola-2019-2nd-leg");
+		cy.forceVisit("//halden-sk.routechoices.dev/Jukola-2019-2nd-leg");
 		cy.contains("Björn Ekeberg", { timeout: 20_000 });
 		cy.contains("Another map", { timeout: 20_000 });
 	});

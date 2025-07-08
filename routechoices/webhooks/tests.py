@@ -46,26 +46,26 @@ class WebHookTestCase(EssentialApiBase):
         self.club = Club.objects.create(name="Kemiön Kiilat", slug="kiilat")
         self.club.creation_date = now() - timedelta(days=14)
         self.club.admins.set([self.user])
-        self.ls_client = LemonSqueezyAPIClient(HTTP_HOST="www.routechoices.dev")
+        self.ls_client = LemonSqueezyAPIClient(HTTP_HOST="api.routechoices.dev")
 
     def test_invalid_signature(self):
         url = self.reverse_and_check(
-            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
+            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy"
         )
-        client = APIClient(HTTP_HOST="www.routechoices.dev")
+        client = APIClient(HTTP_HOST="api.routechoices.dev")
         res = client.post(url, {"random": 123})
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_valid_signature(self):
         url = self.reverse_and_check(
-            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
+            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy"
         )
         res = self.ls_client.post(url, {"random": 123}, content_type="json")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_upgrade_club(self):
         url = self.reverse_and_check(
-            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
+            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy"
         )
         res = self.ls_client.post(
             url,
@@ -89,7 +89,7 @@ class WebHookTestCase(EssentialApiBase):
 
     def test_downgrade_club(self):
         url = self.reverse_and_check(
-            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
+            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy"
         )
         self.club.upgraded = True
         self.club.order_id = "123456"
@@ -108,7 +108,7 @@ class WebHookTestCase(EssentialApiBase):
 
     def test_pause_club_subscription(self):
         url = self.reverse_and_check(
-            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
+            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy"
         )
         self.club.upgraded = True
         self.club.order_id = "123456"
@@ -136,7 +136,7 @@ class WebHookTestCase(EssentialApiBase):
 
     def test_unpause_club_subscription(self):
         url = self.reverse_and_check(
-            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy", host="www"
+            "webhooks:lemonsqueezy_webhook", "/webhooks/lemonsqueezy"
         )
         self.club.upgraded = True
         self.club.order_id = "123456"

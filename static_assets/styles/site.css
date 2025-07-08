@@ -146,6 +146,12 @@ body {
 	color: white;
 }
 
+a.navbar-brand.logo:hover,
+a.navbar-brand.logo:focus {
+	text-decoration: none;
+	color: white;
+}
+
 #myFooter .second-bar {
 	text-align: center;
 	background-color: #33373e;

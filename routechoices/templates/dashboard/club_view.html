@@ -31,7 +31,7 @@
             {% else %}
                 The 10 days free trial has now expired,
             {% endif %}
-            <a href="{% url 'dashboard:club:upgrade_view' club_slug=request.club.slug %}"
+            <a href="{% url 'dashboard_club:upgrade_view' club_slug=request.club.slug %}"
                style="color:var(--bs-info)"
                class="fw-bold">Upgrade to our paid plan!</a>
         </p>
@@ -42,7 +42,7 @@
                   background: linear-gradient(120deg, #98d6a6 0%, #98cdd6 100%)">
             You are registered as an orienteering club, you can enjoy the site for free.
             {% if not club.upgraded %}
-            <a href="{% url 'dashboard:club:upgrade_view' club_slug=request.club.slug %}"
+            <a href="{% url 'dashboard_club:upgrade_view' club_slug=request.club.slug %}"
                style="color:var(--bs-info)"
                class="fw-bold">Upgrade to our paid plan</a> to help the site running!
             {% endif %}
@@ -59,24 +59,24 @@
     {% block pre_menu_content %}
         <ul class="nav nav-tabs mb-3">
             <li>
-                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard:club:edit_view' %}active{% endif %}"
-                   href="{% url 'dashboard:club:edit_view' club_slug=request.club.slug %}"><i class="fa-solid fa-house-flag"></i> Club Info</a>
+                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard_club:edit_view' %}active{% endif %}"
+                   href="{% url 'dashboard_club:edit_view' club_slug=request.club.slug %}"><i class="fa-solid fa-house-flag"></i> Club Info</a>
             </li>
             <li>
-                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':22' == 'dashboard:club:device:' %}active{% endif %}"
-                   href="{% url 'dashboard:club:device:list_view' club_slug=request.club.slug %}"><i class="fa-solid fa-mobile-screen-button"></i> Devices</a>
+                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':22' == 'dashboard_club:device:' %}active{% endif %}"
+                   href="{% url 'dashboard_club:device:list_view' club_slug=request.club.slug %}"><i class="fa-solid fa-mobile-screen-button"></i> Devices</a>
             </li>
             <li>
-                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':19' == 'dashboard:club:map:' %}active{% endif %}"
-                   href="{% url 'dashboard:club:map:list_view' club_slug=request.club.slug %}"><i class="fa-regular fa-map"></i>  Maps</a>
+                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':19' == 'dashboard_club:map:' %}active{% endif %}"
+                   href="{% url 'dashboard_club:map:list_view' club_slug=request.club.slug %}"><i class="fa-regular fa-map"></i>  Maps</a>
             </li>
             <li>
-                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':25' in 'dashboard:club:event_set:' %}active{% endif %}"
-                   href="{% url 'dashboard:club:event_set:list_view' club_slug=request.club.slug %}"><i class="fa-solid fa-folder-open"></i> Event Sets</a>
+                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':25' in 'dashboard_club:event_set:' %}active{% endif %}"
+                   href="{% url 'dashboard_club:event_set:list_view' club_slug=request.club.slug %}"><i class="fa-solid fa-folder-open"></i> Event Sets</a>
             </li>
             <li>
-                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':21' == 'dashboard:club:event:' %}active{% endif %}"
-                   href="{% url 'dashboard:club:event:list_view' club_slug=request.club.slug %}"><i class="fa-solid fa-trophy"></i> Events</a>
+                <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':21' == 'dashboard_club:event:' %}active{% endif %}"
+                   href="{% url 'dashboard_club:event:list_view' club_slug=request.club.slug %}"><i class="fa-solid fa-trophy"></i> Events</a>
             </li>
         </ul>
         {% block sub_sub_content %}
@@ -85,7 +85,7 @@
             </p>
             <p>
                 <a class="btn btn-info mb-1 me-1"
-                   href="{% url 'dashboard:club:custom_domain_view' club_slug=request.club.slug %}"><i class="fa-solid fa-link"></i> Custom Domain Management</a>
+                   href="{% url 'dashboard_club:custom_domain_view' club_slug=request.club.slug %}"><i class="fa-solid fa-link"></i> Custom Domain Management</a>
                 {% if club.analytics_site %}
                     <a href="{{ club.analytics_site }}" class="btn btn-info mb-1"><i class="fa-solid fa-chart-pie"></i> Pages Analytics</a>
                 {% endif %}
@@ -94,7 +94,7 @@
             <h2>Edit info</h2>
             <p id="invite-btn">
                 <a class="btn btn-info mb-1"
-                   href="{% url 'dashboard:club:send_invite_view' club_slug=request.club.slug %}"><i class="fa-solid fa-user-plus"></i> Invite more people</a>
+                   href="{% url 'dashboard_club:send_invite_view' club_slug=request.club.slug %}"><i class="fa-solid fa-user-plus"></i> Invite more people</a>
             </p>
             <form action=""
                   method="post"
@@ -105,7 +105,7 @@
                 <button type="submit" class="btn btn-primary mb-1 me-1" id="submit-btn">
                     <i class="fa-solid fa-floppy-disk"></i> Save
                 </button>
-                <a href="{% url 'dashboard:club:delete_view' club_slug=request.club.slug %}"
+                <a href="{% url 'dashboard_club:delete_view' club_slug=request.club.slug %}"
                    class="btn btn-danger mb-1"><i class="fa-solid fa-trash-can"></i> Delete</a>
             </form>
             {% if club.upgraded %}
@@ -119,7 +119,7 @@
 {% endblock sub_content %}
 
 {% block extra_body %}
-    {% if request.resolver_match.view_name == 'dashboard:club:edit_view' %}
+    {% if request.resolver_match.view_name == 'dashboard_club:edit_view' %}
         <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700" data-api-base-url="{% host_url 'api_doc' host 'api' %}" data-club-slug="{{ club.slug }}" data-club-nice-url="{{ club.nice_url }}" data-club-has-analytics="{% if club.analytics_site %}1{% endif %}">
         </script>
         {% compress js %}

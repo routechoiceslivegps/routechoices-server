@@ -26,7 +26,7 @@
             <div id="map" class="mb-3"></div>
             <form enctype="multipart/form-data"
                   method="post"
-                  action="{% url 'dashboard:club:map:upload_gpx_view' club_slug=request.club.slug %}?from=drawing">
+                  action="{% url 'dashboard_club:map:upload_gpx_view' club_slug=request.club.slug %}?from=drawing">
                 <input type="file" class="d-none" id="id_gpx_file" name="gpx_file">
                 <button id="submit-btn" class="btn btn-primary mb-1" type="submit">
                     <i class="fa-solid fa-floppy-disk"></i> Save

@@ -8,9 +8,9 @@ from routechoices.api import views
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Routechoices.com API",
+        title="Routechoices - Live GPS - API",
         default_version="v1",
-        description="Routechoices.com API",
+        description="Routechoices - Live GPS - API",
         terms_of_service="https://www.routechoices.com/tos/",
         contact=openapi.Contact(email="info@routechoices.com"),
         license=openapi.License(
@@ -19,12 +19,13 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
-    url=f"https://www.{settings.PARENT_HOST}",
+    url=f"https://api.{settings.PARENT_HOST}",
+    urlconf="routechoices.api.urls",
 )
 
 
 urlpatterns = [
-    re_path(r"^$", schema_view.with_ui("redoc", cache_timeout=0), name="api_doc"),
+    re_path(r"^$", schema_view.with_ui("swagger", cache_timeout=60), name="api_doc"),
     re_path(r"^check-latlon/?$", views.ip_latlon, name="ip_latlon"),
     re_path(r"^event-set/?$", views.event_set_creation, name="event_set"),
     path(r"healthcheck/", include("health_check.urls")),
@@ -247,5 +248,9 @@ urlpatterns = [
                 ),
             ]
         ),
+    ),
+    path(
+        "webhooks/",
+        include(("routechoices.webhooks.urls", "webhooks"), namespace="webhooks"),
     ),
 ]

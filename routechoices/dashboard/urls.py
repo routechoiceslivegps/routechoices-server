@@ -1,55 +1,76 @@
 from allauth.account import views as allauth_views
 from django.urls import include, path, re_path
+from django.views.generic.base import RedirectView
 from user_sessions import views as user_sessions_views
 
 from routechoices.dashboard import views
+from routechoices.site import views as site_views
 
 urlpatterns = [
     path("", views.home_view, name="home_view"),
-    path("participations", views.participations_view, name="participations_view"),
+    path(
+        "participations",
+        views.participations_view,
+        name="dashboard_participations_view",
+    ),
     path(
         "request-invite",
         views.club_request_invite_view,
-        name="request_club_invite_view",
+        name="dashboard_request_club_invite_view",
     ),
     path(
         "account/",
         include(
-            (
-                [
-                    path("", views.account_edit_view, name="edit_view"),
-                    path("emails", views.email_view, name="email_list"),
-                    path(
-                        "change-password",
-                        allauth_views.password_change,
-                        name="password_change_view",
-                    ),
-                    path("delete", views.account_delete_view, name="delete_view"),
-                    path(
-                        "sessions/",
-                        include(
-                            (
-                                [
-                                    path(
-                                        "",
-                                        view=user_sessions_views.SessionListView.as_view(),
-                                        name="list_view",
-                                    ),
-                                    path(
-                                        "delete-others",
-                                        view=views.CustomSessionDeleteOtherView.as_view(),
-                                        name="delete_other_view",
-                                    ),
-                                ],
-                                "dashboard_account_session",
-                            ),
-                            namespace="session",
+            [
+                path("", views.account_edit_view, name="account_edit_view"),
+                path("emails", views.email_view, name="account_email_list"),
+                path(
+                    "change-password",
+                    allauth_views.password_change,
+                    name="account_password_change_view",
+                ),
+                path("delete", views.account_delete_view, name="account_delete_view"),
+                path(
+                    "sessions/",
+                    include(
+                        (
+                            [
+                                path(
+                                    "",
+                                    view=user_sessions_views.SessionListView.as_view(),
+                                    name="list_view",
+                                ),
+                                path(
+                                    "delete-others",
+                                    view=views.CustomSessionDeleteOtherView.as_view(),
+                                    name="delete_other_view",
+                                ),
+                            ],
+                            "dashboard_account_session",
                         ),
+                        namespace="account_session",
                     ),
-                ],
-                "dashboard_account",
-            ),
-            namespace="account",
+                ),
+                path("login/", RedirectView.as_view(url="/login")),
+                path("logout/", RedirectView.as_view(url="/logout")),
+                path("signup/", RedirectView.as_view(url="/signup")),
+                path("email/", RedirectView.as_view(url="/account/emails")),
+                path(
+                    "password/change/",
+                    RedirectView.as_view(url="/account/change-password"),
+                ),
+                path("", include("allauth.urls")),
+            ],
+        ),
+    ),
+    path(
+        "account/mfa/",
+        include(
+            [
+                path("login/", RedirectView.as_view(url="/login")),
+                path("backup-codes/", views.backup_codes, name="backup-codes"),
+                path("", include("kagi.urls", namespace="kagi")),
+            ]
         ),
     ),
     path(
@@ -275,7 +296,7 @@ urlpatterns = [
                 ],
                 "dashboard_club",
             ),
-            namespace="club",
+            namespace="dashboard_club",
         ),
     ),
     path(
@@ -306,8 +327,12 @@ urlpatterns = [
                 ],
                 "dashboard_media",
             ),
-            namespace="media",
+            namespace="dashboard_media",
         ),
     ),
+    path("invitations/", include("invitations.urls", namespace="invitations")),
     path("hijack/release/", views.MyReleaseUserView.as_view(), name="hijack_release"),
+    path("login", site_views.CustomLoginView.as_view(), name="account_login"),
+    path("logout", allauth_views.logout, name="account_logout"),
+    path("signup", allauth_views.signup, name="account_signup"),
 ]

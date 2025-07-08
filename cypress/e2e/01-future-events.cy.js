@@ -1,36 +1,34 @@
 context("Events in future", () => {
-	before(() => {
-		cy.visit("/");
-	});
-
 	after(() => {
 		cy.wait(100);
 	});
 
 	it("Future events are not listed", () => {
-		cy.forceVisit("/halden-sk/");
+		cy.forceVisit("//halden-sk.routechoices.dev/");
 		cy.contains("My Future").should("not.exist");
 	});
 
 	it("Can not see Event as in future", () => {
-		cy.forceVisit("/halden-sk/future-default");
+		cy.forceVisit("//halden-sk.routechoices.dev/future-default");
 		cy.contains("Event has not yet started.");
 		cy.contains("Starting in").should("be.visible");
 	});
 
 	it("Can not register or upload to Event as registration not open", () => {
-		cy.forceVisit("/halden-sk/future-default/contribute");
+		cy.forceVisit("//halden-sk.routechoices.dev/future-default/contribute");
 		cy.get("#registration-form").should("not.exist");
 		cy.get("#upload-form").should("not.exist");
 	});
 
 	it("Can not export Event as it is not yet started", () => {
-		cy.forceVisit("/halden-sk/future-default/export");
+		cy.forceVisit("//halden-sk.routechoices.dev/future-default/export");
 		cy.contains("Export is not available yet...");
 	});
 
 	it("Can register to an Event if open registration", () => {
-		cy.forceVisit("/halden-sk/future-open-registration/contribute");
+		cy.forceVisit(
+			"//halden-sk.routechoices.dev/future-open-registration/contribute",
+		);
 		cy.contains("Enter yourself");
 		cy.get("#id_name").type("Thierry Gueorgiou");
 		cy.get("#id_short_name").type("🇫🇷 T.Gueorgiou");
@@ -40,14 +38,16 @@ context("Events in future", () => {
 	});
 
 	it("Can not upload to an Event even if upload allowed since it is not yet started", () => {
-		cy.forceVisit("/halden-sk/future-upload-allowed/contribute");
+		cy.forceVisit(
+			"//halden-sk.routechoices.dev/future-upload-allowed/contribute",
+		);
 		cy.get("#registration-form").should("not.exist");
 		cy.get("#upload-form").should("not.exist");
 	});
 
 	it("Can only add competitor and not upload route to an Event even if everything allowed since it is not yet started", () => {
 		cy.forceVisit(
-			"/halden-sk/future-open-registration-upload-allowed/contribute",
+			"//halden-sk.routechoices.dev/future-open-registration-upload-allowed/contribute",
 		);
 		cy.get("#registration-form").should("exist");
 		cy.get("#upload-form").should("not.exist");

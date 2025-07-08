@@ -10,7 +10,7 @@ from django.contrib import auth, messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMessage
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 from django.views.decorators.csrf import csrf_exempt
@@ -23,6 +23,14 @@ from routechoices.site.forms import ContactForm
 
 def home_page(request):
     return redirect(reverse("site:landing_page", host="www"), permanent=True)
+
+
+def handle_alt_club_url(request, club_slug, path):
+    if not Club.objects.filter(slug__iexact=club_slug).exists():
+        raise Http404()
+    return redirect(
+        f"//{club_slug}.{settings.PARENT_HOST}/{path}?{request.GET.urlencode()}"
+    )
 
 
 def landing_page(request):
@@ -57,7 +65,7 @@ def pricing_page(request):
 @csrf_exempt
 def pay_view(request):
     if request.method != "POST":
-        return redirect(reverse("site:pricing_view"))
+        return redirect(reverse("site:pricing_view", host="www"))
     price = request.POST.get("price-per-month", "7.99")
     try:
         price = max(Decimal("7.99"), Decimal(price))
@@ -139,14 +147,14 @@ def contact(request):
             )
             msg.send()
             messages.success(request, "Message sent succesfully")
-            return redirect("site:contact_view")
+            return redirect(reverse("site:contact_view", host="www"))
     else:
         form = ContactForm()
     return render(request, "site/contact.html", {"form": form})
 
 
 def robots_txt(request):
-    sitemap_url = reverse("django.contrib.sitemaps.views.index")
+    sitemap_url = reverse("site:sitemap.xml", host="www")
     return HttpResponse(
         f"Sitemap: {request.scheme}:{sitemap_url}\n", content_type="text/plain"
     )
@@ -177,7 +185,7 @@ class CustomLoginView(LoginView):
         self.request.session["kagi_pre_verify_user_pk"] = user.pk
         self.request.session["kagi_pre_verify_user_backend"] = user.backend
 
-        verify_url = reverse("kagi:verify-second-factor", host="www")
+        verify_url = reverse("kagi:verify-second-factor", host="dashboard")
         redirect_to = self.request.POST.get(
             auth.REDIRECT_FIELD_NAME,
             self.request.GET.get(auth.REDIRECT_FIELD_NAME, ""),
@@ -197,7 +205,9 @@ class CustomLoginView(LoginView):
         return HttpResponseRedirect(verify_url)
 
     def get_context_data(self, **kwargs):
-        signup_url = self.passthrough_next_url(reverse("account_signup", host="www"))
+        signup_url = self.passthrough_next_url(
+            reverse("account_signup", host="dashboard")
+        )
         site = get_current_site(self.request)
         ret = super(LoginView, self).get_context_data(**kwargs)
         ret.update(

@@ -162,7 +162,7 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
 
         url = self.url.format(x=x, y=y, z=z)
         session = requests.Session()
-        session.headers.update({"User-Agent": "Routechoices.com WMS Tile Proxy"})
+        session.headers.update({"User-Agent": "Routechoices WMS Tile Proxy"})
         try:
             res = session.get(url, timeout=10)
             res.raise_for_status()

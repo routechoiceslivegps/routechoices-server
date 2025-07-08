@@ -11,9 +11,9 @@
               href="{{ club.nice_url }}manifest.json{{ club.logo_last_mod }}" />
     {% else %}
         <link rel="apple-touch-icon"
-              href="{% static 'apple-touch-icon.png' %}?v=2024a" />
-        <link rel="icon" sizes="32x32" href="{% static 'favicon.ico' %}?v=2024a" />
-        <link rel="manifest" href="{% static 'manifest.json' %}?v=2024a" />
+              href="{% static 'apple-touch-icon.png' %}?v=2025" />
+        <link rel="icon" sizes="32x32" href="{% static 'favicon.ico' %}?v=2025" />
+        <link rel="manifest" href="{% static 'manifest.json' %}?v=2025" />
     {% endif %}
 {% endblock favicon %}
 
@@ -25,7 +25,7 @@
     <link rel="alternate"
           type="application/rss+xml"
           title="{% if club %}{{ club.name }} {% else %}{% endif %}GPS Tracking Event Feed"
-          href="{% if club %}{{ club.nice_url }}feed{% else %}{% url 'site:events_feed' %}{% endif %}" />
+          href="{% if club %}{{ club.nice_url }}feed{% else %}{% host_url 'public_events_feed' host 'events' %}{% endif %}" />
     <meta property="og:title"
           content="Events{% if club %} by {{ club.name }} | Powered by Routechoices — Live GPS{% else %} on Routechoices — Live GPS{% endif %}" />
     <meta property="og:description"
@@ -47,7 +47,7 @@
     {% if club %}
         {% define club.nice_url as home_url %}
     {% else %}
-        {% url 'site:events_view' as home_url %}
+        {% host_url 'public_events_view' host 'events' as home_url %}
     {% endif %}
     {% if club %}
         <div class="container-fluid p-0">

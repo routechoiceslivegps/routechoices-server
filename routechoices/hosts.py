@@ -2,7 +2,9 @@ from django_hosts import host, patterns
 
 host_patterns = patterns(
     "",
-    host("www", "routechoices.urls", name="www"),
+    host("dashboard", "routechoices.dashboard.urls", name="dashboard"),
+    host("www", "routechoices.site.urls", name="www"),
+    host("events", "routechoices.public_events.urls", name="events"),
     host("admin", "routechoices.admin.urls", name="admin"),
     host("api", "routechoices.api.urls", name="api"),
     host("map", "routechoices.map.urls", name="map"),

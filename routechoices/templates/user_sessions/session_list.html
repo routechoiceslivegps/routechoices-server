@@ -29,7 +29,7 @@
     </table>
     {% if object_list.count > 1 %}
         <form method="post"
-              action="{% url 'dashboard:account:session:delete_other_view' %}">
+              action="{% url 'account_session:delete_other_view' %}">
             {% csrf_token %}
             <p>
                 {% blocktranslate %}You can end all other sessions but the current.

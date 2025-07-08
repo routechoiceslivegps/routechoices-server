@@ -1,8 +1,9 @@
+import time
+
 import magic
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.sitemaps.views import (
-    SitemapIndexItem,
     _get_latest_lastmod,
     x_robots_tag,
 )
@@ -35,48 +36,7 @@ from routechoices.lib.streaming_response import StreamingHttpRangeResponse
 from routechoices.site.forms import CompetitorUploadGPXForm, RegisterForm
 
 
-def handle_legacy_request(request, view_name, club_slug=None, **kwargs):
-    use_custom_domain = getattr(settings, "USE_CUSTOM_DOMAIN_PREFIX", True)
-
-    if use_custom_domain and club_slug:
-        if not Club.objects.filter(slug__iexact=club_slug).exists():
-            raise Http404()
-        return redirect(
-            reverse(
-                view_name,
-                host="clubs",
-                host_kwargs={"club_slug": club_slug},
-                kwargs=kwargs,
-            )
-        )
-    if not use_custom_domain and getattr(request, "club_slug", None) is not None:
-        kwargs.update({"club_slug": request.club_slug})
-        return redirect(
-            reverse(
-                f"site:club:{view_name}",
-                host="www",
-                kwargs=kwargs,
-            )
-        )
-    if (
-        not use_custom_domain
-        and getattr(request, "club_slug", None) is None
-        and club_slug
-    ):
-        request.club_slug = club_slug
-    return False
-
-
-def club_view(request, **kwargs):
-    if kwargs.get("club_slug"):
-        club_slug = kwargs.get("club_slug")
-        if club_slug in ("api", "admin", "dashboard", "oauth"):
-            return redirect(f"/{club_slug}/")
-
-    bypass_resp = handle_legacy_request(request, "club_view", kwargs.get("club_slug"))
-    if bypass_resp:
-        return bypass_resp
-
+def club_view(request):
     club_slug = request.club_slug
     club = get_object_or_404(Club, slug__iexact=club_slug)
 
@@ -88,12 +48,7 @@ def club_view(request, **kwargs):
     return render(request, "site/event_list.html", event_list)
 
 
-def club_favicon(request, icon_name, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "club_favicon", kwargs.get("club_slug"), icon_name=icon_name
-    )
-    if bypass_resp:
-        return bypass_resp
+def club_favicon(request, icon_name):
     icon_infos = {
         "favicon.ico": {"size": 32, "format": "ICO", "mime": "image/x-icon"},
         "apple-touch-icon.png": {"size": 180, "format": "PNG", "mime": "image/png"},
@@ -116,11 +71,7 @@ def club_favicon(request, icon_name, **kwargs):
     return StreamingHttpRangeResponse(request, data, content_type=icon_info["mime"])
 
 
-def club_logo(request, **kwargs):
-    bypass_resp = handle_legacy_request(request, "club_logo", kwargs.get("club_slug"))
-    if bypass_resp:
-        return bypass_resp
-
+def club_logo(request, extension=None):
     club_slug = request.club_slug
     club = get_object_or_404(
         Club.objects.exclude(logo=""), slug__iexact=club_slug, logo__isnull=False
@@ -129,7 +80,7 @@ def club_logo(request, **kwargs):
     if club.domain and not request.use_cname:
         return redirect(club.logo_url)
 
-    mime = get_image_mime_from_request(kwargs.get("extension"))
+    mime = get_image_mime_from_request(extension)
 
     return serve_image_from_s3(
         request,
@@ -140,10 +91,7 @@ def club_logo(request, **kwargs):
     )
 
 
-def club_banner(request, **kwargs):
-    bypass_resp = handle_legacy_request(request, "club_banner", kwargs.get("club_slug"))
-    if bypass_resp:
-        return bypass_resp
+def club_banner(request, extension=None):
     club_slug = request.club_slug
     club = get_object_or_404(
         Club.objects.exclude(banner=""), slug__iexact=club_slug, banner__isnull=False
@@ -151,7 +99,7 @@ def club_banner(request, **kwargs):
     if club.domain and not request.use_cname:
         return redirect(club.banner_url)
 
-    mime = get_image_mime_from_request(kwargs.get("extension"))
+    mime = get_image_mime_from_request(extension)
 
     return serve_image_from_s3(
         request,
@@ -163,12 +111,7 @@ def club_banner(request, **kwargs):
     )
 
 
-def club_thumbnail(request, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_club_thumbnail", kwargs.get("club_slug")
-    )
-    if bypass_resp:
-        return bypass_resp
+def club_thumbnail(request, extension=None):
     club_slug = request.club_slug
     club = get_object_or_404(
         Club,
@@ -178,7 +121,7 @@ def club_thumbnail(request, **kwargs):
         return redirect(f"{club.nice_url}thumbnail")
 
     mime = get_image_mime_from_request(
-        kwargs.get("extension"), get_best_image_mime(request, "image/jpeg")
+        extension, get_best_image_mime(request, "image/jpeg")
     )
 
     data_out = club.thumbnail(mime)
@@ -188,26 +131,18 @@ def club_thumbnail(request, **kwargs):
     return resp
 
 
-def club_live_event_feed(request, *args, **kwargs):
-    bypass_resp = handle_legacy_request(request, "club_feed", kwargs.get("club_slug"))
-    if bypass_resp:
-        return bypass_resp
+def club_live_event_feed(request, *args):
     club_slug = request.club_slug
     club = get_object_or_404(Club, slug__iexact=club_slug)
     if club.domain and not request.use_cname:
         return redirect(f"{club.nice_url}feed")
-    resp = feeds.club_live_event_feed(request, *args, **kwargs)
+    resp = feeds.club_live_event_feed(request, *args)
     resp["Content-Type"] = "application/rss+xml"
     return resp
 
 
 @cache_page(5 if not settings.DEBUG else 0)
-def event_view(request, slug, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_view", kwargs.get("club_slug"), slug=slug
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_view(request, slug):
     club_slug = request.club_slug
     if not club_slug:
         club_slug = request.club_slug
@@ -292,12 +227,7 @@ def event_view(request, slug, **kwargs):
     return response
 
 
-def event_startlist_view(request, slug, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_startlist_view", kwargs.get("club_slug"), slug=slug
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_startlist_view(request, slug):
     club_slug = request.club_slug
     event = (
         Event.objects.all()
@@ -344,12 +274,7 @@ def event_startlist_view(request, slug, **kwargs):
     return response
 
 
-def event_export_view(request, slug, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_export_view", kwargs.get("club_slug"), slug=slug
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_export_view(request, slug):
     club_slug = request.club_slug
     event = (
         Event.objects.all()
@@ -400,12 +325,7 @@ def event_export_view(request, slug, **kwargs):
     return response
 
 
-def event_zip_view(request, slug, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_zip_view", kwargs.get("club_slug"), slug=slug
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_zip_view(request, slug):
     club_slug = request.club_slug
     event = (
         Event.objects.all()
@@ -437,12 +357,7 @@ def event_zip_view(request, slug, **kwargs):
     )
 
 
-def event_map_view(request, slug, index="1", **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_map_view", kwargs.get("club_slug"), slug=slug, index=index
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_map_view(request, slug, index="1", extension=None):
     club_slug = request.club_slug
 
     if club_slug in ("gpsseuranta", "loggator", "livelox"):
@@ -499,7 +414,6 @@ def event_map_view(request, slug, index="1", **kwargs):
         redirect_view = "event_map_download"
         redirect_kwargs["index"] = index
 
-    extension = kwargs.get("extension")
     if extension is None and request.META.get("HTTP_USER_AGENT", "").startswith(
         "Java/"
     ):
@@ -518,12 +432,7 @@ def event_map_view(request, slug, index="1", **kwargs):
     )
 
 
-def event_kmz_view(request, slug, index="1", **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_kmz_view", kwargs.get("club_slug"), slug=slug, index=index
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_kmz_view(request, slug, index="1"):
     club_slug = request.club_slug
     event = (
         Event.objects.all()
@@ -559,12 +468,7 @@ def event_kmz_view(request, slug, index="1", **kwargs):
     )
 
 
-def event_geojson_view(request, slug, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_geojson_view", kwargs.get("club_slug"), slug=slug
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_geojson_view(request, slug):
     club_slug = request.club_slug
     event = (
         Event.objects.all()
@@ -597,12 +501,7 @@ def event_geojson_view(request, slug, **kwargs):
     )
 
 
-def event_contribute_view(request, slug, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_contribute_view", kwargs.get("club_slug"), slug=slug
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_contribute_view(request, slug):
     club_slug = request.club_slug
     event = (
         Event.objects.all()
@@ -662,12 +561,7 @@ def event_contribute_view(request, slug, **kwargs):
     )
 
 
-def event_map_thumbnail(request, slug, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_map_thumbnail", kwargs.get("club_slug"), slug=slug
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_map_thumbnail(request, slug, extension=None):
     club_slug = request.club_slug
     event = get_object_or_404(
         Event.objects.select_related("club", "map"),
@@ -680,7 +574,7 @@ def event_map_thumbnail(request, slug, **kwargs):
     display_logo = request.GET.get("no-logo", False) is False
 
     mime = get_image_mime_from_request(
-        kwargs.get("extension"), get_best_image_mime(request, "image/jpeg")
+        extension, get_best_image_mime(request, "image/jpeg")
     )
 
     data_out = event.thumbnail(display_logo, mime)
@@ -701,10 +595,7 @@ def acme_challenge(request, challenge):
     raise Http404()
 
 
-def robots_txt(request, **kwargs):
-    bypass_resp = handle_legacy_request(request, "robots.txt", kwargs.get("club_slug"))
-    if bypass_resp:
-        return bypass_resp
+def robots_txt(request):
     club_slug = request.club_slug
     club = get_object_or_404(Club, slug=club_slug)
     if club.domain and not request.use_cname:
@@ -714,10 +605,7 @@ def robots_txt(request, **kwargs):
     )
 
 
-def manifest(request, **kwargs):
-    bypass_resp = handle_legacy_request(request, "manifest", kwargs.get("club_slug"))
-    if bypass_resp:
-        return bypass_resp
+def manifest(request):
     club_slug = request.club_slug
     club = get_object_or_404(Club, slug=club_slug)
     if club.domain and not request.use_cname:
@@ -736,75 +624,13 @@ def manifest(request, **kwargs):
 
 
 @x_robots_tag
-def sitemap_index(
-    request,
-    sitemaps,
-    template_name="sitemap_index.xml",
-    content_type="application/xml",
-    sitemap_url_name="club_sitemap_sections",
-    **kwargs,
-):
-    bypass_resp = handle_legacy_request(
-        request,
-        "club_sitemap",
-        kwargs.get("club_slug"),
-    )
-    if bypass_resp:
-        return bypass_resp
-    club_slug = request.club_slug
-    club = get_object_or_404(Club, slug__iexact=club_slug)
-    if club.domain and not request.use_cname:
-        return redirect(f"{club.nice_url}sitemap.xml")
-    sites = []  # all sections' sitemap URLs
-    all_indexes_lastmod = True
-    latest_lastmod = None
-    for section, site in sitemaps.items():
-        site.club_slug = club_slug
-        # For each section label, add links of all pages of its sitemap
-        # (usually generated by the `sitemap` view).
-        if callable(site):
-            site = site()
-        sitemap_url = f"{club.nice_url}sitemap-{section}.xml"
-        absolute_url = sitemap_url
-        site_lastmod = site.get_latest_lastmod()
-        if all_indexes_lastmod:
-            if site_lastmod is not None:
-                latest_lastmod = _get_latest_lastmod(latest_lastmod, site_lastmod)
-            else:
-                all_indexes_lastmod = False
-        sites.append(SitemapIndexItem(absolute_url, site_lastmod))
-        # Add links to all pages of the sitemap.
-        for page in range(2, site.paginator.num_pages + 1):
-            sites.append(SitemapIndexItem(f"{absolute_url}?p={page}", site_lastmod))
-    # If lastmod is defined for all sites, set header so as
-    # ConditionalGetMiddleware is able to send 304 NOT MODIFIED
-    if all_indexes_lastmod and latest_lastmod:
-        headers = {"Last-Modified": http_date(latest_lastmod.timestamp())}
-    else:
-        headers = None
-    return TemplateResponse(
-        request,
-        template_name,
-        {"sitemaps": sites},
-        content_type=content_type,
-        headers=headers,
-    )
-
-
-@x_robots_tag
 def sitemap(
     request,
     sitemaps,
     section=None,
     template_name="sitemap.xml",
     content_type="application/xml",
-    **kwargs,
 ):
-    bypass_resp = handle_legacy_request(
-        request, "club_sitemap_sections", kwargs.get("club_slug"), section=section
-    )
-    if bypass_resp:
-        return bypass_resp
     club_slug = request.club_slug
     req_protocol = request.scheme
     req_site = get_current_site()
@@ -856,17 +682,10 @@ def sitemap(
 
 
 def gpsseuranta_time(request):
-    import time
-
     return HttpResponse(time.time() - 1136073600, headers={"Cache-Control": "no-cache"})
 
 
-def event_gpsseuranta_init_view(request, slug, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_gpsseuranta_init_view", kwargs.get("club_slug"), slug=slug
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_gpsseuranta_init_view(request, slug):
     club_slug = request.club_slug
     event = get_object_or_404(
         Event.objects.select_related("club", "map").prefetch_related("competitors"),
@@ -908,12 +727,7 @@ LIVE:{1 if event.is_live else 0}
     )
 
 
-def event_gpsseuranta_data_view(request, slug, **kwargs):
-    bypass_resp = handle_legacy_request(
-        request, "event_gpsseuranta_data_view", kwargs.get("club_slug"), slug=slug
-    )
-    if bypass_resp:
-        return bypass_resp
+def event_gpsseuranta_data_view(request, slug, extension="lst"):
     club_slug = request.club_slug
     event = get_object_or_404(
         Event.objects.select_related("club", "map"),

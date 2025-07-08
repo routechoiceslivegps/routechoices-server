@@ -8,7 +8,7 @@
         <name>{{ name }}</name>
         <drawOrder>50</drawOrder>
         <Icon>
-          <href>files/doc.{{ ext }}</href>
+          <href>files/doc.{{ extension }}</href>
         </Icon>
         <altitudeMode>clampToGround</altitudeMode>
         <gx:LatLonQuad>

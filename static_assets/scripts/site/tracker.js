@@ -8,7 +8,7 @@
 
 		u("#imeiRes").text(u("#IMEI").val());
 		reqwest({
-			url: "/api/device/",
+			url: `${window.local.apiRoot}device/`,
 			method: "post",
 			data: {
 				imei: u("#IMEI").val(),

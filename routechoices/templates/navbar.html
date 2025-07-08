@@ -3,7 +3,7 @@
         style="color: #fff;
                background-color: #111 !important">
     <div class="container">
-        <a class="navbar-brand site-name d-inline-flex"
+        <a class="navbar-brand site-name d-inline-flex logo"
            href="{% host_url 'site:landing_page' host 'www' %}" style="margin-top:5px;">
             <div class="d-inline-block">
                 <img src="{% static 'img/logo.svg' %}?v=2025"
@@ -12,8 +12,8 @@
                      style="vertical-align: top">
             </div>
             <div class="px-2">
-                <div style="font-size:0.67em;line-height: 1em;">ROUTECHOICES</div>
-                <div style="font-size:1.14em;line-height: 1em;">LIVE GPS</div>
+                <div style="font-size:.85em;line-height: 1em;">ROUTECHOICES</div>
+                <div style="font-size:.85em;line-height: 1em;text-align: left;">LIVE GPS</div>
             </div>
         </a>
         <button id="navbar-toogler"
@@ -31,8 +31,8 @@
             </ul>
             <ul class="navbar-nav d-flex flex-start">
                 <li class="nav-item">
-                    <a class="text-nowrap nav-link{% if request.resolver_match.view_name == 'site:events_view' %} active{% endif %}"
-                       href="{% host_url 'site:events_view' host 'www' %}"><i class="fa-solid fa-trophy"></i> Events</a>
+                    <a class="text-nowrap nav-link{% if request.host.name == 'events' %} active{% endif %}"
+                       href="{% host_url 'public_events_view' host 'events' %}"><i class="fa-solid fa-trophy"></i> Events</a>
                 </li>
                 <li class="nav-item">
                     <a class="text-nowrap nav-link{% if request.resolver_match.view_name == 'site:trackers_view' %} active{% endif %}"
@@ -52,17 +52,17 @@
             <ul class="navbar-nav d-flex">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="text-nowrap nav-link dashboard-navbar-link{% if request.resolver_match.view_name|slice:":10" == 'dashboard:' or request.resolver_match.view_name in "kagi:webauthn-keys backup-codes kagi:totp-devices kagi:add-webauthn-key kagi:two-factor-settings kagi:add-totp" %} active{% endif %}"
-                           href="{% host_url 'dashboard:home_view' %}"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+                        <a class="text-nowrap nav-link dashboard-navbar-link{% if request.host.name == 'dashboard' %} active{% endif %}"
+                           href="{% host_url 'home_view' host 'dashboard' %}"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
                     </li>
                 {% else %}
                     <span class="if-not-collapsed me-2"></span>
                     <li class="nav-item">
-                        <a href="{% host_url 'site:account_login' host 'www' %}"
+                        <a href="{% host_url 'account_login' host 'dashboard' %}"
                            class="text-nowrap btn btn-primary navbar-btn loginBtn mt-0 me-2"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% host_url 'site:account_signup' host 'www' %}"
+                        <a href="{% host_url 'account_signup' host 'dashboard' %}"
                            class="text-nowrap btn btn-success navbar-btn text-nowrap mt-0"><i class="fa-solid fa-user-plus"></i> Sign up for free</a>
                     </li>
                 {% endif %}

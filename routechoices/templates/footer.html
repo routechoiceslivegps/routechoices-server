@@ -9,7 +9,7 @@
                         <a href="{% host_url 'site:landing_page' host 'www' %}">Home</a>
                     </li>
                     <li>
-                        <a href="{% host_url 'site:events_view' host 'www' %}">Events</a>
+                        <a href="{% host_url 'public_events_view' host 'events' %}">Public Events</a>
                     </li>
                     <li>
                         <a href="{% host_url 'site:trackers_view' host 'www' %}">Trackers</a>
@@ -61,7 +61,7 @@
     <div class="container">
         <div class="logo site-name">
             <a href="{% host_url 'site:landing_page' host 'www' %}"
-               class="d-inline-flex ">
+               class="d-inline-flex">
                 <div class="p-0">
                     <img src="{% static 'img/logo.svg' %}?v=2025"
                          alt="Site logo"
@@ -69,8 +69,8 @@
                          style="vertical-align: top">
                 </div>
                 <div class="px-2 py-0">
-                    <div style="font-size:0.67em;line-height: 1em;">ROUTECHOICES</div>
-                    <div style="font-size:1.14em;line-height: 1em;">LIVE GPS</div>
+                    <div style="font-size:.85em;line-height: 1em;">ROUTECHOICES</div>
+                    <div style="font-size:.85em;line-height: 1em;text-align: left;">LIVE GPS</div>
                 </div>
             </a>
         </div>

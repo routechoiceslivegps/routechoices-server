@@ -90,26 +90,27 @@
                             <i class="fa-solid fa-fw fa-share-nodes"></i>
                         </button>
                     </div>
-                    <div class="px-0 py-3 powered-vert">
+                    <div class="px-0 py-2 powered-vert">
                         <a target="_blank"
-                           href="https://www.routechoices.com"
+                           href="{% host_url 'site:landing_page' host 'www' %}"
                            style="line-height: 30px;
+                                  font-size: 1.2em;
                                   font-weight: 700;
+                                  font-family: Atkinson Hyperlegible, sans-serif;
                                   color: var(--bs-primary-text);
                                   margin-right: 3px;
                                   user-select: none;
-                                  -webkit-user-select: none;
-                                  font-family: Atkinson Hyperlegible, sans-serif;"
+                                  -webkit-user-select: none;"
                            class="d-flex text-decoration-none fw-bold">
+                            <div class="pt-1 pb-2">
+                                <div style="font-size:.85em;line-height: 1em;">ROUTECHOICES</div>
+                                <div style="font-size:.85em;line-height: 1em;text-align: right;">LIVE GPS</div>
+                            </div>
                             <div>
                                 <img src="{% static 'img/logo.svg' %}?v=2025"
                                      alt="Site logo"
                                      width="35"
                                      style="vertical-align: bottom;transform: rotate(90deg);margin-right: -5px">
-                            </div>
-                            <div class="pt-3 pb-1">
-                                <div style="font-size:0.67em;line-height: 1em;">ROUTECHOICES</div>
-                                <div style="font-size:1.14em;line-height: 1em;">LIVE GPS</div>
                             </div>
                         </a>
                     </div>

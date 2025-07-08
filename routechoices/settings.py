@@ -139,9 +139,9 @@ MIDDLEWARE = [
     "hijack.middleware.HijackUserMiddleware",
 ]
 SESSION_ENGINE = "routechoices.core.sessions_backend"
-ROOT_URLCONF = "routechoices.urls"
+ROOT_URLCONF = "routechoices.dashboard.urls"
 ROOT_HOSTCONF = "routechoices.hosts"
-DEFAULT_HOST = "www"
+DEFAULT_HOST = "dashboard"
 TEMPLATES_LOADERS = [
     (
         "django.template.loaders.cached.Loader",
@@ -209,7 +209,7 @@ STATICFILES_FINDERS = [
 ]
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
-LOGIN_REDIRECT_URL = f"//www.{PARENT_HOST}/dashboard"
+LOGIN_REDIRECT_URL = f"//dashboard.{PARENT_HOST}"
 LOGOUT_REDIRECT_URL = f"//www.{PARENT_HOST}"
 SESSION_COOKIE_SAMESITE = None
 CORS_ALLOW_ALL_ORIGINS = True
