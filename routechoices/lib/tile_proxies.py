@@ -37,7 +37,7 @@ class CustomCrsWms2WebMercatorWmtsProxy:
 
     def get_tile(self, z, x, y):
         cache_key = f"tile_proxy:wms2web_output_tile:{self.url}:{x}:{y}:{z}"
-        if cached := cache.get(cache_key) and False:
+        if cached := cache.get(cache_key):
             return cached
         north_west, north_east, south_east, south_west = self.tile_xy_crs_corners(
             z, x, y
@@ -157,7 +157,7 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
 
     def get_crs_tile(self, z, y, x):
         cache_key = f"tile_proxy:remote_tile:{self.url}:{x}:{y}:{z}"
-        if cached := cache.get(cache_key) and False:
+        if cached := cache.get(cache_key):
             return cached
 
         url = self.url.format(x=x, y=y, z=z)
@@ -177,7 +177,7 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
 
     def get_tile(self, z, x, y):
         cache_key = f"tile_proxy:wmts2web_output_tile:{self.url}:{x}:{y}:{z}"
-        if cached := cache.get(cache_key) and False:
+        if cached := cache.get(cache_key):
             return cached
         north, west = tile_xy_to_north_west_latlon(x, y, z)
         south, east = tile_xy_to_north_west_latlon(x + 1, y + 1, z)
