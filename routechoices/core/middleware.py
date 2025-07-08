@@ -1,12 +1,13 @@
 import logging
 import time
-from importlib import import_module
 from re import compile
 
 import arrow
 from corsheaders.middleware import CorsMiddleware as OrigCorsMiddleware
 from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
+from django.contrib.sessions.backends.base import UpdateError
+from django.contrib.sessions.exceptions import SessionInterrupted
 from django.core.cache import cache
 from django.core.exceptions import DisallowedHost
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
@@ -14,11 +15,11 @@ from django.middleware.csrf import CsrfViewMiddleware as OrigCsrfViewMiddleware
 from django.shortcuts import redirect, render
 from django.urls import get_urlconf, set_urlconf
 from django.utils.cache import patch_vary_headers
-from django.utils.deprecation import MiddlewareMixin
 from django.utils.functional import cached_property
 from django.utils.http import http_date
 from django_hosts.middleware import HostsBaseMiddleware
 from rest_framework import status
+from user_sessions.middleware import SessionMiddleware as OrigSessionMiddleware
 
 from routechoices.core.models import Club
 
@@ -265,34 +266,39 @@ class FilterCountriesIPsMiddleware:
         return None
 
 
-class SessionMiddleware(MiddlewareMixin):
-    """
-    Middleware that provides ip and user_agent to the session store.
-    """
-
-    def process_request(self, request):
-        engine = import_module(settings.SESSION_ENGINE)
-        session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, None)
-        request.session = engine.SessionStore(
-            ip=request.META.get("REMOTE_ADDR", ""),
-            user_agent=request.META.get("HTTP_USER_AGENT", ""),
-            session_key=session_key,
-        )
-
+class SessionMiddleware(OrigSessionMiddleware):
     def process_response(self, request, response):
         """
         If request.session was modified, or if the configuration is to save the
-        session every time, save the changes and set a session cookie.
+        session every time, save the changes and set a session cookie or delete
+        the session cookie if the session has been emptied.
+        EDIT: Handling of sites using cname.
         """
         try:
             accessed = request.session.accessed
             modified = request.session.modified
+            empty = request.session.is_empty()
         except AttributeError:
-            pass
+            return response
+
+        session_domain = settings.SESSION_COOKIE_DOMAIN
+        if request.use_cname:
+            session_domain = request.get_host()
+
+        # First check if we need to delete this cookie.
+        # The session should be deleted only if the session is entirely empty.
+        if settings.SESSION_COOKIE_NAME in request.COOKIES and empty:
+            response.delete_cookie(
+                settings.SESSION_COOKIE_NAME,
+                path=settings.SESSION_COOKIE_PATH,
+                domain=session_domain,
+                samesite=settings.SESSION_COOKIE_SAMESITE,
+            )
+            patch_vary_headers(response, ("Cookie",))
         else:
             if accessed:
                 patch_vary_headers(response, ("Cookie",))
-            if modified or settings.SESSION_SAVE_EVERY_REQUEST:
+            if (modified or settings.SESSION_SAVE_EVERY_REQUEST) and not empty:
                 if request.session.get_expire_at_browser_close():
                     max_age = None
                     expires = None
@@ -301,19 +307,22 @@ class SessionMiddleware(MiddlewareMixin):
                     expires_time = time.time() + max_age
                     expires = http_date(expires_time)
                 # Save the session data and refresh the client cookie.
-                # Skip session save for 500 responses, refs #3881.
-                if response.status_code != 500:
-                    request.session.save()
-                    host = request.get_host().partition(":")[0]
-                    domain = settings.SESSION_COOKIE_DOMAIN
-                    if Club.objects.filter(domain=host).exists():
-                        domain = host
+                # Skip session save for 5xx responses.
+                if response.status_code < 500:
+                    try:
+                        request.session.save()
+                    except UpdateError:
+                        raise SessionInterrupted(
+                            "The request's session was deleted before the "
+                            "request completed. The user may have logged "
+                            "out in a concurrent request, for example."
+                        )
                     response.set_cookie(
                         settings.SESSION_COOKIE_NAME,
                         request.session.session_key,
                         max_age=max_age,
                         expires=expires,
-                        domain=domain,
+                        domain=session_domain,
                         path=settings.SESSION_COOKIE_PATH,
                         secure=settings.SESSION_COOKIE_SECURE or None,
                         httponly=settings.SESSION_COOKIE_HTTPONLY or None,
