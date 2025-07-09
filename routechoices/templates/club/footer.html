@@ -5,11 +5,11 @@
             <div class="container{% if is_event_page %}-fluid{% endif %}">
                 <div class="logosmall site-name my-0 py-0">
                     <div class="px-0 pt-2">
-                        <a href="https://www.routechoices.com/"
+                        <a href="{% host_url 'site:landing_page' host 'www' %}"
                            class="d-flex justify-content-end">
                             <div class="px-2">
-                                <div style="font-size:.85em;line-height: 1em;">ROUTECHOICES</div>
-                                <div style="font-size:.85em;line-height: 1em;text-align: right;">LIVE GPS</div>
+                                <div style="font-size:.85em;line-height: 1em;text-align: right;">ROUTECHOICES</div>
+                                <div style="font-size:.85em;line-height: 1em;">LIVE GPS TRACKING</div>
                             </div>
                             <div>
                                 <img src="{% static 'img/logo.svg' %}?v=2025"
