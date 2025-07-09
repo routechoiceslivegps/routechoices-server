@@ -6,7 +6,7 @@
           href="{% static 'styles/site/tracker.css' %}?_=2022022600" />
 {% endblock extra_head %}
 
-{% block head_title %}Trackers | Routechoices — Live GPS{% endblock %}
+{% block head_title %}Trackers | Routechoices — Live GPS Tracking{% endblock %}
 
 {% block contentup %}
     <div class="container-fluid p-0">
@@ -286,7 +286,7 @@
                                                        aria-describedby="IMEIHelp"
                                                        placeholder="Enter IMEI"
                                                        required>
-                                                <small id="IMEIHelp" class="form-text text-muted">This is used to link the physical device with the Routechoices Live GPS platform.</small>
+                                                <small id="IMEIHelp" class="form-text text-muted">This is used to link the physical device with the {{ site.name }} platform.</small>
                                                 <div id="imeiErrorMsg" class="invalid-feedback d-none mb-1">
                                                     <i class="fa-solid fa-triangle-exclamation"></i> Invalid IMEI
                                                 </div>

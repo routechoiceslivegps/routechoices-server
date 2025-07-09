@@ -16,11 +16,11 @@ class LiveEventsFeed(Feed):
 
     def title(self):
         site = get_current_site()
-        return f"Last 50 Live GPS Events on {site.name}"
+        return f"Last 50 events on {site.name}"
 
     def description(self):
         site = get_current_site()
-        return f"Watch live or later the GPS Tracking Events on {site.name}"
+        return f"Watch live or later the events on {site.name}"
 
     def link(self):
         return reverse("site:public_events_view", host="www")
@@ -39,7 +39,7 @@ class LiveEventsFeed(Feed):
         return item.name
 
     def item_description(self, item):
-        return f"Live GPS of {item.name} by {item.club}"
+        return f"Live GPS Tracking for {item.name} by {item.club}"
 
     def item_pubdate(self, item):
         return item.start_date

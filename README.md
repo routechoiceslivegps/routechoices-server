@@ -4,7 +4,7 @@
 Routechoices server
 ===================
 
-Code for the server of the Routechoices Live GPS platform.
+Code for the server of the "Routechoices — Live GPS Tracking" platform.
 
 It includes:
 

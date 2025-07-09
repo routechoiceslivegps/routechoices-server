@@ -31,10 +31,10 @@ class ClubLiveEventsFeed(Feed):
         return Club.objects.get(slug__iexact=request.club_slug)
 
     def title(self, obj):
-        return f"Latest Live GPS Events by {obj.name}"
+        return f"Latest Events by {obj.name}"
 
     def description(self, obj):
-        return f"Watch live or later the Live GPS Events by {obj.name}"
+        return f"Watch live or later the events by {obj.name}"
 
     def link(self, obj):
         return f"{obj.nice_url}"
@@ -53,7 +53,7 @@ class ClubLiveEventsFeed(Feed):
         return item.name
 
     def item_description(self, item):
-        return f"Live GPS of {item.name} by {item.club}"
+        return f"Live GPS tracking of {item.name} by {item.club}"
 
     def item_pubdate(self, item):
         return item.start_date
