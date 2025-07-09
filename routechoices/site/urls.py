@@ -4,11 +4,12 @@ from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 from django_hosts.resolvers import reverse
 
-from routechoices.site import views
-from routechoices.site.sitemaps import StaticViewSitemap
+from routechoices.site import feeds, views
+from routechoices.site.sitemaps import DynamicViewSitemap, StaticViewSitemap
 
 sitemaps = {
     "static": StaticViewSitemap,
+    "dynamic": DynamicViewSitemap,
 }
 
 urlpatterns = [
@@ -39,18 +40,12 @@ urlpatterns = [
                     ),
                     re_path(r"^contact/?$", views.contact, name="contact_view"),
                     re_path(
-                        r"^events/?$",
-                        RedirectView.as_view(
-                            url=reverse("public_events_view", host="events")
-                        ),
-                        name="events_view",
+                        r"^events/?$", views.events_view, name="public_events_view"
                     ),
                     re_path(
                         r"^feed(.rss)?$",
-                        RedirectView.as_view(
-                            url=reverse("public_events_feed", host="events")
-                        ),
-                        name="events_feed",
+                        feeds.live_event_feed,
+                        name="public_events_feed",
                     ),
                     re_path(
                         r"^trackers/?$",

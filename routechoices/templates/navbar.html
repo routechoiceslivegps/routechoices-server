@@ -32,7 +32,7 @@
             <ul class="navbar-nav d-flex flex-start">
                 <li class="nav-item">
                     <a class="text-nowrap nav-link{% if request.host.name == 'events' %} active{% endif %}"
-                       href="{% host_url 'public_events_view' host 'events' %}"><i class="fa-solid fa-trophy"></i> Events</a>
+                       href="{% host_url 'site:public_events_view' host 'www' %}"><i class="fa-solid fa-trophy"></i> Events</a>
                 </li>
                 <li class="nav-item">
                     <a class="text-nowrap nav-link{% if request.resolver_match.view_name == 'site:trackers_view' %} active{% endif %}"

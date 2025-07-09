@@ -23,7 +23,7 @@ class LiveEventsFeed(Feed):
         return f"Watch live or later the GPS Tracking Events on {site.name}"
 
     def link(self):
-        return reverse("public_events_view", host="events")
+        return reverse("site:public_events_view", host="www")
 
     def items(self):
         return (

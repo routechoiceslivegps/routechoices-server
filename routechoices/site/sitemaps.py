@@ -17,10 +17,10 @@ class StaticViewSitemap(Sitemap):
         return [
             "site:landing_page",
             "site:trackers_view",
-            "site:contact_view",
             "site:pricing_view",
-            "site:tos_view",
+            "site:contact_view",
             "site:privacy_policy_view",
+            "site:tos_view",
         ]
 
     def location(self, item):
@@ -58,7 +58,7 @@ class DynamicViewSitemap(Sitemap):
 
         page_count = max(0, all_events.count() - 1) // 25 + 1
 
-        root = reverse("public_events_view", host="events")
+        root = reverse("site:public_events_view", host="www")
         items = (root,)
         for p in range(1, page_count):
             items += (f"{root}?page={p+1}",)

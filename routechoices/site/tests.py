@@ -48,9 +48,9 @@ class SiteViewsTestCase(EssentialApiBase):
             end_date=arrow.now().shift(hours=-1).datetime,
         )
 
-        client = APIClient(HTTP_HOST="events.routechoices.dev")
+        client = APIClient(HTTP_HOST="www.routechoices.dev")
 
-        url = self.reverse_and_check("public_events_view", "/", host="events")
+        url = self.reverse_and_check("site:public_events_view", "/events", host="www")
         response = client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = client.get(f"{url}?q=Kiila+Cup+2")
@@ -68,7 +68,7 @@ class SiteViewsTestCase(EssentialApiBase):
         self.assertNotContains(response, "Kiila Cup 1")
         self.assertContains(response, "Kiila Cup 2")
 
-        url = self.reverse_and_check("site:events_feed", "/feed", host="www")
+        url = self.reverse_and_check("site:public_events_feed", "/feed", host="www")
         response = client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

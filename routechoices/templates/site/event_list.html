@@ -25,7 +25,7 @@
     <link rel="alternate"
           type="application/rss+xml"
           title="{% if club %}{{ club.name }} {% else %}{% endif %}GPS Tracking Event Feed"
-          href="{% if club %}{{ club.nice_url }}feed{% else %}{% host_url 'public_events_feed' host 'events' %}{% endif %}" />
+          href="{% if club %}{{ club.nice_url }}feed{% else %}{% host_url 'site:public_events_feed' host 'www' %}{% endif %}" />
     <meta property="og:title"
           content="Events{% if club %} by {{ club.name }} | Powered by Routechoices — Live GPS{% else %} on Routechoices — Live GPS{% endif %}" />
     <meta property="og:description"
@@ -47,7 +47,7 @@
     {% if club %}
         {% define club.nice_url as home_url %}
     {% else %}
-        {% host_url 'public_events_view' host 'events' as home_url %}
+        {% host_url 'site:public_events_view' host 'www' as home_url %}
     {% endif %}
     {% if club %}
         <div class="container-fluid p-0">
