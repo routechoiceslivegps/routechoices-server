@@ -50,4 +50,16 @@
 			},
 		});
 	});
+
+	u('button[data-bs-toggle="tab"]').each((el) => {
+		u(el).on("show.bs.tab", (e) => {
+			window.location.hash = u(e.target).attr("data-bs-target").slice(0, -5);
+		});
+	});
+
+	const hash = window.location.hash;
+	if (hash) {
+		const triggerEl = document.querySelector(`${hash}-tab`);
+		bootstrap.Tab.getOrCreateInstance(triggerEl).show();
+	}
 })();

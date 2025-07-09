@@ -5,7 +5,7 @@ context("IMEI device id generation", () => {
 
 	it("Create an Device Id", () => {
 		cy.forceVisit("//www.routechoices.dev/trackers");
-		cy.get("#hardware-tab-btn").click();
+		cy.get("#dedicated-trackers-tab").click();
 
 		// Invalid too short IMEI
 		cy.get("#IMEI").clear().type("0123456789");
