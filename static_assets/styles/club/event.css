@@ -228,12 +228,8 @@
 	font-family: "Twemoji Country Flags", "Atkinson Hyperlegible", sans-serif;
 }
 
-.runner-icon {
-	opacity: 0.75;
-}
-
 .runner-tail {
-	opacity: 0.75;
+	opacity: 0.8;
 }
 
 .runner-dot {
@@ -241,7 +237,6 @@
 	width: calc(var(--runner-scale) * 15px);
 	height: calc(var(--runner-scale) * 15px);
 	border: 2px solid black;
-	opacity: 0.75;
 }
 
 .runner-focused {
@@ -250,6 +245,10 @@
 
 .runner-focused .runner-dot {
 	border: 3px solid black;
+}
+
+.runner-dot.faded {
+	border: 3px solid #66666699;
 }
 
 .close {
