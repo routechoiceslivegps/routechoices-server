@@ -14,7 +14,7 @@
                 <div class="card-body p-4 p-sm-5">
                     <ul class="nav nav-tabs mb-3">
                         <li>
-                            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':18' == 'account_' or request.resolver_match.view_name in 'kagi:webauthn-keys backup-codes kagi:totp-devices kagi:add-webauthn-key kagi:two-factor-settings kagi:add-totp' %}active{% endif %}"
+                            <a class="flex-sm-fill text-sm-center nav-link {% if request.path|slice:':9' == '/account/' %}active{% endif %}"
                                href="{% url 'account_edit_view' %}"><i class="fa-solid fa-circle-user"></i> Account</a>
                         </li>
                         <li>
@@ -22,7 +22,7 @@
                                href="{% url 'dashboard_club:select_view' %}"><i class="fa-solid fa-house-flag"></i> Clubs</a>
                         </li>
                         <li>
-                            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':25' == 'dashboard_participations:' %}active{% endif %}"
+                            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard_participations_view' %}active{% endif %}"
                                href="{% url 'dashboard_participations_view' %}"><i class="fa-solid fa-trophy"></i> Participations</a>
                         </li>
                     </ul>
