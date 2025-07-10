@@ -1,6 +1,6 @@
-# Routechoices.com - Live GPS Tracking
+# Routechoices - Live GPS Tracking
 
-Routechoices.com is a live GPS tracking SaaS platform for orienteering and outdoor enthusiasts.
+Routechoices is a live GPS tracking SaaS platform for orienteering and outdoor enthusiasts.
 
 ## Revolutionize Your Events
 
