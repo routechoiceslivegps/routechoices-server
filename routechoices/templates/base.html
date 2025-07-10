@@ -6,33 +6,25 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         {% block favicon %}
-            <link rel="apple-touch-icon"
-                  href="{% static 'apple-touch-icon.png' %}?v=20250709" />
+            <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}?v=20250709" />
             <link rel="icon" sizes="32x32" href="{% static 'favicon.ico' %}?v=20250709" />
             <link rel="manifest" href="{% static 'manifest.json' %}?v=20250709" />
         {% endblock favicon %}
         <meta name="apple-mobile-web-app-title" content="Routechoices" />
         <meta name="application-name" content="Routechoices" />
         <meta name="theme-color" content="#ffffff" />
-        <meta name="description"
-              content="{% block head_description %}Routechoices.com is an easy-to-use yet powerful live GPS tracking platform designed for orienteering and outdoor sports enthusiasts. Whether you're on a computer, tablet, or smartphone, you can effortlessly set up and view events where participants' live locations are displayed on high-precision maps.{% endblock %}" />
-        <meta name="keywords"
-              content="{% block head_keywords %}gps,tracking,orienteering,live,gps tracking,outdoor,tracker,orienteer,replay,trackers,gps seuranta,gps spårning,gps sporing,suunnistus,orientering{% endblock %}" />
+        <meta name="description" content="{% block head_description %}Routechoices is an easy-to-use yet powerful live GPS tracking platform designed for orienteering and outdoor sports enthusiasts. Whether you're on a computer, tablet, or smartphone, you can effortlessly set up and view events where participants' live locations are displayed on high-precision maps.{% endblock %}" />
+        <meta name="keywords" content="{% block head_keywords %}gps,tracking,orienteering,live,gps tracking,outdoor,tracker,orienteer,replay,trackers,gps seuranta,gps spårning,gps sporing,suunnistus,orientering{% endblock %}" />
         <title>{% block head_title %}Routechoices | Live GPS Tracking{% endblock %}</title>
         {% compress css %}
-            <link rel="stylesheet"
-                  href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
-            <link rel="stylesheet"
-                  href="{% static '/vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
-            <link rel="stylesheet"
-                  href="{% static '/vendor/bootstrap_sweetalert-1.0.1/sweetalert.css' %}" />
+            <link rel="stylesheet" href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
+            <link rel="stylesheet" href="{% static '/vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
+            <link rel="stylesheet" href="{% static '/vendor/bootstrap_sweetalert-1.0.1/sweetalert.css' %}" />
             <link rel="stylesheet" href="{% static '/styles/site.css' %}" />
         {% endcompress %}
         {% block extra_head %}
-            <meta property="og:title"
-                  content="Routechoices | Live GPS Tracking" />
-            <meta property="og:description"
-                  content="Routechoices.com is an easy-to-use yet powerful live GPS tracking platform designed for orienteering and outdoor sports enthusiasts. Whether you're on a computer, tablet, or smartphone, you can effortlessly set up and view events where participants' live locations are displayed on high-precision maps." />
+            <meta property="og:title" content="Routechoices | Live GPS Tracking" />
+            <meta property="og:description" content="Routechoices is an easy-to-use yet powerful live GPS tracking platform designed for orienteering and outdoor sports enthusiasts. Whether you're on a computer, tablet, or smartphone, you can effortlessly set up and view events where participants' live locations are displayed on high-precision maps." />
             <meta property="og:type" content="website" />
             <meta property="og:locale" content="en_US" />
             <meta property="og:site_name" content="Routechoices | Live GPS Tracking" />
