@@ -138,6 +138,7 @@ class XForwardedForMiddleware:
 class HostsRequestMiddleware(HostsBaseMiddleware):
     def process_request(self, request):
         # Find best match, falling back to settings.DEFAULT_HOST
+        request.use_cname = False
         try:
             host, kwargs = self.get_host(request.get_host())
         except DisallowedHost:
@@ -150,7 +151,6 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
             raw_host = raw_host[:-1]
         if raw_host == default_domain:
             return redirect(f"//www.{default_domain}{request.get_full_path()}")
-        request.use_cname = False
         club_slug = None
         if raw_host.endswith(default_subdomain_suffix):
             slug = raw_host[: -(len(default_subdomain_suffix))].lower()
