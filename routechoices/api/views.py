@@ -1635,7 +1635,7 @@ def create_device_id(request):
 
 @swagger_auto_schema(
     method="get",
-    operation_id="server_time",
+    operation_id="server_time_get",
     operation_description="Return the server unix epoch time.",
     tags=["Miscellaneous"],
     responses={
@@ -1647,7 +1647,7 @@ def create_device_id(request):
 )
 @swagger_auto_schema(
     method="post",
-    operation_id="server_time",
+    operation_id="server_time_post",
     operation_description="Return the server unix epoch time.",
     tags=["Miscellaneous"],
     responses={
