@@ -139,7 +139,7 @@ MIDDLEWARE = [
     "hijack.middleware.HijackUserMiddleware",
 ]
 SESSION_ENGINE = "routechoices.core.sessions_backend"
-ROOT_URLCONF = "routechoices.dashboard.urls"
+ROOT_URLCONF = "routechoices.site.urls"
 ROOT_HOSTCONF = "routechoices.hosts"
 DEFAULT_HOST = "dashboard"
 TEMPLATES_LOADERS = [

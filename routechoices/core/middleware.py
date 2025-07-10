@@ -190,6 +190,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
                         )
                     club_slug = slug.lower()
                     cache.set(cache_key, club_slug, 60)
+
         else:
             cache_key = f"club_domain_exists:{raw_host}"
             cached_slug = cache.get(cache_key)
@@ -207,6 +208,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
             host, kwargs = self.get_host(original_host)
             request.use_cname = True
         request.club_slug = club_slug
+
         # This is the main part of this middleware
         request.urlconf = host.urlconf
         request.host = host

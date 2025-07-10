@@ -28,7 +28,7 @@
         </li>
         <li>
             <a class="flex-sm-fill text-sm-center nav-link {% if request.path|slice:':13' == '/account/mfa/' %}active{% endif %}"
-               href="{% url 'kagi:two-factor-settings' %}"><i class="fa-solid fa-shield-halved"></i> Two-Factor Authentication{{ request.resolver_match.view_name|slice:':5' }}</a>
+               href="{% url 'kagi:two-factor-settings' %}"><i class="fa-solid fa-shield-halved"></i> Two-Factor Authentication</a>
         </li>
         <li>
             <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'account_session:list_view' %}active{% endif %}"
