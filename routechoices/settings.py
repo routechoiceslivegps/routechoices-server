@@ -142,7 +142,7 @@ MIDDLEWARE = [
 SESSION_ENGINE = "routechoices.core.sessions_backend"
 ROOT_URLCONF = "routechoices.site.urls"
 ROOT_HOSTCONF = "routechoices.hosts"
-DEFAULT_HOST = "dashboard"
+DEFAULT_HOST = "www"
 TEMPLATES_LOADERS = [
     (
         "django.template.loaders.cached.Loader",
