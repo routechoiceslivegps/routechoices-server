@@ -547,7 +547,7 @@ def club_list_view(request):
         ),
     },
 )
-@api_GET_view
+@api_GET_view  # TODO: Add Patch and Delete method
 def event_detail(request, event_id):
     event = (
         Event.objects.select_related("club", "notice", "map")
