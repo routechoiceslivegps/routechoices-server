@@ -1259,7 +1259,7 @@ def event_new_data(request, event_id, key):
     if not prev_data:
         return Response(
             "Previous version is not cached anymore",
-            status=status.HTTP_412_PRECONDITION_FAILED,
+            status=status.HTTP_410_GONE,
         )
 
     req = HttpRequest()
@@ -1268,10 +1268,7 @@ def event_new_data(request, event_id, key):
     req.session = request.session
     current_resp = event_data(req, event_id)
     if not current_resp.data or current_resp.data.get("error"):
-        return Response(
-            "Could not fetch current version",
-            status=status.HTTP_412_PRECONDITION_FAILED,
-        )
+        raise Http404()
 
     current_data = current_resp.data
 
