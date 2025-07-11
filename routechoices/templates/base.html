@@ -71,7 +71,7 @@
         <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700"
                 data-site-version="{{ version }}"
                 data-api-root="{% host_url 'api_doc' host 'api' %}"></script>
-        {% if analytics_enabled %}
+        {% if analytics_enabled and request.host.name != 'dashboard' %}
             <script defer
                     {% if request.club_slug %}data-club-slug="{{ request.club_slug }}"{% endif %}
                     data-domain="{{ site.domain }}"
