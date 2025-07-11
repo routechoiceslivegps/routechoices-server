@@ -6,8 +6,7 @@ Media:
 ------
 
     Frontpage Video             CC-4.0 Floris Kloet https://livingstills.nl
-    Frontpage Picture           Atro Saukko - Jukola 2021
-    Event list banner           Juuso-Valtteri Kivimäki https://www.juusovaltteri.com
+    Frontpage Pictures          Veijo Isojunno, Emma Lähdekorpi 
 
 Translations:
 -------------
@@ -25,7 +24,6 @@ JS Libraries:
     dayjs                       MIT https://github.com/iamkun/dayjs
     emoji-supported             MIT https://github.com/benaubin/emoji-supported
     filesaver                   MIT https://github.com/eligrey/FileSaver.js
-    fittext                     WTFPL License https://github.com/adactio/FitText.js
     fontawesome                 Font Awesome Free License https://fontawesome.com
     gpxparser                   MIT https://github.com/Luuka/GPXParser.js
     iro                         MPL-2.0 https://github.com/jaames/iro.js
