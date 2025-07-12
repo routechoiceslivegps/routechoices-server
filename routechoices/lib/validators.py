@@ -50,6 +50,8 @@ def validate_latitude(value):
         value = Decimal(value)
     except Exception:
         raise ValidationError(_("not a number"))
+    if value == 0:
+        raise ValidationError(_("suspicious zero value"))
     if value < -90 or value > 90:
         raise ValidationError(_("latitude out of range -90.0 90.0"))
 
@@ -61,6 +63,8 @@ def validate_longitude(value):
         value = Decimal(value)
     except Exception:
         raise ValidationError(_("not a number"))
+    if value == 0:
+        raise ValidationError(_("suspicious zero value"))
     if value < -180 or value > 180:
         raise ValidationError(_("longitude out of range -180.0 180.0"))
 

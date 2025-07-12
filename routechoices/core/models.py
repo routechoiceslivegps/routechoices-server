@@ -2185,7 +2185,8 @@ class Device(models.Model):
 
     def remove_unused_location(self, /, *, until, save=False):
         location_count = self.location_count
-
+        if location_count == 0:
+            return
         periods_used = [(until, max(now(), self.last_location_datetime))]
         periods_used += self.get_active_periods()
         periods_to_keep = simplify_periods(periods_used)

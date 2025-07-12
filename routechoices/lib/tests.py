@@ -208,23 +208,26 @@ class ValidatorsTestCase(TestCase):
         self.assertRaises(ValidationError, validate_esn, None)
 
     def test_validate_corners_coords(self):
-        validate_corners_coordinates("0,0,0,0,0,0,0,0")
-        validate_corners_coordinates("0,360,0,0,0,0,0,0")
+        validate_corners_coordinates("1,1,1,1,1,1,1,1")
+        validate_corners_coordinates("1,360,1,1,1,1,1,1")
         self.assertRaises(ValidationError, validate_corners_coordinates, "r a@a.aa")
         self.assertRaises(
-            ValidationError, validate_corners_coordinates, "0,0,0,0,0,0,0"
+            ValidationError, validate_corners_coordinates, "0,0,0,0,0,0,0,0"
         )
         self.assertRaises(
-            ValidationError, validate_corners_coordinates, "0,0,0,0,0,0,0,"
+            ValidationError, validate_corners_coordinates, "1,1,1,1,1,1,1"
         )
         self.assertRaises(
-            ValidationError, validate_corners_coordinates, "0,0,0,0,0,0,0,a"
+            ValidationError, validate_corners_coordinates, "1,1,1,1,1,1,1,"
         )
         self.assertRaises(
-            ValidationError, validate_corners_coordinates, "0,0,0,0,0,0,0,0,1"
+            ValidationError, validate_corners_coordinates, "1,1,1,1,1,1,1,a"
         )
         self.assertRaises(
-            ValidationError, validate_corners_coordinates, "100,0,0,0,0,0,0,0"
+            ValidationError, validate_corners_coordinates, "1,1,1,1,1,1,1,1,1"
+        )
+        self.assertRaises(
+            ValidationError, validate_corners_coordinates, "100,1,1,1,1,1,1,1"
         )
 
     def test_validate_domain(self):
@@ -267,17 +270,19 @@ class ValidatorsTestCase(TestCase):
         self.assertRaises(ValidationError, validate_nice_slug, "test")
 
     def test_validate_lat(self):
-        validate_latitude(0)
+        validate_latitude(12.12456)
         validate_latitude(90)
         validate_latitude(-90)
         self.assertRaises(ValidationError, validate_latitude, "r a@a.aa")
         self.assertRaises(ValidationError, validate_latitude, 90.1)
+        self.assertRaises(ValidationError, validate_latitude, 0)
         self.assertRaises(ValidationError, validate_latitude, -90.1)
 
     def test_validate_lon(self):
-        validate_longitude(0)
+        validate_longitude(45.1234)
         validate_longitude(180)
         validate_longitude(-180)
         self.assertRaises(ValidationError, validate_longitude, "r a@a.aa")
         self.assertRaises(ValidationError, validate_longitude, 180.1)
+        self.assertRaises(ValidationError, validate_longitude, 0)
         self.assertRaises(ValidationError, validate_longitude, -180.1)

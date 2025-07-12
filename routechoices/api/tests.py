@@ -176,28 +176,28 @@ class EssentialApiTestCase1(EssentialApiBase):
     def test_add_locations(self):
         device = Device()
         self.assertEqual(device._location_count, 0)
-        device.add_locations([(0, 0.000014, 0)], save=False)
-        self.assertEqual(device.locations_encoded, "~n|sfjAA?")
+        device.add_locations([(0, 0.000014, 0.1)], save=False)
+        self.assertEqual(device.locations_encoded, "~n|sfjAA_pR")
         self.assertEqual(device._location_count, 1)
-        device.add_locations([(0, 0, 0)], save=False)
-        self.assertEqual(device.locations_encoded, "~n|sfjAA?")
+        device.add_locations([(0, 0.1, 0.1)], save=False)
+        self.assertEqual(device.locations_encoded, "~n|sfjAA_pR")
         self.assertEqual(device._location_count, 1)
-        device.add_locations([(-1, 0, 0)], save=False)
-        self.assertEqual(device.locations_encoded, "`o|sfjA??@A?")
+        device.add_locations([(-1, 0.1, 0.1)], save=False)
+        self.assertEqual(device.locations_encoded, "`o|sfjA_pR_pR@|oR?")
         self.assertEqual(device._location_count, 2)
-        device.add_locations([(2, 0.000016, 0), (3, 0.000024, 0)], save=False)
-        self.assertEqual(device.locations_encoded, "`o|sfjA??@A?AA?@??")
+        device.add_locations([(2, 0.000016, 0.1), (3, 0.000024, 0.1)], save=False)
+        self.assertEqual(device.locations_encoded, "`o|sfjA_pR_pR@|oR?AA?@??")
         self.assertEqual(device._location_count, 4)
-        device.add_locations([(1, 0.000009, 0), (3, 0, 0)], save=False)
-        self.assertEqual(device.locations_encoded, "`o|sfjA??@A?@??@A?@??")
+        device.add_locations([(1, 0.000009, 0.1), (3, 0.1, 0.1)], save=False)
+        self.assertEqual(device.locations_encoded, "`o|sfjA_pR_pR@|oR?@??@A?@??")
         self.assertEqual(device._location_count, 5)
         device.save()
         self.assertEqual(device.location_count, 5)
-        self.assertEqual(device.last_location, (3, 0.00002, 0))
+        self.assertEqual(device.last_location, (3, 0.00002, 0.1))
         self.assertEqual(device.last_location, device.locations[-1])
-        device.add_locations([(4, 0, 0.000005)], save=False)
-        device.add_locations([(5, 0, -0.000005)], save=False)
-        device.add_locations([(6, 0, -0.00001)])
+        device.add_locations([(4, 0.1, 0.000005)], save=False)
+        device.add_locations([(5, 0.1, -0.000005)], save=False)
+        device.add_locations([(6, 0.1, -0.00001)])
         device.add_locations([(7, -0.000015, 0.00001)], save=False)
         device.add_locations([(7, 0.00002, 0.00002)], save=False)
         self.assertEqual(device.last_location, device.locations[-1])
@@ -206,7 +206,9 @@ class EssentialApiTestCase1(EssentialApiBase):
     def test_archive_device(self):
         club = Club.objects.create(name="Test club", slug="club")
         device = Device()
-        device.add_locations([(0, 0, 0), (5, 0, 0), (10, 0, 0)])
+        device.add_locations(
+            [(0, 0.00001, 0.00001), (5, 0.00001, 0.00001), (10, 0.00001, 0.00001)]
+        )
         event1 = Event.objects.create(
             club=club,
             name="test1",
@@ -269,7 +271,7 @@ class EssentialApiTestCase1(EssentialApiBase):
     def test_clean_device(self):
         club = Club.objects.create(name="Test club", slug="club")
         device = Device()
-        device.add_locations([(0, 0, 0), (5, 0, 0), (10, 0, 0)])
+        device.add_locations([(0, 0.1, 0.1), (5, 0.1, 0.1), (10, 0.1, 0.1)])
 
         device.remove_unused_location(until=epoch_to_datetime(13))
         self.assertEqual(device.location_count, 0)
