@@ -6,7 +6,7 @@ Media:
 ------
 
     Frontpage Video             CC-4.0 Floris Kloet https://livingstills.nl
-    Frontpage Pictures          Veijo Isojunno, Emma Lähdekorpi 
+    Frontpage Pictures          Veijo Isojunno, Emma Lähdekorpi
 
 Translations:
 -------------
