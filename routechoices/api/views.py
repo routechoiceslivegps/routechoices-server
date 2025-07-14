@@ -1262,6 +1262,17 @@ def event_new_data(request, event_id, key):
             status=status.HTTP_410_GONE,
         )
 
+    if cache_ts == key:
+        response = {
+            "competitors": [],
+            "duration": (time.perf_counter() - t0_perf),
+            "timestamp": time.time(),
+            "key": cache_ts,
+            "partial": 1,
+        }
+        headers = {"ETag": f'W/"{safe64encodedsha(json.dumps(response))}"'}
+        return Response(response, headers=headers)
+
     req = HttpRequest()
     req.method = "GET"
     req.user = request.user
