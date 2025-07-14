@@ -1565,7 +1565,7 @@ class Event(models.Model):
         super().validate_unique(exclude)
         qs = EventSet.objects.filter(club_id=self.club_id, slug__iexact=self.slug)
         if qs.exists():
-            raise ValidationError("Event Set with this slug already exists.")
+            raise ValidationError("An Event Set with this URL already exists.")
 
     def check_user_permission(self, user):
         if self.privacy == PRIVACY_PRIVATE and (
