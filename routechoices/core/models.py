@@ -1561,6 +1561,12 @@ class Event(models.Model):
         self.invalidate_cache()
         super().save(*args, **kwargs)
 
+    def validate_unique(self, exclude=None):
+        super().validate_unique(exclude)
+        qs = EventSet.objects.filter(club_id=self.club_id, slug__iexact=self.slug)
+        if qs.exists():
+            raise ValidationError("Event Set with this slug already exists.")
+
     def check_user_permission(self, user):
         if self.privacy == PRIVACY_PRIVATE and (
             not user.is_authenticated
