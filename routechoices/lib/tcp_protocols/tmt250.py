@@ -121,6 +121,9 @@ class TMT250Connection(GenericConnection):
                         await self.parse_imei(data[:17])
                     elif self.imei:
                         await self.decode_data(data)
+                    else:
+                        self.stream.close()
+                        break
             except StreamClosedError:
                 break
 
