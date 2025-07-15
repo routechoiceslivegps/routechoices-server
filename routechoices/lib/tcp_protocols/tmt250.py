@@ -119,7 +119,7 @@ class TMT250Connection(GenericConnection):
                     imei_len = (data[0] << 8) + data[1]
                     if imei_len > 0:
                         await self.parse_imei(data[:17])
-                    else:
+                    elif self.imei:
                         await self.decode_data(data)
             except StreamClosedError:
                 break
