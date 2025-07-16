@@ -2339,10 +2339,27 @@ function RCEvent(infoURL, clockURL, locale) {
 					weight: 3 * runnerIconScale,
 					className: `${competitor.highlighted ? "runner-focused" : ""} stroke-dark runner-tail`,
 				}).addTo(map);
+
 				competitor.tail.closestLayerPoint(new L.Point(0, 0));
 				competitor.tailScale = runnerIconScale;
 			} else {
 				competitor.tail.setLatLngs(tailLatLng);
+			}
+			if (competitor.displayFullRoute && !competitor.tail.hasDir) {
+				competitor.tail.setText("    ➤    ", {
+					offset: 3 + 4 * runnerIconScale,
+					repeat: true,
+					attributes: {
+						fill: competitor.color,
+						"font-size": 20 * runnerIconScale,
+						style:
+							"text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;opacity: 0.75",
+					},
+				});
+				competitor.tail.hasDir = true;
+			} else if (!competitor.displayFullRoute && competitor.tailHasDir) {
+				competitor.tail.setText(null);
+				competitor.tail.hasDir = false;
 			}
 		}
 	}
