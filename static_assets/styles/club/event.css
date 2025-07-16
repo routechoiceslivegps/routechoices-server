@@ -436,3 +436,11 @@
 	user-select: none; /* Non-prefixed version, currently
 									supported by Chrome, Edge, Opera and Firefox */
 }
+
+.leaflet-control-ranking::-webkit-scrollbar {
+	display: none;
+}
+.leaflet-control-ranking {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
