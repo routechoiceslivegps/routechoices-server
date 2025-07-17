@@ -2357,7 +2357,7 @@ function RCEvent(infoURL, clockURL, locale) {
 					},
 				});
 				competitor.tail.hasDir = true;
-			} else if (!competitor.displayFullRoute && competitor.tailHasDir) {
+			} else if (!competitor.displayFullRoute && competitor.tail.hasDir) {
 				competitor.tail.setText(null);
 				competitor.tail.hasDir = false;
 			}
