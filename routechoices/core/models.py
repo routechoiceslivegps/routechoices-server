@@ -44,6 +44,9 @@ from PIL import Image, ImageDraw, ImageFile
 from pillow_heif import register_avif_opener
 
 from routechoices.lib import plausible
+from routechoices.lib.duration_constants import (
+    DURATION_ONE_MONTH,
+)
 from routechoices.lib.globalmaptiles import GlobalMercator
 from routechoices.lib.helpers import (
     adjugate_matrix,
@@ -88,9 +91,9 @@ register_jxl_opener()
 logger = logging.getLogger(__name__)
 
 GLOBAL_MERCATOR = GlobalMercator()
+
 EVENT_CACHE_INTERVAL_LIVE = 5
 EVENT_CACHE_INTERVAL_ARCHIVED = 7 * 24 * 3600
-
 
 WEBP_MAX_SIZE = 16383
 
@@ -419,7 +422,7 @@ Follow our events live or replay them later.
             quality=(80 if mime == "image/jpeg" else 40),
         )
         data_out = buffer.getvalue()
-        cache.set(cache_key, data_out, 31 * 24 * 3600)
+        cache.set(cache_key, data_out, DURATION_ONE_MONTH)
         return data_out
 
     def validate_unique(self, exclude=None):
@@ -516,8 +519,7 @@ class Map(models.Model):
         with self.image.open("rb") as fp:
             data = fp.read()
 
-        cache.set(cache_key, data, 3600)
-
+        cache.set(cache_key, data, DURATION_ONE_MONTH)
         return data
 
     @property
@@ -560,7 +562,7 @@ class Map(models.Model):
         with self.image.storage.open(self.image.name, mode="rb", nbytes=2048) as fp:
             data = fp.read()
         mime = magic.from_buffer(data, mime=True)
-        cache.set(cache_key, mime, 3600)
+        cache.set(cache_key, mime, DURATION_ONE_MONTH)
         return mime
 
     @property
@@ -776,7 +778,7 @@ class Map(models.Model):
         )
         data_out = buffer.getvalue()
 
-        cache.set(cache_key, data_out, 3600 * 24 * 30)
+        cache.set(cache_key, data_out, DURATION_ONE_MONTH)
 
         return data_out, NOT_CACHED_TILE
 
@@ -818,7 +820,7 @@ class Map(models.Model):
             blank_tile, cache_status = self.blank_tile(
                 output_width, output_height, img_mime, cache_key
             )
-            cache.set(cache_key, blank_tile, 3600 * 24 * 30)
+            cache.set(cache_key, blank_tile, DURATION_ONE_MONTH)
             return blank_tile, cache_status
 
         width, height = self.quick_size
@@ -892,7 +894,7 @@ class Map(models.Model):
             _, buffer = cv2.imencode(f".{img_mime[6:]}", tile_img, extra_args)
             data_out = BytesIO(buffer).getvalue()
 
-        cache.set(cache_key, data_out, 3600 * 24 * 30)
+        cache.set(cache_key, data_out, DURATION_ONE_MONTH)
 
         return data_out, NOT_CACHED_TILE
 
@@ -2006,7 +2008,7 @@ class Event(models.Model):
             quality=(40 if mime in ("image/webp", "image/avif", "image/jxl") else 80),
         )
         data_out = buffer.getvalue()
-        cache.set(cache_key, data_out, 31 * 24 * 3600)
+        cache.set(cache_key, data_out, DURATION_ONE_MONTH)
         return data_out
 
 

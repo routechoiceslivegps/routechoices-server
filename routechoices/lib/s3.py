@@ -9,6 +9,9 @@ from django.core.cache import cache
 from django.http import HttpResponse
 from PIL import Image
 
+from routechoices.lib.duration_constants import (
+    DURATION_ONE_MONTH,
+)
 from routechoices.lib.helpers import (
     get_best_image_mime,
     safe64encodedsha,
@@ -120,7 +123,7 @@ def serve_image_from_s3(
             quality=(40 if mime in ("image/webp", "image/avif", "image/jxl") else 80),
         )
         image = out_buffer.getvalue()
-        cache.set(cache_key, image, 31 * 24 * 3600)
+        cache.set(cache_key, image, DURATION_ONE_MONTH)
 
     resp = StreamingHttpRangeResponse(
         request,

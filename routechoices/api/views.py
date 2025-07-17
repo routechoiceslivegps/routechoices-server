@@ -51,6 +51,9 @@ from routechoices.core.models import (
     Map,
     MapAssignation,
 )
+from routechoices.lib.duration_constants import (
+    DURATION_ONE_MINUTE,
+)
 from routechoices.lib.globalmaptiles import GlobalMercator
 from routechoices.lib.helpers import (
     epoch_to_datetime,
@@ -1313,7 +1316,7 @@ def event_new_data(request, event_id, key):
     if cache_control := current_resp.headers.get("Cache-Control"):
         headers["Cache-Control"] = cache_control
 
-    cache.set(cache_key, response, 60)
+    cache.set(cache_key, response, DURATION_ONE_MINUTE)
 
     return Response(response, headers=headers)
 
@@ -2112,7 +2115,7 @@ def third_party_event(request, provider, uid):
         }
         output["maps"].append(map_data)
 
-    cache.set(cache_key, output, 60)
+    cache.set(cache_key, output, DURATION_ONE_MINUTE)
 
     return Response(output)
 

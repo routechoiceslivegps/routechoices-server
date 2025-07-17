@@ -20,6 +20,9 @@ from rest_framework import status
 
 from routechoices.club import feeds
 from routechoices.core.models import PRIVACY_PRIVATE, Club, Event, EventSet
+from routechoices.lib.duration_constants import (
+    DURATION_ONE_DAY,
+)
 from routechoices.lib.helpers import (
     get_best_image_mime,
     get_current_site,
@@ -379,7 +382,7 @@ def event_map_view(request, slug, index="1", extension=None):
         with rmap.open("rb") as fp:
             data = fp.read()
 
-        cache.set(cache_key, data, 24 * 3600)
+        cache.set(cache_key, data, DURATION_ONE_DAY)
 
         mime_type = magic.from_buffer(data, mime=True)
         return HttpResponse(data, content_type=mime_type)

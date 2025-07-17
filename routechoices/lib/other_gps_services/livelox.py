@@ -15,6 +15,9 @@ from django.core.files.base import ContentFile
 from PIL import Image, ImageDraw, ImageFont
 
 from routechoices.core.models import Competitor, Event, Map
+from routechoices.lib.duration_constants import (
+    DURATION_FIVE_MINUTE,
+)
 from routechoices.lib.helpers import get_remote_image_sizes, initial_of_name, project
 from routechoices.lib.other_gps_services.commons import (
     EventImportError,
@@ -92,7 +95,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
         self.init_data["xtra"] = r.json()
         self.init_data["relay_leg"] = int(relay_leg) if relay_leg else ""
         self.init_data["class_id"] = int(class_id)
-        cache.set(cache_key, self.init_data, 300)
+        cache.set(cache_key, self.init_data, DURATION_FIVE_MINUTE)
 
     def get_competitor_device_id_prefix(self):
         return "LLX_"

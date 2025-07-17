@@ -22,6 +22,9 @@ from rest_framework import status
 from user_sessions.middleware import SessionMiddleware as OrigSessionMiddleware
 
 from routechoices.core.models import Club
+from routechoices.lib.duration_constants import (
+    DURATION_ONE_MINUTE,
+)
 
 XFF_EXEMPT_URLS = []
 if hasattr(settings, "XFF_EXEMPT_URLS"):
@@ -188,7 +191,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
                             request, "club/404.html", status=status.HTTP_404_NOT_FOUND
                         )
                     club_slug = slug.lower()
-                    cache.set(cache_key, club_slug, 60)
+                    cache.set(cache_key, club_slug, DURATION_ONE_MINUTE)
 
         else:
             cache_key = f"club_domain_exists:{raw_host}"
@@ -201,7 +204,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
                         request, "404-cname.html", status=status.HTTP_404_NOT_FOUND
                     )
                 club_slug = club.slug
-                cache.set(cache_key, club_slug, 60)
+                cache.set(cache_key, club_slug, DURATION_ONE_MINUTE)
             original_host = f"{club_slug}{default_subdomain_suffix}"
             host, kwargs = self.get_host(original_host)
             request.use_cname = True
