@@ -152,6 +152,24 @@ class MapApiTestCase(EssentialApiBase):
         )
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_proxy(self):
+        client = APIClient(HTTP_HOST="tiles.routechoices.dev")
+        url = self.reverse_and_check(
+            "proxy_tile_service",
+            "/proxy/uk/1/2/3.webp",
+            "tiles",
+            {"country": "uk", "z": 1, "x": 2, "y": 3},
+        )
+        test_tiles = [
+            "ch/16/34026/23199",
+            "ee/15/18662/9672",
+            "se/13/4459/2405",
+            "uk/13/4062/2695",
+        ]
+        for url in test_tiles:
+            res = client.get(f"/proxy/{url}.webp")
+            self.assertEqual(res.status_code, status.HTTP_200_OK)
+
     def test_should_hit_cache(self):
         cache.clear()
         client = APIClient(HTTP_HOST="tiles.routechoices.dev")
