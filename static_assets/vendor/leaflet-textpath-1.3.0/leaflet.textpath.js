@@ -56,9 +56,7 @@ var PolylineTextPath = {
 
         var defaults = {
             repeat: false,
-            fillColor: 'black',
             attributes: {},
-            below: false,
         };
         options = L.Util.extend(defaults, options);
 
@@ -108,53 +106,7 @@ var PolylineTextPath = {
         textPath.appendChild(document.createTextNode(text));
         textNode.appendChild(textPath);
         this._textNode = textNode;
-
-        if (options.below) {
-            svg.insertBefore(textNode, svg.firstChild);
-        }
-        else {
-            svg.appendChild(textNode);
-        }
-
-        /* Center text according to the path's bounding box */
-        if (options.center) {
-            var textLength = textNode.getComputedTextLength();
-            var pathLength = this._path.getTotalLength();
-            /* Set the position for the left side of the textNode */
-            textNode.setAttribute('dx', ((pathLength / 2) - (textLength / 2)));
-        }
-
-        /* Change label rotation (if required) */
-        if (options.orientation) {
-            var rotateAngle = 0;
-            switch (options.orientation) {
-                case 'flip':
-                    rotateAngle = 180;
-                    break;
-                case 'perpendicular':
-                    rotateAngle = 90;
-                    break;
-                default:
-                    rotateAngle = options.orientation;
-            }
-
-            var rotatecenterX = (textNode.getBBox().x + textNode.getBBox().width / 2);
-            var rotatecenterY = (textNode.getBBox().y + textNode.getBBox().height / 2);
-            textNode.setAttribute('transform','rotate(' + rotateAngle + ' '  + rotatecenterX + ' ' + rotatecenterY + ')');
-        }
-
-        /* Initialize mouse events for the additional nodes */
-        if (this.options.interactive) {
-            if (L.Browser.svg || !L.Browser.vml) {
-                textPath.setAttribute('class', 'leaflet-interactive');
-            }
-
-            var events = ['click', 'dblclick', 'mousedown', 'mouseover',
-                          'mouseout', 'mousemove', 'contextmenu'];
-            for (var i = 0; i < events.length; i++) {
-                L.DomEvent.on(textNode, events[i], this.fire, this);
-            }
-        }
+        svg.appendChild(textNode);
 
         return this;
     }
