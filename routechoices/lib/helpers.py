@@ -393,25 +393,17 @@ def initial_of_name(name):
 
 
 def check_cname_record(domain):
-    if not domain:
-        return False
-
     try:
         resp = requests.get(
             f"https://cloudflare-dns.com/dns-query?type=CNAME&name={urllib.parse.quote(domain)}",
             headers={"accept": "application/dns-json"},
             timeout=10,
         )
+        resp.raise_for_status()
     except Exception:
         return False
 
-    if resp.status_code != 200:
-        return False
-
-    try:
-        data = resp.json()
-    except Exception:
-        return False
+    data = resp.json()
 
     if data.get("Status") != 0:
         return False

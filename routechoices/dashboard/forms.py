@@ -259,7 +259,7 @@ class ClubDomainForm(ModelForm):
 
     def clean_domain(self):
         domain = self.cleaned_data["domain"]
-        if domain == "":
+        if not domain:
             return domain
         if not check_cname_record(domain):
             self.add_error(
