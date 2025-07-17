@@ -241,9 +241,6 @@ CACHES = {
         "LOCATION": "unique-snowflake",
     }
 }
-CACHE_TILES = True
-CACHE_THUMBS = True
-CACHE_EVENT_DATA = True
 AWS_SESSION_TOKEN = ""
 AWS_S3_BUCKET = "routechoices"
 GEOIP_PATH = os.path.join(BASE_DIR, "geoip")

@@ -31,7 +31,8 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
 from routechoices.core.models import (
-    EVENT_CACHE_INTERVAL,
+    EVENT_CACHE_INTERVAL_ARCHIVED,
+    EVENT_CACHE_INTERVAL_LIVE,
     LOCATION_LATITUDE_INDEX,
     LOCATION_LONGITUDE_INDEX,
     LOCATION_TIMESTAMP_INDEX,
@@ -1131,22 +1132,15 @@ def competitor_route_upload(request, competitor_id):
 def event_data(request, event_id):
     t0_perf = time.perf_counter()
     t0 = time.time()
-    cache_key_found = None
-    event = None
 
-    use_cache = getattr(settings, "CACHE_EVENT_DATA", False)
-
-    cache_interval = EVENT_CACHE_INTERVAL
-    live_cache_ts = int(t0 // cache_interval)
-    live_cache_key = f"event:{event_id}:data:{live_cache_ts}:live"
-    if use_cache and cache.has_key(live_cache_key):
-        cache_key_found = live_cache_key
-        try:
-            data = cache.get(cache_key_found)
-        except Exception:
-            pass
-        else:
-            return Response(data, headers={"X-Cache-Hit": 1})
+    cache_ts = int(t0 // EVENT_CACHE_INTERVAL_LIVE)
+    cache_key = f"event:{event_id}:data:{cache_ts}:live"
+    if data := cache.get(cache_key):
+        headers = {
+            "ETag": f'W/"{safe64encodedsha(json.dumps(data))}"',
+            "X-Cache-Hit": 1,
+        }
+        return Response(data, headers=headers)
 
     event = (
         Event.objects.select_related("club")
@@ -1157,38 +1151,15 @@ def event_data(request, event_id):
         response = {"error": "No event match this id"}
         return Response(response)
 
-    cache_ts = int(t0 // (cache_interval if event.is_live else 7 * 24 * 3600))
-    cache_suffix = "live" if event.is_live else "archived"
-    cache_key = f"event:{event_id}:data:{cache_ts}:{cache_suffix}"
-    prev_cache_key = f"event:{event_id}:data:{cache_ts - 1}:{cache_suffix}"
-    # then if we have a cache for that
-    # return it if we do
-    if use_cache and not event.is_live and cache.has_key(cache_key):
-        cache_key_found = cache_key
-
-    # If we dont have cache check if we are currently generating cache
-    # if so return previous cache data if available
-    elif (
-        use_cache
-        and cache.has_key(f"{cache_key}:processing")
-        and cache.has_key(prev_cache_key)
-    ):
-        cache_key_found = prev_cache_key
-
-    if cache_key_found:
-        try:
-            data = cache.get(cache_key_found)
-        except Exception:
-            pass
-        else:
-            return Response(data, headers={"X-Cache-Hit": 1})
-
-    # else generate data and set that we are generating cache
-    if use_cache:
-        try:
-            cache.set(f"{cache_key}:processing", 1, 15)
-        except Exception:
-            pass
+    if not event.is_live:
+        cache_ts = int(t0 // EVENT_CACHE_INTERVAL_ARCHIVED)
+        cache_key = f"event:{event_id}:data:{cache_ts}:archived"
+        if data := cache.get(cache_key):
+            headers = {
+                "ETag": f'W/"{safe64encodedsha(json.dumps(data))}"',
+                "X-Cache-Hit": 1,
+            }
+            return Response(data, headers=headers)
 
     event.check_user_permission(request.user)
 
@@ -1225,15 +1196,20 @@ def event_data(request, event_id):
         "key": cache_ts,
     }
 
+    cache.set(
+        cache_key,
+        response,
+        60
+        + (
+            EVENT_CACHE_INTERVAL_LIVE
+            if event.is_live
+            else EVENT_CACHE_INTERVAL_ARCHIVED
+        ),
+    )
+
     headers = {"ETag": f'W/"{safe64encodedsha(json.dumps(response))}"'}
     if event.privacy == PRIVACY_PRIVATE:
         headers["Cache-Control"] = "Private"
-
-    if use_cache:
-        try:
-            cache.set(cache_key, response, 60 if event.is_live else 7 * 24 * 3600 + 60)
-        except Exception:
-            pass
 
     return Response(response, headers=headers)
 
@@ -1247,20 +1223,8 @@ def event_new_data(request, event_id, key):
     t0_perf = time.perf_counter()
     t0 = time.time()
 
-    cache_interval = EVENT_CACHE_INTERVAL
-    cache_ts = int(t0 // cache_interval)
+    cache_ts = int(t0 // EVENT_CACHE_INTERVAL_LIVE)
     cache_key = f"event:{event_id}:data-diff:{key}:{cache_ts}"
-
-    if cached_resp := cache.get(cache_key):
-        return Response(cached_resp, headers={"X-Cache-Hit": 1})
-
-    src_cache_key = f"event:{event_id}:data:{key}:live"
-    prev_data = cache.get(src_cache_key)
-    if not prev_data:
-        return Response(
-            "Previous version is not cached anymore",
-            status=status.HTTP_410_GONE,
-        )
 
     if cache_ts == key:
         response = {
@@ -1272,6 +1236,17 @@ def event_new_data(request, event_id, key):
         }
         headers = {"ETag": f'W/"{safe64encodedsha(json.dumps(response))}"'}
         return Response(response, headers=headers)
+
+    if cached_resp := cache.get(cache_key):
+        return Response(cached_resp, headers={"X-Cache-Hit": 1})
+
+    src_cache_key = f"event:{event_id}:data:{key}:live"
+    prev_data = cache.get(src_cache_key)
+    if not prev_data:
+        return Response(
+            "Previous version is not cached anymore",
+            status=status.HTTP_410_GONE,
+        )
 
     req = HttpRequest()
     req.method = "GET"
@@ -1338,11 +1313,7 @@ def event_new_data(request, event_id, key):
     if cache_control := current_resp.headers.get("Cache-Control"):
         headers["Cache-Control"] = cache_control
 
-    cache_key = f"event:{event_id}:data-diff:{key}:{cache_ts}"
-    try:
-        cache.set(cache_key, response, 60)
-    except Exception:
-        pass
+    cache.set(cache_key, response, 60)
 
     return Response(response, headers=headers)
 
@@ -2083,13 +2054,8 @@ def two_d_rerun_race_data(request):
 @api_GET_view
 def third_party_event(request, provider, uid):
     cache_key = f"3rd_party_event_detail:{uid}"
-    if cache.has_key(cache_key):
-        try:
-            data = cache.get(cache_key)
-        except Exception:
-            pass
-        else:
-            return Response(data, headers={"X-Cache-Hit": 1})
+    if data := cache.get(cache_key):
+        return Response(data, headers={"X-Cache-Hit": 1})
 
     if provider == "gpsseuranta":
         proxy = GpsSeurantaNet()
@@ -2146,10 +2112,8 @@ def third_party_event(request, provider, uid):
         }
         output["maps"].append(map_data)
 
-    try:
-        cache.set(f"{cache_key}", output, 60)
-    except Exception:
-        pass
+    cache.set(cache_key, output, 60)
+
     return Response(output)
 
 
@@ -2160,13 +2124,8 @@ def third_party_event(request, provider, uid):
 @api_GET_view
 def third_party_event_data(request, provider, uid):
     cache_key = f"3rd_party_event_data:{uid}"
-    if cache.has_key(cache_key):
-        try:
-            data = cache.get(cache_key)
-        except Exception:
-            pass
-        else:
-            return Response(data, headers={"X-Cache-Hit": 1})
+    if data := cache.get(cache_key):
+        return Response(data, headers={"X-Cache-Hit": 1})
 
     if provider == "gpsseuranta":
         proxy = GpsSeurantaNet()
@@ -2196,8 +2155,7 @@ def third_party_event_data(request, provider, uid):
                 "start_time": competitor.start_time,
             }
         )
-    try:
-        cache.set(f"{cache_key}", output, 10)
-    except Exception:
-        pass
+
+    cache.set(cache_key, output, 10)
+
     return Response(output)

@@ -88,7 +88,9 @@ register_jxl_opener()
 logger = logging.getLogger(__name__)
 
 GLOBAL_MERCATOR = GlobalMercator()
-EVENT_CACHE_INTERVAL = 5
+EVENT_CACHE_INTERVAL_LIVE = 5
+EVENT_CACHE_INTERVAL_ARCHIVED = 7 * 24 * 3600
+
 
 WEBP_MAX_SIZE = 16383
 
@@ -755,10 +757,9 @@ class Map(models.Model):
         )
 
     @classmethod
-    def blank_tile(cls, output_width, output_height, img_mime, use_cache, cache_key):
-        blank_cache_key = f"tile:blank:{output_width}x{output_height}:{img_mime}"
-        if use_cache and (cached := cache.get(blank_cache_key)):
-            cache.set(cache_key, cached, 3600 * 24 * 30)
+    def blank_tile(cls, output_width, output_height, img_mime, src_cache_key):
+        cache_key = f"tile:blank:{output_width}x{output_height}:{img_mime}"
+        if cached := cache.get(cache_key):
             return cached, CACHED_BLANK_TILE
 
         blank_image = Image.new(
@@ -775,17 +776,12 @@ class Map(models.Model):
         )
         data_out = buffer.getvalue()
 
-        if use_cache:
-            cache.set(cache_key, data_out, 3600 * 24 * 30)
-            cache.set(blank_cache_key, data_out, 3600 * 24 * 30)
+        cache.set(cache_key, data_out, 3600 * 24 * 30)
 
         return data_out, NOT_CACHED_TILE
 
     @property
     def cv2image(self):
-        cv2_img_cache_key = f"map:image:{self.image.name}:cv2"
-        if (cv2_img := cache.get(cv2_img_cache_key)) is not None:
-            return cv2_img
         src_img = self.data
         src_mime = magic.from_buffer(src_img, mime=True)
         if src_mime == "image/gif":
@@ -795,10 +791,6 @@ class Map(models.Model):
             src_bytes = np.frombuffer(src_img, np.uint8)
             cv2_img_raw = cv2.imdecode(src_bytes, cv2.IMREAD_UNCHANGED)
             cv2_img = cv2.cvtColor(np.array(cv2_img_raw), cv2.COLOR_BGR2BGRA)
-
-        if not cache.has_key(cv2_img_cache_key):
-            cache.set(cv2_img_cache_key, cv2_img, 3600 * 24 * 30)
-
         return cv2_img
 
     def create_tile(
@@ -817,16 +809,16 @@ class Map(models.Model):
         cache_key = self.tile_cache_key(
             output_width, output_height, img_mime, min_x, max_x, min_y, max_y
         )
-        use_cache = getattr(settings, "CACHE_TILES", False)
-        cached = None
-        if use_cache and (cached := cache.get(cache_key)):
+
+        if cached := cache.get(cache_key):
             return cached, CACHED_TILE
 
         if not self.intersects_with_tile(min_x, max_x, min_y, max_y):
             # Out of map bounds, return blank tile
             blank_tile, cache_status = self.blank_tile(
-                output_width, output_height, img_mime, use_cache, cache_key
+                output_width, output_height, img_mime, cache_key
             )
+            cache.set(cache_key, blank_tile, 3600 * 24 * 30)
             return blank_tile, cache_status
 
         width, height = self.quick_size
@@ -900,8 +892,7 @@ class Map(models.Model):
             _, buffer = cv2.imencode(f".{img_mime[6:]}", tile_img, extra_args)
             data_out = BytesIO(buffer).getvalue()
 
-        if use_cache:
-            cache.set(cache_key, data_out, 3600 * 24 * 30)
+        cache.set(cache_key, data_out, 3600 * 24 * 30)
 
         return data_out, NOT_CACHED_TILE
 
@@ -1932,15 +1923,18 @@ class Event(models.Model):
 
     def invalidate_cache(self):
         t0 = time.time()
-        cache_interval = EVENT_CACHE_INTERVAL
         for cache_suffix in ("live", "archived"):
             cache_ts = int(
-                t0 // (cache_interval if cache_suffix == "live" else 7 * 24 * 3600)
+                t0
+                // (
+                    EVENT_CACHE_INTERVAL_LIVE
+                    if cache_suffix == "live"
+                    else EVENT_CACHE_INTERVAL_ARCHIVED
+                )
             )
-            cache_key = f"event:{self.aid}:data:{cache_ts}:{cache_suffix}"
-            cache.delete(cache_key)
-            cache_key = f"event:{self.aid}:data:{cache_ts - 1}:{cache_suffix}"
-            cache.delete(cache_key)
+            for offset in range(0, -2, -1):
+                cache_key = f"event:{self.aid}:data:{cache_ts + offset}:{cache_suffix}"
+                cache.delete(cache_key)
 
     @property
     def has_notice(self):

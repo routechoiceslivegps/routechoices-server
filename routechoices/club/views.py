@@ -378,7 +378,9 @@ def event_map_view(request, slug, index="1", extension=None):
         rmap = proxy.get_map_file()
         with rmap.open("rb") as fp:
             data = fp.read()
+
         cache.set(cache_key, data, 24 * 3600)
+
         mime_type = magic.from_buffer(data, mime=True)
         return HttpResponse(data, content_type=mime_type)
 

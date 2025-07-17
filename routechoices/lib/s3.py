@@ -100,8 +100,7 @@ def serve_image_from_s3(
 
     headers = {}
     image = None
-    if cache.has_key(cache_key):
-        image = cache.get(cache_key)
+    if image := cache.get(cache_key):
         headers["X-Cache-Hit"] = 1
     else:
         file_path = image_field.name

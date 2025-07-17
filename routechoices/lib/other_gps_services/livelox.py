@@ -34,8 +34,8 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
     def parse_init_data(self, uid):
         self.uid = uid
         cache_key = f"3rd_part_init_data:livelox:uid:{uid}"
-        if data := cache.get(cache_key):
-            self.init_data = data
+        if cached := cache.get(cache_key):
+            self.init_data = cached
             return
         if match := re.match(r"^(\d+)(-(\d+))?$", uid):
             details = {"classId": match[1]}

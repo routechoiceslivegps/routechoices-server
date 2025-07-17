@@ -61,10 +61,9 @@ class CustomCrsWms2WebMercatorWmtsProxy:
             img = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGRA)
             _, buffer = cv2.imencode(".webp", img, [int(cv2.IMWRITE_WEBP_QUALITY), 40])
             data_out = BytesIO(buffer)
-            try:
-                cache.set(cache_key, data_out, TILE_CACHE_TIMEOUT)
-            except Exception:
-                pass
+
+            cache.set(cache_key, data_out, TILE_CACHE_TIMEOUT)
+
             return data_out
 
         img_alpha = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
@@ -101,10 +100,9 @@ class CustomCrsWms2WebMercatorWmtsProxy:
         )
         _, buffer = cv2.imencode(".webp", img, [int(cv2.IMWRITE_WEBP_QUALITY), 40])
         data_out = BytesIO(buffer)
-        try:
-            cache.set(cache_key, data_out, TILE_CACHE_TIMEOUT)
-        except Exception:
-            pass
+
+        cache.set(cache_key, data_out, TILE_CACHE_TIMEOUT)
+
         return data_out
 
 
@@ -169,10 +167,9 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         except Exception:
             return None
         im = Image.open(BytesIO(res.content))
-        try:
-            cache.set(cache_key, im, timeout=REMOTE_IMG_CACHE_TIMEOUT)
-        except Exception:
-            pass
+
+        cache.set(cache_key, im, timeout=REMOTE_IMG_CACHE_TIMEOUT)
+
         return im
 
     def get_tile(self, z, x, y):
@@ -269,10 +266,9 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         )
         _, buffer = cv2.imencode(".webp", img, [int(cv2.IMWRITE_WEBP_QUALITY), 40])
         data_out = BytesIO(buffer)
-        try:
-            cache.set(cache_key, data_out, TILE_CACHE_TIMEOUT)
-        except Exception:
-            pass
+
+        cache.set(cache_key, data_out, TILE_CACHE_TIMEOUT)
+
         return data_out
 
 

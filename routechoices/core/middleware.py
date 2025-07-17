@@ -166,8 +166,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
                 "www",
             ):
                 cache_key = f"club_slug_exists:{slug}"
-                cached_slug = cache.get(cache_key)
-                if cached_slug:
+                if cached_slug := cache.get(cache_key):
                     club_slug = cached_slug
                 else:
                     club_exists = Club.objects.filter(slug__iexact=slug).exists()
@@ -193,8 +192,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
 
         else:
             cache_key = f"club_domain_exists:{raw_host}"
-            cached_slug = cache.get(cache_key)
-            if cached_slug:
+            if cached_slug := cache.get(cache_key):
                 club_slug = cached_slug
             else:
                 club = Club.objects.filter(domain__iexact=raw_host).first()
