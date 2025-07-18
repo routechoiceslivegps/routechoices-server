@@ -33,7 +33,7 @@ context("IMEI device id generation", () => {
 		// Invalid: Contains a letter.          V This is letter "O"
 		cy.get("#IMEI").clear().type("0123456789O1234");
 		cy.get("button:not([type]),button[type=submit]").click();
-		cy.contains("Invalid IMEI (Should not contain letters)");
+		cy.contains("Invalid IMEI (should not contain letters)");
 		cy.get("#copyDevIdBtn").should("not.be.visible");
 	});
 });
