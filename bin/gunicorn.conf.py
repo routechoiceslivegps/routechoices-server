@@ -4,5 +4,5 @@ daemon = False
 raw_env = ["DJANGO_SETTINGS_MODULE=routechoices.settings"]
 workers = 4
 threads = 3
-max_requests = 10000
-max_requests_jitter = 500
+max_requests = 3000
+max_requests_jitter = 100
