@@ -1342,7 +1342,8 @@ class EventSet(models.Model):
                 ).order_by("start_date", "name")
             else:
                 all_events_w_set = all_events_w_set.filter(end_date__lt=now())
-            if not all_events_w_set.exists():
+            all_events_w_set = list(all_events_w_set)
+            if not all_events_w_set:
                 return []
             events = [
                 {
