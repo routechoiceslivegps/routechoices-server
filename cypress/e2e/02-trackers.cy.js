@@ -13,10 +13,10 @@ context("IMEI device id generation", () => {
 		cy.contains("Invalid IMEI (must be 15 digits)");
 		cy.get("#copyDevIdBtn").should("not.be.visible");
 
-		// Invalid too long IMEI
+		// Invalid (too long IMEI) but input takes only 15 chars
 		cy.get("#IMEI").clear().type("0123456789012345");
 		cy.get("button:not([type]),button[type=submit]").click();
-		cy.contains("Invalid IMEI (must be 15 digits)");
+		cy.contains("Invalid IMEI (check digit does not match)");
 		cy.get("#copyDevIdBtn").should("not.be.visible");
 
 		// Invalid: Luhn check
