@@ -419,6 +419,11 @@ a.navbar-brand.logo:focus {
 	width: 9.7em;
 }
 
+.imei-input {
+	letter-spacing: 0.1em;
+	width: 13.9em;
+}
+
 .theme-selector > svg {
 	color: var(--bs-navbar-color);
 }

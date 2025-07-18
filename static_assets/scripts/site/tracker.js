@@ -18,7 +18,7 @@
 			withCredentials: true,
 			crossOrigin: true,
 			success: (response) => {
-				u("#IMEI").removeClass("is-invalid");
+				u("#IMEI").removeClass("is-invalid").addClass("is-valid");
 				u("#imeiDevId").removeClass("d-none");
 				u(".imeiDevId").text(response.device_id);
 				u("#imeiErrorMsg").addClass("d-none");

@@ -273,11 +273,12 @@
                                             <div class="form-group">
                                                 <label for="IMEI" class="fw-bold">Tracker's IMEI</label>
                                                 <input type="text"
-                                                       class="form-control font-monospaced text-muted mb-1"
+                                                       class="form-control font-monospace text-muted mb-1 imei-input"
                                                        id="IMEI"
                                                        aria-describedby="IMEIHelp"
                                                        placeholder="•••••••••••••••"
-                                                       required>
+                                                       required
+                                                       maxlength="15">
                                                 <div id="imeiErrorMsg" class="invalid-feedback d-none mb-1">
                                                     <i class="fa-solid fa-triangle-exclamation"></i> Invalid IMEI
                                                 </div>
