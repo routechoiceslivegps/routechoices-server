@@ -38,7 +38,9 @@ def validate_imei(number):
     except Exception:
         raise ValidationError("Invalid IMEI")
     if not matched:
-        raise ValidationError(_("Invalid IMEI (must be 15 digits)"))
+        if re.match(r"[^\d]", number):
+            raise ValidationError(_("Invalid IMEI (Should not contain letters)"))
+        raise ValidationError(_("Invalid IMEI (must be 15 digits long)"))
     if not luhn.validate(number):
         raise ValidationError(_("Invalid IMEI (check digit does not match)"))
 

@@ -10,7 +10,7 @@ context("IMEI device id generation", () => {
 		// Invalid too short IMEI
 		cy.get("#IMEI").clear().type("0123456789");
 		cy.get("button:not([type]),button[type=submit]").click();
-		cy.contains("Invalid IMEI (must be 15 digits)");
+		cy.contains("Invalid IMEI (must be 15 digits long)");
 		cy.get("#copyDevIdBtn").should("not.be.visible");
 
 		// Invalid (too long IMEI) but input takes only 15 chars
@@ -30,10 +30,10 @@ context("IMEI device id generation", () => {
 		cy.get("button:not([type]),button[type=submit]").click();
 		cy.get("#copyDevIdBtn").should("be.visible");
 
-		// Invalid: Contains a letter           v this is letter "O"
+		// Invalid: Contains a letter.          V This is letter "O"
 		cy.get("#IMEI").clear().type("0123456789O1234");
 		cy.get("button:not([type]),button[type=submit]").click();
-		cy.contains("Invalid IMEI (must be 15 digits)");
+		cy.contains("Invalid IMEI (Should not contain letters)");
 		cy.get("#copyDevIdBtn").should("not.be.visible");
 	});
 });
