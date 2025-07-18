@@ -382,7 +382,7 @@ Follow our events live or replay them later.
     @property
     def logo_hash(self):
         if not self.logo:
-            return f"?v={safe64encodedsha(self.modification_date.timestamp())}"
+            return f"?v={safe64encodedsha(str(self.modification_date.timestamp()))}"
         return f"?v={safe64encodedsha(self.logo.name)}"
 
     @property
