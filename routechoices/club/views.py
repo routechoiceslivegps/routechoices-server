@@ -63,7 +63,9 @@ def club_favicon(request, icon_name):
     icon_info = icon_infos.get(icon_name)
 
     club_slug = request.club_slug
-    club = get_object_or_404(Club, slug__iexact=club_slug)
+    club = get_object_or_404(
+        Club.objects.only("logo", "domain", "slug"), slug__iexact=club_slug
+    )
     if club.domain and not request.use_cname:
         return redirect(f"{club.nice_url}{icon_name}")
     if not club.logo:
@@ -77,7 +79,9 @@ def club_favicon(request, icon_name):
 def club_logo(request, extension=None):
     club_slug = request.club_slug
     club = get_object_or_404(
-        Club.objects.exclude(logo=""), slug__iexact=club_slug, logo__isnull=False
+        Club.objects.exclude(logo="").only("logo", "name", "domain", "slug"),
+        slug__iexact=club_slug,
+        logo__isnull=False,
     )
 
     if club.domain and not request.use_cname:
@@ -97,7 +101,9 @@ def club_logo(request, extension=None):
 def club_banner(request, extension=None):
     club_slug = request.club_slug
     club = get_object_or_404(
-        Club.objects.exclude(banner=""), slug__iexact=club_slug, banner__isnull=False
+        Club.objects.exclude(banner="").only("banner", "name", "domain", "slug"),
+        slug__iexact=club_slug,
+        banner__isnull=False,
     )
     if club.domain and not request.use_cname:
         return redirect(club.banner_url)
@@ -117,7 +123,9 @@ def club_banner(request, extension=None):
 def club_thumbnail(request, extension=None):
     club_slug = request.club_slug
     club = get_object_or_404(
-        Club,
+        Club.objects.only(
+            "slug", "domain", "modification_date", "aid", "banner", "logo"
+        ),
         slug__iexact=club_slug,
     )
     if club.domain and not request.use_cname:
