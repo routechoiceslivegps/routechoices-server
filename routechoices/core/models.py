@@ -354,7 +354,7 @@ Follow our events live or replay them later.
     def url_protocol(self):
         return f"http{'s' if self.use_https else ''}"
 
-    @property
+    @cached_property
     def nice_url(self):
         if self.domain:
             return f"{self.url_protocol}://{self.domain}/"
@@ -382,12 +382,12 @@ Follow our events live or replay them later.
     @property
     def logo_hash(self):
         if not self.logo:
-            return f"?v={safe64encodedsha(str(self.modification_date.timestamp()))}"
-        return f"?v={safe64encodedsha(self.logo.name)}"
+            return safe64encodedsha(str(self.modification_date.timestamp()))
+        return safe64encodedsha(self.logo.name)
 
     @property
     def logo_url(self):
-        return f"{self.nice_url}logo{self.logo_hash}"
+        return f"{self.nice_url}logo?v={self.logo_hash}"
 
     @property
     def banner_url(self):
