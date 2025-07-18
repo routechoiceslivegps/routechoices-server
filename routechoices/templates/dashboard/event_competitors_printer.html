@@ -9,7 +9,7 @@
         <title>Competitors of {{ event.name }}</title>
         {% compress css %}
             <link rel="stylesheet"
-                  href="{% static '/vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
+                  href="{% static 'vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
             <style>
     @media print {
         body {
@@ -52,9 +52,9 @@
             </div>
         </div>
         {% compress js %}
-            <script src="{% static '/vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
-            <script src="{% static '/vendor/dayjs-1.11.7/dayjs.min.js' %}"></script>
-            <script src="{% static '/scripts/dashboard/event_competitors_printer.js' %}"></script>
+            <script src="{% static 'vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
+            <script src="{% static 'vendor/dayjs-1.11.7/dayjs.min.js' %}"></script>
+            <script src="{% static 'scripts/dashboard/event_competitors_printer.js' %}"></script>
         {% endcompress %}
     </body>
 </html>

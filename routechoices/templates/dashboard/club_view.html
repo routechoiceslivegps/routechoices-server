@@ -4,7 +4,7 @@
     {{ block.super }}
     {% compress css %}
         <link rel="stylesheet"
-              href="{% static '/vendor/tom-select-2.0.1/tom-select.bootstrap5.min.css' %}" />
+              href="{% static 'vendor/tom-select-2.0.1/tom-select.bootstrap5.min.css' %}" />
         <link rel="stylesheet" href="{% static 'styles/dashboard/grow.css' %}" />
     {% endcompress %}
 {% endblock extra_head %}
@@ -13,7 +13,7 @@
     <div class="row">
         <div class="col-12">
             <h1>
-                <img src="{% if club.logo %}{{ club.logo_url }}{% else %}{% static '/img/club-default.png' %}{% endif %}"
+                <img src="{% if club.logo %}{{ club.logo_url }}{% else %}{% static 'img/club-default.png' %}{% endif %}"
                      width="80"
                      height="80"
                      alt="Club {{ club.name }} Logo"
@@ -120,16 +120,16 @@
 
 {% block extra_body %}
     {% if request.resolver_match.view_name == 'dashboard_club:edit_view' %}
-        <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700" data-api-base-url="{% host_url 'api_doc' host 'api' %}" data-club-slug="{{ club.slug }}" data-club-nice-url="{{ club.nice_url }}" data-club-has-analytics="{% if club.analytics_site %}1{% endif %}">
+        <script src="{% static 'scripts/load-local-variables.js' %}?_=2023112700" data-api-base-url="{% host_url 'api_doc' host 'api' %}" data-club-slug="{{ club.slug }}" data-club-nice-url="{{ club.nice_url }}" data-club-has-analytics="{% if club.analytics_site %}1{% endif %}">
         </script>
         {% compress js %}
-            <script src="{% static '/vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
-            <script src="{% static '/vendor/tom-select-2.0.1/tom-select.custom.js' %}"></script>
-            <script src="{% static '/vendor/reqwest-2.0.5/reqwest.min.js' %}"></script>
-            <script src="{% static '/vendor/slugify-1.6.5/slugify.js' %}"></script>
-            <script src="{% static '/scripts/dashboard/common.js' %}"></script>
-            <script src="{% static '/scripts/dashboard/club_edit.js' %}"></script>
-            <script src="{% static '/scripts/submit-form-commons.js' %}"></script>
+            <script src="{% static 'vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
+            <script src="{% static 'vendor/tom-select-2.0.1/tom-select.custom.js' %}"></script>
+            <script src="{% static 'vendor/reqwest-2.0.5/reqwest.min.js' %}"></script>
+            <script src="{% static 'vendor/slugify-1.6.5/slugify.js' %}"></script>
+            <script src="{% static 'scripts/dashboard/common.js' %}"></script>
+            <script src="{% static 'scripts/dashboard/club_edit.js' %}"></script>
+            <script src="{% static 'scripts/submit-form-commons.js' %}"></script>
         {% endcompress %}
     {% endif %}
 {% endblock extra_body %}

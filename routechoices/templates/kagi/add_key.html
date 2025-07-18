@@ -18,6 +18,6 @@
 {% block extra_body %}
     {{ block.super }}
     {% compress js %}
-        <script src="{% static '/scripts/webauthn.js' %}?v=2"></script>
+        <script src="{% static 'scripts/webauthn.js' %}?v=2"></script>
     {% endcompress %}
 {% endblock extra_body %}

@@ -4,9 +4,9 @@
     {{ block.super }}
     {% compress css %}
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-1.9.4/leaflet.css' %}" />
+              href="{% static 'vendor/leaflet-1.9.4/leaflet.css' %}" />
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.css' %}" />
+              href="{% static 'vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.css' %}" />
         <link rel="stylesheet" href="{% static 'styles/dashboard/map_edit.css' %}" />
     {% endcompress %}
 {% endblock extra_head %}
@@ -164,18 +164,18 @@
 {% endblock sub_sub_content %}
 
 {% block extra_body %}
-    <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700"
+    <script src="{% static 'scripts/load-local-variables.js' %}?_=2023112700"
             data-api-root="{% host_url 'api_doc' host 'api' %}"></script>
-    <script type="module" src="{% static '/vendor/pdfjs-5.2.133/pdf.js' %}"></script>
+    <script type="module" src="{% static 'vendor/pdfjs-5.2.133/pdf.js' %}"></script>
     {% compress js %}
-        <script src="{% static '/vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
-        <script src="{% static '/vendor/load-image-5.16.0/load-image.all.min.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-1.9.4/leaflet.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-image-transform-2022.02.26/leaflet-image-transform.min.js' %}"></script>
-        <script src="{% static '/scripts/backdrop_maps.js' %}"></script>
-        <script src="{% static '/scripts/dashboard/tooltips.js' %}"></script>
-        <script src="{% static '/scripts/dashboard/map_edit.js' %}"></script>
-        <script src="{% static '/scripts/submit-form-commons.js' %}"></script>
+        <script src="{% static 'vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
+        <script src="{% static 'vendor/load-image-5.16.0/load-image.all.min.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-1.9.4/leaflet.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-image-transform-2022.02.26/leaflet-image-transform.min.js' %}"></script>
+        <script src="{% static 'scripts/backdrop_maps.js' %}"></script>
+        <script src="{% static 'scripts/dashboard/tooltips.js' %}"></script>
+        <script src="{% static 'scripts/dashboard/map_edit.js' %}"></script>
+        <script src="{% static 'scripts/submit-form-commons.js' %}"></script>
     {% endcompress %}
 {% endblock extra_body %}

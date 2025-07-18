@@ -10,11 +10,11 @@
     <meta name="keywords" content="geojson,map,layers,maps" />
     {% compress css %}
     <link rel="stylesheet"
-          href="{% static '/vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
+          href="{% static 'vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
     <link rel="stylesheet"
-          href="{% static '/vendor/leaflet-1.9.4/leaflet.css' %}" />
+          href="{% static 'vendor/leaflet-1.9.4/leaflet.css' %}" />
     <link rel="stylesheet"
-          href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}"  />
+          href="{% static 'vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}"  />
     <link rel="stylesheet"
           href="{% static 'styles/geojson.css' %}" />
     {% endcompress %}
@@ -247,9 +247,9 @@
         </div>
     </div>
     {% compress js %}
-    <script src="{% static '/vendor/leaflet-1.9.4/leaflet.js' %}"></script>
-    <script src="{% static '/vendor/leaflet-geojson-css-0.0.1/leaflet-geojson-css.min.js' %}"></script>
-    <script src="{% static '/scripts/site/geojson.js' %}"></script>
+    <script src="{% static 'vendor/leaflet-1.9.4/leaflet.js' %}"></script>
+    <script src="{% static 'vendor/leaflet-geojson-css-0.0.1/leaflet-geojson-css.min.js' %}"></script>
+    <script src="{% static 'scripts/site/geojson.js' %}"></script>
     {% endcompress %}
 </body>
 </html>

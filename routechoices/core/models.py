@@ -380,8 +380,14 @@ Follow our events live or replay them later.
         return buffer.getvalue()
 
     @property
+    def logo_hash(self):
+        if not self.logo:
+            return f"?v={safe64encodedsha(self.modification_date.timestamp())}"
+        return f"?v={safe64encodedsha(self.logo.name)}"
+
+    @property
     def logo_url(self):
-        return f"{self.nice_url}logo?v={safe64encodedsha(self.logo.name)}"
+        return f"{self.nice_url}logo{self.logo_hash}"
 
     @property
     def banner_url(self):

@@ -19,10 +19,10 @@
         <meta name="keywords" content="{% block head_keywords %}gps,tracking,orienteering,live,gps tracking,outdoor,tracker,orienteer,replay,trackers,gps seuranta,gps spårning,gps sporing,suunnistus,orientering{% endblock %}" />
         <title>{% block head_title %}Routechoices — Live GPS Tracking{% endblock %}</title>
         {% compress css %}
-            <link rel="stylesheet" href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
-            <link rel="stylesheet" href="{% static '/vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
-            <link rel="stylesheet" href="{% static '/vendor/bootstrap_sweetalert-1.0.1/sweetalert.css' %}" />
-            <link rel="stylesheet" href="{% static '/styles/site.css' %}" />
+            <link rel="stylesheet" href="{% static 'vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
+            <link rel="stylesheet" href="{% static 'vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
+            <link rel="stylesheet" href="{% static 'vendor/bootstrap_sweetalert-1.0.1/sweetalert.css' %}" />
+            <link rel="stylesheet" href="{% static 'styles/site.css' %}" />
         {% endcompress %}
         {% block extra_head %}
             <meta property="og:title" content="Routechoices | Live GPS Tracking" />
@@ -31,14 +31,14 @@
             <meta property="og:locale" content="en_US" />
             <meta property="og:site_name" content="Routechoices | Live GPS Tracking" />
             <meta name="twitter:card" content="summary_large_image" />
-            <meta property="og:image" content="{% static '/img/og.jpg' %}?t=2024090300" />
+            <meta property="og:image" content="{% static 'img/og.jpg' %}?t=2024090300" />
             <meta property="og:image:width" content="1200" />
             <meta property="og:image:height" content="630" />
         {% endblock extra_head %}
     </head>
     <body>
         {% compress js %}
-            <script src="{% static '/scripts/site/img-detection.js' %}"></script>
+            <script src="{% static 'scripts/site/img-detection.js' %}"></script>
         {% endcompress %}
         {% block body %}
             <!-- Fixed navbar -->
@@ -68,7 +68,7 @@
         <script src="https://browser.sentry-cdn.com/7.114.0/bundle.min.js"
                 integrity="sha384-ZI11RF8XfI7ic0+HK1UnGkClkyjeQrHLUX+42WJHeu8+O94vBhb5Wivro/pn5lhG"
                 crossorigin="anonymous"></script>
-        <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700"
+        <script src="{% static 'scripts/load-local-variables.js' %}?_=2023112700"
                 data-site-version="{{ version }}"
                 data-api-root="{% host_url 'api_doc' host 'api' %}"></script>
         {% if analytics_enabled and request.host.name != 'dashboard' %}
@@ -76,14 +76,14 @@
                     {% if request.club_slug %}data-club-slug="{{ request.club_slug }}"{% endif %}
                     data-domain="{{ site.domain }}"
                     data-api="https://www.routechoices.com/ping"
-                    src="{% static '/vendor/plausible/ping.js' %}?v=2025041302"></script>
+                    src="{% static 'vendor/plausible/ping.js' %}?v=2025041302"></script>
         {% endif %}
         {% compress js %}
-            <script src="{% static '/vendor/popper-2.11.6/popper.min.js' %}"></script>
-            <script src="{% static '/vendor/bootstrap-5.3.2/bootstrap.bundle.min.js' %}"></script>
-            <script src="{% static '/vendor/bootstrap_sweetalert-1.0.1/sweetalert.min.js' %}"></script>
-            <script src="{% static '/vendor/emoji-supported-1.0.0/emoji-supported.min.js' %}"></script>
-            <script src="{% static '/scripts/site/base.js' %}"></script>
+            <script src="{% static 'vendor/popper-2.11.6/popper.min.js' %}"></script>
+            <script src="{% static 'vendor/bootstrap-5.3.2/bootstrap.bundle.min.js' %}"></script>
+            <script src="{% static 'vendor/bootstrap_sweetalert-1.0.1/sweetalert.min.js' %}"></script>
+            <script src="{% static 'vendor/emoji-supported-1.0.0/emoji-supported.min.js' %}"></script>
+            <script src="{% static 'scripts/site/base.js' %}"></script>
         {% endcompress %}
         {% block extra_body %}
         {% endblock extra_body %}

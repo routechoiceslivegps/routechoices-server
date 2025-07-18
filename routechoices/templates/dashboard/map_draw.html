@@ -3,13 +3,13 @@
 {% block extra_head %}
     {% compress css %}
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-1.9.4/leaflet.css' %}" />
+              href="{% static 'vendor/leaflet-1.9.4/leaflet.css' %}" />
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.css' %}" />
+              href="{% static 'vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.css' %}" />
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-locate-control-0.79.0/L.Control.Locate.min.css' %}" />
+              href="{% static 'vendor/leaflet-locate-control-0.79.0/L.Control.Locate.min.css' %}" />
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-draw-1.0.4/leaflet.draw.css' %}" />
+              href="{% static 'vendor/leaflet-draw-1.0.4/leaflet.draw.css' %}" />
         <style>
 #map {
     width: 100%;
@@ -38,16 +38,16 @@
 {% endblock sub_sub_content %}
 
 {% block extra_body %}
-    <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700"
+    <script src="{% static 'scripts/load-local-variables.js' %}?_=2023112700"
             data-api-root="{% host_url 'api_doc' host 'api' %}"></script>
     {% compress js %}
-        <script src="{% static '/vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
-        <script src="{% static '/vendor/dayjs-1.11.7/dayjs.min.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-1.9.4/leaflet.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-draw-1.0.4/leaflet.draw.js' %}"></script>
-        <script src="{% static '/scripts/backdrop_maps.js' %}"></script>
-        <script src="{% static '/scripts/dashboard/map_draw.js' %}"></script>
-        <script src="{% static '/scripts/submit-form-commons.js' %}"></script>
+        <script src="{% static 'vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
+        <script src="{% static 'vendor/dayjs-1.11.7/dayjs.min.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-1.9.4/leaflet.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-draw-1.0.4/leaflet.draw.js' %}"></script>
+        <script src="{% static 'scripts/backdrop_maps.js' %}"></script>
+        <script src="{% static 'scripts/dashboard/map_draw.js' %}"></script>
+        <script src="{% static 'scripts/submit-form-commons.js' %}"></script>
     {% endcompress %}
 {% endblock extra_body %}

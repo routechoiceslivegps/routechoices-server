@@ -626,9 +626,9 @@ def manifest(request):
     return HttpResponse(
         (
             '{"icons": ['
-            f'{{"src":"/icon-192.png{club.logo_last_mod}",'
+            f'{{"src":"/icon-192.png{club.logo_hash}",'
             '"type":"image/png","sizes":"192x192"},'
-            f'{{"src":"/icon-512.png{club.logo_last_mod}",'
+            f'{{"src":"/icon-512.png{club.logo_hash}",'
             '"type":"image/png","sizes":"512x512"}'
             "]}"
         ),

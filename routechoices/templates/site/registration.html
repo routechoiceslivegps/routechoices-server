@@ -11,11 +11,11 @@
         <meta name="keywords" content="signup,enter,registration" />
         {% compress css %}
             <link rel="stylesheet"
-                  href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
+                  href="{% static 'vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
             <link rel="stylesheet"
-                  href="{% static '/vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
+                  href="{% static 'vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
             <link rel="stylesheet"
-                  href="{% static '/vendor/bootstrap_sweetalert-1.0.1/sweetalert.css' %}" />
+                  href="{% static 'vendor/bootstrap_sweetalert-1.0.1/sweetalert.css' %}" />
         {% endcompress %}
     </head>
     <body>
@@ -110,17 +110,17 @@
         <script src="https://browser.sentry-cdn.com/7.114.0/bundle.min.js"
                 integrity="sha384-ZI11RF8XfI7ic0+HK1UnGkClkyjeQrHLUX+42WJHeu8+O94vBhb5Wivro/pn5lhG"
                 crossorigin="anonymous"></script>
-        <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700"
+        <script src="{% static 'scripts/load-local-variables.js' %}?_=2023112700"
                 data-static-root="{% static '' %}"
                 data-api-root="{% host_url 'api_doc' host 'api' %}"
                 data-csrf-token="{{ csrf_token }}"></script>
         {% compress js %}
-            <script src="{% static '/vendor/popper-2.11.6/popper.min.js' %}"></script>
-            <script src="{% static '/vendor/bootstrap-5.3.2/bootstrap.bundle.min.js' %}"></script>
-            <script src="{% static '/vendor/bootstrap_sweetalert-1.0.1/sweetalert.min.js' %}"></script>
-            <script src="{% static '/vendor/dayjs-1.11.7/dayjs.min.js' %}?langs=en-es-fi-fr-nl-sv"></script>
-            <script src="{% static '/vendor/banana-i18n-2.3.1/banana-i18n.js' %}"></script>
-            <script src="{% static '/scripts/site/registration.js' %}"></script>
+            <script src="{% static 'vendor/popper-2.11.6/popper.min.js' %}"></script>
+            <script src="{% static 'vendor/bootstrap-5.3.2/bootstrap.bundle.min.js' %}"></script>
+            <script src="{% static 'vendor/bootstrap_sweetalert-1.0.1/sweetalert.min.js' %}"></script>
+            <script src="{% static 'vendor/dayjs-1.11.7/dayjs.min.js' %}?langs=en-es-fi-fr-nl-sv"></script>
+            <script src="{% static 'vendor/banana-i18n-2.3.1/banana-i18n.js' %}"></script>
+            <script src="{% static 'scripts/site/registration.js' %}"></script>
         {% endcompress %}
         <script></script>
     </body>

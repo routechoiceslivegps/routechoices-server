@@ -25,7 +25,7 @@
     <link rel="canonical" href="{{ event.get_absolute_url }}/contribute" />
     {% compress css %}
         <link rel="stylesheet"
-            href="{% static '/vendor/tom-select-2.0.1/tom-select.bootstrap5.min.css' %}" />
+            href="{% static 'vendor/tom-select-2.0.1/tom-select.bootstrap5.min.css' %}" />
     {% endcompress %}
 {% endblock extra_head %}
 
@@ -188,13 +188,13 @@
 
 {% block extra_body %}
     {{ block.super }}
-    <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700" data-api-base-url="{% host_url 'api_doc' host 'api' %}" data-event-id="{{ event.aid }}" data-csrf-token="{{ csrf_token }}" {% if event_ended %}data-event-ended="1"{% endif %}>
+    <script src="{% static 'scripts/load-local-variables.js' %}?_=2023112700" data-api-base-url="{% host_url 'api_doc' host 'api' %}" data-event-id="{{ event.aid }}" data-csrf-token="{{ csrf_token }}" {% if event_ended %}data-event-ended="1"{% endif %}>
     </script>
     {% compress js %}
-        <script src="{% static '/vendor/tom-select-2.0.1/tom-select.custom.js' %}"></script>
-        <script src="{% static '/vendor/reqwest-2.0.5/reqwest.min.js' %}"></script>
-        <script src="{% static '/vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
-        <script src="{% static '/vendor/dayjs-1.11.7/dayjs.min.js' %}"></script>
-        <script src="{% static '/scripts/club/event_contribute.js' %}"></script>
+        <script src="{% static 'vendor/tom-select-2.0.1/tom-select.custom.js' %}"></script>
+        <script src="{% static 'vendor/reqwest-2.0.5/reqwest.min.js' %}"></script>
+        <script src="{% static 'vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
+        <script src="{% static 'vendor/dayjs-1.11.7/dayjs.min.js' %}"></script>
+        <script src="{% static 'scripts/club/event_contribute.js' %}"></script>
     {% endcompress %}
 {% endblock extra_body %}

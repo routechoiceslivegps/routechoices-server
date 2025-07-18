@@ -24,13 +24,13 @@
     <link rel="canonical" href="{{ event.get_absolute_url }}" />
     {% compress css %}
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-1.9.4/leaflet.css' %}" />
+              href="{% static 'vendor/leaflet-1.9.4/leaflet.css' %}" />
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-pancontrol-1.0.0/L.Control.Pan.css' %}" />
+              href="{% static 'vendor/leaflet-pancontrol-1.0.0/L.Control.Pan.css' %}" />
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-contextmenu-1.5.1/leaflet.contextmenu.min.css' %}" />
+              href="{% static 'vendor/leaflet-contextmenu-1.5.1/leaflet.contextmenu.min.css' %}" />
         <link rel="stylesheet"
-              href="{% static '/vendor/leaflet-mapcentercoord-0.7/L.Control.MapCenterCoord.min.css' %}" />
+              href="{% static 'vendor/leaflet-mapcentercoord-0.7/L.Control.MapCenterCoord.min.css' %}" />
         <link rel="stylesheet" href="{% static 'styles/geojson.css' %}" />
         <link rel="stylesheet" href="{% static 'styles/club/event.css' %}" />
     {% endcompress %}
@@ -309,7 +309,7 @@
 
 {% block extra_body %}
     {{ block.super }}
-    <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700"
+    <script src="{% static 'scripts/load-local-variables.js' %}?_=2023112700"
             data-club-name="{{ event.club.name }}"
             data-event-id="{{ event.aid }}"
             data-event-url="{{ event.get_api_detail_url }}"
@@ -318,31 +318,31 @@
             data-wms-service-url="{% host_url 'wms_service' host 'wms' %}"
             data-is-private="{% if event.privacy == 'private' %}1{% else %}{% endif %}"></script>
     {% compress js %}
-        <script src="{% static '/vendor/dayjs-1.11.7/dayjs.min.js' %}?langs=en-es-fi-fr-nl-pl-sv"></script>
-        <script src="{% static '/vendor/dayjs-1.11.7/duration.min.js' %}"></script>
-        <script src="{% static '/vendor/banana-i18n-2.3.1/banana-i18n.js' %}"></script>
-        <script src="{% static '/vendor/server-clock-2024.10.02/server-clock.js' %}"></script>
-        <script src="{% static '/vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
-        <script src="{% static '/vendor/tinycolor-1.5.2/tinycolor.min.js' %}"></script>
-        <script src="{% static '/vendor/iro-5.5.2/iro.min.js' %}"></script>
-        <script src="{% static '/vendor/qrious-4.0.2/qrious.min.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-1.9.4/leaflet.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-pancontrol-1.0.0/L.Control.Pan.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-line-utils-2022.09.29/leaflet.lineUtils.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-contextmenu-1.5.1/leaflet.contextmenu.min.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-mapcentercoord-0.7/L.Control.MapCenterCoord.min.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-rotate-0.2.8/leaflet-rotate.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-locate-control-0.79.0/L.Control.Locate.min.js' %}"></script>
-        <script src="{% static '/vendor/jdbscan-20210913/jdbscan.min.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-image-transform-2022.02.26/leaflet-image-transform.min.js' %}"></script>
-        <script src="{% static '/vendor/bn-5.2.1/bn.min.js' %}"></script>
-        <script src="{% static '/vendor/gps-encoding-2025.02.28/gps-encoding.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-geojson-css-0.0.1/leaflet-geojson-css.min.js' %}"></script>
-        <script src="{% static '/vendor/leaflet-textpath-1.3.0/leaflet.textpath.js' %}"></script>
-        <script src="{% static '/vendor/geotools-2/geotools.js' %}"></script>
-        <script src="{% static '/vendor/csv-js-6.3.11/csv.min.js' %}"></script>
-        <script src="{% static '/scripts/backdrop_maps.js' %}"></script>
-        <script src="{% static '/scripts/club/event-core.js' %}"></script>
-        <script src="{% static '/scripts/club/event.js' %}"></script>
+        <script src="{% static 'vendor/dayjs-1.11.7/dayjs.min.js' %}?langs=en-es-fi-fr-nl-pl-sv"></script>
+        <script src="{% static 'vendor/dayjs-1.11.7/duration.min.js' %}"></script>
+        <script src="{% static 'vendor/banana-i18n-2.3.1/banana-i18n.js' %}"></script>
+        <script src="{% static 'vendor/server-clock-2024.10.02/server-clock.js' %}"></script>
+        <script src="{% static 'vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
+        <script src="{% static 'vendor/tinycolor-1.5.2/tinycolor.min.js' %}"></script>
+        <script src="{% static 'vendor/iro-5.5.2/iro.min.js' %}"></script>
+        <script src="{% static 'vendor/qrious-4.0.2/qrious.min.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-1.9.4/leaflet.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-pancontrol-1.0.0/L.Control.Pan.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-line-utils-2022.09.29/leaflet.lineUtils.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-contextmenu-1.5.1/leaflet.contextmenu.min.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-mapcentercoord-0.7/L.Control.MapCenterCoord.min.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-rotate-0.2.8/leaflet-rotate.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-locate-control-0.79.0/L.Control.Locate.min.js' %}"></script>
+        <script src="{% static 'vendor/jdbscan-20210913/jdbscan.min.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-image-transform-2022.02.26/leaflet-image-transform.min.js' %}"></script>
+        <script src="{% static 'vendor/bn-5.2.1/bn.min.js' %}"></script>
+        <script src="{% static 'vendor/gps-encoding-2025.02.28/gps-encoding.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-geojson-css-0.0.1/leaflet-geojson-css.min.js' %}"></script>
+        <script src="{% static 'vendor/leaflet-textpath-1.3.0/leaflet.textpath.js' %}"></script>
+        <script src="{% static 'vendor/geotools-2/geotools.js' %}"></script>
+        <script src="{% static 'vendor/csv-js-6.3.11/csv.min.js' %}"></script>
+        <script src="{% static 'scripts/backdrop_maps.js' %}"></script>
+        <script src="{% static 'scripts/club/event-core.js' %}"></script>
+        <script src="{% static 'scripts/club/event.js' %}"></script>
     {% endcompress %}
 {% endblock extra_body %}

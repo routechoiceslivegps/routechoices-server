@@ -11,19 +11,19 @@
         <meta name="keywords" content="map,kmz,gpx,osm,polyline,layers" />
         {% compress css %}
             <link rel="stylesheet"
-                  href="{% static '/vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
+                  href="{% static 'vendor/bootstrap-5.3.2/bootstrap.min.css' %}" />
             <link rel="stylesheet"
-                  href="{% static '/vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
+                  href="{% static 'vendor/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
             <link rel="stylesheet"
-                  href="{% static '/vendor/leaflet-1.9.4/leaflet.css' %}" />
+                  href="{% static 'vendor/leaflet-1.9.4/leaflet.css' %}" />
             <link rel="stylesheet"
-                  href="{% static '/vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.css' %}" />
+                  href="{% static 'vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.css' %}" />
             <link rel="stylesheet"
-                  href="{% static '/vendor/leaflet-locate-control-0.79.0/L.Control.Locate.min.css' %}" />
+                  href="{% static 'vendor/leaflet-locate-control-0.79.0/L.Control.Locate.min.css' %}" />
             <link rel="stylesheet"
-                  href="{% static '/vendor/leaflet-draw-1.0.4/leaflet.draw.css' %}" />
+                  href="{% static 'vendor/leaflet-draw-1.0.4/leaflet.draw.css' %}" />
             <link rel="stylesheet" href="{% static 'styles/geojson.css' %}" />
-            <link rel="stylesheet" href="{% static '/styles/site.css' %}" />
+            <link rel="stylesheet" href="{% static 'styles/site.css' %}" />
             <style>
                 #map {
                     height: calc(100% - 45px);
@@ -72,19 +72,19 @@
         <script src="https://browser.sentry-cdn.com/7.114.0/bundle.min.js"
                 integrity="sha384-ZI11RF8XfI7ic0+HK1UnGkClkyjeQrHLUX+42WJHeu8+O94vBhb5Wivro/pn5lhG"
                 crossorigin="anonymous"></script>
-        <script src="{% static '/scripts/load-local-variables.js' %}?_=2023112700"
+        <script src="{% static 'scripts/load-local-variables.js' %}?_=2023112700"
                 data-api-root="{% host_url 'api_doc' host 'api' %}"></script>
         {% compress js %}
-            <script src="{% static '/vendor/leaflet-1.9.4/leaflet.js' %}"></script>
-            <script src="{% static '/vendor/leaflet-image-transform-2022.02.26/leaflet-image-transform.min.js' %}"></script>
-            <script src="{% static '/vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.js' %}"></script>
-            <script src="{% static '/vendor/leaflet-locate-control-0.79.0/L.Control.Locate.min.js' %}"></script>
-            <script src="{% static '/vendor/leaflet-draw-1.0.4/leaflet.draw.js' %}"></script>
-            <script src="{% static '/vendor/gpxparser-3.0.8/GPXParser.min.js' %}"></script>
-            <script src="{% static '/vendor/jszip-3.10.1/jszip.min.js' %}"></script>
-            <script src="{% static '/vendor/leaflet-geojson-css-0.0.1/leaflet-geojson-css.min.js' %}"></script>
-            <script src="{% static '/scripts/backdrop_maps.js' %}"></script>
-            <script src="{% static '/scripts/site/map.js' %}"></script>
+            <script src="{% static 'vendor/leaflet-1.9.4/leaflet.js' %}"></script>
+            <script src="{% static 'vendor/leaflet-image-transform-2022.02.26/leaflet-image-transform.min.js' %}"></script>
+            <script src="{% static 'vendor/leaflet-control-geocoder-2.4.0/Control.Geocoder.js' %}"></script>
+            <script src="{% static 'vendor/leaflet-locate-control-0.79.0/L.Control.Locate.min.js' %}"></script>
+            <script src="{% static 'vendor/leaflet-draw-1.0.4/leaflet.draw.js' %}"></script>
+            <script src="{% static 'vendor/gpxparser-3.0.8/GPXParser.min.js' %}"></script>
+            <script src="{% static 'vendor/jszip-3.10.1/jszip.min.js' %}"></script>
+            <script src="{% static 'vendor/leaflet-geojson-css-0.0.1/leaflet-geojson-css.min.js' %}"></script>
+            <script src="{% static 'scripts/backdrop_maps.js' %}"></script>
+            <script src="{% static 'scripts/site/map.js' %}"></script>
         {% endcompress %}
     </body>
 </html>

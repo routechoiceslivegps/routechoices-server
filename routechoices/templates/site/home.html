@@ -192,7 +192,7 @@
                             <a href="{{ club.nice_url }}"
                                target="_blank"
                                class="d-inline-block text-decoration-none dark-link">
-                                <img src="{% if club.logo %}{{ club.logo_url }}{% else %}{% static '/img/club-default.png' %}{% endif %}"
+                                <img src="{% if club.logo %}{{ club.logo_url }}{% else %}{% static 'img/club-default.png' %}{% endif %}"
                                      width="100"
                                      height="100"
                                      class="rounded mx-auto d-block mb-2"
@@ -338,7 +338,7 @@
 
 {% block extra_body %}
     {% compress js %}
-        <script src="{% static '/vendor/fittext-1.0/fittext.js' %}"></script>
-        <script src="{% static '/scripts/site/home.js' %}"></script>
+        <script src="{% static 'vendor/fittext-1.0/fittext.js' %}"></script>
+        <script src="{% static 'scripts/site/home.js' %}"></script>
     {% endcompress %}
 {% endblock extra_body %}
