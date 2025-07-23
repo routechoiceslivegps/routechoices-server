@@ -273,6 +273,8 @@ def event_startlist_view(request, slug):
     elif event.club.domain and not request.use_cname:
         return redirect(f"{event.club.nice_url}{event.slug}/startlist")
 
+    event.check_user_permission(request.user)
+
     response = render(
         request,
         "club/event_startlist.html",
@@ -359,6 +361,9 @@ def event_zip_view(request, slug):
         )
     if event.club.domain and not request.use_cname:
         return redirect(f"{event.club.nice_url}{event.slug}/zip")
+
+    event.check_user_permission(request.user)
+
     return redirect(
         reverse(
             "event_zip",
@@ -553,6 +558,9 @@ def event_contribute_view(request, slug):
 
     can_upload = event.allow_route_upload and (event.start_date <= now())
     can_register = event.open_registration and (event.end_date >= now() or can_upload)
+
+    if not (can_upload or can_register):
+        raise Http404
 
     register_form = None
     if can_register:
