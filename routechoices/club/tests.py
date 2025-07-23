@@ -350,9 +350,7 @@ class ClubViewsTestCase(EssentialApiBase):
             prefix="kiilat",
         )
         response = client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertNotContains(response, "Enter yourself")
-        self.assertNotContains(response, "Upload GPX")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         e.open_registration = True
         e.save()
