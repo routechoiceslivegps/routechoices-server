@@ -104,7 +104,6 @@
 
         <div class="col-12">
             <div class="row">
-                {% if upload_form %}
                 <h4 class="padded-multiline">
                     <span>Competitors</span>
                 </h4>
@@ -112,6 +111,7 @@
                     {% for c in event.competitors.all %}
                         <div class="p-1 m-1 border-bottom d-flex justify-content-between">
                             <div class="ms-2 fw-bold">{{ c.name }}</div>
+                            {% if upload_form %}
                             <div>
                                 <button type="button"
                                         class="btn btn-primary btn-sm upload-route-btn"
@@ -120,12 +120,12 @@
                                     <i class="fa-solid fa-upload"></i> Upload Route
                                 </button>
                             </div>
+                            {% endif %}
                         </div>
                     {% empty %}
                         <h4 class="text-muted">No competitors registered so far</h4>
                     {% endfor %}
                 </div>
-                {% endif %}
                 {% if register_form %}
                     <h4 class="padded-multiline">
                         <span>Enter yourself</span>
