@@ -40,6 +40,8 @@ class CustomCrsWms2WebMercatorWmtsProxy:
         cache_key = f"tile_proxy:wms2web_output_tile:{self.url}:{x}:{y}:{z}"
         if cached := cache.get(cache_key):
             return cached
+        if z - self.z_offset == 0:
+            raise Http404()
         north_west, north_east, south_east, south_west = self.tile_xy_crs_corners(
             z, x, y
         )
@@ -181,19 +183,21 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
             raise Http404()
         north, west = tile_xy_to_north_west_latlon(x, y, z)
         south, east = tile_xy_to_north_west_latlon(x + 1, y + 1, z)
-
-        nw_x, nw_y, nw_tile_x, nw_tile_y = self.latlon_to_crs_tile_coordinates(
-            north, west, z
-        )
-        ne_x, ne_y, ne_tile_x, ne_tile_y = self.latlon_to_crs_tile_coordinates(
-            north, east, z
-        )
-        se_x, se_y, se_tile_x, se_tile_y = self.latlon_to_crs_tile_coordinates(
-            south, east, z
-        )
-        sw_x, sw_y, sw_tile_x, sw_tile_y = self.latlon_to_crs_tile_coordinates(
-            south, west, z
-        )
+        try:
+            nw_x, nw_y, nw_tile_x, nw_tile_y = self.latlon_to_crs_tile_coordinates(
+                north, west, z
+            )
+            ne_x, ne_y, ne_tile_x, ne_tile_y = self.latlon_to_crs_tile_coordinates(
+                north, east, z
+            )
+            se_x, se_y, se_tile_x, se_tile_y = self.latlon_to_crs_tile_coordinates(
+                south, east, z
+            )
+            sw_x, sw_y, sw_tile_x, sw_tile_y = self.latlon_to_crs_tile_coordinates(
+                south, west, z
+            )
+        except OverflowError:
+            raise Http404()
 
         tile_min_x = min(nw_tile_x, ne_tile_x, se_tile_x, sw_tile_x)
         tile_max_x = max(nw_tile_x, ne_tile_x, se_tile_x, sw_tile_x)
