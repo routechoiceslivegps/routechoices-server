@@ -258,6 +258,8 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
                         int(src_tile_size * (yy - tile_min_y)),
                     ),
                 )
+            else:
+                cache_key = None
         coeffs, mask = cv2.findHomography(p2, p1, cv2.RANSAC, 5.0)
         img_alpha = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGRA)
         img = cv2.warpPerspective(
@@ -270,8 +272,8 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         )
         _, buffer = cv2.imencode(".webp", img, [int(cv2.IMWRITE_WEBP_QUALITY), 40])
         data_out = BytesIO(buffer)
-
-        cache.set(cache_key, data_out, TILE_CACHE_TIMEOUT)
+        if cache_key:
+            cache.set(cache_key, data_out, TILE_CACHE_TIMEOUT)
 
         return data_out
 
