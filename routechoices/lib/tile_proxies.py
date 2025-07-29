@@ -6,6 +6,7 @@ import numpy as np
 from curl_cffi import requests
 from django.conf import settings
 from django.core.cache import cache
+from django.http import Http404
 from PIL import Image
 from pyproj import Transformer
 
@@ -176,6 +177,8 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         cache_key = f"tile_proxy:wmts2web_output_tile:{self.url}:{x}:{y}:{z}"
         if cached := cache.get(cache_key):
             return cached
+        if z - self.z_offset == 0:
+            raise Http404()
         north, west = tile_xy_to_north_west_latlon(x, y, z)
         south, east = tile_xy_to_north_west_latlon(x + 1, y + 1, z)
 
