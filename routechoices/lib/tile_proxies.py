@@ -177,7 +177,7 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         cache_key = f"tile_proxy:wmts2web_output_tile:{self.url}:{x}:{y}:{z}"
         if cached := cache.get(cache_key):
             return cached
-        if z - self.z_offset == 0:
+        if z - self.z_offset <= 0:
             raise Http404()
         north, west = tile_xy_to_north_west_latlon(x, y, z)
         south, east = tile_xy_to_north_west_latlon(x + 1, y + 1, z)
