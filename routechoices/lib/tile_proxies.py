@@ -40,8 +40,6 @@ class CustomCrsWms2WebMercatorWmtsProxy:
         cache_key = f"tile_proxy:wms2web_output_tile:{self.url}:{x}:{y}:{z}"
         if cached := cache.get(cache_key):
             return cached
-        if z - self.z_offset == 0:
-            raise Http404()
         north_west, north_east, south_east, south_west = self.tile_xy_crs_corners(
             z, x, y
         )
