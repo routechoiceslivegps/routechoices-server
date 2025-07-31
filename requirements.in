@@ -41,7 +41,7 @@ opencv-python
 orjson
 pillow-heif
 pillow
-psycopg[pool]
+psycopg[binary,pool]
 python-magic
 sentry-sdk
 setuptools
