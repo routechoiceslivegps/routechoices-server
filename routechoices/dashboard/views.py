@@ -39,7 +39,6 @@ from routechoices.core.models import (
     ImeiDevice,
     Map,
     Notice,
-    TooLargeResult,
 )
 from routechoices.dashboard.forms import (
     ClubDomainForm,
@@ -359,19 +358,12 @@ def merge_maps(request):
         if form.is_valid():
             base = form.cleaned_data["base"]
             addend = form.cleaned_data["addend"]
-            try:
-                new_map = base.merge(addend)
-            except TooLargeResult:
-                messages.error(
-                    request,
-                    "Could not merge those two maps, output would be too large.",
-                )
-            else:
-                new_map.name = f"{base.name} + {addend.name}"[:255]
-                new_map.club = club
-                new_map.save()
-                messages.success(request, "New map created")
-                return redirect("dashboard_club:map:list_view", club_slug=club.slug)
+            new_map = base.merge(addend)
+            new_map.name = f"{base.name} + {addend.name}"[:255]
+            new_map.club = club
+            new_map.save()
+            messages.success(request, "New map created")
+            return redirect("dashboard_club:map:list_view", club_slug=club.slug)
     else:
         form = MergeMapsForm(club)
 

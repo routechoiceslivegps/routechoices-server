@@ -102,10 +102,6 @@ LOCATION_LATITUDE_INDEX = 1
 LOCATION_LONGITUDE_INDEX = 2
 
 
-class TooLargeResult(Exception):
-    pass
-
-
 class GPSSeurantaClient:
     def connect(self):
         if not settings.GPSSEURANTA_SERVER_ADDR:
