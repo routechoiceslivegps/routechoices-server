@@ -1121,20 +1121,21 @@ class Map(models.Model):
         new_height = int(max_y - min_y)
 
         if new_width * new_height > Image.MAX_IMAGE_PIXELS:
-            img_ratio = new_height / new_width
             max_width = math.floor(Image.MAX_IMAGE_PIXELS / new_height)
-            max_height = math.floor(max_width * img_ratio)
+            scale = max_width / new_width
 
+            w = int(width * scale)
+            h = int(height * scale)
             img = Image.open(BytesIO(self.data)).convert("RGBA")
-            img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+            img.thumbnail((w, h), Image.Resampling.LANCZOS)
             out_buffer = BytesIO()
             img.save(out_buffer, "WEBP")
             out_file = ContentFile(out_buffer.getvalue())
 
             map_obj = Map(name=self.name)
             map_obj.image.save("imported_image", out_file, save=False)
-            map_obj.width = max_width
-            map_obj.height = max_height
+            map_obj.width = w
+            map_obj.height = h
             map_obj.corners_coordinates = self.corners_coordinates
             return map_obj.merge(*other_maps)
 
