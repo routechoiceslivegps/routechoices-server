@@ -849,8 +849,10 @@ def event_create_view(request):
             )
 
         for cform in competitors_formset.forms:
-            if cform.cleaned_data.get("device"):
-                all_devices_id.add(cform.cleaned_data.get("device").id)
+            if "device" in cform.changed_data and (
+                new_device := cform.cleaned_data.get("device")
+            ):
+                all_devices_id.add(new_device.id)
     else:
         form = EventForm(club=club)
         form.fields["map"].queryset = map_list
@@ -919,10 +921,11 @@ def event_edit_view(request, event_id):
     )
     if use_competitor_formset:
         comp_devices_id = event.competitors.values_list("device", flat=True)
+        own_devices_id = club.devices.values_list("id", flat=True)
     else:
         comp_devices_id = []
+        own_devices_id = []
 
-    own_devices_id = club.devices.values_list("id", flat=True)
     all_devices_id = set(list(comp_devices_id) + list(own_devices_id))
 
     if request.method == "POST":
@@ -956,8 +959,8 @@ def event_edit_view(request, event_id):
             ]
         ):
             form.save()
-            competitors_formset.save()
             extra_maps_formset.save()
+            competitors_formset.save()
 
             prev_notice = ""
             if event.has_notice:
@@ -984,8 +987,10 @@ def event_edit_view(request, event_id):
             )
 
         for cform in competitors_formset.forms:
-            if cform.cleaned_data.get("device"):
-                all_devices_id.add(cform.cleaned_data.get("device").id)
+            if "device" in cform.changed_data and (
+                new_device := cform.cleaned_data.get("device")
+            ):
+                all_devices_id.add(new_device.id)
     else:
         form = EventForm(instance=event, club=club)
         form.fields["map"].queryset = map_list
@@ -1095,8 +1100,10 @@ def event_competitors_view(request, event_id):
             )
 
         for cform in formset.forms:
-            if cform.cleaned_data.get("device"):
-                all_devices_id.add(cform.cleaned_data.get("device").id)
+            if "device" in cform.changed_data and (
+                new_device := cform.cleaned_data.get("device")
+            ):
+                all_devices_id.add(new_device.id)
     else:
         formset = CompetitorFormSet(
             instance=event,
