@@ -74,22 +74,25 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
             raise EventImportError(f"Can not fetch class info data {r.status_code}")
         self.init_data = r.json().get("general", {})
 
-        post_data = json.dumps(
-            {
-                "classIds": class_ids,
-                "courseIds": [],
-                "relayLegs": relay_legs,
-                "relayLegGroupIds": [],
-                "includeMap": True,
-                "includeCourses": True,
-            }
-        )
-        r = requests.post(
-            "https://www.livelox.com/Data/ClassBlob",
-            data=post_data,
-            headers=self.HEADERS,
-            timeout=60,
-        )
+        if blobUrl := self.init_data.get("classBlobUrl"):
+            r = requests.get(blobUrl)
+        else:
+            post_data = json.dumps(
+                {
+                    "classIds": class_ids,
+                    "courseIds": [],
+                    "relayLegs": relay_legs,
+                    "relayLegGroupIds": [],
+                    "includeMap": True,
+                    "includeCourses": True,
+                }
+            )
+            r = requests.post(
+                "https://www.livelox.com/Data/ClassBlob",
+                data=post_data,
+                headers=self.HEADERS,
+                timeout=60,
+            )
         if r.status_code != 200:
             raise EventImportError("Can not fetch class blob data")
         self.init_data["xtra"] = r.json()
