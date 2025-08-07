@@ -172,8 +172,8 @@ function clearEmptyCompetitorRows() {
 
 function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 	u(".add-competitor-btn").first().click();
-
-	const inputs = u(u(".formset_row").last()).find("input").nodes;
+	const lastFormsetRow = u(u(".formset_row").last());
+	const inputs = lastFormsetRow.find("input").nodes;
 	if (startTime) {
 		inputs[5].value = dayjs(startTime).utc().format("YYYY-MM-DD HH:mm:ss");
 		u(inputs[5]).trigger("change");
@@ -184,7 +184,7 @@ function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 		u(inputs[6]).trigger("set", { color });
 	}
 	if (tags) {
-		const control = u(u(".formset_row").last())
+		const control = lastFormsetRow
 			.find(".tag-input.tomselected")
 			.first().tomselect;
 		for (const t of tags) {
@@ -193,7 +193,7 @@ function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 		}
 	}
 	if (deviceId) {
-		const myDeviceSelectInput = u(u(".formset_row").last())
+		const myDeviceSelectInput = lastFormsetRow
 			.find('select[name$="-device"]')
 			.first().tomselect;
 		reqwest({
