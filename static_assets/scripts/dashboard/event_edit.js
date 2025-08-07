@@ -193,9 +193,9 @@ function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 		}
 	}
 	if (deviceId) {
-		const myDeviceSelectInput = u(u(".formset_row").last()).find(
-			'select[name$="-device"]',
-		).nodes[0].tomselect;
+		const myDeviceSelectInput = u(u(".formset_row").last())
+			.find('select[name$="-device"]')
+			.first().tomselect;
 		reqwest({
 			url: `${window.local.apiBaseUrl}search/device?q=${deviceId}`,
 			method: "get",
