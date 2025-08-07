@@ -25,6 +25,15 @@ const seletizeOptions = {
 		});
 	},
 };
+const tempusDominusOptions = {
+	useCurrent: false,
+	display: {
+		components: {
+			useTwentyfourHour: true,
+			seconds: true,
+		},
+	},
+};
 
 const createTagWidget = (i) => {
 	new TomSelect(i, {
@@ -121,59 +130,49 @@ const createColorWidget = (i) => {
 	}
 };
 
-let lastDeviceSelectInput = null;
+const createStartTimeWidget = (i) => {
+	const el = u(i);
+	new tempusDominus.TempusDominus(i, tempusDominusOptions);
+	u(el).attr("autocomplete", "off");
+	i.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+		showLocalTime(e.target);
+	});
+	el.on("change", (e) => {
+		showLocalTime(e.target);
+	});
+	showLocalTime(i);
+	makeTimeFieldClearable(i);
+	makeFieldNowable(i);
+};
+
 function onAddedCompetitorRow(row) {
-	const options = {
-		useCurrent: false,
-		display: {
-			components: {
-				useTwentyfourHour: true,
-				seconds: true,
-			},
-		},
-	};
-	const el = u(row).find(".datetimepicker").first();
+	new TomSelect(
+		u(row).find('select[name$="-device"]').first(),
+		seletizeOptions,
+	);
+
 	createColorWidget(u(row).find(".color-input").first());
 	createTagWidget(u(row).find(".tag-input").first());
-	new tempusDominus.TempusDominus(el, options);
-	u(row)
-		.find('select[name$="-device"]')
-		.each((el) => {
-			lastDeviceSelectInput = new TomSelect(el, seletizeOptions);
-		});
-
-	u(row)
-		.find('input[id$="-start_time"]')
-		.each((el) => {
-			makeTimeFieldClearable(el);
-			makeFieldNowable(el);
-		});
-
-	u(el).attr("autocomplete", "off");
-	showLocalTime(el);
-	el.addEventListener(tempusDominus.Namespace.events.change, (e) => {
-		showLocalTime(e.target);
-	});
-	u(el).on("change", (e) => {
-		showLocalTime(e.target);
-	});
+	createStartTimeWidget(u(row).find('input[id$="-start_time"]').first());
 }
 
 function clearEmptyCompetitorRows() {
 	u(".formset_row").each((e) => {
+		const row = u(e);
 		if (
-			u(e)
+			row
 				.find("input")
-				.filter((el) => u(el).attr("type") !== "hidden" && el.value !== "")
+				.filter((input) => input.type !== "hidden" && input.value !== "")
 				.length === 0
 		) {
-			u(e).find(".delete-row").first().click();
+			row.find(".delete-row").first().click();
 		}
 	});
 }
 
 function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 	u(".add-competitor-btn").first().click();
+
 	const inputs = u(u(".formset_row").last()).find("input").nodes;
 	if (startTime) {
 		inputs[5].value = dayjs(startTime).utc().format("YYYY-MM-DD HH:mm:ss");
@@ -194,7 +193,9 @@ function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 		}
 	}
 	if (deviceId) {
-		const myDeviceSelectInput = lastDeviceSelectInput;
+		const myDeviceSelectInput = u(u(".formset_row").last()).find(
+			'select[name$="-device"]',
+		).nodes[0].tomselect;
 		reqwest({
 			url: `${window.local.apiBaseUrl}search/device?q=${deviceId}`,
 			method: "get",
@@ -540,11 +541,15 @@ function showLocalTime(el) {
 	// next line must come after formset initialization
 	let hasArchivedDevices = false;
 	u('select[name$="-device"]').each((el) => {
-		if (el.options[el.selectedIndex].text.endsWith("*")) {
+		if (
+			!hasArchivedDevices &&
+			el.options[el.selectedIndex].text.endsWith("*")
+		) {
 			hasArchivedDevices = true;
 		}
 		new TomSelect(el, seletizeOptions);
 	});
+
 	if (hasArchivedDevices) {
 		u(".add-competitor-btn")
 			.parent()
