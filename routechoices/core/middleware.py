@@ -8,7 +8,6 @@ from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
 from django.contrib.sessions.backends.base import UpdateError
 from django.contrib.sessions.exceptions import SessionInterrupted
-from django.core.cache import cache
 from django.core.exceptions import DisallowedHost
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
 from django.middleware.csrf import CsrfViewMiddleware as OrigCsrfViewMiddleware
@@ -22,6 +21,7 @@ from rest_framework import status
 from user_sessions.middleware import SessionMiddleware as OrigSessionMiddleware
 
 from routechoices.core.models import Club
+from routechoices.lib import cache
 from routechoices.lib.duration_constants import (
     DURATION_ONE_MINUTE,
 )

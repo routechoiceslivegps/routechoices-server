@@ -5,10 +5,10 @@ from io import BytesIO
 import boto3
 import botocore
 from django.conf import settings
-from django.core.cache import cache
 from django.http import HttpResponse
 from PIL import Image
 
+from routechoices.lib import cache
 from routechoices.lib.duration_constants import (
     DURATION_ONE_MONTH,
 )

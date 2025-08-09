@@ -5,10 +5,11 @@ import cv2
 import numpy as np
 from curl_cffi import requests
 from django.conf import settings
-from django.core.cache import cache
 from django.http import Http404
 from PIL import Image
 from pyproj import Transformer
+
+from routechoices.lib import cache
 
 from .slippy_tiles import (
     tile_xy_to_north_west_latlon,

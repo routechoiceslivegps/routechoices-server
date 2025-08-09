@@ -23,7 +23,6 @@ from allauth.account.models import EmailAddress
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import LinearRing, Polygon
-from django.core.cache import cache
 from django.core.exceptions import BadRequest, PermissionDenied, ValidationError
 from django.core.files.base import ContentFile, File
 from django.core.mail import EmailMessage
@@ -43,7 +42,7 @@ from django_hosts.resolvers import reverse
 from PIL import Image, ImageDraw, ImageFile
 from pillow_heif import register_avif_opener
 
-from routechoices.lib import plausible
+from routechoices.lib import cache, plausible
 from routechoices.lib.duration_constants import (
     DURATION_ONE_MONTH,
 )

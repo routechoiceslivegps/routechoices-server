@@ -7,7 +7,6 @@ from django.contrib.sitemaps.views import (
     _get_latest_lastmod,
     x_robots_tag,
 )
-from django.core.cache import cache
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -20,6 +19,7 @@ from rest_framework import status
 
 from routechoices.club import feeds
 from routechoices.core.models import PRIVACY_PRIVATE, Club, Event, EventSet
+from routechoices.lib import cache
 from routechoices.lib.duration_constants import (
     DURATION_ONE_DAY,
 )

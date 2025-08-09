@@ -10,11 +10,11 @@ from operator import itemgetter
 import arrow
 import cairosvg
 from curl_cffi import requests
-from django.core.cache import cache
 from django.core.files.base import ContentFile
 from PIL import Image, ImageDraw, ImageFont
 
 from routechoices.core.models import Competitor, Event, Map
+from routechoices.lib import cache
 from routechoices.lib.duration_constants import (
     DURATION_FIVE_MINUTE,
 )

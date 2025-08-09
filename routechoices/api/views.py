@@ -13,7 +13,6 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.gis.geoip2 import GeoIP2
-from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Prefetch, Q
@@ -51,6 +50,7 @@ from routechoices.core.models import (
     Map,
     MapAssignation,
 )
+from routechoices.lib import cache
 from routechoices.lib.duration_constants import (
     DURATION_ONE_MINUTE,
 )
