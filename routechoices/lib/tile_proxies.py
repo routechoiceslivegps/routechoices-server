@@ -52,7 +52,11 @@ class CustomCrsWms2WebMercatorWmtsProxy:
         tile_url = self.url.format(min_x=min_x, max_x=max_x, min_y=min_y, max_y=max_y)
 
         try:
-            res = requests.get(tile_url, timeout=10, impersonate="chrome110")
+            res = requests.get(
+                tile_url,
+                timeout=10,
+                headers={"User-Agent": "Routechoices WMS Tile Proxy"},
+            )
             res.raise_for_status()
         except Exception as e:
             print(e)
