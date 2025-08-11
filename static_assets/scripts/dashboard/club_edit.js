@@ -45,34 +45,32 @@
 		slugEdited = true;
 	}
 
-	new TomSelect("#id_admins", {
-		valueField: "id",
-		labelField: "username",
-		searchField: "username",
-		multiple: true,
-		plugins: ["preserve_on_blur"],
-		load: (query, callback) => {
-			if (!query.length || query.length < 2) return callback();
-			reqwest({
-				url: `${window.local.apiBaseUrl}search/user?q=${encodeURIComponent(query)}`,
-				method: "get",
-				type: "json",
-				withCredentials: true,
-				crossOrigin: true,
-				success: (res) => {
-					callback(res.results);
-				},
-				error: () => {
-					callback();
-				},
-			});
-		},
-	});
+	const newAdminsBlock = u("<div>");
+	newAdminsBlock.append(
+		u("#id_admins option[selected]").map((el) => {
+			const name = el.textContent;
+			const d = u('<div class="d-inline-block me-1 btn btn-sm btn-info">');
+			d.append(u("<span>").text(name));
+
+			removeElFromAdmin = () => {
+				el.selected = false;
+				d.remove();
+			};
+			d.append(
+				u(
+					'<button type="button" class="btn-close ms-1 btn-sm" aria-label="Close"></button>',
+				).on("click", removeElFromAdmin),
+			);
+			return d;
+		}),
+	);
+	u("#id_admins").hide();
+	u("#id_admins").after(newAdminsBlock);
 
 	const inviteBtn = u("#invite-btn").clone();
 	u("#invite-btn").remove();
 	if (inviteBtn) {
-		u("#id_admins-ts-label").parent().after(inviteBtn);
+		u("#id_admins").parent().after(inviteBtn);
 	}
 	const submitForm = u("#change_form");
 	if (submitForm) {

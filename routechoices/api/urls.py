@@ -44,7 +44,6 @@ urlpatterns = [
         include(
             [
                 path("device", views.device_search, name="device_search_api"),
-                path("user", views.user_search, name="user_search_api"),
             ]
         ),
     ),
