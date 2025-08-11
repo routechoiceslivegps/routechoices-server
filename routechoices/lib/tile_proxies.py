@@ -50,14 +50,16 @@ class CustomCrsWms2WebMercatorWmtsProxy:
         max_y = max(north_west[1], north_east[1], south_east[1], south_west[1])
 
         tile_url = self.url.format(min_x=min_x, max_x=max_x, min_y=min_y, max_y=max_y)
+
         try:
-            res = requests.get(tile_url, timeout=10)
+            res = requests.get(tile_url, timeout=10, impersonate="chrome110")
             res.raise_for_status()
-        except Exception:
+        except Exception as e:
+            print(e)
             data = None
         else:
             data = res.content
-
+        print(tile_url, flush=True)
         if not data:
             im = Image.new(mode="RGB", size=(256, 256), color=(255, 255, 255))
             img = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGRA)
@@ -245,8 +247,16 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
                 tile = (z - self.z_offset, yy, xx)
                 tiles.append(tile)
                 futures.append(thread_pool.submit(self.get_crs_tile, *tile))
-
         im = Image.new(mode="RGB", size=(img_width, img_height), color=(255, 255, 255))
+        if len(tiles) > 9:
+            buffer = BytesIO()
+            im.save(
+                buffer,
+                "WEBP",
+                optimize=True,
+                quality=40,
+            )
+            return buffer
         for tile, future in zip(tiles, futures):
             _, yy, xx = tile
             tile_img = future.result()
