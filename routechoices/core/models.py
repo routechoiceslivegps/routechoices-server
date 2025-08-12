@@ -2422,7 +2422,7 @@ class Device(models.Model):
         if not self._location_count:
             return None
         return (
-            self._last_location_datetime.timestamp(),
+            int(self._last_location_datetime.timestamp()),
             self._last_location_latitude,
             self._last_location_longitude,
         )
