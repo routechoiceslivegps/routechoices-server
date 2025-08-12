@@ -50,15 +50,30 @@
 		u("#id_admins option[selected]").map((el) => {
 			const name = el.textContent;
 			const d = u('<div class="d-inline-block me-1 btn btn-sm btn-info">');
+			d.append(u('<i class="fa fa-user me-1"></i>'));
 			d.append(u("<span>").text(name));
 
 			removeElFromAdmin = () => {
-				el.selected = false;
-				d.remove();
+				swal(
+					{
+						title: "Confirm",
+						text: `You are about to remove user "${name}" from the club's administrator list.`,
+						type: "warning",
+						confirmButtonText: "Continue",
+						showCancelButton: true,
+						confirmButtonClass: "btn-danger",
+					},
+					(isConfirmed) => {
+						if (isConfirmed) {
+							el.selected = false;
+							d.remove();
+						}
+					},
+				);
 			};
 			d.append(
 				u(
-					'<button type="button" class="btn-close ms-1 btn-sm" aria-label="Close"></button>',
+					'<button type="button" class="btn btn-close ms-1 btn-sm" aria-label="Close"></button>',
 				).on("click", removeElFromAdmin),
 			);
 			return d;
