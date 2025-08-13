@@ -735,7 +735,6 @@ function showLocalTime(el) {
 			window.performance.navigation.type ===
 				window.performance.navigation.TYPE_BACK_FORWARD
 		) {
-			console.log("reloading");
 			location.reload();
 		}
 	}
