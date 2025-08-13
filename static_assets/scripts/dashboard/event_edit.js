@@ -725,4 +725,18 @@ function showLocalTime(el) {
 	u(".color-input").each(createColorWidget);
 
 	u(".tag-input").each(createTagWidget);
+
+	if (window.performance) {
+		const navEntries = window.performance.getEntriesByType("navigation");
+		if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+			location.reload();
+		} else if (
+			window.performance.navigation &&
+			window.performance.navigation.type ===
+				window.performance.navigation.TYPE_BACK_FORWARD
+		) {
+			console.log("reloading");
+			location.reload();
+		}
+	}
 })();
