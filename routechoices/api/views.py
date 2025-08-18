@@ -1268,29 +1268,30 @@ def event_new_data(request, event_id, key):
     competitors_data = []
 
     for competitor in current_data.get("competitors", []):
-        old_match = None
-        if competitor["id"] in prev_competitors:
-            old_match = prev_competitors.get(competitor["id"])
-        if not old_match:
-            competitors_data.append(competitor)
-        else:
-            if cats := old_match.get("categories"):
-                old_match["categories"] = " ".join(cats)
-            if cats := competitor.get("categories"):
-                competitor["categories"] = " ".join(cats)
+        if categories := competitor.get("categories"):
+            competitor["categories"] = " ".join(categories)
+        if old_match := prev_competitors.get(competitor["id"]):
+            if categories := old_match.get("categories"):
+                old_match["categories"] = " ".join(categories)
+
             old_version = set(old_match.items())
             new_version = set(competitor.items())
             diff = dict(new_version - old_version)
+
+            if not diff:
+                continue
+
+            diff["id"] = competitor.get("id")
+            if "categories" in diff:
+                diff["categories"] = diff["categories"].split(" ")
             if "encoded_data" in diff:
-                old_locations = gps_data_codec.decode(old_match.get("encoded_data"))
-                if not old_locations:
-                    diff["encoded_data"] = competitor.get("encoded_data")
-                else:
-                    new_locations = gps_data_codec.decode(
-                        competitor.get("encoded_data")
-                    )
+                if old_location_encoded := old_match.get("encoded_data"):
+                    old_locations = gps_data_codec.decode(old_location_encoded)
                     existing_ts = set(
                         list(zip(*old_locations))[LOCATION_TIMESTAMP_INDEX]
+                    )
+                    new_locations = gps_data_codec.decode(
+                        competitor.get("encoded_data")
                     )
                     added_locations = [
                         loc
@@ -1298,12 +1299,11 @@ def event_new_data(request, event_id, key):
                         if loc[LOCATION_TIMESTAMP_INDEX] not in existing_ts
                     ]
                     diff["encoded_data"] = gps_data_codec.encode(added_locations)
-            if "categories" in diff:
-                diff["categories"] = competitor.get("categories", "").split(" ")
-            if diff:
-                diff["id"] = competitor.get("id")
-                competitors_data.append(diff)
-
+                else:
+                    diff["encoded_data"] = competitor.get("encoded_data")
+            competitors_data.append(diff)
+        else:
+            competitors_data.append(competitor)
     response = {
         "competitors": competitors_data,
         "duration": (time.perf_counter() - t0_perf),
