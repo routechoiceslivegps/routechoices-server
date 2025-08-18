@@ -1362,11 +1362,29 @@ def event_route_upload_view(request, event_id):
 @requires_club_in_session
 def quick_event(request):
     club = request.club
+    all_devices_id = set(club.devices.values_list("id", flat=True))
+    dev_qs = (
+        Device.objects.filter(id__in=all_devices_id)
+        .defer("locations_encoded")
+        .prefetch_related("club_ownerships")
+    )
+    devices = sorted(
+        [
+            {
+                "aid": d.aid,
+                "name": d.get_display_str(club),
+                "key": (d.get_nickname(club), d.get_display_str(club)),
+            }
+            for d in dev_qs
+        ],
+        key=lambda x: (x["key"][0] == "", x["key"]),
+    )
     return render(
         request,
         "dashboard/quick_event.html",
         {
             "club": club,
+            "devices": devices,
         },
     )
 

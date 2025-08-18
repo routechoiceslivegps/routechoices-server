@@ -1683,12 +1683,15 @@ def user_view(request):
 @api_GET_view
 def device_search(request):
     devices = []
+    aid = request.GET.get("aid", "") == "true"
     q = request.GET.get("q")
     if q and len(q) > 4:
         devices = Device.objects.filter(aid__startswith=q, virtual=False).values_list(
             "id", "aid"
         )[:10]
-    return Response({"results": [{"id": d[0], "device_id": d[1]} for d in devices]})
+    return Response(
+        {"results": [{"id": d[1 if aid else 0], "device_id": d[1]} for d in devices]}
+    )
 
 
 @swagger_auto_schema(

@@ -2,7 +2,7 @@
 	let tsDevId = null;
 	function selectizeDeviceInput() {
 		tsDevId = new TomSelect("select[name='device_id']", {
-			valueField: "device_id",
+			valueField: "id",
 			labelField: "device_id",
 			searchField: "device_id",
 			create: false,
@@ -14,7 +14,7 @@
 					return callback();
 				}
 				reqwest({
-					url: `${window.local.apiBaseUrl}search/device?q=${encodeURIComponent(query)}`,
+					url: `${window.local.apiBaseUrl}search/device?aid=true&q=${encodeURIComponent(query)}`,
 					method: "get",
 					type: "json",
 					withCredentials: true,
