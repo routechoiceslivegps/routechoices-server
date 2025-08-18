@@ -735,12 +735,11 @@ LIVE:{1 if event.is_live else 0}
     for comp in event.competitors.all():
         out += f"COMPETITOR:t{comp.aid}|{comp.start_time.strftime("%Y%m%d")}|{comp.start_time.strftime("%H%I%S")}|{comp.name}|{comp.short_name}\n"
 
-    content_type = "text/plain; charset=utf-8"
-
     headers = {}
     if event.privacy == PRIVACY_PRIVATE:
         headers["Cache-Control"] = "Private"
 
+    content_type = "text/plain; charset=utf-8"
     return HttpResponse(
         out,
         content_type=content_type,
@@ -757,21 +756,31 @@ def event_gpsseuranta_data_view(request, slug, extension="lst"):
     )
 
     event.check_user_permission(request.user)
+    t0 = time.time()
+    cache_ts = int(t0 // 5)
+    cache_key = f"event:{event.aid}:gpsseuranta-data:{cache_ts}"
+    was_cached = False
+    if data := cache.get(cache_key):
+        result = data
+        was_cached = True
+    else:
+        result = ""
+        for competitor, from_date, end_date in event.iterate_competitors():
+            if competitor.device_id:
+                locations, _ = competitor.device.get_locations_between_dates(
+                    from_date, end_date
+                )
+                result += gpsseuranta_encode_data(f"t{competitor.aid}", locations)
 
-    result = ""
-    for competitor, from_date, end_date in event.iterate_competitors():
-        if competitor.device_id:
-            locations, _ = competitor.device.get_locations_between_dates(
-                from_date, end_date
-            )
-            result += gpsseuranta_encode_data(f"t{competitor.aid}", locations)
-
-    content_type = "text/plain; charset=utf-8"
-
-    headers = {}
+    file_length = len(result)
+    headers = {"X-GPS-Server-Filesize": file_length}
     if event.privacy == PRIVACY_PRIVATE:
         headers["Cache-Control"] = "Private"
 
+    if not was_cached:
+        cache.set(cache_key, result)
+
+    content_type = "text/plain; charset=utf-8"
     return HttpResponse(
         result,
         content_type=content_type,
