@@ -22,7 +22,7 @@ class CustomCrsWms2WebMercatorWmtsProxy:
     def __init__(self, proj_def, url):
         self.proj_def = proj_def
         self.url = url
-        self.session = requests.Session()
+        self.session = requests.Session(impersonate="chrome")
 
     def wgs84_to_crs(self, lat, lon):
         return Transformer.from_crs(
@@ -55,7 +55,6 @@ class CustomCrsWms2WebMercatorWmtsProxy:
             res = self.session.get(
                 tile_url,
                 timeout=10,
-                impersonate="realworld",
             )
             res.raise_for_status()
         except Exception:
@@ -123,7 +122,7 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         self.y_offset = y_offset
         self.z_offset = z_offset
         self.url = url
-        self.session = requests.Session()
+        self.session = requests.Session(impersonate="chrome")
 
     def wgs84_to_crs(self, lon, lat):
         return Transformer.from_crs(
@@ -168,9 +167,10 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         url = self.url.format(x=x, y=y, z=z)
 
         try:
-            res = self.session.get(url, timeout=10, impersonate="realworld")
+            res = self.session.get(url, timeout=10)
             res.raise_for_status()
-        except Exception:
+        except Exception as e:
+            print(e, flush=True)
             return None
         im = Image.open(BytesIO(res.content))
 
