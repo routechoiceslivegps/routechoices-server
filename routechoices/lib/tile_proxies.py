@@ -177,7 +177,7 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         im = Image.open(BytesIO(res.content))
 
         cache.set(cache_key, im, timeout=REMOTE_IMG_CACHE_TIMEOUT)
-
+        cache.close()
         return im
 
     def get_tile(self, z, x, y):
