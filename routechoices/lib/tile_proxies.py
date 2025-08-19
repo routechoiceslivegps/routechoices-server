@@ -22,6 +22,7 @@ class CustomCrsWms2WebMercatorWmtsProxy:
     def __init__(self, proj_def, url):
         self.proj_def = proj_def
         self.url = url
+        self.session = requests.Session()
 
     def wgs84_to_crs(self, lat, lon):
         return Transformer.from_crs(
@@ -51,18 +52,16 @@ class CustomCrsWms2WebMercatorWmtsProxy:
         tile_url = self.url.format(min_x=min_x, max_x=max_x, min_y=min_y, max_y=max_y)
 
         try:
-            res = requests.get(
+            res = self.session.get(
                 tile_url,
                 timeout=10,
-                headers={"User-Agent": "Routechoices WMS Tile Proxy"},
+                impersonate="realworld",
             )
             res.raise_for_status()
-        except Exception as e:
-            print(e)
+        except Exception:
             data = None
         else:
             data = res.content
-        print(tile_url, flush=True)
         if not data:
             im = Image.new(mode="RGB", size=(256, 256), color=(255, 255, 255))
             img = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGRA)
@@ -124,6 +123,7 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         self.y_offset = y_offset
         self.z_offset = z_offset
         self.url = url
+        self.session = requests.Session()
 
     def wgs84_to_crs(self, lon, lat):
         return Transformer.from_crs(
@@ -166,10 +166,9 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
             return cached
 
         url = self.url.format(x=x, y=y, z=z)
-        session = requests.Session()
-        session.headers.update({"User-Agent": "Routechoices WMS Tile Proxy"})
+
         try:
-            res = session.get(url, timeout=10)
+            res = self.session.get(url, timeout=10, impersonate="realworld")
             res.raise_for_status()
         except Exception:
             return None
