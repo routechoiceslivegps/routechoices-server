@@ -20,10 +20,3 @@ def delete(*args, **kwargs):
         cache.delete(*args, **kwargs)
     except Exception:
         pass
-
-
-def close(*args, **kwargs):
-    try:
-        cache.close(*args, **kwargs)
-    except Exception:
-        pass

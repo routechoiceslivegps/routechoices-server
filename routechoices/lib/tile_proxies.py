@@ -1,4 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 
 import cv2
@@ -177,7 +176,6 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
         im = Image.open(BytesIO(res.content))
 
         cache.set(cache_key, im, timeout=REMOTE_IMG_CACHE_TIMEOUT)
-        cache.close()
         return im
 
     def get_tile(self, z, x, y):
@@ -243,14 +241,12 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
                 ],
             ]
         )
-        thread_pool = ThreadPoolExecutor(4)
-        futures = []
         tiles = []
         for yy in range(tile_min_y, tile_max_y + 1):
             for xx in range(tile_min_x, tile_max_x + 1):
                 tile = (z - self.z_offset, yy, xx)
                 tiles.append(tile)
-                futures.append(thread_pool.submit(self.get_crs_tile, *tile))
+
         im = Image.new(mode="RGB", size=(img_width, img_height), color=(255, 255, 255))
         if len(tiles) > 9:
             buffer = BytesIO()
@@ -261,9 +257,9 @@ class CustomCrsWmts2WebMercatorWmtsProxy:
                 quality=40,
             )
             return buffer
-        for tile, future in zip(tiles, futures):
-            _, yy, xx = tile
-            tile_img = future.result()
+        for tile in tiles:
+            z, yy, xx = tile
+            tile_img = self.get_crs_tile(z, yy, xx)
             if tile_img:
                 Image.Image.paste(
                     im,
