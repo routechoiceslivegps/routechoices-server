@@ -500,8 +500,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My Event",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -510,6 +510,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-INITIAL_FORMS": 0,
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
@@ -539,8 +540,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My Competition",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -550,6 +551,7 @@ class TestDashboard(EssentialDashboardBase):
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
                 "geo_json_layer": "",
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
@@ -568,8 +570,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My Competition",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -578,6 +580,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-INITIAL_FORMS": 0,
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -596,8 +599,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My Competition",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -608,6 +611,7 @@ class TestDashboard(EssentialDashboardBase):
                 "competitors-INITIAL_FORMS": 0,
                 "competitors-0-short_name": "A",
                 "competitors-0-name": "Alice",
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -625,8 +629,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My Competition",
                 "slug": "myevent",
-                "start_date": "2025-02-05T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-05T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -635,6 +639,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-INITIAL_FORMS": 0,
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -661,8 +666,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My event in a set",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -672,6 +677,7 @@ class TestDashboard(EssentialDashboardBase):
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
                 "event_set": es.id,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -686,8 +692,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My event in a set",
                 "slug": "myeventslug",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -696,6 +702,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-INITIAL_FORMS": 0,
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -708,8 +715,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My event in a set",
                 "slug": "eventset-slug",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -718,6 +725,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-INITIAL_FORMS": 0,
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -764,8 +772,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My event in a set",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -777,6 +785,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-0-title": "Alt map",
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -789,8 +798,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My event in a set",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -804,6 +813,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-1-title": "Alt map 2",
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -816,8 +826,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My event in a set",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -830,6 +840,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-0-title": "Main map",
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -842,8 +853,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My event in a set",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -858,6 +869,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-1-title": "Extra map",
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -870,8 +882,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My event in a set",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -882,6 +894,7 @@ class TestDashboard(EssentialDashboardBase):
                 "map_assignations-0-title": "Main map",
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -896,8 +909,8 @@ class TestDashboard(EssentialDashboardBase):
             {
                 "name": "My Event",
                 "slug": "myevent",
-                "start_date": "2025-02-03T00:00:00Z",
-                "end_date": "2025-02-04T00:00:00Z",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
                 "privacy": "public",
                 "tail_length": 60,
                 "send_interval": 5,
@@ -909,6 +922,7 @@ class TestDashboard(EssentialDashboardBase):
                 "competitors-0-start_time": "2024-01-20 00:00:00",
                 "competitors-0-name": "Alice",
                 "competitors-0-short_name": "A",
+                "timezone": "UTC",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
