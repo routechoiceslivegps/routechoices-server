@@ -53,29 +53,31 @@ function showLocalTime(el) {
 	const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	console.log(`User timezone: ${userTimezone}`);
 	const timezoneInput = document.getElementById("id_timezone");
-	if (timezoneInput) {
+	if (timezoneInput && timezoneInput.value !== userTimezone) {
 		timezoneInput.value = userTimezone;
+		u(".datetimepicker").map((el) => {
+			const val = el.value;
+			if (val) {
+				const date = new Date(
+					`${val.substring(0, 10)}T${val.substring(11, 19)}Z`,
+				);
+				el.value = date.toLocaleString("sv");
+			}
+		});
 	}
 
 	u(".datetimepicker").map((el) => {
-		el.type = "datetime-local";
-		el.step = 1;
-		const val = el.value;
-		if (val) {
-			const date = new Date(
-				`${val.substring(0, 10)}T${val.substring(11, 19)}Z`,
-			);
-			el.value = date.toLocaleString("sv");
-		}
-		u(el).attr("autocomplete", "off");
-		showLocalTime(el);
-
 		makeTimeFieldClearable(el);
 		makeFieldNowable(el);
+		el.type = "datetime-local";
+		el.step = 1;
+		el.autocomplete = "off";
 		el.addEventListener("change", (e) => {
 			showLocalTime(e.target);
 		});
+		showLocalTime(el);
 	});
+
 	u('label[for$="-DELETE"]').parent(".form-group").hide();
 	$(".formset_row").formset({
 		addText: "",
