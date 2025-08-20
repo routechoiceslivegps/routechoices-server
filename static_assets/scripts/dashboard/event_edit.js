@@ -593,7 +593,6 @@ function showLocalTime(el) {
 	});
 
 	u("#iof_input").on("change", onIofXMLLoaded);
-	u(".competitor-table .datetimepicker").each(makeTimeFieldClearable);
 
 	u(".utc-offset").text(`(Timezone ${userTimezone})`);
 
