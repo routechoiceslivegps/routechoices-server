@@ -419,6 +419,16 @@ a.navbar-brand.logo:focus {
 .tempus-dominus-widget .time-container-second div:not(.no-highlight).active {
 	background-color: var(--bs-info) !important;
 }
+.tempus-dominus-widget .date-container-decades div:not(.no-highlight),
+.tempus-dominus-widget .date-container-years div:not(.no-highlight),
+.tempus-dominus-widget .date-container-months div:not(.no-highlight),
+.tempus-dominus-widget .date-container-days div:not(.no-highlight),
+.tempus-dominus-widget .time-container-clock div:not(.no-highlight),
+.tempus-dominus-widget .time-container-hour div:not(.no-highlight),
+.tempus-dominus-widget .time-container-minute div:not(.no-highlight),
+.tempus-dominus-widget .time-container-second div:not(.no-highlight) {
+	border-radius: 5px !important;
+}
 .totp-token {
 	letter-spacing: 0.5em;
 	width: 8.3em;
