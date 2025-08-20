@@ -19,7 +19,7 @@
                         </li>
                         <li>
                             <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':15' == 'dashboard_club:' %}active{% endif %}"
-                               href="{% url 'dashboard_club:select_view' %}"><i class="fa-solid fa-house-flag"></i> Clubs/Organisations</a>
+                               href="{% url 'dashboard_club:select_view' %}"><i class="fa-solid fa-house-flag"></i> Organisations</a>
                         </li>
                         <li>
                             <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard_participations_view' %}active{% endif %}"
