@@ -25,15 +25,6 @@ const seletizeOptions = {
 		});
 	},
 };
-const tempusDominusOptions = {
-	useCurrent: false,
-	display: {
-		components: {
-			useTwentyfourHour: true,
-			seconds: true,
-		},
-	},
-};
 
 const createTagWidget = (i) => {
 	new TomSelect(i, {
@@ -131,12 +122,17 @@ const createColorWidget = (i) => {
 };
 
 const createStartTimeWidget = (i) => {
+	i.type = "datetime-local";
+	i.step = 1;
+	const val = i.value;
+	if (val) {
+		const date = new Date(`${val}Z`);
+		i.value = date.toLocaleString("sv");
+	} else {
+		i.value = "";
+	}
 	const el = u(i);
-	new tempusDominus.TempusDominus(i, tempusDominusOptions);
-	u(el).attr("autocomplete", "off");
-	i.addEventListener(tempusDominus.Namespace.events.change, (e) => {
-		showLocalTime(e.target);
-	});
+	el.attr("autocomplete", "off");
 	el.on("change", (e) => {
 		showLocalTime(e.target);
 	});
@@ -175,7 +171,7 @@ function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 	const lastFormsetRow = u(u(".formset_row").last());
 	const inputs = lastFormsetRow.find("input").nodes;
 	if (startTime) {
-		inputs[5].value = dayjs(startTime).utc().format("YYYY-MM-DD HH:mm:ss");
+		inputs[5].value = dayjs(startTime).local().format("YYYY-MM-DD HH:mm:ss");
 		u(inputs[5]).trigger("change");
 	}
 	inputs[2].value = name;
@@ -383,8 +379,8 @@ function onCsvParsed(result) {
 function showLocalTime(el) {
 	const val = u(el).val();
 	if (val) {
-		let local = dayjs(val).utc(true).local().format("YYYY-MM-DD HH:mm:ss");
-		local += local === "Invalid Date" ? "" : " Local time";
+		let local = dayjs(val).local(true).utc().format("YYYY-MM-DD HH:mm:ss");
+		local += local === "Invalid Date" ? "" : " UTC";
 		u(el).closest(":has(.local_time)").find(".local_time").text(local);
 	} else {
 		u(el)
@@ -395,6 +391,22 @@ function showLocalTime(el) {
 }
 
 (() => {
+	// set timezone to local
+	const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	console.log(`User timezone: ${userTimezone}`);
+	const timezoneInput = document.getElementById("id_timezone");
+	if (timezoneInput) {
+		timezoneInput.value = userTimezone;
+		u(timezoneInput).parent().hide();
+	}
+
+	const originalEventStart = u("#id_start_date").val();
+	let competitorsStartTimeElsWithSameStartAsEvents = u(
+		".competitor-table .datetimepicker",
+	).filter(
+		(el) => originalEventStart !== "" && el.value === originalEventStart,
+	).nodes;
+
 	const slugPrefix = u(
 		`<br/><span id="id_slug-prefix" class="pe-2" style="color: #999">${window.local.clubUrl}</span>`,
 	);
@@ -496,29 +508,34 @@ function showLocalTime(el) {
 		},
 	});
 
+	const hasErrors = u(".invalid-feedback").nodes.length > 0;
 	u(".datetimepicker").map((el) => {
-		const options = {
-			useCurrent: false,
-			display: {
-				components: {
-					useTwentyfourHour: true,
-					seconds: true,
-				},
-			},
-		};
-		let val = u(el).val();
-		if (
-			val &&
-			/^\d{4}-\d{2}-\d{2}/.test(val) &&
-			/\d{2}:\d{2}:\d{2}$/.test(val)
-		) {
-			val = `${val.substring(0, 10)} ${val.substring(11, 19)}`;
-			u(el).val(val);
-			u(el).trigger("change");
+		el.type = "datetime-local";
+		el.step = 1;
+		const val = el.value;
+		if (val) {
+			if (!hasErrors) {
+				const date = new Date(`${val}Z`);
+				el.value = date.toLocaleString("sv");
+				u(el).trigger("change");
+			}
 		} else {
-			u(el).val("");
+			el.value = "";
 		}
-		new tempusDominus.TempusDominus(el, options);
+		u(el).attr("autocomplete", "off");
+		makeTimeFieldClearable(el);
+		makeFieldNowable(el);
+		el.addEventListener("change", (e) => {
+			const elId = u(e.target).attr("id");
+			competitorsStartTimeElsWithSameStartAsEvents = u(
+				competitorsStartTimeElsWithSameStartAsEvents,
+			).filter((_e) => u(_e).attr("id") !== elId).nodes;
+			showLocalTime(e.target);
+		});
+		showLocalTime(el);
+		u(el).on("change", (e) => {
+			showLocalTime(e.target);
+		});
 	});
 	u('label[for$="-DELETE"]').parent(".form-group").hide();
 	$(".formset_row").formset({
@@ -558,12 +575,6 @@ function showLocalTime(el) {
 			);
 	}
 
-	const originalEventStart = u("#id_start_date").val();
-	let competitorsStartTimeElsWithSameStartAsEvents = u(
-		".competitor-table .datetimepicker",
-	).filter(
-		(el) => originalEventStart !== "" && u(el).val() === originalEventStart,
-	).nodes;
 	u("#csv_input").on("change", (e) => {
 		const csvFile = e.target.files[0];
 		const fileReader = new FileReader();
@@ -583,35 +594,16 @@ function showLocalTime(el) {
 
 	u("#iof_input").on("change", onIofXMLLoaded);
 	u(".competitor-table .datetimepicker").each(makeTimeFieldClearable);
-	u(".datetimepicker").each((el) => {
-		u(el).attr("autocomplete", "off");
-		makeFieldNowable(el);
-		showLocalTime(el);
-		el.addEventListener(tempusDominus.Namespace.events.change, (e) => {
-			const elId = u(e.target).attr("id");
-			competitorsStartTimeElsWithSameStartAsEvents = u(
-				competitorsStartTimeElsWithSameStartAsEvents,
-			).filter((_e) => u(_e).attr("id") !== elId).nodes;
-			showLocalTime(e.target);
-		});
-		u(el).on("change", (e) => {
-			showLocalTime(e.target);
-		});
-	});
 
-	const utcOffset = dayjs().utcOffset();
-	const utcOffsetText = `${
-		(utcOffset > 0 ? "+" : "-") +
-		`0${Math.floor(Math.abs(utcOffset / 60))}`.slice(-2)
-	}:${(`0${Math.round(utcOffset % 60)}`).slice(-2)}`;
-	u(".utc-offset").text(`(UTC Offset ${utcOffsetText})`);
+	u(".utc-offset").text(`(Timezone ${userTimezone})`);
 
 	u("#id_start_date")
 		.first()
-		.addEventListener(tempusDominus.Namespace.events.change, (e) => {
-			const newValue = u(e.target).val();
+		.addEventListener("change", (e) => {
+			const newValue = e.target.value;
 			u(competitorsStartTimeElsWithSameStartAsEvents).each((el) => {
-				u(el).val(newValue);
+				el.value = newValue;
+				u(el).trigger("change");
 			});
 		});
 

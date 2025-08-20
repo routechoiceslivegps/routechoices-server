@@ -38,32 +38,31 @@ const createTagWidget = (i) => {
 function showLocalTime(el) {
 	const val = u(el).val();
 	if (val) {
-		const local = dayjs(val).utc(true).local().format("YYYY-MM-DD HH:mm:ss");
-		u(el).parent().find(".local_time").text(`${local} Local ztime`);
+		let local = dayjs(val).local(true).utc().format("YYYY-MM-DD HH:mm:ss");
+		local += local === "Invalid Date" ? "" : " UTC";
+		u(el).closest(":has(.local_time)").find(".local_time").text(local);
 	} else {
-		u(el).parent().find(".local_time").text("");
+		u(el)
+			.closest(":has(.local_time)")
+			.find(".local_time")
+			.html("&ZeroWidthSpace;");
 	}
 }
 
 (() => {
 	u(".datetimepicker").map((el) => {
-		const options = {
-			useCurrent: false,
-			display: {
-				components: {
-					useTwentyfourHour: true,
-					seconds: true,
-				},
-			},
-		};
-		let val = u(el).val();
+		el.type = "datetime-local";
+		el.step = 1;
+		const val = el.value;
 		if (val) {
-			val = `${val.substring(0, 10)}T${val.substring(11, 19)}Z`;
-			options.defaultDate = new Date(
-				new Date(val).toLocaleString("en-US", { timeZone: "UTC" }),
-			);
+			const date = `${val.substring(0, 10)}T${val.substring(11, 19)}Z`;
+			el.value = date.toLocaleString("sv");
 		}
-		new tempusDominus.TempusDominus(el, options);
+		u(el).attr("autocomplete", "off");
+		showLocalTime(el);
+		el.addEventListener("change", (e) => {
+			showLocalTime(e.target);
+		});
 	});
 	u('label[for$="-DELETE"]').parent(".form-group").hide();
 	$(".formset_row").formset({
@@ -85,14 +84,6 @@ function showLocalTime(el) {
 			'<div class="form-text"><span>* Archive of original device</span></div>',
 		);
 	}
-
-	u(".datetimepicker").each((el) => {
-		u(el).attr("autocomplete", "off");
-		showLocalTime(el);
-		el.addEventListener(tempusDominus.Namespace.events.change, (e) => {
-			showLocalTime(e.target);
-		});
-	});
 
 	const utcOffset = dayjs().utcOffset();
 	const utcOffsetText = `${

@@ -79,7 +79,7 @@
 		content: "Device";
 	}
 	.competitor-table td:nth-of-type(4):before {
-		content: "Start time (UTC)";
+		content: "Start time";
 	}
 	.competitor-table td:nth-of-type(4) {
 		min-height: 7.5em;

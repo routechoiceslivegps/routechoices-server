@@ -14,9 +14,6 @@ importers:
       '@fortawesome/fontawesome-free':
         specifier: ^6.7.2
         version: 6.7.2
-      cypress-real-events:
-        specifier: ^1.14.0
-        version: 1.14.0(cypress@13.17.0)
       fontawesome-subset:
         specifier: ^4.5.0
         version: 4.5.0(@fortawesome/fontawesome-free@6.7.2)
@@ -342,11 +339,6 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
-
-  cypress-real-events@1.14.0:
-    resolution: {integrity: sha512-XmI8y3OZLh6cjRroPalzzS++iv+pGCaD9G9kfIbtspgv7GVsDt30dkZvSXfgZb4rAN+3pOkMVB7e0j4oXydW7Q==}
-    peerDependencies:
-      cypress: ^4.x || ^5.x || ^6.x || ^7.x || ^8.x || ^9.x || ^10.x || ^11.x || ^12.x || ^13.x || ^14.x
 
   cypress@13.17.0:
     resolution: {integrity: sha512-5xWkaPurwkIljojFidhw8lFScyxhtiFHl/i/3zov+1Z5CmY4t9tjIdvSXfu82Y3w7wt0uR9KkucbhkVvJZLQSA==}
@@ -1202,10 +1194,6 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
-
-  cypress-real-events@1.14.0(cypress@13.17.0):
-    dependencies:
-      cypress: 13.17.0
 
   cypress@13.17.0:
     dependencies:

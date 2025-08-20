@@ -1418,11 +1418,11 @@ class Event(models.Model):
         default=short_random_slug,
     )
     start_date = models.DateTimeField(
-        verbose_name="Start Date (UTC)",
+        verbose_name="Start Date",
         db_index=True,
     )
     end_date = models.DateTimeField(
-        verbose_name="End Date (UTC)",
+        verbose_name="End Date",
     )
     privacy = models.CharField(
         max_length=8,
@@ -2616,9 +2616,7 @@ class Competitor(models.Model):
     )
     name = models.CharField(max_length=64)
     short_name = models.CharField(max_length=32)
-    start_time = models.DateTimeField(
-        verbose_name="Start time (UTC)", null=True, blank=True
-    )
+    start_time = models.DateTimeField(verbose_name="Start time", null=True, blank=True)
     user = models.ForeignKey(
         User,
         related_name="participations",

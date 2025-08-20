@@ -47,7 +47,6 @@ JS Libraries:
     qrious                      GPL-3.0 https://github.com/neocotic/qrious
     reqwest                     MIT https://github.com/neocotic/qrious
     slugify                     MIT github.com/simov/slugify
-    tempus-dominus              MIT https://github.com/Eonasdan/tempus-dominus
     tinycolor                   MIT https://github.com/bgrins/TinyColor
     tom-select                  Apache-2.0 https://github.com/orchidjs/tom-select
     umbrellajs                  MIT https://github.com/franciscop/umbrella

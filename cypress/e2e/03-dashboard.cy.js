@@ -205,8 +205,8 @@ context("Dashboard actions", () => {
 		cy.get("#id_event_set-ts-control").parent().click().wait(300);
 		cy.get("#id_event_set-ts-control").type("{backspace}Jukola 2019").wait(300);
 		cy.get(".ts-dropdown-content > .create").click();
-		cy.get("#id_start_date").focus().realType("2019-06-15 20:00:00");
-		cy.get("#id_end_date").focus().realType("2019-06-16 10:00:00");
+		cy.get("#id_start_date").focus().clear().type("2019-06-15T23:00:00");
+		cy.get("#id_end_date").focus().clear().type("2019-06-16T12:00:00");
 		cy.get("#id_map").select("Jukola 2019 - 1st Leg");
 		cy.get("button:not([type]),button[type=submit]").first().click();
 
@@ -308,8 +308,8 @@ context("Dashboard actions", () => {
 		cy.get("#id_name").type("Jukola 2019 - 2nd Leg");
 		cy.get("#id_event_set-ts-control").parent().click().wait(300);
 		cy.get("#id_event_set-ts-dropdown > .option").eq(1).click().wait(300);
-		cy.get("#id_start_date").focus().realType("2019-06-15 21:00:00");
-		cy.get("#id_end_date").focus().realType("2019-06-16 00:00:00");
+		cy.get("#id_start_date").focus().clear().type("2019-06-16T00:00:00");
+		cy.get("#id_end_date").focus().clear().type("2019-06-16T03:00:00");
 		cy.get("#id_map").select("Jukola 2019 - 1st Leg"); // doesnt matter
 		cy.get("#id_map_assignations-0-map").select("Another map");
 		cy.get("#id_map_assignations-0-title").type("Another map");
@@ -318,7 +318,8 @@ context("Dashboard actions", () => {
 		cy.get("#id_competitors-0-short_name").type("🇳🇴 IL Tyrving");
 		cy.get("#id_competitors-0-start_time")
 			.focus()
-			.realType("2019-06-15 21:00:10");
+			.clear()
+			.type("2019-06-16T00:00:10");
 		cy.get("button:not([type]),button[type=submit]").first().click();
 
 		cy.wait("@eventSubmit").then(({ request, response }) => {

@@ -23,7 +23,7 @@ const makeFieldRandomizable = (id) => {
 const makeFieldNowable = (el) => {
 	const localTimeDisplay = u(el).parent().find(".local_time");
 	localTimeDisplay.before(
-		'<button class="set_time_now_btn btn btn-info btn-sm py-1 px-2 float-end" type="button"><i class="fa-solid fa-clock"></i> Set Now</button>',
+		'<button class="set_time_now_btn btn btn-info btn-sm py-1 px-2 float-end ms-1" type="button"><i class="fa-solid fa-clock"></i> Set Now</button>',
 	);
 	u(el)
 		.parent()
@@ -31,7 +31,7 @@ const makeFieldNowable = (el) => {
 		.on("click", function (e) {
 			e.preventDefault();
 			const target = u(this).closest(":has(input)").find("input");
-			target.val(dayjs().utc().format("YYYY-MM-DD HH:mm:ss"));
+			target.val(dayjs().local().format("YYYY-MM-DD HH:mm:ss"));
 			target.trigger("change");
 		});
 };

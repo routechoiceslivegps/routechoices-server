@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import zipfile
 from io import BytesIO
+from zoneinfo import ZoneInfo
 
 import arrow
 import geojson_validator
@@ -19,6 +20,7 @@ from django.core.validators import FileExtensionValidator
 from django.db.models import Q
 from django.forms import (
     CharField,
+    ChoiceField,
     DateTimeInput,
     FileField,
     Form,
@@ -49,6 +51,19 @@ from routechoices.lib.helpers import (
 )
 from routechoices.lib.kmz import extract_ground_overlay_info
 from routechoices.lib.validators import validate_domain_name, validate_nice_slug
+
+
+def get_timezone_choices():
+    import zoneinfo
+
+    return [(tz, tz) for tz in sorted(zoneinfo.available_timezones())]
+
+
+def from_timezone_to_utc(date, timezone):
+    tz = ZoneInfo(timezone)
+    date = date.replace(tzinfo=tz)
+    date = date.astimezone(ZoneInfo("UTC"))
+    return date
 
 
 class UserForm(ModelForm):
@@ -383,6 +398,8 @@ class EventForm(ModelForm):
         self.fields["send_interval"].widget.attrs["min"] = 1
         self.instance.club = self.club
 
+    timezone = ChoiceField(choices=get_timezone_choices)
+
     class Meta:
         model = Event
         fields = [
@@ -402,6 +419,7 @@ class EventForm(ModelForm):
             "geojson_layer",
             "map",
             "map_title",
+            "timezone",
         ]
         widgets = {
             "start_date": DateTimeInput(
@@ -471,6 +489,20 @@ class EventForm(ModelForm):
             club_id=club.id, create_page=True, slug__iexact=slug
         ).exists():
             self.add_error("slug", "URL already used by an event set.")
+
+    def clean_start_date(self):
+        result = self.cleaned_data.get("start_date")
+        timezone = self.data.get("timezone", "UTC")
+        if result and timezone:
+            result = from_timezone_to_utc(result, timezone)
+        return result
+
+    def clean_end_date(self):
+        result = self.cleaned_data.get("end_date")
+        timezone = self.data.get("timezone", "UTC")
+        if result and timezone:
+            result = from_timezone_to_utc(result, timezone)
+        return result
 
     def clean_map(self):
         raster_map = self.cleaned_data.get("map")
@@ -613,18 +645,29 @@ class CompetitorForm(ModelForm):
         return short_name
 
     def clean_start_time(self):
-        start = self.cleaned_data.get("start_time")
+        result = self.cleaned_data.get("start_time")
+        timezone = self.data.get("timezone", "UTC")
+        if result and timezone:
+            result = from_timezone_to_utc(result, timezone)
+        start = result
+
         orig_event = self.cleaned_data.get("event")
         if self.data.get("start_date"):
             try:
-                event_start = get_aware_datetime(self.data.get("start_date"))
+                event_start = from_timezone_to_utc(
+                    get_aware_datetime(self.data.get("start_date")),
+                    timezone,
+                )
             except Exception:
                 event_start = orig_event.start_date
         else:
             event_start = orig_event.start_date
         if self.data.get("end_date"):
             try:
-                event_end = get_aware_datetime(self.data.get("end_date"))
+                event_end = from_timezone_to_utc(
+                    get_aware_datetime(self.data.get("end_date")),
+                    timezone,
+                )
             except Exception:
                 event_end = orig_event.end_date
         else:
