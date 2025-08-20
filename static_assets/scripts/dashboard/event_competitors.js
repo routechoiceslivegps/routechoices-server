@@ -50,16 +50,28 @@ function showLocalTime(el) {
 }
 
 (() => {
+	const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	console.log(`User timezone: ${userTimezone}`);
+	const timezoneInput = document.getElementById("id_timezone");
+	if (timezoneInput) {
+		timezoneInput.value = userTimezone;
+	}
+
 	u(".datetimepicker").map((el) => {
 		el.type = "datetime-local";
 		el.step = 1;
 		const val = el.value;
 		if (val) {
-			const date = `${val.substring(0, 10)}T${val.substring(11, 19)}Z`;
+			const date = new Date(
+				`${val.substring(0, 10)}T${val.substring(11, 19)}Z`,
+			);
 			el.value = date.toLocaleString("sv");
 		}
 		u(el).attr("autocomplete", "off");
 		showLocalTime(el);
+
+		makeTimeFieldClearable(el);
+		makeFieldNowable(el);
 		el.addEventListener("change", (e) => {
 			showLocalTime(e.target);
 		});

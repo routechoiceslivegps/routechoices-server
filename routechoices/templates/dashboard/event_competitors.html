@@ -39,6 +39,7 @@
             {% endif %}
             <form action="" method="post">
                 {% csrf_token %}
+                <input id="id_timezone" type="hidden" name="timezone" value="UTC"></input>
                 <h3>Competitors</h3>
                 {% if not competitors.object_list and search_query %}<h4>No competitors matches this search</h4>{% endif %}
                 {% bootstrap_formset_errors formset %}
@@ -121,6 +122,7 @@
         <script src="{% static 'vendor/dayjs-1.11.7/dayjs.min.js' %}"></script>
         <script src="{% static 'vendor/reqwest-2.0.5/reqwest.min.js' %}"></script>
         <script src="{% static 'vendor/iro-5.5.2/iro.min.js' %}"></script>
+        <script src="{% static 'scripts/dashboard/common.js' %}"></script>
         <script src="{% static 'scripts/dashboard/event_competitors.js' %}"></script>
         <script src="{% static 'scripts/submit-form-commons.js' %}"></script>
     {% endcompress %}
