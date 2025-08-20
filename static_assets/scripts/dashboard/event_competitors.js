@@ -98,12 +98,7 @@ function showLocalTime(el) {
 		);
 	}
 
-	const utcOffset = dayjs().utcOffset();
-	const utcOffsetText = `${
-		(utcOffset > 0 ? "+" : "-") +
-		`0${Math.floor(Math.abs(utcOffset / 60))}`.slice(-2)
-	}:${`0${Math.round(utcOffset % 60)}`.slice(-2)}`;
-	u(".utc-offset").text(`(UTC Offset ${utcOffsetText})`);
+	u(".utc-offset").text(`(Timezone ${userTimezone})`);
 
 	const colorModal = new bootstrap.Modal(
 		document.getElementById("color-modal"),
