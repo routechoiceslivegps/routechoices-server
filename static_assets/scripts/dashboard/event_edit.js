@@ -395,6 +395,7 @@ function showLocalTime(el) {
 	const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	console.log(`User timezone: ${userTimezone}`);
 	const timezoneInput = document.getElementById("id_timezone");
+	u(timezoneInput).parent().hide();
 	if (timezoneInput && timezoneInput.value !== userTimezone) {
 		timezoneInput.value = userTimezone;
 		u(".datetimepicker").map((el) => {
@@ -418,13 +419,6 @@ function showLocalTime(el) {
 			showLocalTime(e.target);
 		});
 		showLocalTime(el);
-		el.addEventListener("change", (e) => {
-			const elId = u(e.target).attr("id");
-			competitorsStartTimeElsWithSameStartAsEvents = u(
-				competitorsStartTimeElsWithSameStartAsEvents,
-			).filter((_e) => u(_e).attr("id") !== elId).nodes;
-			showLocalTime(e.target);
-		});
 	});
 
 	const originalEventStart = u("#id_start_date").val();
@@ -433,6 +427,14 @@ function showLocalTime(el) {
 	).filter(
 		(el) => originalEventStart !== "" && el.value === originalEventStart,
 	).nodes;
+
+	u(competitorsStartTimeElsWithSameStartAsEvents).on("change", (ev) => {
+		competitorsStartTimeElsWithSameStartAsEvents = u(
+			competitorsStartTimeElsWithSameStartAsEvents,
+		).filter((el) => {
+			el.id !== ev.target.id;
+		}).nodes;
+	});
 
 	const slugPrefix = u(
 		`<br/><span id="id_slug-prefix" class="pe-2" style="color: #999">${window.local.clubUrl}</span>`,
