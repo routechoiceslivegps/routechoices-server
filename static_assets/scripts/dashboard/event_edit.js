@@ -122,23 +122,13 @@ const createColorWidget = (i) => {
 };
 
 const createStartTimeWidget = (i) => {
-	i.type = "datetime-local";
-	i.step = 1;
-	const val = i.value;
-	if (val) {
-		const date = new Date(`${val}Z`);
-		i.value = date.toLocaleString("sv");
-	} else {
-		i.value = "";
-	}
-	const el = u(i);
-	el.attr("autocomplete", "off");
-	el.on("change", (e) => {
+	makeTimeFieldClearable(i);
+	makeFieldNowable(i);
+	new tempusDominus.TempusDominus(i);
+	i.addEventListener(tempusDominus.Namespace.events.change, (e) => {
 		showLocalTime(e.target);
 	});
 	showLocalTime(i);
-	makeTimeFieldClearable(i);
-	makeFieldNowable(i);
 };
 
 function onAddedCompetitorRow(row) {
@@ -172,7 +162,7 @@ function addCompetitor(name, shortName, startTime, deviceId, color, tags) {
 	const inputs = lastFormsetRow.find("input").nodes;
 	if (startTime) {
 		inputs[5].value = dayjs(startTime).local().format("YYYY-MM-DD HH:mm:ss");
-		u(inputs[5]).trigger("change");
+		u(inputs[5]).trigger(tempusDominus.Namespace.events.change);
 	}
 	inputs[2].value = name;
 	inputs[3].value = shortName;
@@ -409,33 +399,6 @@ function showLocalTime(el) {
 		});
 	}
 
-	u(".datetimepicker").map((el) => {
-		makeTimeFieldClearable(el);
-		makeFieldNowable(el);
-		el.type = "datetime-local";
-		el.step = 1;
-		el.autocomplete = "off";
-		el.addEventListener("change", (e) => {
-			showLocalTime(e.target);
-		});
-		showLocalTime(el);
-	});
-
-	const originalEventStart = u("#id_start_date").val();
-	let competitorsStartTimeElsWithSameStartAsEvents = u(
-		".competitor-table .datetimepicker",
-	).filter(
-		(el) => originalEventStart !== "" && el.value === originalEventStart,
-	).nodes;
-
-	u(competitorsStartTimeElsWithSameStartAsEvents).on("change", (ev) => {
-		competitorsStartTimeElsWithSameStartAsEvents = u(
-			competitorsStartTimeElsWithSameStartAsEvents,
-		).filter((el) => {
-			el.id !== ev.target.id;
-		}).nodes;
-	});
-
 	const slugPrefix = u(
 		`<br/><span id="id_slug-prefix" class="pe-2" style="color: #999">${window.local.clubUrl}</span>`,
 	);
@@ -556,6 +519,35 @@ function showLocalTime(el) {
 	});
 
 	// next line must come after formset initialization
+	u(".datetimepicker").map((el) => {
+		makeTimeFieldClearable(el);
+		makeFieldNowable(el);
+		new tempusDominus.TempusDominus(el);
+		el.autocomplete = "off";
+		el.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+			showLocalTime(e.target);
+		});
+		showLocalTime(el);
+	});
+	const originalEventStart = u("#id_start_date").val();
+	let competitorsStartTimeElsWithSameStartAsEvents = u(
+		".competitor-table .datetimepicker",
+	).filter(
+		(el) => originalEventStart !== "" && el.value === originalEventStart,
+	).nodes;
+
+	u(competitorsStartTimeElsWithSameStartAsEvents).on(
+		tempusDominus.Namespace.events.change,
+		(ev) => {
+			competitorsStartTimeElsWithSameStartAsEvents = u(
+				competitorsStartTimeElsWithSameStartAsEvents,
+			).filter((el) => {
+				el.id !== ev.target.id;
+			}).nodes;
+		},
+	);
+
+	// next line must come after formset initialization
 	let hasArchivedDevices = false;
 	u('select[name$="-device"]').each((el) => {
 		if (
@@ -596,15 +588,14 @@ function showLocalTime(el) {
 
 	u(".utc-offset").text(`(Timezone ${userTimezone})`);
 
-	u("#id_start_date")
-		.first()
-		.addEventListener("change", (e) => {
-			const newValue = e.target.value;
-			u(competitorsStartTimeElsWithSameStartAsEvents).each((el) => {
-				el.value = newValue;
-				u(el).trigger("change");
-			});
+	u("#id_start_date").on(tempusDominus.Namespace.events.change, (e) => {
+		const o = competitorsStartTimeElsWithSameStartAsEvents;
+		u(competitorsStartTimeElsWithSameStartAsEvents).each((el) => {
+			el.value = e.target.value;
+			u(el).trigger("change");
 		});
+		competitorsStartTimeElsWithSameStartAsEvents = o;
+	});
 
 	const tailLength = u("#id_tail_length").addClass("d-none").val();
 	u('[for="id_tail_length"]').text("Tail length (Hours, Minutes, Seconds)");

@@ -69,10 +69,9 @@ function showLocalTime(el) {
 	u(".datetimepicker").map((el) => {
 		makeTimeFieldClearable(el);
 		makeFieldNowable(el);
-		el.type = "datetime-local";
-		el.step = 1;
 		el.autocomplete = "off";
-		el.addEventListener("change", (e) => {
+		new tempusDominus.TempusDominus(el);
+		el.addEventListener(tempusDominus.TempusDominus, (e) => {
 			showLocalTime(e.target);
 		});
 		showLocalTime(el);
