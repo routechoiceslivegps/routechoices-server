@@ -7,6 +7,7 @@ import re
 import socket
 import time
 from datetime import timedelta
+from dateutil.parser import parse as parse_date
 from decimal import Decimal
 from io import BytesIO
 from operator import itemgetter
@@ -100,6 +101,7 @@ LOCATION_TIMESTAMP_INDEX = 0
 LOCATION_LATITUDE_INDEX = 1
 LOCATION_LONGITUDE_INDEX = 2
 
+END_FREE_OCLUB = parse_date("2026-01-01T00:00:00Z")
 
 class GPSSeurantaClient:
     def connect(self):
@@ -324,7 +326,7 @@ Follow our events live or replay them later.
     def can_modify_events(self):
         return (
             self.free_trial_active
-            or self.o_club
+            or (self.o_club and now() < END_FREE_OCLUB)
             or (self.upgraded and not self.subscription_paused)
         )
 
@@ -440,7 +442,7 @@ def delete_club_receiver(sender, instance, using, **kwargs):
 
 def can_user_create_club(user):
     user_free_clubs_count = Club.objects.filter(
-        o_club=False, upgraded=False, admins__id=user.id
+        upgraded=False, admins__id=user.id
     ).count()
     return user_free_clubs_count == 0
 

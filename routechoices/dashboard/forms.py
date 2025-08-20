@@ -907,11 +907,3 @@ ExtraMapFormSet = inlineformset_factory(
     max_num=None,
     validate_min=True,
 )
-
-
-class InquiryOStatusForm(Form):
-    request = CharField(
-        widget=Textarea,
-        required=True,
-        help_text="Tell us how you qualify as a non-commercial orienteering club.",
-    )

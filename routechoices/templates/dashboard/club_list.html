@@ -56,9 +56,9 @@
                                             {% if club.upgraded %}
                                                 Paid Plan{% if club.subscription_paused %} (Paused){% endif %}
                                             {% elif club.o_club %}
-                                                Orienteering Club
+                                                Orienteering club (Free usage ends January 1st 2026)
                                             {% else %}
-                                                Free Trial
+                                                Free Trial{% if not club.free_trial_active %} Expired{% endif %}
                                             {% endif %}
                                         </small>
                                     </div>

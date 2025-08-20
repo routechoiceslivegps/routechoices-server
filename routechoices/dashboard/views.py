@@ -48,7 +48,6 @@ from routechoices.dashboard.forms import (
     EventForm,
     EventSetForm,
     ExtraMapFormSet,
-    InquiryOStatusForm,
     MapForm,
     MergeMapsForm,
     NoticeForm,
@@ -1428,43 +1427,10 @@ backup_codes = login_required(CustomBackupCodesView.as_view())
 @requires_club_in_session
 def upgrade(request):
     club = request.club
-    if request.method == "POST":
-        form = InquiryOStatusForm(request.POST)
-        if form.is_valid():
-            from_email = EmailAddress.objects.get_primary(request.user)
-            subject = (
-                "Routechoices.com - Orienteering club request - "
-                f"{club.name} [{from_email}]"
-            )
-            message = form.cleaned_data["request"]
-            msg = EmailMessage(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [settings.EMAIL_CUSTOMER_SERVICE],
-                reply_to=[from_email],
-            )
-            msg.send()
-
-            conf_msg = EmailMessage(
-                subject,
-                f'We received your request for "{club.name}" to be treated as a non-commercial orienteering club, and we will process it shortly.\r\n\r\nRegards,\r\nThe Routechoices.com Team',
-                settings.DEFAULT_FROM_EMAIL,
-                [from_email],
-            )
-            conf_msg.send()
-            messages.success(
-                request, "Request submitted successfully, we will process it shortly."
-            )
-            return redirect("dashboard_club:edit_view", club_slug=request.club.slug)
-    else:
-        form = InquiryOStatusForm()
-
     return render(
         request,
         "dashboard/upgrade.html",
         {
-            "oform": form,
             "club": club,
         },
     )

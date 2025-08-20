@@ -4,25 +4,19 @@
     <content>
         <h4>Hey!</h4>
         {% if not club.upgraded and club.o_club %}
-            <h4>You are registered as an orienteering club. You can enjoy the Routechoices.com for free!</h4>
-            <p class="fw-bold">However, if you want, you can upgrade to our paid plan and help the site running.</p>
+            <h4>You are registered as an orienteering club. You can enjoy the Routechoices.com platform for free until January 1st 2026!</h4>
+            <p class="fw-bold">You must upgrade to our paid plan to be able access all features after that date.</p>
         {% endif %}
         {% if not club.upgraded %}
             <p>
                 Routechoices.com will never sell your data, or display ads.
                 <br>
                 <br>
-                To keep the servers running,
-                {% if not club.o_club %}
-                    we need you to
-                {% else %}
-                    you can generously
-                {% endif %}
-                contribute to their running cost.
+                To keep the servers running, we need you to contribute to cover their running cost.
             </p>
             <p>
                 <b>
-                    Join the paid plan starting at 7.99€ per month <small style="font-size: 0.7rem; color: grey;">(or 95.88€ per year)</small> + VAT.
+                    Join the paid plan at 7.99€ per month <small style="font-size: 0.7rem; color: grey;">(or 95.88€ per year)</small> + VAT.
                 </b>
             </p>
             <p>
@@ -50,21 +44,6 @@
                 <br>
                 Most importantly, you'll be supporting the small, fast internet, and a live GPS tracking platform built to last forever.
             </p>
-            {% if not club.o_club %}
-                <hr>
-                <h4>Orienteering club?</h4>
-                <p>
-                    Our main goal is to promote orienteering, hence if you qualify as a non commercial orienteering organisation (associated with the International Orienteering Federation), you can use {{ site.name }} completely for free.
-                </p>
-                <p>
-                    Just fill the following form telling us how you qualify as an orienteering club and we will inspect your enquiry.
-                </p>
-                <form method="post">
-                    {% bootstrap_form oform %}
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-            {% endif %}
             <div class="modal"
                  id="contributeModal"
                  tabindex="-1"
