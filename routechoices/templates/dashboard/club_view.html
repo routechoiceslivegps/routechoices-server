@@ -60,7 +60,7 @@
         <ul class="nav nav-tabs mb-3">
             <li>
                 <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard_club:edit_view' %}active{% endif %}"
-                   href="{% url 'dashboard_club:edit_view' club_slug=request.club.slug %}"><i class="fa-solid fa-house-flag"></i> Club Info</a>
+                   href="{% url 'dashboard_club:edit_view' club_slug=request.club.slug %}"><i class="fa-solid fa-house-flag"></i> Organisation Info</a>
             </li>
             <li>
                 <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':22' == 'dashboard_club:device:' %}active{% endif %}"
@@ -81,7 +81,7 @@
         </ul>
         {% block sub_sub_content %}
             <p>
-                Club page hosted at <a href="{{ club.nice_url }}">{{ club.nice_url }}</a>
+                Organisation page hosted at <a href="{{ club.nice_url }}">{{ club.nice_url }}</a>
             </p>
             <p>
                 <a class="btn btn-info mb-1 me-1"
