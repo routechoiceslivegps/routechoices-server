@@ -2,47 +2,47 @@
 {% load compress django_bootstrap5 hosts static %}
 {% block pre_menu_content %}
     <content>
-        <h4>Hey!</h4>
+        <h4><b>Hey!</b></h4>
         {% if not club.upgraded and club.o_club %}
             <h4>You are registered as an orienteering club. You can enjoy the Routechoices.com platform for free until January 1st 2026!</h4>
             <p class="fw-bold">You must upgrade to our paid plan to be able access all features after that date.</p>
         {% endif %}
         {% if not club.upgraded %}
             <p>
-                Routechoices.com will never sell your data, or display ads.
-                <br>
-                <br>
-                To keep the servers running, we need you to contribute to cover their running cost.
+                <b>Routechoices.com</b> will never sell your data or display ads, so to keep the servers running, we need you to contribute to cover our running costs.
             </p>
             <p>
-                <b>
-                    Join the paid plan at 7.99€ per month <small style="font-size: 0.7rem; color: grey;">(or 95.88€ per year)</small> + VAT.
-                </b>
+                <b>Upgrade to our paid plan at 7.99€ per month <small style="font-size: 0.7rem; color: grey;">(or 95.88€ per year)</small> + VAT.</b>
             </p>
             <p>
                 <button class="btn btn-primary"
                         data-bs-toggle="modal"
                         data-bs-target="#contributeModal"
                         role="button"
-                        type="button">Upgrade my subscription</button>
+                        type="button"><i class="fa-solid fa-credit-card"></i> Upgrade my subscription</button>
             </p>
             <hr>
             <h4>Need convincing?</h4>
             <p>
-                Routechoices' relative value is great when compared to stringing together the disparate services it provides.
-                <br>
-                <br>
+                <b>Routechoices.com</b> relative value is great when compared to stringing together the disparate services it provides.
+            </p>
+            <p>
                 We offer a bundle that together includes:
-                <br>
-                A continuously updated web application, a HTTP Server, a TCP Server for GPS trackers, image hosting, privacy respecting analytics, custom domain, SSL certificates...
-                <br>
-                Overall a custom equivalent setup would cost upwards from 30€/month.
-                <br>
-                <br>
-                Routechoices.com integrates all of these services. And when compared to other live GPS tracking platforms, It comes in as being faster, more user friendly, and more affordable.
-                <br>
-                <br>
-                Most importantly, you'll be supporting the small, fast internet, and a live GPS tracking platform built to last forever.
+                <ul>
+                    <li>A modern/continuously updated web application</li>
+                    <li>A HTTP(S) server, with an 99.9% uptime</li>
+                    <li>A TCP Server for receiving data from GPS trackers</li>
+                    <li>An Image hosting server for your maps</li>
+                    <li>Analytics tool for your pages</li>
+                    <li>Custom domain handling</li>
+                </ul>
+                Overall We estimate that a custom equivalent setup would cost you a minimum of 30€/month.
+            </p>
+            <p>
+                <b>Routechoices.com</b> integrates all of these services for a much smaller fee, and when compared to other live GPS tracking platforms, It comes in as being faster, more user-friendly, and cheaper.
+            </p>
+            <p>
+                Finally, you'll be supporting the small, fast internet, and a live GPS tracking platform built to last forever.
             </p>
             <div class="modal"
                  id="contributeModal"
@@ -52,7 +52,7 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="contributeModalLabel">Join the paid plan</h5>
+                            <h5 class="modal-title" id="contributeModalLabel">Upgrade to our paid plan <span class="text-muted">(7.99€/month + VAT)</span></h5>
                             <button type="button"
                                     class="btn-close"
                                     data-bs-dismiss="modal"
@@ -60,24 +60,13 @@
                         </div>
                         <form method="post" action="{% host_url 'site:pay_view' host 'www' %}">
                             <div class="modal-body">
-                                <h6>Please enter how much you want to contribute per month.</h6>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">€</span>
-                                    <input type="text"
-                                           min="7.99"
-                                           value="7.99"
-                                           name="price-per-month"
-                                           id="price-per-month"
-                                           class="form-control"
-                                           aria-label="Amount (with dot and two decimal places)" />
-                                </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input"
                                            type="checkbox"
                                            id="per-year"
                                            name="per-year">
                                     <label class="form-check-label" for="per-year">
-                                        One payment per year <span id="price-per-year"></span>
+                                        One payment per year <span class="text-muted">(95.88€/year + VAT)</span>
                                     </label>
                                 </div>
                                 <input type="hidden" value="{{ club.slug }}" name="club">
