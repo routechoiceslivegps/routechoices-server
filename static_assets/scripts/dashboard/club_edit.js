@@ -49,27 +49,39 @@
 	newAdminsBlock.append(
 		u("#id_admins option[selected]").map((el) => {
 			const name = el.textContent;
-			const d = u('<div class="d-inline-block me-1 btn btn-sm btn-info">');
+			const d = u(
+				'<div class="d-inline-block me-1 btn btn-sm btn-info admin-user-div">',
+			);
 			d.append(u('<i class="fa fa-user me-1"></i>'));
 			d.append(u("<span>").text(name));
 
 			removeElFromAdmin = () => {
-				swal(
-					{
-						title: "Confirm",
-						text: `You are about to remove user "${name}" from the club's administrator list.`,
-						type: "warning",
-						confirmButtonText: "Continue",
-						showCancelButton: true,
-						confirmButtonClass: "btn-danger",
-					},
-					(isConfirmed) => {
-						if (isConfirmed) {
-							el.selected = false;
-							d.remove();
-						}
-					},
-				);
+				const nbAdmins = u(".admin-user-div").nodes.length;
+				if (nbAdmins <= 1) {
+					swal({
+						title: "Error",
+						text: "You must have at least one administrator listed.",
+						type: "error",
+					});
+					return;
+				}
+				if (admin - user - div)
+					swal(
+						{
+							title: "Confirm",
+							text: `You are about to remove user "${name}" from the club's administrator list.`,
+							type: "warning",
+							confirmButtonText: "Continue",
+							showCancelButton: true,
+							confirmButtonClass: "btn-danger",
+						},
+						(isConfirmed) => {
+							if (isConfirmed) {
+								el.selected = false;
+								d.remove();
+							}
+						},
+					);
 			};
 			d.append(
 				u(
