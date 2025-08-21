@@ -85,10 +85,3 @@
         {% endif %}
     </content>
 {% endblock pre_menu_content %}
-
-{% block extra_body %}
-    {% compress js %}
-        <script src="{% static 'vendor/umbrella-3.3.1/umbrella.min.js' %}"></script>
-        <script src="{% static 'scripts/site/pricing.js' %}"></script>
-    {% endcompress %}
-{% endblock extra_body %}
