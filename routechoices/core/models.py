@@ -7,7 +7,6 @@ import re
 import socket
 import time
 from datetime import timedelta
-from dateutil.parser import parse as parse_date
 from decimal import Decimal
 from io import BytesIO
 from operator import itemgetter
@@ -21,6 +20,7 @@ import gpxpy.gpx
 import magic
 import numpy as np
 from allauth.account.models import EmailAddress
+from dateutil.parser import parse as parse_date
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import LinearRing, Polygon
@@ -102,6 +102,7 @@ LOCATION_LATITUDE_INDEX = 1
 LOCATION_LONGITUDE_INDEX = 2
 
 END_FREE_OCLUB = parse_date("2026-01-01T00:00:00Z")
+
 
 class GPSSeurantaClient:
     def connect(self):
