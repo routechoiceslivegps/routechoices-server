@@ -14,7 +14,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.db.models import Case, Prefetch, Q, Value, When
 from django.dispatch import receiver

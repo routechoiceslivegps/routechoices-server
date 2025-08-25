@@ -26,7 +26,6 @@ from django.forms import (
     Form,
     ModelChoiceField,
     ModelForm,
-    Textarea,
     inlineformset_factory,
 )
 from django.forms.widgets import TextInput
