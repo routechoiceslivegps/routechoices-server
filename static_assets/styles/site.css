@@ -443,6 +443,11 @@ a.navbar-brand.logo:focus {
 	width: 13.9em;
 }
 
+.h02-input {
+	letter-spacing: 0.1em;
+	width: 10.9em;
+}
+
 .theme-selector > svg {
 	color: var(--bs-navbar-color);
 }

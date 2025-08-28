@@ -18,3 +18,26 @@ def validate(string):
     False
     """
     return checksum(string) == 0
+
+
+def generate(string):
+    """
+    Generate the Luhn check digit to append to the provided string.
+
+    >>> generate('35693803564380')
+    9
+    >>> generate('53461861341123')
+    4
+    """
+    cksum = checksum(string + "0")
+    return (10 - cksum) % 10
+
+
+def append(string):
+    """
+    Append Luhn check digit to the end of the provided string.
+
+    >>> append('53461861341123')
+    '534618613411234'
+    """
+    return string + str(generate(string))

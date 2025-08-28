@@ -254,6 +254,7 @@
                                         <h5>Supported devices:</h5>
                                         <ul>
                                             <li>GT06 protocol devices</li>
+                                            <li>H02 protocol devices</li>
                                             <li>Mictrack devices</li>
                                             <li>Queclink devices</li>
                                             <li>Teltonika devices</li>
@@ -269,7 +270,7 @@
                                         <h5>Get a Device ID:</h5>
                                         <p>Devices must be registered with us.</p>
                                         <p>We let you get a Routechoices "Device ID" that is unique to your tracker's IMEI.</p>
-                                        <form id="imeiForm">
+                                        <form id="imeiForm" class="mb-3">
                                             <div class="form-group">
                                                 <label for="IMEI" class="fw-bold">Tracker's IMEI</label>
                                                 <input type="text"
@@ -284,14 +285,32 @@
                                                     <i class="fa-solid fa-triangle-exclamation"></i> Invalid IMEI
                                                 </div>
                                             </div>
-                                            <button type="submit" id="submit-btn" class="btn btn-primary">Submit</button>
+                                            <button type="submit" id="submit-btn-imei" class="btn btn-primary">Submit</button>
+                                        </form>
+                                        <p>Or for H02 protocol trackers, the 10 digits serial number</p>
+                                        <form id="h02Form">
+                                            <div class="form-group">
+                                                <label for="Serial Number" class="fw-bold">H02 Tracker's Serial Number</label>
+                                                <input type="text"
+                                                       class="form-control font-monospace text-muted mb-1 h02-input"
+                                                       id="H02SN"
+                                                       aria-describedby="H02Help"
+                                                       placeholder="••••••••••"
+                                                       required
+                                                       inputmode="numeric"
+                                                       maxlength="10">
+                                                <div id="h02ErrorMsg" class="invalid-feedback d-none mb-1">
+                                                    <i class="fa-solid fa-triangle-exclamation"></i> Invalid Serial Number
+                                                </div>
+                                            </div>
+                                            <button type="submit" id="submit-btn-h02" class="btn btn-primary">Submit</button>
                                         </form>
                                         <br />
                                         <div id="imeiDevId" class="well d-none">
                                             <p>
-                                                IMEI: <code id="imeiRes"></code>
+                                                <b>IMEI/SN:</b> <code id="imeiRes"></code>
                                                 <br />
-                                                Device ID
+                                                <b>Device ID:</b>
                                                 <button type="button" class="btn btn-sm btn-secondary" id="copyDevIdBtn">
                                                     <span class="imeiDevId roboto"></span> <i class="fa-regular fa-copy fa-fw"></i>
                                                 </button>
@@ -305,6 +324,9 @@
                                             <ul>
                                                 <li>
                                                     <code>5023</code>: GT06
+                                                </li>
+                                                <li>
+                                                    <code>5013</code>: H02
                                                 </li>
                                                 <li>
                                                     <code>5191</code>: Mictrack
