@@ -9,6 +9,7 @@ from tornado.testing import AsyncTestCase, bind_unused_port, gen_test
 
 from routechoices.core.models import Device, ImeiDevice
 from routechoices.lib.tcp_protocols.gt06 import GT06Server
+from routechoices.lib.tcp_protocols.h02 import H02Server
 from routechoices.lib.tcp_protocols.mictrack import MicTrackServer
 from routechoices.lib.tcp_protocols.queclink import QueclinkServer
 from routechoices.lib.tcp_protocols.tmt250 import TMT250Server
@@ -287,6 +288,95 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
             nb_pos += nb_new_pos
             device = await refresh_device(device)
             self.assertEqual(device.location_count, nb_pos)
+
+        if server is not None:
+            server.stop()
+        if client is not None:
+            client.close()
+
+    @gen_test
+    async def test_h02_binary(self):
+        gps_data_with_pos = [
+            "2435248308410000901047591808172627335900074412294E024138FEFFFFFFFF01120064BA73005ECC",
+            "24352483084121532131081504419390060740418306000000fffffbfdff0015060000002c02dc0c000000001f",
+            "2435248308410850240512192350143206090249758e000001ffffbbff00bdf0900000000001d60161cc4b9a35",
+            "2435248308412059572807175137358006000183640e000000fffffbfdff001f080000000000ea1e0000000021",
+            "2435248308410127171003170520046500100286297e003085ffffdfffff03440069129344006400001151415a20",
+            "2435248308411245431311165035313006004318210e000000fffffbffff0024",
+            "2435248308412133391406135002584900014337822e000000ffffffffff0000",
+            "2435248308412134091406135002584900014337822e000000ffffffffff0000",
+            "24352483084101234020031910125482600612695044000000ffffbbff000000000000000001760d04e2c9934d",
+            "2435248308410503162209022212874500113466574C014028fffffbffff0000",
+            "2435248308410831250401145047888000008554650e000000fffff9ffff001006000000000106020299109c01",
+            "24352483084120321418041423307879000463213792000056fffff9ffff0000",
+            "2435248308411222470112142233983006114026520E000000FFFFFBFFFF0014060000000001CC00262B0F170A",
+            "24352483084105201916101533335008000073206976000000effffbffff000252776566060000000000000000000049",
+        ]
+        nb_new_pos_expected = [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1]
+
+        server = client = None
+        device = await create_imei_device("352483084100009")
+        sock, port = bind_unused_port()
+        server = H02Server()
+        server.add_socket(sock)
+        client = IOStream(socket.socket())
+        await client.connect(("localhost", port))
+
+        nb_pos = 0
+        for gps_data, nb_new_pos in zip(gps_data_with_pos, nb_new_pos_expected):
+            await client.write(bytes.fromhex(gps_data))
+            await asyncio.sleep(0.05)
+            nb_pos += nb_new_pos
+            device = await refresh_device(device)
+            self.assertEqual(device.location_count, nb_pos)
+
+        if server is not None:
+            server.stop()
+        if client is not None:
+            client.close()
+
+    @gen_test
+    async def test_h02_text(self):
+        gps_data_with_pos = [
+            "*HQ,3524830841,V6,002926,V,3514.4088,N,9733.2842,W,0.00,0.00,151222,FFF7FBFF,310,260,32936,13641,8944501311217563382F,#",
+            "*HQ,3524830841,V1,105759,A,37573392,S,145037022,E,000.00,173,280122,FF7FFBFF,,,9059e2c,8232,4#",
+            "*HQ,3524830841,V1,104000,A,2235.1777,N,11357.8913,E,000.27,235,130721,FFFFFBFF,460,11,d18e105,7752,6#",
+            "*HQ,352483084100009,HTBT,100#",
+            "*HQ,3524830841,V5,091233,V,2348.8912,N,09021.3302,E,000.00,000,051219,FFFFBBFF,470,01,21019,2033,2921283#",
+            "*HQ,352483084100009,HTBT#",
+            "*HQ,352483084100009,V1,132926,A,1935.3933,N,07920.4134,E,  3.34,342,280519,FFFFFFFF#",
+            "*hq,352483084100009,VP1,V,470,002,92,3565,0Y92,19433,30Y92,1340,29#",
+            "*HQ,352483084100009,V2,100220,0,5238.26259,N,00507.33983,E,0.25,0,280917,FFFFFFFF,cc,28,  db,d75b#",
+            "*HQ,,V1,173212,A,2225.78879,S,02829.19021,E,0.00,0,290418,FFFFFBFF#",
+            "*HQ,352483084100009,VI1,075146,0,5238.25900,N,00507.33429,E,0.54,0,250917,FFFFFFFF,cc,28,  db,d75b#",
+            "*HQ,352483084100009,V1,,V,,N,,E,0.00,0,,FFFFF7FF,f0,a,11a0,c0c6#",
+            "*hq,352483084100009,VP1,A,2702.7245,S,15251.9311,E,0.48,0.0000,080917#",
+            "*HQ,3524830841,V19,214452,A,5201.0178,N,01830.5029,E,000.00,000,200417,,195.63.13.195,89480610500392633029,BFFFFBFF#",
+            "*HQ,352483084100009,XT,1,100#",
+            "*HQ,352483084100009,V3,044855,28403,01,001450,011473,158,-62,0292,0,X,030817,FFFFFBFF#",
+            "*HQ,3524830841,#",
+        ]
+        nb_new_pos_expected = [0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0]
+        need_to_read = [0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0]
+        server = client = None
+        device = await create_imei_device("352483084100009")
+        sock, port = bind_unused_port()
+        server = H02Server()
+        server.add_socket(sock)
+        client = IOStream(socket.socket())
+        await client.connect(("localhost", port))
+
+        nb_pos = 0
+        for gps_data, nb_new_pos, reading in zip(
+            gps_data_with_pos, nb_new_pos_expected, need_to_read
+        ):
+            await client.write(gps_data.encode())
+            await asyncio.sleep(0.05)
+            nb_pos += nb_new_pos
+            device = await refresh_device(device)
+            self.assertEqual(device.location_count, nb_pos)
+            if reading:
+                client.read_bytes(255, partial=True)
 
         if server is not None:
             server.stop()
