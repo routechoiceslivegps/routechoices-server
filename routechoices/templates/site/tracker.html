@@ -270,7 +270,7 @@
                                         <h5>Get a Device ID:</h5>
                                         <p>Devices must be registered with us.</p>
                                         <p>We let you get a Routechoices "Device ID" that is unique to your tracker's IMEI.</p>
-                                        <form id="imeiForm" class="mb-3">
+                                        <form id="imeiForm">
                                             <div class="form-group">
                                                 <label for="IMEI" class="fw-bold">Tracker's IMEI</label>
                                                 <input type="text"
@@ -287,6 +287,7 @@
                                             </div>
                                             <button type="submit" id="submit-btn-imei" class="btn btn-primary">Submit</button>
                                         </form>
+                                        <!--
                                         <p>Or for H02 protocol trackers, the 10 digits serial number</p>
                                         <form id="h02Form">
                                             <div class="form-group">
@@ -305,10 +306,11 @@
                                             </div>
                                             <button type="submit" id="submit-btn-h02" class="btn btn-primary">Submit</button>
                                         </form>
+                                        -->
                                         <br />
                                         <div id="imeiDevId" class="well d-none">
                                             <p>
-                                                <b>IMEI/SN:</b> <code id="imeiRes"></code>
+                                                <b>IMEI:</b> <code id="imeiRes"></code>
                                                 <br />
                                                 <b>Device ID:</b>
                                                 <button type="button" class="btn btn-sm btn-secondary" id="copyDevIdBtn">
@@ -325,9 +327,11 @@
                                                 <li>
                                                     <code>5023</code>: GT06
                                                 </li>
+                                                <!--
                                                 <li>
                                                     <code>5013</code>: H02
                                                 </li>
+                                                -->
                                                 <li>
                                                     <code>5191</code>: Mictrack
                                                 </li>
