@@ -404,6 +404,7 @@ class DeviceBrandFilter(admin.SimpleListFilter):
             ("android", "Android"),
             ("garmin", "Garmin"),
             ("gt06", "GT06"),
+            ("h02", "H02"),
             ("ios", "iOS"),
             ("mictrack", "MicTrack"),
             ("queclink", "Queclink"),
@@ -420,6 +421,8 @@ class DeviceBrandFilter(admin.SimpleListFilter):
             return queryset.filter(user_agent__startswith="ConnectMobile/")
         if self.value() == "gt06":
             return queryset.filter(user_agent="GT06")
+        if self.value() == "h02":
+            return queryset.filter(user_agent="H02")
         if self.value() == "ios":
             return queryset.filter(user_agent__startswith="Routechoices-ios-tracker/")
         if self.value() == "mictrack":

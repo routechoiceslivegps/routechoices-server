@@ -6,6 +6,7 @@ from tornado.ioloop import IOLoop
 
 from routechoices.lib.tcp_protocols import (
     gt06,
+    h02,
     mictrack,
     queclink,
     tmt250,
@@ -27,6 +28,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--gt06-port", nargs="?", type=int, help="GT06 Handler Port"
         )
+        parser.add_argument("--h02-port", nargs="?", type=int, help="H02 Handler Port")
         parser.add_argument(
             "--mictrack-port", nargs="?", type=int, help="Mictrack Handler Port"
         )
@@ -51,6 +53,9 @@ class Command(BaseCommand):
         if options.get("gt06_port"):
             gt06_server = gt06.GT06Server()
             gt06_server.listen(options["gt06_port"], reuse_port=True)
+        if options.get("h02_port"):
+            h02_server = h02.H02Server()
+            h02_server.listen(options["h02_port"], reuse_port=True)
         if options.get("mictrack_port"):
             mictrack_server = mictrack.MicTrackServer()
             mictrack_server.listen(options["mictrack_port"], reuse_port=True)
@@ -75,6 +80,8 @@ class Command(BaseCommand):
         except (KeyboardInterrupt, SystemExit):
             if options.get("gt06_port"):
                 gt06_server.stop()
+            if options.get("h02_port"):
+                h02_server.stop()
             if options.get("mictrack_port"):
                 mictrack_server.stop()
             if options.get("queclink_port"):
