@@ -287,26 +287,6 @@
                                             </div>
                                             <button type="submit" id="submit-btn-imei" class="btn btn-primary">Submit</button>
                                         </form>
-                                        <!--
-                                        <p>Or for H02 protocol trackers, the 10 digits serial number</p>
-                                        <form id="h02Form">
-                                            <div class="form-group">
-                                                <label for="Serial Number" class="fw-bold">H02 Tracker's Serial Number</label>
-                                                <input type="text"
-                                                       class="form-control font-monospace text-muted mb-1 h02-input"
-                                                       id="H02SN"
-                                                       aria-describedby="H02Help"
-                                                       placeholder="••••••••••"
-                                                       required
-                                                       inputmode="numeric"
-                                                       maxlength="10">
-                                                <div id="h02ErrorMsg" class="invalid-feedback d-none mb-1">
-                                                    <i class="fa-solid fa-triangle-exclamation"></i> Invalid Serial Number
-                                                </div>
-                                            </div>
-                                            <button type="submit" id="submit-btn-h02" class="btn btn-primary">Submit</button>
-                                        </form>
-                                        -->
                                         <br />
                                         <div id="imeiDevId" class="well d-none">
                                             <p>
@@ -327,11 +307,9 @@
                                                 <li>
                                                     <code>5023</code>: GT06
                                                 </li>
-                                                <!--
                                                 <li>
-                                                    <code>5013</code>: H02
+                                                    <code>5013</code>: H02<sup>*</sup>
                                                 </li>
-                                                -->
                                                 <li>
                                                     <code>5191</code>: Mictrack
                                                 </li>
@@ -351,10 +329,10 @@
                                                     <code>5233</code>: Xexun2
                                                 </li>
                                             </ul>
-                                            The recommended data push interval is 5 seconds, and the recommended GPS data acquisition interval is 1 second, but feel free to adjust the settings depending on your usage as this settings affect the battery life.
-                                            <br />
-                                            <a target="_blank" href="https://github.com/routechoiceslivegps/trackers-config" aria-label="Config file download page">Configuration file for most common devices</a>.
                                         </p>
+                                        <p><small class="text-muted">* H02 protocol – If your device transmit a 10 digits number instead of an IMEI, <a href="{% url 'site:contact_view' %}">Contact us</a> to get a device ID.</small></p>
+                                        <p>The recommended data push interval is 5 seconds, and the recommended GPS data acquisition interval is 1 second, but feel free to adjust the settings depending on your usage as this settings affect the battery life.</p>
+                                        <p><a target="_blank" href="https://github.com/routechoiceslivegps/trackers-config" aria-label="Config file download page">Repository of configuration files</a> for most common devices.</p>
                                     </div>
                                     <div>
                                         <h5 class="mt-3">Want to rent some GPS tracking devices for a single weekend or interested in acquiring some permanently?</h5>
