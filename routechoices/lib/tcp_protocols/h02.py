@@ -183,12 +183,15 @@ class H02Connection(GenericConnection):
 
     async def send_response(self, response_type):
         response = ""
+        imei = self.imei
+        if self.fake_imei:
+            imei = imei[:10]
         if response_type == "R12":
             time = arrow.get().format("HHmmss")
-            response = f"*HQ,{self.imei},{response_type},{time}#".encode()
+            response = f"*HQ,{imei},{response_type},{time}#".encode()
         else:
             time = arrow.get().format("YYYYMMDDHHmmss")
-            response = f"*HQ,{self.imei},V4,{response_type},{time}#".encode()
+            response = f"*HQ,{imei},V4,{response_type},{time}#".encode()
         await self.stream.write(response)
 
     async def parse_default_text_packet(self, imei, data, command):
@@ -313,7 +316,9 @@ class H02Connection(GenericConnection):
                 if not imei and self.imei:
                     imei = self.imei
                 try:
+                    self.fake_imei = False
                     if len(imei) == 10:
+                        self.fake_imei = True
                         imei = luhn.append(f"{imei:0<14}")
                     await self.process_identification(imei)
                 except Exception:
