@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 
 import arrow
 from asgiref.sync import sync_to_async
@@ -25,6 +26,10 @@ formatter = logging.Formatter(
 )
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+
+
+ROLLOVER_CYCLE = 1024 * 7 * 24 * 3600
+ROLLOVER_THRESHOLD = ROLLOVER_CYCLE - 90 * 24 * 3600
 
 
 class GenericTCPServer(TCPServer):
@@ -78,7 +83,16 @@ def get_device_by_imei(imei):
 
 @sync_to_async
 def add_locations(device, locations):
-    device.add_locations(locations)
+
+    corrected_locations = []
+    current_time = time.time()
+    for location in locations:
+        ts, lat, lon = location
+        while current_time - ts > ROLLOVER_THRESHOLD:
+            ts += ROLLOVER_CYCLE
+        corrected_locations.append((ts, lat, lon))
+
+    device.add_locations(corrected_locations)
     connection.close()
 
 
