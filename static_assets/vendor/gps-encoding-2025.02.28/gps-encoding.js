@@ -366,7 +366,7 @@ const PositionArchive = function () {
   }
   this.closestPointFrom = function (p) {
     let minDistance = Infinity,
-        minPoint = null,
+        minPoint = positions?.[0],
         p1, p2, pp;
     for (let i = 1; i < positions.length; i++) {
         p1 = positions[i - 1];
