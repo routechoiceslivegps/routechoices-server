@@ -36,16 +36,16 @@ class QueclinkConnection(GenericConnection):
                 self.stream.close()
                 return
 
-            self.logger.info(
-                f"GL300 DATA, {self.aid}, {self.address}, {self.imei}: {data}"
-            )
-
             try:
                 await self.process_identification(imei)
             except Exception as e:
                 print(f"Queclink - Could not identify device ({e})", flush=True)
                 self.stream.close()
                 return
+
+            self.logger.info(
+                f"GL300 DATA, {self.aid}, {self.address}, {self.imei}: {data}"
+            )
 
             try:
                 await self.send_pending_commands()
