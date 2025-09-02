@@ -28,7 +28,7 @@ RUN uv pip install -r requirements.txt
 FROM python:3.13-slim AS final
 RUN adduser --uid 1001 --disabled-password --gecos '' --no-create-home app
 RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends libcairo2 libgl1 libglib2.0-0 libmagic1 libgdal32 && \
+    apt-get install -y --no-install-recommends libcairo2 libgl1 libglib2.0-0 libmagic1 libgdal36 && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man
 
