@@ -41,7 +41,6 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django_hosts.resolvers import reverse
 from PIL import Image, ImageDraw, ImageFile
-from pillow_heif import register_avif_opener
 
 from routechoices.lib import cache, plausible
 from routechoices.lib.duration_constants import (
@@ -85,7 +84,6 @@ from routechoices.lib.validators import (
     validate_nice_slug,
 )
 
-register_avif_opener()
 register_jxl_opener()
 
 logger = logging.getLogger(__name__)
