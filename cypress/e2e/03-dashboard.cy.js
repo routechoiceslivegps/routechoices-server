@@ -309,6 +309,9 @@ context("Dashboard actions", () => {
 		cy.get("#id_event_set-ts-dropdown > .option").eq(1).click().wait(300);
 		cy.get("#id_start_date").focus().clear().type("2019-06-16T00:00:00");
 		cy.get("#id_end_date").focus().clear().type("2019-06-16T03:00:00");
+		cy.get("#id_geojson_layer").selectFile(
+			"cypress/fixtures/geojson/valid.geojson",
+		);
 		cy.get("#id_map").select("Jukola 2019 - 1st Leg"); // doesnt matter
 		cy.get("#id_map_assignations-0-map").select("Another map");
 		cy.get("#id_map_assignations-0-title").type("Another map");

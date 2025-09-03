@@ -542,10 +542,10 @@ class EventForm(ModelForm):
         except Exception:
             raise ValidationError("Invalid JSON File")
         try:
-            is_ok = geojson_validator.validate_structure(datajson, check_crs=False)
+            errors = geojson_validator.validate_structure(datajson, check_crs=False)
         except Exception:
             raise ValidationError("Could not validate the GeoJSON File")
-        if not is_ok:
+        if errors:
             raise ValidationError("Invalid GeoJSON File")
         return f_orig
 
