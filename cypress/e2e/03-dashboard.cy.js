@@ -3,10 +3,9 @@ context("Dashboard actions", () => {
 		cy.wait(100);
 	});
 
-	it("Manage participations", () => {
-		cy.login();
-		cy.forceVisit(
-			"//halden-sk.routechoices.dev/open-registration-upload-allowed/contribute",
+	it("Contribution page", () => {
+		cy.visit(
+			"https://halden-sk.routechoices.dev/open-registration-upload-allowed/contribute",
 		);
 		cy.contains("Enter yourself");
 		cy.get("#id_name").type("Thierry Gueorgiou");
@@ -15,15 +14,21 @@ context("Dashboard actions", () => {
 		cy.get("button:not([type]),button[type=submit]").eq(0).click();
 		cy.contains("Competitor added!");
 		cy.get(".upload-route-btn").first().click();
-		cy.get("#id_gpx_file").selectFile(
-			"cypress/fixtures/Jukola2019/1/gpx/HaldenSK.gpx",
-		);
+
+		cy.get("#id_gpx_file").selectFile({
+			contents: "cypress/fixtures/Jukola2019/1/gpx/HaldenSK.gpx",
+			fileName: "HaldenSK.gpx",
+			mimeType: "text/xml",
+		});
 		cy.get("#uploadRouteModal button:not([type]),button[type=submit]").click();
 		cy.contains("Data uploaded!");
+	});
 
-		cy.forceVisit("https://dashboard.routechoices.dev/participations");
+	it("Particiption page", () => {
+		cy.login();
+		cy.visit("https://dashboard.routechoices.dev/participations");
 		cy.contains(
-			"My event with open registration and upload allowed by Halden SK as Thierry Gueorgiou (🇫🇷 T.Gueorgiou)",
+			"My event with open registration and upload allowed by Halden SK as Aatos (A)",
 		);
 		cy.get(".edit-info-btn").first().click();
 		cy.get("#id_name").clear().type("Kasper Harlem Fosser");
@@ -39,8 +44,10 @@ context("Dashboard actions", () => {
 		);
 		cy.get(".upload-btn:not(.disabled)").click();
 		cy.contains("Data uploaded!");
+	});
 
-		cy.forceVisit("https://registration.routechoices.dev");
+	it("Registration website", () => {
+		cy.visit("https://registration.routechoices.dev");
 		cy.get("#name").type("Veijo");
 		cy.get("#sname").type("V");
 		cy.get("#devid").type("10000000{enter}");
@@ -51,7 +58,7 @@ context("Dashboard actions", () => {
 
 	it("Manage devices", () => {
 		cy.login();
-		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
+		cy.visit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 		cy.contains("Devices").click();
 		cy.contains("Add new device").click();
@@ -74,7 +81,7 @@ context("Dashboard actions", () => {
 
 	it("Upgrade account", () => {
 		cy.login();
-		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
+		cy.visit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 		cy.contains("Upgrade to our paid plan!").click();
 		cy.location("pathname").should("eq", "/clubs/halden-sk/upgrade");
@@ -87,11 +94,11 @@ context("Dashboard actions", () => {
 
 	it("Import map", () => {
 		cy.login();
-		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
+		cy.visit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 
 		for (const gpxFileName of ["trk", "waypoint", "waypoint+trk"]) {
-			cy.forceVisit(
+			cy.visit(
 				"https://dashboard.routechoices.dev/clubs/halden-sk/maps/upload-gpx",
 			);
 			cy.get("#id_gpx_file").selectFile(
@@ -108,7 +115,7 @@ context("Dashboard actions", () => {
 			"maps/multiground.kml",
 			"maps/tiled.kmz",
 		]) {
-			cy.forceVisit(
+			cy.visit(
 				"https://dashboard.routechoices.dev/clubs/halden-sk/maps/upload-kmz",
 			);
 			cy.get("#id_file").selectFile(`cypress/fixtures/${kmzFileName}`);
@@ -121,12 +128,10 @@ context("Dashboard actions", () => {
 
 	it("Create map from image", () => {
 		cy.login();
-		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
+		cy.visit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 
-		cy.forceVisit(
-			"https://dashboard.routechoices.dev/clubs/halden-sk/maps/new",
-		);
+		cy.visit("https://dashboard.routechoices.dev/clubs/halden-sk/maps/new");
 
 		cy.get("#id_name").type("Jukola 2019 - 1st Leg (manual calibration)");
 
@@ -189,14 +194,14 @@ context("Dashboard actions", () => {
 
 	it("Create events", () => {
 		cy.login();
-		cy.forceVisit("https://dashboard.routechoices.dev/clubs/");
+		cy.visit("https://dashboard.routechoices.dev/clubs/");
 		cy.contains("Halden SK").click();
 
 		// Create Map
 		cy.createMap();
 
 		// Create Event with minimal info
-		cy.forceVisit("https://dashboard.routechoices.dev/clubs/halden-sk/events/");
+		cy.visit("https://dashboard.routechoices.dev/clubs/halden-sk/events/");
 		cy.get("a").contains("Create new event").click();
 		cy.location("pathname").should("eq", "/clubs/halden-sk/events/new");
 
@@ -242,68 +247,68 @@ context("Dashboard actions", () => {
 
 		// Test the event view
 		// TODO: move to own test
-		cy.forceVisit("//halden-sk.routechoices.dev/Jukola-2019-1st-leg");
-		cy.contains("Niels Christian Hellerud", { timeout: 20_000 }); // in competitor list
+		cy.visit("https://halden-sk.routechoices.dev/Jukola-2019-1st-leg");
+		cy.origin("https://halden-sk.routechoices.dev", () => {
+			cy.contains("Niels Christian Hellerud", { timeout: 20_000 }); // in competitor list
 
-		//// toggle competitor
-		cy.get("#toggleAllSwitch").uncheck();
+			//// toggle competitor
+			cy.get("#toggleAllSwitch").uncheck();
 
-		cy.get(".competitor-switch").eq(2).check();
-		cy.contains("#map", "🇫🇮 KooVee");
-		cy.get(".competitor-switch").eq(2).uncheck();
-		cy.contains("#map", "🇫🇮 KooVee").should("not.exist");
-		cy.get(".competitor-switch").eq(1).check();
-		cy.contains("#map", "🇫🇮 Paimion Rasti");
+			cy.get(".competitor-switch").eq(2).check();
+			cy.contains("#map", "🇫🇮 KooVee");
+			cy.get(".competitor-switch").eq(2).uncheck();
+			cy.contains("#map", "🇫🇮 KooVee").should("not.exist");
+			cy.get(".competitor-switch").eq(1).check();
+			cy.contains("#map", "🇫🇮 Paimion Rasti");
 
-		cy.get("#toggleAllSwitch").check();
+			cy.get("#toggleAllSwitch").check();
 
-		//// change runner color
-		cy.get(".color-tag").eq(1).click();
-		cy.contains("Select new color for Samuel Heinonen");
-		cy.get(".IroWheel").first().should("be.visible").click(50, 50);
-		cy.get("#save-color").click();
+			//// change runner color
+			cy.get(".color-tag").eq(1).click();
+			cy.contains("Select new color for Samuel Heinonen");
+			cy.get(".IroWheel").first().should("be.visible").click(50, 50);
+			cy.get("#save-color").click();
 
-		//// center on runner
-		cy.get('[aria-label="Center"]').eq(1).click();
-		cy.wait(200);
+			//// center on runner
+			cy.get('[aria-label="Center"]').eq(1).click();
+			cy.wait(200);
 
-		//// move progress bar and focus on runner
-		cy.get("#full_progress_bar").click(50, 7);
-		cy.get(".competitor-focus-btn").eq(1).click();
-		cy.wait(500);
+			//// move progress bar and focus on runner
+			cy.get("#full_progress_bar").click(50, 7);
+			cy.get(".competitor-focus-btn").eq(1).click();
+			cy.wait(500);
 
-		//// toogle full route
-		cy.get(".competitor-highlight-btn").eq(1).click();
-		cy.get(".competitor-full-route-btn").eq(1).click();
-		cy.wait(500);
-		cy.get(".competitor-highlight-btn").eq(1).click();
-		cy.get(".competitor-full-route-btn").eq(1).click();
+			//// toogle full route
+			cy.get(".competitor-highlight-btn").eq(1).click();
+			cy.get(".competitor-full-route-btn").eq(1).click();
+			cy.wait(500);
+			cy.get(".competitor-highlight-btn").eq(1).click();
+			cy.get(".competitor-full-route-btn").eq(1).click();
 
-		//// random location mass start
-		cy.get("#real_time_button").should("have.class", "active");
-		cy.get("#map").dblclick(70, 100);
-		cy.wait(1000);
-		cy.get("#real_time_button").should("not.have.class", "active");
+			//// random location mass start
+			cy.get("#real_time_button").should("have.class", "active");
+			cy.get("#map").dblclick(70, 100);
+			cy.wait(1000);
+			cy.get("#real_time_button").should("not.have.class", "active");
 
-		//// Show grouping
-		cy.get("#options_show_button").click();
-		cy.get("#toggleClusterSwitch").click();
-		cy.get(".leaflet-control-grouping").first().contains("Group A");
-		cy.contains("#map", "Group A");
-		cy.contains("#map", "🇫🇮 Paimion Rasti");
-		cy.contains("#map", "🇫🇮 KooVee").should("not.exist");
-		cy.get("#toggleClusterSwitch").click();
+			//// Show grouping
+			cy.get("#options_show_button").click();
+			cy.get("#toggleClusterSwitch").click();
+			cy.get(".leaflet-control-grouping").first().contains("Group A");
+			cy.contains("#map", "Group A");
+			cy.contains("#map", "🇫🇮 Paimion Rasti");
+			cy.contains("#map", "🇫🇮 KooVee").should("not.exist");
+			cy.get("#toggleClusterSwitch").click();
 
-		//// mass start simulation
-		cy.get("#mass_start_button").click();
-		cy.wait(1000);
+			//// mass start simulation
+			cy.get("#mass_start_button").click();
+			cy.wait(1000);
+		});
 
 		// Create second event with all fields info
 		cy.createMap("Another map");
 		cy.intercept("POST", "/clubs/halden-sk/events/new").as("eventSubmit");
-		cy.forceVisit(
-			"https://dashboard.routechoices.dev/clubs/halden-sk/events/new",
-		);
+		cy.visit("https://dashboard.routechoices.dev/clubs/halden-sk/events/new");
 		cy.get("#id_name").type("Jukola 2019 - 2nd Leg");
 		cy.get("#id_event_set-ts-control").parent().click().wait(300);
 		cy.get("#id_event_set-ts-dropdown > .option").eq(1).click().wait(300);
@@ -333,8 +338,10 @@ context("Dashboard actions", () => {
 		cy.location("pathname").should("eq", "/clubs/halden-sk/events/");
 
 		// test the event view
-		cy.forceVisit("//halden-sk.routechoices.dev/Jukola-2019-2nd-leg");
-		cy.contains("Björn Ekeberg", { timeout: 20_000 });
-		cy.contains("Another map", { timeout: 20_000 });
+		cy.visit("https://halden-sk.routechoices.dev/Jukola-2019-2nd-leg");
+		cy.origin("https://halden-sk.routechoices.dev", () => {
+			cy.contains("Björn Ekeberg", { timeout: 20_000 });
+			cy.contains("Another map", { timeout: 20_000 });
+		});
 	});
 });

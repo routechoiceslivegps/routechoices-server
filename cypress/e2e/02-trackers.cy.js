@@ -4,7 +4,7 @@ context("IMEI device id generation", () => {
 	});
 
 	it("Create an Device Id", () => {
-		cy.forceVisit("//www.routechoices.dev/trackers");
+		cy.visit("https:////www.routechoices.dev/trackers");
 		cy.get("#dedicated-trackers-tab").click();
 
 		// Invalid too short IMEI

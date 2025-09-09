@@ -27,14 +27,14 @@
 Cypress.Commands.add(
 	"login",
 	(username = "admin", password = "pa$$word123") => {
-		cy.forceVisit("https://dashboard.routechoices.dev/login");
+		cy.visit("https://dashboard.routechoices.dev/login");
 		cy.get("#id_login").type(username);
 		cy.get("#id_password").type(`${password}{enter}`);
 	},
 );
 
 Cypress.Commands.add("createClub", (name = "Kangasala SK") => {
-	cy.forceVisit("https://dashboard.routechoices.dev/clubs/new");
+	cy.visit("https://dashboard.routechoices.dev/clubs/new");
 	cy.get("#id_name").type(name);
 	cy.get("button:not([type]),button[type=submit]").click();
 	cy.contains("successfully");
@@ -43,7 +43,7 @@ Cypress.Commands.add("createClub", (name = "Kangasala SK") => {
 Cypress.Commands.add(
 	"createMap",
 	(name = "Jukola 2019 - 1st Leg", club = "halden-sk") => {
-		cy.forceVisit(`https://dashboard.routechoices.dev/clubs/${club}/maps/new`);
+		cy.visit(`https://dashboard.routechoices.dev/clubs/${club}/maps/new`);
 		cy.fixture("Jukola2019/1/map.jpg", { encoding: null }).as("mapFile");
 		cy.get("#id_name").clear().type(name).blur();
 		cy.get("#id_image").selectFile({
@@ -55,9 +55,3 @@ Cypress.Commands.add(
 		cy.location("pathname").should("eq", `/clubs/${club}/maps/`);
 	},
 );
-
-Cypress.Commands.add("forceVisit", (url) => {
-	cy.window().then((win) => {
-		return win.open(url, "_self");
-	});
-});

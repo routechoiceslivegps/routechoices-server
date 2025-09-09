@@ -13,7 +13,7 @@
 		"sass": "^1.83.4"
 	},
 	"devDependencies": {
-		"cypress": "^13.17.0"
+		"cypress": "^15.1.0"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": ["cypress", "@biomejs/biome"]
