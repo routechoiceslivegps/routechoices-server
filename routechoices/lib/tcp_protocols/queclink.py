@@ -107,8 +107,11 @@ class QueclinkConnection(GenericConnection):
                 else:
                     pts.append((tim, lat, lon))
             batt = None
+            batt_raw = parts[-3]
+            if batt_raw == "":
+                batt_raw = parts[-6]
             try:
-                batt = int(parts[-3])
+                batt = int(batt_raw)
             except Exception:
                 pass
             await self.on_data(pts, batt)
