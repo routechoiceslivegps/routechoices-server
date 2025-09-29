@@ -801,11 +801,12 @@ class DeviceAdmin(admin.ModelAdmin):
         )
 
     def locations_sample(self, obj):
-        if obj.location_count <= 30:
+        locations = obj.locations
+        if len(locations) <= 30:
             return "\n".join(
                 [
                     f"time: {epoch_to_datetime(x[0])}, latlon: {x[1]}, {x[2]}"
-                    for x in obj.locations
+                    for x in locations
                 ]
             )
         return "\n.\n.\n.\n".join(
@@ -813,13 +814,13 @@ class DeviceAdmin(admin.ModelAdmin):
                 "\n".join(
                     [
                         f"time: {epoch_to_datetime(x[0])}, latlon: {x[1]}, {x[2]}"
-                        for x in obj.locations[:15]
+                        for x in locations[:15]
                     ]
                 ),
                 "\n".join(
                     [
                         f"time: {epoch_to_datetime(x[0])}, latlon: {x[1]}, {x[2]}"
-                        for x in obj.locations[-15:]
+                        for x in locations[-15:]
                     ]
                 ),
             ]
