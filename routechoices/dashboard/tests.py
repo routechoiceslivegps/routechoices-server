@@ -931,6 +931,33 @@ class TestDashboard(EssentialDashboardBase):
             res, "Competitor start time should be during the event time"
         )
 
+        with open("cypress/fixtures/geojson/invalid.geojson", "rb") as fp:
+            geojson = SimpleUploadedFile(
+                "route.geojson", fp.read(), content_type="application/json"
+            )
+        res = self.client.post(
+            url,
+            {
+                "name": "My Event",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2025-02-04T00:00:00",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
+                "geojson_layer": geojson,
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(res, "invalid-feedback")
+        self.assertContains(res, "Invalid GeoJSON File")
+
     def test_edit_event_sets(self):
         # Create event set
         url = self.reverse_and_check(
