@@ -495,6 +495,11 @@ class TestDashboard(EssentialDashboardBase):
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
+        with open("cypress/fixtures/geojson/valid.geojson", "rb") as fp:
+            geojson = SimpleUploadedFile(
+                "route.geojson", fp.read(), content_type="application/json"
+            )
+
         res = self.client.post(
             url,
             {
@@ -511,6 +516,7 @@ class TestDashboard(EssentialDashboardBase):
                 "competitors-TOTAL_FORMS": 1,
                 "competitors-INITIAL_FORMS": 0,
                 "timezone": "UTC",
+                "geojson_layer": geojson,
             },
         )
         self.assertEqual(res.status_code, status.HTTP_302_FOUND)
