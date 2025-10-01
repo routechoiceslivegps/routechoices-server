@@ -6,9 +6,6 @@ JXL_FORMAT = "JXL"
 
 
 def _save(im, fp, filename, save_all=False):
-    if im.mode not in _VALID_JXL_MODES:
-        raise NotImplementedError("Only RGB, RGBA, L, LA are supported.")
-
     info = im.encoderinfo.copy()
 
     # default quality is 90
