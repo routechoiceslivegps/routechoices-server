@@ -46,7 +46,7 @@ def simplify_periods(ps):
 
 def get_remote_image_sizes(uri):
     # Get file size *and* image size (None if not known)
-    if not re.match("https?://", uri.lower()):
+    if not re.match("^https?://", uri.lower()):
         raise Exception("Invalid Protocol")
     with urllib.request.urlopen(uri) as file:
         size = file.headers.get("content-length")

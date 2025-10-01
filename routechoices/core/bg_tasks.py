@@ -25,7 +25,7 @@ class MapImportError(Exception):
 def import_single_event_from_gps_seuranta(event_id, club=None):
     event_id = event_id.strip()
     if match := re.match(
-        r"https?://((gps|www)\.)?tulospalvelu\.fi/gps/(?P<uid>[^/]+)/?", event_id
+        r"^https?://((gps|www)\.)?tulospalvelu\.fi/gps/(?P<uid>[^/]+)/?", event_id
     ):
         event_id = match.group("uid")
     solution = GpsSeurantaNet()
@@ -38,7 +38,7 @@ def import_single_event_from_gps_seuranta(event_id, club=None):
 @background(schedule=0)
 def import_single_event_from_virekunnas(event_id, club=None):
     event_id = event_id.strip()
-    if match := re.match(r"https?://gps\.virekunnas\.fi/(?P<uid>[^/]+)/?", event_id):
+    if match := re.match(r"^https?://gps\.virekunnas\.fi/(?P<uid>[^/]+)/?", event_id):
         event_id = match.group("uid")
     solution = GpsVirekunnasFi()
     if club:
@@ -51,7 +51,7 @@ def import_single_event_from_virekunnas(event_id, club=None):
 def import_single_event_from_loggator(event_id, club=None):
     event_id = event_id.strip()
     if match := re.match(
-        r"https?://(events\.)?loggator\.com/(?P<uid>[^/]+)/?", event_id
+        r"^https?://(events\.)?loggator\.com/(?P<uid>[^/]+)/?", event_id
     ):
         event_id = match.group("uid")
     solution = Loggator()
