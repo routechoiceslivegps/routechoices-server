@@ -99,17 +99,23 @@ class XForwardedForMiddleware:
                 logger.warning(
                     (
                         "Incorrect proxy depth in incoming request.\n"
-                        + "Expected {} and got {} remote addresses in "
-                        + "X-Forwarded-For header."
-                    ).format(depth, len(levels))
+                        "Expected %d and got %d remote addresses in "
+                        "X-Forwarded-For header."
+                    ),
+                    depth,
+                    len(levels),
                 )
                 return HttpResponseBadRequest()
 
             if len(levels) < depth or depth == 0:
                 logger.warning(
-                    "Not running behind as many reverse proxies as expected."
-                    + "\nThe right value for XFF_TRUSTED_PROXY_DEPTH for this "
-                    + f"request is {len(levels)} and {depth} is configured."
+                    (
+                        "Not running behind as many reverse proxies as expected."
+                        "\nThe right value for XFF_TRUSTED_PROXY_DEPTH for this "
+                        "request is %d and %d is configured.",
+                    ),
+                    len(levels),
+                    depth,
                 )
                 if self.always_proxy:
                     return HttpResponseBadRequest()
