@@ -1072,6 +1072,7 @@ class Map(models.Model):
         return round(
             ((a + b + c) * (a + b - c) * (a + c - b) + (b + c - a)) ** 0.5 / 4
             + ((c + d + e) * (c + d - e) * (c + e - d) + (e + d - c)) ** 0.5 / 4,
+            3,
         )
 
     def draw_gps(self, gps_data):
