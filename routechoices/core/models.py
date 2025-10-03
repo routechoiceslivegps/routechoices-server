@@ -1070,8 +1070,8 @@ class Map(models.Model):
         e = distance_latlon(ll_d, ll_c) / 1000
 
         return round(
-            ((a + b + c) * (a + b - c) * (a + c - b) + (b + c - a)) ** 0.5 / 4
-            + ((c + d + e) * (c + d - e) * (c + e - d) + (e + d - c)) ** 0.5 / 4,
+            ((a + b + c) * (a + b - c) * (a + c - b) * (b + c - a)) ** 0.5 / 4
+            + ((c + d + e) * (c + d - e) * (c + e - d) * (e + d - c)) ** 0.5 / 4,
             3,
         )
 
