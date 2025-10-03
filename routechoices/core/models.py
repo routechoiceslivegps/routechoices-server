@@ -685,7 +685,7 @@ class Map(models.Model):
     def resolution(self):
         """Return map image resolution in pixels/meters"""
         width, height = self.quick_size
-        return (width * height / (self.area * 1_000_000)) ** 0.5
+        return (width * height / self.area) ** 0.5
 
     @property
     def center(self):
