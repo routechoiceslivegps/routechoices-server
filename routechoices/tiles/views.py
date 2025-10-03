@@ -107,7 +107,7 @@ def tile_etag(request):
     get_params = {}
     for key in request.GET.keys():
         get_params[key.lower()] = request.GET[key]
-    key = request.raster_map.get_tile_cache_key_name(
+    key = request.raster_map.get_tile_cache_key(
         request.image_request["width"],
         request.image_request["height"],
         request.image_request["mime"],

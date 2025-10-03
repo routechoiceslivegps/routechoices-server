@@ -778,7 +778,7 @@ class Map(models.Model):
                 file2.write(doc_img)
         return kmz.getvalue()
 
-    def get_tile_cache_key_name(
+    def get_tile_cache_key(
         self, output_width, output_height, img_mime, min_lon, max_lon, min_lat, max_lat
     ):
         return (
@@ -789,7 +789,7 @@ class Map(models.Model):
         )
 
     @classmethod
-    def blank_tile(cls, output_width, output_height, img_mime, src_cache_key):
+    def get_blank_tile(cls, output_width, output_height, img_mime, src_cache_key):
         cache_key = f"tile:blank:{output_width}x{output_height}:{img_mime}"
         if cached := cache.get(cache_key):
             return cached, CACHED_BLANK_TILE
@@ -825,7 +825,7 @@ class Map(models.Model):
         """
         Coordinates must be given in spherical mercator X Y
         """
-        cache_key = self.get_tile_cache_key_name(
+        cache_key = self.get_tile_cache_key(
             output_width, output_height, img_mime, min_x, max_x, min_y, max_y
         )
 
@@ -834,11 +834,11 @@ class Map(models.Model):
 
         if not self.do_intersects_with_tile(min_x, max_x, min_y, max_y):
             # Out of map bounds, return blank tile
-            blank_tile, cache_status = self.blank_tile(
+            tile, cache_status = self.get_blank_tile(
                 output_width, output_height, img_mime, cache_key
             )
-            cache.set(cache_key, blank_tile, DURATION_ONE_MONTH)
-            return blank_tile, cache_status
+            cache.set(cache_key, tile, DURATION_ONE_MONTH)
+            return tile, cache_status
 
         width, height = self.quick_size
         tl = self.map_xy_to_spherical_mercator(0, 0)
