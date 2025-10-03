@@ -1062,14 +1062,16 @@ class Map(models.Model):
         ll_b = self.map_xy_to_wsg84(width, 0)
         ll_c = self.map_xy_to_wsg84(width, height)
         ll_d = self.map_xy_to_wsg84(0, height)
+
+        a = distance_latlon(ll_a, ll_b) / 1000
+        b = distance_latlon(ll_b, ll_c) / 1000
+        c = distance_latlon(ll_c, ll_a) / 1000
+        d = distance_latlon(ll_a, ll_d) / 1000
+        e = distance_latlon(ll_d, ll_c) / 1000
+
         return round(
-            (distance_latlon(ll_a, ll_b) + distance_latlon(ll_c, ll_d))
-            / 2
-            * (+distance_latlon(ll_a, ll_c) + distance_latlon(ll_b, ll_d))
-            / 2
-            / 1000
-            / 1000,
-            3,
+            ((a + b + c) * (a + b - c) * (a + c - b) + (b + c - a)) ** 0.5 / 4
+            + ((c + d + e) * (c + d - e) * (c + e - d) + (e + d - c)) ** 0.5 / 4,
         )
 
     def draw_gps(self, gps_data):
