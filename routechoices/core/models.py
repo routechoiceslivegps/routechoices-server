@@ -535,23 +535,6 @@ class Map(models.Model):
         return p.image.size
 
     @property
-    def kmz(self):
-        doc_img = self.data
-        mime_type = magic.from_buffer(doc_img, mime=True)
-        extension = mime_type[6:]
-
-        doc_kml = render_to_string(
-            "kml.xml", {"name": self.name, "bound": self.bound, "extension": extension}
-        )
-        kmz = BytesIO()
-        with ZipFile(kmz, "w") as fp:
-            with fp.open("doc.kml", "w") as file1:
-                file1.write(doc_kml.encode("utf-8"))
-            with fp.open(f"files/doc.{extension}", "w") as file2:
-                file2.write(doc_img)
-        return kmz.getvalue()
-
-    @property
     def mime_type(self):
         cache_key = f"map:{self.image.name}:mime"
         if cached := cache.get(cache_key):
@@ -584,6 +567,35 @@ class Map(models.Model):
             save=False,
         )
         self.image.close()
+
+    @property
+    def cv2image(self):
+        src_img = self.data
+        src_mime = magic.from_buffer(src_img, mime=True)
+        if src_mime == "image/gif":
+            pil_img = Image.open(BytesIO(src_img)).convert("RGBA")
+            cv2_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGRA)
+        else:
+            src_bytes = np.frombuffer(src_img, np.uint8)
+            cv2_img_raw = cv2.imdecode(src_bytes, cv2.IMREAD_UNCHANGED)
+            cv2_img = cv2.cvtColor(np.array(cv2_img_raw), cv2.COLOR_BGR2BGRA)
+        return cv2_img
+
+    @property
+    def hash(self):
+        return shortsafe64encodedsha(
+            f"{self.path}:{self.corners_coordinates}:20230420"
+        )[:8]
+
+    @property
+    def bound(self):
+        coords = [float(x) for x in self.corners_coordinates.split(",")]
+        return {
+            "top_left": {"lat": coords[0], "lon": coords[1]},
+            "top_right": {"lat": coords[2], "lon": coords[3]},
+            "bottom_right": {"lat": coords[4], "lon": coords[5]},
+            "bottom_left": {"lat": coords[6], "lon": coords[7]},
+        }
 
     @property
     def size(self):
@@ -682,15 +694,34 @@ class Map(models.Model):
         return GLOBAL_MERCATOR.meters_to_latlon({"x": mx, "y": my})
 
     @property
+    def center(self):
+        width, height = self.quick_size
+        return self.map_xy_to_wsg84(width / 2, height / 2)
+
+    @property
+    def area(self):
+        # Area in m^2
+        width, height = self.quick_size
+        ll_a = self.map_xy_to_wsg84(0, 0)
+        ll_b = self.map_xy_to_wsg84(width, 0)
+        ll_c = self.map_xy_to_wsg84(width, height)
+        ll_d = self.map_xy_to_wsg84(0, height)
+
+        a = distance_latlon(ll_a, ll_b)
+        b = distance_latlon(ll_b, ll_c)
+        c = distance_latlon(ll_c, ll_a)
+        d = distance_latlon(ll_a, ll_d)
+        e = distance_latlon(ll_d, ll_c)
+
+        return ((a + b + c) * (a + b - c) * (a + c - b) * (b + c - a)) ** 0.5 / 4 + (
+            (c + d + e) * (c + d - e) * (c + e - d) * (e + d - c)
+        ) ** 0.5 / 4
+
+    @property
     def resolution(self):
         """Return map image resolution in pixels/meters"""
         width, height = self.quick_size
         return (width * height / self.area) ** 0.5
-
-    @property
-    def center(self):
-        width, height = self.quick_size
-        return self.map_xy_to_wsg84(width / 2, height / 2)
 
     @property
     def max_zoom(self):
@@ -730,7 +761,24 @@ class Map(models.Model):
             rot = (rot - 45) % 90 - 45
         return round(rot, 2)
 
-    def tile_cache_key(
+    @property
+    def kmz(self):
+        doc_img = self.data
+        mime_type = magic.from_buffer(doc_img, mime=True)
+        extension = mime_type[6:]
+
+        doc_kml = render_to_string(
+            "kml.xml", {"name": self.name, "bound": self.bound, "extension": extension}
+        )
+        kmz = BytesIO()
+        with ZipFile(kmz, "w") as fp:
+            with fp.open("doc.kml", "w") as file1:
+                file1.write(doc_kml.encode("utf-8"))
+            with fp.open(f"files/doc.{extension}", "w") as file2:
+                file2.write(doc_img)
+        return kmz.getvalue()
+
+    def get_tile_cache_key_name(
         self, output_width, output_height, img_mime, min_lon, max_lon, min_lat, max_lat
     ):
         return (
@@ -764,20 +812,7 @@ class Map(models.Model):
 
         return data_out, NOT_CACHED_TILE
 
-    @property
-    def cv2image(self):
-        src_img = self.data
-        src_mime = magic.from_buffer(src_img, mime=True)
-        if src_mime == "image/gif":
-            pil_img = Image.open(BytesIO(src_img)).convert("RGBA")
-            cv2_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGRA)
-        else:
-            src_bytes = np.frombuffer(src_img, np.uint8)
-            cv2_img_raw = cv2.imdecode(src_bytes, cv2.IMREAD_UNCHANGED)
-            cv2_img = cv2.cvtColor(np.array(cv2_img_raw), cv2.COLOR_BGR2BGRA)
-        return cv2_img
-
-    def create_tile(
+    def get_tile(
         self,
         output_width,
         output_height,
@@ -790,14 +825,14 @@ class Map(models.Model):
         """
         Coordinates must be given in spherical mercator X Y
         """
-        cache_key = self.tile_cache_key(
+        cache_key = self.get_tile_cache_key_name(
             output_width, output_height, img_mime, min_x, max_x, min_y, max_y
         )
 
         if cached := cache.get(cache_key):
             return cached, CACHED_TILE
 
-        if not self.intersects_with_tile(min_x, max_x, min_y, max_y):
+        if not self.do_intersects_with_tile(min_x, max_x, min_y, max_y):
             # Out of map bounds, return blank tile
             blank_tile, cache_status = self.blank_tile(
                 output_width, output_height, img_mime, cache_key
@@ -880,7 +915,7 @@ class Map(models.Model):
 
         return data_out, NOT_CACHED_TILE
 
-    def intersects_with_tile(self, min_x, max_x, min_y, max_y):
+    def do_intersects_with_tile(self, min_x, max_x, min_y, max_y):
         width, height = self.quick_size
         tile_bounds_poly = Polygon(
             LinearRing(
@@ -902,22 +937,6 @@ class Map(models.Model):
         )
         tile_bounds_poly_prep = tile_bounds_poly.prepared
         return tile_bounds_poly_prep.intersects(map_bounds_poly)
-
-    @property
-    def hash(self):
-        return shortsafe64encodedsha(
-            f"{self.path}:{self.corners_coordinates}:20230420"
-        )[:8]
-
-    @property
-    def bound(self):
-        coords = [float(x) for x in self.corners_coordinates.split(",")]
-        return {
-            "top_left": {"lat": coords[0], "lon": coords[1]},
-            "top_right": {"lat": coords[2], "lon": coords[3]},
-            "bottom_right": {"lat": coords[4], "lon": coords[5]},
-            "bottom_left": {"lat": coords[6], "lon": coords[7]},
-        }
 
     @classmethod
     def from_points(cls, seg, waypoints):
@@ -1037,25 +1056,6 @@ class Map(models.Model):
             save=False,
         )
         return new_map
-
-    @property
-    def area(self):
-        # Area in m^2
-        width, height = self.quick_size
-        ll_a = self.map_xy_to_wsg84(0, 0)
-        ll_b = self.map_xy_to_wsg84(width, 0)
-        ll_c = self.map_xy_to_wsg84(width, height)
-        ll_d = self.map_xy_to_wsg84(0, height)
-
-        a = distance_latlon(ll_a, ll_b)
-        b = distance_latlon(ll_b, ll_c)
-        c = distance_latlon(ll_c, ll_a)
-        d = distance_latlon(ll_a, ll_d)
-        e = distance_latlon(ll_d, ll_c)
-
-        return ((a + b + c) * (a + b - c) * (a + c - b) * (b + c - a)) ** 0.5 / 4 + (
-            (c + d + e) * (c + d - e) * (c + e - d) * (e + d - c)
-        ) ** 0.5 / 4
 
     def draw_gps(self, gps_data):
         img = Image.open(BytesIO(self.data)).convert("RGBA")

@@ -131,7 +131,7 @@ def tile_etag(request):
     for key in request.GET.keys():
         get_params[key.lower()] = request.GET[key]
     if get_params.get("request", "").lower() == "getmap":
-        key = request.raster_map.tile_cache_key(
+        key = request.raster_map.get_tile_cache_key_name(
             request.image_request["width"],
             request.image_request["height"],
             request.image_request["mime"],
@@ -151,7 +151,7 @@ def wms_service(request):
     for key in request.GET.keys():
         get_params[key.lower()] = request.GET[key]
     if get_params.get("request", "").lower() == "getmap":
-        data_out, cache_hit = request.raster_map.create_tile(
+        data_out, cache_hit = request.raster_map.get_tile(
             request.image_request["width"],
             request.image_request["height"],
             request.image_request["mime"],
