@@ -946,7 +946,7 @@ class MapAdmin(admin.ModelAdmin):
         "resolution_rounded",
         "max_zoom",
         "north_declination",
-        "area",
+        "area_rounded",
         "event_count",
     )
     list_filter = (
@@ -987,7 +987,12 @@ class MapAdmin(admin.ModelAdmin):
     def resolution_rounded(self, obj):
         return round(obj.resolution, 3)
 
-    resolution_rounded.short_description = "Resolution"
+    resolution_rounded.short_description = "Resolution (pixel/m)"
+
+    def area_rounded(self, obj):
+        return round(obj.area / 1_000_000, 3)
+
+    area_rounded.short_description = "Area (km^2)"
 
     def event_count(self, obj):
         return obj.event_count

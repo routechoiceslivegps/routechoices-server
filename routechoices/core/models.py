@@ -52,7 +52,6 @@ from routechoices.lib.helpers import (
     avg_angles,
     delete_domain,
     distance_latlon,
-    distance_xy,
     epoch_to_datetime,
     general_2d_projection,
     get_current_site,
@@ -686,22 +685,7 @@ class Map(models.Model):
     def resolution(self):
         """Return map image resolution in pixels/meters"""
         width, height = self.quick_size
-        ll_a = self.map_xy_to_wsg84(0, 0)
-        ll_b = self.map_xy_to_wsg84(width, 0)
-        ll_c = self.map_xy_to_wsg84(width, height)
-        ll_d = self.map_xy_to_wsg84(0, height)
-        resolution = (
-            distance_xy(0, 0, 0, height)
-            + distance_xy(0, height, width, height)
-            + distance_xy(width, height, width, 0)
-            + distance_xy(width, 0, 0, 0)
-        ) / (
-            distance_latlon(ll_a, ll_b)
-            + distance_latlon(ll_b, ll_c)
-            + distance_latlon(ll_c, ll_d)
-            + distance_latlon(ll_d, ll_a)
-        )
-        return resolution
+        return (width * height / (self.area * 1_000_000)) ** 0.5
 
     @property
     def center(self):
@@ -1056,24 +1040,22 @@ class Map(models.Model):
 
     @property
     def area(self):
-        # Area in km^2
+        # Area in m^2
         width, height = self.quick_size
         ll_a = self.map_xy_to_wsg84(0, 0)
         ll_b = self.map_xy_to_wsg84(width, 0)
         ll_c = self.map_xy_to_wsg84(width, height)
         ll_d = self.map_xy_to_wsg84(0, height)
 
-        a = distance_latlon(ll_a, ll_b) / 1000
-        b = distance_latlon(ll_b, ll_c) / 1000
-        c = distance_latlon(ll_c, ll_a) / 1000
-        d = distance_latlon(ll_a, ll_d) / 1000
-        e = distance_latlon(ll_d, ll_c) / 1000
+        a = distance_latlon(ll_a, ll_b)
+        b = distance_latlon(ll_b, ll_c)
+        c = distance_latlon(ll_c, ll_a)
+        d = distance_latlon(ll_a, ll_d)
+        e = distance_latlon(ll_d, ll_c)
 
-        return round(
-            ((a + b + c) * (a + b - c) * (a + c - b) * (b + c - a)) ** 0.5 / 4
-            + ((c + d + e) * (c + d - e) * (c + e - d) * (e + d - c)) ** 0.5 / 4,
-            3,
-        )
+        return ((a + b + c) * (a + b - c) * (a + c - b) * (b + c - a)) ** 0.5 / 4 + (
+            (c + d + e) * (c + d - e) * (c + e - d) * (e + d - c)
+        ) ** 0.5 / 4
 
     def draw_gps(self, gps_data):
         img = Image.open(BytesIO(self.data)).convert("RGBA")
