@@ -515,7 +515,10 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                 course_map.height = map_drawing.height
                 course_maps.append(course_map)
         if course_maps:
-            map_obj = map_obj.merge(*course_maps)
+            try:
+                map_obj = map_obj.merge(*course_maps)
+            except Exception:
+                pass
         return ContentFile(map_obj.data)
 
     def get_competitor_devices_data(self, event):
