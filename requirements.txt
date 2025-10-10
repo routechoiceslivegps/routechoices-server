@@ -100,7 +100,7 @@ tinycss2==1.4.0
 tornado==6.5.2
 types-python-dateutil==2.9.0.20250822
 typing-extensions==4.15.0
-typing-inspection==0.4.1
+typing-inspection==0.4.2
 uritemplate==4.2.0
 urllib3==2.5.0
 webauthn==1.11.1
