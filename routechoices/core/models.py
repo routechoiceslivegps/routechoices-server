@@ -2166,8 +2166,14 @@ class Device(models.Model):
         from_ts = from_date.timestamp()
         end_ts = end_date.timestamp()
         locs = self.locations
-        from_idx = bisect.bisect_left(locs, from_ts, key=itemgetter(0))
-        end_idx = bisect.bisect_right(locs, end_ts, key=itemgetter(0))
+        if locs and locs[0][0] >= from_ts:
+            from_idx = 0
+        else:
+            from_idx = bisect.bisect_left(locs, from_ts, key=itemgetter(0))
+        if locs and locs[-1][0] <= end_ts:
+            end_idx = None
+        else:
+            end_idx = bisect.bisect_right(locs, end_ts, key=itemgetter(0))
         locs = locs[from_idx:end_idx]
         if not encode:
             return locs, len(locs)
