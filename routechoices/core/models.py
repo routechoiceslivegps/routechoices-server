@@ -2163,8 +2163,14 @@ class Device(models.Model):
             self._last_location_longitude = None
 
     def get_locations_between_dates(self, from_date, end_date, /, *, encode=False):
-        from_ts = from_date.timestamp()
-        end_ts = end_date.timestamp()
+        from_ts = int(round(from_date.timestamp()))
+        end_ts = int(round(end_date.timestamp()))
+
+        if encode:
+            return gps_data_codec.extract_encoded_interval(
+                self.locations_encoded, from_ts, end_ts
+            )
+
         locs = self.locations
         if locs and locs[0][0] >= from_ts:
             from_idx = 0
@@ -2174,11 +2180,7 @@ class Device(models.Model):
             end_idx = None
         else:
             end_idx = bisect.bisect_right(locs, end_ts, key=itemgetter(0))
-        locs = locs[from_idx:end_idx]
-        if not encode:
-            return locs, len(locs)
-        encoded_locs = gps_data_codec.encode(locs)
-        return encoded_locs, len(locs)
+        return locs[from_idx:end_idx], len(locs)
 
     def get_active_periods(self):
         periods_used = []
