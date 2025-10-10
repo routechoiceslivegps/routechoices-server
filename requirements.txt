@@ -74,8 +74,8 @@ psycopg==3.2.10
 psycopg-binary==3.2.10
 psycopg-pool==3.2.6
 pycparser==2.22
-pydantic==2.11.7
-pydantic-core==2.33.2
+pydantic==2.12.0
+pydantic-core==2.41.1
 pyopenssl==25.1.0
 pypng==0.20220715.0
 pyproj==3.7.2
