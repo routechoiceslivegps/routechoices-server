@@ -1,4 +1,4 @@
-FROM python:3.13 AS builder
+FROM python:3.14 AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,6 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 ENV PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1
 
-COPY requirements.txt .
 
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends g++ gcc libcairo2-dev libgdal-dev libjpeg-dev zlib1g-dev libwebp-dev libmagic-dev libgl1 libpq5 && \
@@ -22,10 +21,12 @@ ENV VIRTUAL_ENV="/opt/venv/" \
 
 RUN . /opt/venv/bin/activate
 
+COPY requirements.txt .
+
 RUN uv pip install -r requirements.txt
 
 # final stage
-FROM python:3.13-slim AS final
+FROM python:3.14-slim AS final
 RUN adduser --uid 1001 --disabled-password --gecos '' --no-create-home app
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends libcairo2 libgl1 libglib2.0-0 libmagic1 libgdal36 && \
