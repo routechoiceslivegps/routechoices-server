@@ -79,7 +79,7 @@ function RCEvent(infoURL, clockURL, locale) {
 	let competitorsMinCustomOffset = null;
 	const competitorsTags = new Set();
 	const activeCompetitorCategories = new Set();
-	const targetFPS = 1000 / 30;
+	const targetMSPerFrame = 1000 / 30;
 	let loaded = false;
 	const MAX_RUNNER_DISPLAYED = 200;
 
@@ -1139,11 +1139,11 @@ function RCEvent(infoURL, clockURL, locale) {
 			}
 			currentTime =
 				+clock.now() - (fetchPositionInterval + 5 + sendInterval + 5) * 1e3; // 25sec // Delay includes by the fetch interval (10s) + the cache interval (5sec) + the send interval (default 5sec) + smoothness delay (5sec)
-			const elapsedSineRefresh = ts - prevDisplayRefresh;
-			if (elapsedSineRefresh >= targetFPS) {
+			const elapsedSinceRefresh = ts - prevDisplayRefresh;
+			if (elapsedSinceRefresh >= targetMSPerFrame) {
 				const mustRefreshMeters = ts - prevMeterDisplayRefresh > 1000;
 				drawCompetitors(mustRefreshMeters);
-				prevDisplayRefresh = ts - (elapsedSineRefresh % targetFPS);
+				prevDisplayRefresh = ts - (elapsedSinceRefresh % targetMSPerFrame);
 				if (mustRefreshMeters) {
 					prevMeterDisplayRefresh = prevDisplayRefresh;
 				}
@@ -1507,11 +1507,11 @@ function RCEvent(infoURL, clockURL, locale) {
 					return;
 				}
 			}
-			const elapsedSineRefresh = ts - prevDisplayRefresh;
-			if (elapsedSineRefresh > targetFPS) {
+			const elapsedSinceRefresh = ts - prevDisplayRefresh;
+			if (elapsedSinceRefresh > targetMSPerFrame) {
 				const mustRefreshMeters = ts - prevMeterDisplayRefresh > 1000;
 				drawCompetitors(mustRefreshMeters);
-				prevDisplayRefresh = ts - (elapsedSineRefresh % targetFPS);
+				prevDisplayRefresh = ts - (elapsedSinceRefresh % targetMSPerFrame);
 				if (mustRefreshMeters) {
 					prevMeterDisplayRefresh = prevDisplayRefresh;
 				}
