@@ -1,5 +1,4 @@
 {
-	"heads-up-text": "Attention!",
 	"club-events-link-text": "Événements par $1",
 	"no-competitors": "Pas de participants.",
 	"loading-text": "Chargement...",
@@ -56,5 +55,6 @@
 	"start-list": "Liste de départ",
 	"icons-size": "Taille des icônes",
 	"last-seen": "Vu la dernière fois $1",
-	"coordinates": "Coordonnées"
+	"coordinates": "Coordonnées",
+	"too-many-runners": "Il y a plus de 200 participants, un seul est affiché pour le moment."
 }

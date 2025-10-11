@@ -1,5 +1,4 @@
 {
-	"heads-up-text": "Huomio!",
 	"club-events-link-text": "Tapahtumat seuralta $1",
 	"no-competitors": "Ei osallistujia.",
 	"loading-text": "Ladataan...",
@@ -56,5 +55,6 @@
 	"start-list": "Aloituslista",
 	"icons-size": "Kuvakkeiden koko",
 	"last-seen": "Viimeksi nähty $1",
-	"coordinates": "Koordinaatit"
+	"coordinates": "Koordinaatit",
+	"too-many-runners": "Osallistujia on yli 200, mutta nyt näytetään vain yksi."
 }

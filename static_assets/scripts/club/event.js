@@ -81,6 +81,7 @@ function RCEvent(infoURL, clockURL, locale) {
 	const activeCompetitorCategories = new Set();
 	const targetFPS = 1000 / 30;
 	let loaded = false;
+	const MAX_RUNNER_DISPLAYED = 200;
 
 	const getBatteryLevelTitle = (battery, route) => {
 		const lastTs = route?.getLastPosition()?.[0];
@@ -1009,6 +1010,9 @@ function RCEvent(infoURL, clockURL, locale) {
 					u("#options_show_button").on("click", displayOptions);
 					u("#full_progress_bar").parent().on("click", pressProgressBar);
 					u("#share_button").on("click", shareURL);
+					u(".text-too-many-runners-content").text(
+						banana.i18n("too-many-runners"),
+					);
 					map.contextmenu.insertItem(
 						{
 							text: banana.i18n("draw-split-line"),
@@ -1819,10 +1823,14 @@ function RCEvent(infoURL, clockURL, locale) {
 		const listDiv = u("<div/>");
 		listDiv.addClass("mt-1");
 		listDiv.attr({ id: "competitorList", "data-bs-theme": getCurrentTheme() });
-		if (!loaded && Object.keys(competitorList).length > 199) {
+		if (!loaded && Object.keys(competitorList).length >= MAX_RUNNER_DISPLAYED) {
 			Object.values(competitorList).forEach((competitor, i) => {
 				competitor.isShown = i === 0;
 			});
+			new bootstrap.Toast(document.getElementById("text-too-many-runners"), {
+				animation: true,
+				autohide: false,
+			}).show();
 		}
 		loaded = true;
 		Object.values(competitorList).forEach((competitor, i) => {
@@ -3248,7 +3256,6 @@ function RCEvent(infoURL, clockURL, locale) {
 	dayjs.locale(locale);
 	updateText(locale).then(() => {
 		u("#event-start-date-text").text(banana.i18n("event-start-date-text"));
-		u("#heads-up-text").text(banana.i18n("heads-up-text"));
 		u("#export-text").text(banana.i18n("export"));
 		u("#event-start-list-link").text(banana.i18n("start-list"));
 		u("#loading-text").text(banana.i18n("loading-text"));

@@ -1,5 +1,4 @@
 {
-	"heads-up-text": "Heads up!",
 	"club-events-link-text": "Events by $1",
 	"no-competitors": "No competitors.",
 	"loading-text": "Loading...",
@@ -56,5 +55,6 @@
 	"start-list": "Start List",
 	"icons-size": "Icons size",
 	"last-seen": "Last seen $1",
-	"coordinates": "Coordinates"
+	"coordinates": "Coordinates",
+	"too-many-runners": "There is more than 200 participants, only 1 is displayed now."
 }

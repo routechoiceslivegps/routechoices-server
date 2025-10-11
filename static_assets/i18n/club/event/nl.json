@@ -1,5 +1,4 @@
 {
-	"heads-up-text": "Waarschuwing!",
 	"club-events-link-text": "$1 evenementen",
 	"no-competitors": "Geen concurenten...",
 	"loading-text": "Laden...",
@@ -56,5 +55,6 @@
 	"start-list": "Start lijst",
 	"icons-size": "Pictogrammen grootte",
 	"last-seen": "Laatst gezien $1",
-	"coordinates": "Coördinaten"
+	"coordinates": "Coördinaten",
+	"too-many-runners": "Er zijn meer dan 200 deelnemers, er wordt er nu maar 1 weergegeven."
 }
