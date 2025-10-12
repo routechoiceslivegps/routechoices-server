@@ -310,14 +310,26 @@ Follow our events live or replay them later.
         super().save(*args, **kwargs)
 
     @property
+    def free_trial_end(self):
+        self.creation_date + timedelta(days=10)
+
+    @property
     def free_trial_active(self):
-        return now() - self.creation_date < timedelta(days=10)
+        return now() < self.free_trial_end
 
     @property
     def subscription_paused(self):
         return (
             self.subscription_paused_at is not None
             and self.subscription_paused_at < now()
+        )
+
+    @property
+    def is_on_free_trial(self):
+        return (
+            self.free_trial_active
+            and not (self.o_club and now() < END_FREE_OCLUB)
+            and not (self.upgraded and not self.subscription_paused)
         )
 
     @property
