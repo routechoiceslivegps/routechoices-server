@@ -311,7 +311,7 @@ Follow our events live or replay them later.
 
     @property
     def free_trial_end(self):
-        self.creation_date + timedelta(days=10)
+        return self.creation_date + timedelta(days=10)
 
     @property
     def free_trial_active(self):
