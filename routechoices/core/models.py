@@ -1071,6 +1071,79 @@ class Map(models.Model):
         draw.line(points, fill="#0000FF", width=6, joint="curve")
         return img
 
+    def overlay(self, *other_maps):
+        if not other_maps:
+            return self
+        width, height = self.quick_size
+
+        min_x = 0
+        min_y = 0
+        max_x = width
+        max_y = height
+
+        new_width = int(max_x - min_x)
+        new_height = int(max_y - min_y)
+
+        new_image = Image.new(
+            mode="RGBA", size=(new_width, new_height), color=(0, 0, 0, 0)
+        )
+        cv2_img_raw = Image.open(BytesIO(self.data)).convert("RGBA")
+        new_image.alpha_composite(cv2_img_raw, (int(-min_x), int(-min_y)))
+
+        for i, other_map in enumerate(other_maps):
+            w, h = other_map.quick_size
+            bound = other_map.bound
+            corners = [
+                self.wsg84_to_map_xy(bound[xx]["lat"], bound[xx]["lon"])
+                for xx in ("top_left", "top_right", "bottom_right", "bottom_left")
+            ]
+            p1 = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
+            p2 = np.float32(
+                [
+                    [corners[0][0] - min_x, corners[0][1] - min_y],
+                    [corners[1][0] - min_x, corners[1][1] - min_y],
+                    [corners[2][0] - min_x, corners[2][1] - min_y],
+                    [corners[3][0] - min_x, corners[3][1] - min_y],
+                ]
+            )
+            coeffs = cv2.getPerspectiveTransform(p1, p2)
+
+            src_data = other_map.data
+            src_mime = magic.from_buffer(src_data, mime=True)
+            if src_mime == "image/gif":
+                pil_src_img = Image.open(BytesIO(src_data)).convert("RGBA")
+                cv2_img = cv2.cvtColor(np.array(pil_src_img), cv2.COLOR_RGB2BGRA)
+            else:
+                img_bytes = np.frombuffer(src_data, np.uint8)
+                cv2_img_raw = cv2.imdecode(img_bytes, cv2.IMREAD_UNCHANGED)
+                cv2_img = cv2.cvtColor(np.array(cv2_img_raw), cv2.COLOR_BGR2BGRA)
+            img_warped = cv2.warpPerspective(
+                cv2_img,
+                coeffs,
+                (new_width, new_height),
+                flags=cv2.INTER_AREA,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=(255, 255, 255, 0),
+            )
+            pil_img_warped = Image.fromarray(
+                cv2.cvtColor(img_warped, cv2.COLOR_BGRA2RGBA)
+            )
+            new_image.alpha_composite(pil_img_warped, (0, 0))
+        params = {
+            "dpi": (72, 72),
+            "quality": 40,
+        }
+        out_buffer = BytesIO()
+        new_image.save(out_buffer, "WEBP", **params)
+        out_file = ContentFile(out_buffer.getvalue())
+
+        map_obj = Map(name=self.name)
+        map_obj.image.save("imported_image", out_file, save=False)
+        map_obj.width = new_image.width
+        map_obj.height = new_image.height
+        map_obj.corners_coordinates = self.corners_coordinates
+        return map_obj
+
     def merge(self, *other_maps):
         if not other_maps:
             return self
@@ -1130,6 +1203,7 @@ class Map(models.Model):
         cv2_img_raw = Image.open(BytesIO(self.data)).convert("RGBA")
         new_image.alpha_composite(cv2_img_raw, (int(-min_x), int(-min_y)))
 
+        # TODO: Use overlay function starting here
         for i, other_map in enumerate(other_maps):
             w, h = other_map.quick_size
             p1 = np.float32([[0, 0], [w, 0], [w, h], [0, h]])

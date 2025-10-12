@@ -516,7 +516,7 @@ class Livelox(ThirdPartyTrackingSolutionWithProxy):
                 course_maps.append(course_map)
         if course_maps:
             try:
-                map_obj = map_obj.merge(*course_maps)
+                map_obj = map_obj.overlay(*course_maps)
             except Exception:
                 pass
         return ContentFile(map_obj.data)
