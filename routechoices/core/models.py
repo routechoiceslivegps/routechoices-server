@@ -1075,21 +1075,7 @@ class Map(models.Model):
         if not other_maps:
             return self
         width, height = self.quick_size
-
-        min_x = 0
-        min_y = 0
-        max_x = width
-        max_y = height
-
-        new_width = int(max_x - min_x)
-        new_height = int(max_y - min_y)
-
-        new_image = Image.new(
-            mode="RGBA", size=(new_width, new_height), color=(0, 0, 0, 0)
-        )
-        cv2_img_raw = Image.open(BytesIO(self.data)).convert("RGBA")
-        new_image.alpha_composite(cv2_img_raw, (int(-min_x), int(-min_y)))
-
+        new_image = Image.open(BytesIO(self.data)).convert("RGBA")
         for i, other_map in enumerate(other_maps):
             w, h = other_map.quick_size
             bound = other_map.bound
@@ -1100,10 +1086,10 @@ class Map(models.Model):
             p1 = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
             p2 = np.float32(
                 [
-                    [corners[0][0] - min_x, corners[0][1] - min_y],
-                    [corners[1][0] - min_x, corners[1][1] - min_y],
-                    [corners[2][0] - min_x, corners[2][1] - min_y],
-                    [corners[3][0] - min_x, corners[3][1] - min_y],
+                    [corners[0][0], corners[0][1]],
+                    [corners[1][0], corners[1][1]],
+                    [corners[2][0], corners[2][1]],
+                    [corners[3][0], corners[3][1]],
                 ]
             )
             coeffs = cv2.getPerspectiveTransform(p1, p2)
@@ -1120,7 +1106,7 @@ class Map(models.Model):
             img_warped = cv2.warpPerspective(
                 cv2_img,
                 coeffs,
-                (new_width, new_height),
+                (width, height),
                 flags=cv2.INTER_AREA,
                 borderMode=cv2.BORDER_CONSTANT,
                 borderValue=(255, 255, 255, 0),
@@ -1139,8 +1125,8 @@ class Map(models.Model):
 
         map_obj = Map(name=self.name)
         map_obj.image.save("imported_image", out_file, save=False)
-        map_obj.width = new_image.width
-        map_obj.height = new_image.height
+        map_obj.width = width
+        map_obj.height = height
         map_obj.corners_coordinates = self.corners_coordinates
         return map_obj
 
