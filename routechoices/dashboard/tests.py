@@ -567,6 +567,32 @@ class TestDashboard(EssentialDashboardBase):
         self.assertContains(res, "My Competition")
 
         # test validations errors
+        # event outside free trial period
+        self.club.creation_date = arrow.now().shift(days=-5).datetime
+        self.club.save()
+        res = self.client.post(
+            url,
+            {
+                "name": "My Competition",
+                "slug": "myevent",
+                "start_date": "2025-02-03T00:00:00",
+                "end_date": "2125-02-04T00:00:00",
+                "privacy": "public",
+                "tail_length": 60,
+                "send_interval": 5,
+                "backdrop_map": "blank",
+                "map_assignations-TOTAL_FORMS": 1,
+                "map_assignations-INITIAL_FORMS": 0,
+                "competitors-TOTAL_FORMS": 1,
+                "competitors-INITIAL_FORMS": 0,
+                "timezone": "UTC",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertContains(
+            res,
+            "You can not create events that extend beyond the expiration date of your free trial.",
+        )
 
         # free trial expired
         self.club.creation_date = arrow.now().shift(years=-1).datetime
