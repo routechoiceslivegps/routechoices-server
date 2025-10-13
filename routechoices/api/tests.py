@@ -891,7 +891,7 @@ class EventApiTestCase(EssentialApiBase):
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
         key = res.data["key"]
 
-        device.add_location(arrow.get().shift().timestamp(), 12.34568, 123.45677)
+        device.add_location(arrow.get().timestamp(), 12.34568, 123.45677)
 
         time.sleep((time.time() // 5 + 1) * 5 - time.time() + 0.1)
         res = self.client.get(f"{url}/{key}")
