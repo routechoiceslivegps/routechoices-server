@@ -48,7 +48,7 @@ drf-yasg==1.21.11
 frozenlist==1.8.0
 geoip2==5.1.0
 geojson-validator==0.6.0
-gps-data-codec @ git+https://github.com/routechoiceslivegps/gps-data-codec@f0adb59360e796fab6e1cde0a0a0ec7579ffe26f
+gps-data-codec @ git+https://github.com/routechoiceslivegps/gps-data-codec@56295f83f88499cf76b42362e86411e1e6420d53
 gpxpy==1.6.2
 gunicorn==23.0.0
 idna==3.11
