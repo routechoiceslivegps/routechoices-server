@@ -35,7 +35,7 @@ const backdropMaps = {
 		},
 	),
 	"mapant-fi": L.tileLayer(
-		"https://www.mapant.fi/wmts/wmts_EPSG3857.php?z={z}&x={x}&y={y}",
+		"https://wmts.mapant.fi/wmts_EPSG3857.php?z={z}&x={x}&y={y}",
 		{
 			attribution: "&copy; MapAnt.fi and National Land Survey of Finland",
 			className: "wms256",
