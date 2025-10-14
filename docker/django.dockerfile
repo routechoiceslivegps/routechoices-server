@@ -1,4 +1,4 @@
-FROM python:3.13 AS builder
+FROM python:3.14 AS builder
 
 WORKDIR /app
 
@@ -26,7 +26,7 @@ COPY requirements.txt .
 RUN uv pip install -r requirements.txt
 
 # final stage
-FROM python:3.13-slim AS final
+FROM python:3.14-slim AS final
 RUN adduser --uid 1001 --disabled-password --gecos '' --no-create-home app
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends libcairo2 libgl1 libglib2.0-0 libmagic1 libgdal36 && \
