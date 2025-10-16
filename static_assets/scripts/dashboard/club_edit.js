@@ -65,23 +65,22 @@
 					});
 					return;
 				}
-				if (admin - user - div)
-					swal(
-						{
-							title: "Confirm",
-							text: `You are about to remove user "${name}" from the club's administrator list.`,
-							type: "warning",
-							confirmButtonText: "Continue",
-							showCancelButton: true,
-							confirmButtonClass: "btn-danger",
-						},
-						(isConfirmed) => {
-							if (isConfirmed) {
-								el.selected = false;
-								d.remove();
-							}
-						},
-					);
+				swal(
+					{
+						title: "Confirm",
+						text: `You are about to remove user "${name}" from the club's administrator list.`,
+						type: "warning",
+						confirmButtonText: "Continue",
+						showCancelButton: true,
+						confirmButtonClass: "btn-danger",
+					},
+					(isConfirmed) => {
+						if (isConfirmed) {
+							el.selected = false;
+							d.remove();
+						}
+					},
+				);
 			};
 			d.append(
 				u(
