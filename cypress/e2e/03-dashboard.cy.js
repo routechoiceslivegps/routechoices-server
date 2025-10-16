@@ -3,6 +3,22 @@ context("Dashboard actions", () => {
 		cy.wait(100);
 	});
 
+	it("Club page edit", () => {
+		cy.login();
+		cy.visit("https://dashboard.routechoices.dev/clubs/halden-sk");
+		cy.contains(".admin-user-div", "test-user");
+		cy.get(".admin-user-div").should("have.length", 2);
+		cy.get(".remove-admin-btn").eq(1).click();
+		cy.contains(
+			`You are about to remove user "test-user" from the club's administrator list.`,
+		);
+		cy.wait(500);
+		cy.get("button.confirm").click();
+		cy.get(".admin-user-div").should("have.length", 1);
+		cy.get(".remove-admin-btn").click();
+		cy.contains("You must have at least one administrator listed.");
+	});
+
 	it("Contribution page", () => {
 		cy.visit(
 			"https://halden-sk.routechoices.dev/open-registration-upload-allowed/contribute",

@@ -22,9 +22,12 @@ class Command(BaseCommand):
         admin_user = User.objects.create_user(
             "admin", "admin@routechoices.com", "pa$$word123"
         )
+        other_user = User.objects.create_user(
+            "test-user", "test@routechoices.com", "pa$$word123"
+        )
 
         club = Club.objects.create(name="Halden SK", slug="halden-sk")
-        club.admins.set([admin_user])
+        club.admins.set([admin_user, other_user])
 
         Event.objects.create(
             club=club,

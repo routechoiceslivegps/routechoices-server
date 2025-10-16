@@ -84,7 +84,7 @@
 			};
 			d.append(
 				u(
-					'<button type="button" class="btn btn-close ms-1 btn-sm" aria-label="Close"></button>',
+					'<button type="button" class="btn btn-close ms-1 btn-sm remove-admin-btn" aria-label="Remove admin"></button>',
 				).on("click", removeElFromAdmin),
 			);
 			return d;
