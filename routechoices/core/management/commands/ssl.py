@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 from sewer.crypto import AcmeAccount, AcmeKey
 
 from routechoices.core.models import Club
-from routechoices.lib.helpers import check_cname_record
+from routechoices.lib.helpers import check_dns_records
 from routechoices.lib.ssl_certificates import (
     ClubAcmeProvider,
     is_account_ssl_expirying,
@@ -87,7 +87,7 @@ class Command(BaseCommand):
                 self.stderr.write("Certificate for this domain already exists")
                 continue
 
-            if not check_cname_record(domain):
+            if not check_dns_records(domain):
                 self.stderr.write("Domain is not pointing to routechoices.com anymore")
                 club.domain = ""
                 club.save()
@@ -174,7 +174,7 @@ class Command(BaseCommand):
                 self.stderr.write("Certificate for domain is not yet expiring")
                 continue
 
-            if not check_cname_record(domain):
+            if not check_dns_records(domain):
                 self.stderr.write("Domain is not pointing to routechoices.com anymore")
                 club.domain = ""
                 club.save()

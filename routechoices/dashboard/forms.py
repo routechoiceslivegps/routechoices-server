@@ -44,7 +44,7 @@ from routechoices.core.models import (
     Notice,
 )
 from routechoices.lib.helpers import (
-    check_cname_record,
+    check_dns_records,
     get_aware_datetime,
     initial_of_name,
 )
@@ -275,10 +275,10 @@ class ClubDomainForm(ModelForm):
         domain = self.cleaned_data["domain"]
         if not domain:
             return domain
-        if not check_cname_record(domain):
+        if not check_dns_records(domain):
             self.add_error(
                 "domain",
-                f"CNAME record for '{domain}' has not been set properly.",
+                f"DNS record for '{domain}' has not been set properly.",
             )
         matching_clubs = Club.objects.filter(domain__iexact=domain)
         if self.instance:

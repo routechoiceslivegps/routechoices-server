@@ -6,7 +6,7 @@ from django.test import TestCase, override_settings
 
 from . import plausible
 from .helpers import (
-    check_cname_record,
+    check_dns_records,
     compute_corners_from_kml_latlonbox,
     get_device_name,
     get_image_mime_from_request,
@@ -141,9 +141,10 @@ class HelperTestCase(TestCase):
         )
 
     def test_check_dns(self):
-        self.assertTrue(check_cname_record("live.kiilat.com"))
-        self.assertFalse(check_cname_record("doesnotexist.kiilat.com"))
-        self.assertFalse(check_cname_record("kiilat.com"))
+        self.assertTrue(check_dns_records("live.kiilat.com"))
+        self.assertTrue(check_dns_records("where.rapha.run"))
+        self.assertFalse(check_dns_records("doesnotexist.kiilat.com"))
+        self.assertFalse(check_dns_records("kiilat.com"))
 
     def test_slippy_map(self):
         xy = latlon_to_tile_xy(60, 20, 10)

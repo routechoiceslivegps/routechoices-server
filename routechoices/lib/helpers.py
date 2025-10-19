@@ -395,7 +395,7 @@ def initial_of_name(name):
 def check_cname_record(domain):
     try:
         resp = requests.get(
-            f"https://cloudflare-dns.com/dns-query?type=CNAME&name={urllib.parse.quote(domain)}",
+            f"https://one.one.one.one/dns-query?type=CNAME&name={urllib.parse.quote(domain)}",
             headers={"accept": "application/dns-json"},
             timeout=10,
         )
@@ -412,8 +412,34 @@ def check_cname_record(domain):
     for ans in answer:
         if ans.get("data") == "cname.routechoices.com." and ans.get("type") == 5:
             return True
-
     return False
+
+
+def check_a_record(domain):
+    try:
+        resp = requests.get(
+            f"https://one.one.one.one/dns-query?type=A&name={urllib.parse.quote(domain)}",
+            headers={"accept": "application/dns-json"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+    except Exception:
+        return False
+
+    data = resp.json()
+
+    if data.get("Status") != 0:
+        return False
+
+    answer = data.get("Answer", [])
+    for ans in answer:
+        if ans.get("data") == "95.217.56.90" and ans.get("type") == 1:
+            return True
+    return False
+
+
+def check_dns_records(domain):
+    return check_cname_record(domain) or check_a_record(domain)
 
 
 def delete_domain(domain):
