@@ -189,7 +189,7 @@ class TestDashboard(EssentialDashboardBase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertContains(res, "invalid-feedback")
         self.assertContains(
-            res, "CNAME record for 'gps.kiilat.com' has not been set properly."
+            res, "DNS record for 'gps.kiilat.com' has not been set properly."
         )
 
         url = "/clubs/myclub/custom-domain"
