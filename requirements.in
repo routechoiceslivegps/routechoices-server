@@ -44,6 +44,6 @@ psycopg[binary,pool]
 python-magic
 sentry-sdk
 setuptools
-sewer @ git+https://github.com/rphlo/sewer@0.8.4a
+sewer @ git+https://github.com/rphlo/sewer@0.8.4b
 tornado
 pyproj

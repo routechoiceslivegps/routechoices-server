@@ -91,7 +91,7 @@ s3transfer==0.14.0
 segno==1.6.6
 sentry-sdk==2.41.0
 setuptools==80.9.0
-sewer @ git+https://github.com/rphlo/sewer@8d25ea1f1e95e97f52c2354c1752d2adbbfdafaf
+sewer @ git+https://github.com/rphlo/sewer@10ad8f2885cb038a52fb3686a7e80590a8799349
 shapely==2.1.2
 six==1.17.0
 soupsieve==2.8
