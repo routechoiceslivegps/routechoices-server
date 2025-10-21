@@ -202,6 +202,9 @@ class EssentialApiTestCase1(EssentialApiBase):
         device.add_locations([(7, 0.00002, 0.00002)], save=False)
         self.assertEqual(device.last_location, device.locations[-1])
         self.assertEqual(device.last_location, (7, -0.00002, 0.00001))
+        last_loc = device.last_location
+        device.update_cached_data()
+        self.assertEqual(last_loc, device.last_location)
 
     def test_archive_device(self):
         club = Club.objects.create(name="Test club", slug="club")
