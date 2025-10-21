@@ -2460,12 +2460,6 @@ class Device(models.Model):
         )
 
     @property
-    def last_location_timestamp(self):
-        if self._location_count == 0:
-            return None
-        return self.last_location[LOCATION_TIMESTAMP_INDEX]
-
-    @property
     def last_location_datetime(self):
         return self._last_location_datetime
 

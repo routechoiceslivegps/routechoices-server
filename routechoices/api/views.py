@@ -1700,7 +1700,7 @@ def device_info(request, device_id):
             "id": device.aid,
             "last_position": (
                 {
-                    "timestamp": device.last_location_timestamp,
+                    "timestamp": device.last_location[LOCATION_TIMESTAMP_INDEX],
                     "coordinates": {
                         "latitude": device.last_location[LOCATION_LATITUDE_INDEX],
                         "longitude": device.last_location[LOCATION_LONGITUDE_INDEX],
