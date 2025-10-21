@@ -355,9 +355,10 @@ class TCPConnectionsTest(AsyncTestCase, TransactionTestCase):
             "*HQ,352483084100009,XT,1,100#",
             "*HQ,352483084100009,V3,044855,28403,01,001450,011473,158,-62,0292,0,X,030817,FFFFFBFF#",
             "*HQ,3524830841,#",
+            "*HQ,3524830841,V1,104000,A,-22-35.1777,N,-113-57.8913,E,000.27,235,130722,FFFFFBFF,460,11,d18e105,7752,6#",
         ]
-        nb_new_pos_expected = [0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0]
-        need_to_read = [0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0]
+        nb_new_pos_expected = [0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1]
+        need_to_read = [0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1]
         server = client = None
         device = await create_imei_device("352483084100009")
         sock, port = bind_unused_port()
