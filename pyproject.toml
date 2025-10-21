@@ -8,6 +8,6 @@ ignore="H021"
 [tool.coverage.run]
 omit = [
   "invitations/admin.py",
-  "routechoices/core/admin.py"
-  "routechoices/lib/other_gps_services/*.py"
+  "routechoices/core/admin.py",
+  "routechoices/lib/other_gps_services/*.py",
 ]
