@@ -1069,20 +1069,6 @@ class Map(models.Model):
         )
         return new_map
 
-    def draw_gps(self, gps_data):
-        img = Image.open(BytesIO(self.data)).convert("RGBA")
-        points = [
-            self.wsg84_to_map_xy(
-                coord[LOCATION_LATITUDE_INDEX], coord[LOCATION_LONGITUDE_INDEX]
-            )
-            for coord in gps_data
-        ]
-        points = simplify_line(points)
-        draw = ImageDraw.Draw(img)
-        draw.line(points, fill="#FFFFFF", width=10, joint="curve")
-        draw.line(points, fill="#0000FF", width=6, joint="curve")
-        return img
-
     def overlay(self, *other_maps):
         if not other_maps:
             return self
