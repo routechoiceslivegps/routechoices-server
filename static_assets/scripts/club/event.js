@@ -211,7 +211,11 @@ function RCEvent(infoURL, clockURL, locale) {
 				rankingData.forEach((c, i) => {
 					rankingDiv.append(
 						`<div class="text-nowrap overflow-hidden text-truncate" style="clear: both; width: 200px;">
-							<div class="text-nowrap d-inline-block overflow-hidden float-start text-truncate" style="width: 145px;">${i + 1} <span style="color: ${c.color}">&#11044;</span> ${u("<span/>").text(c.name).html()}</div>
+							<div class="text-nowrap d-inline-block overflow-hidden float-start text-truncate" style="width: 145px;">${i + 1} <span style="color: ${c.color}">&#11044;</span> ${u(
+								"<span/>",
+							)
+								.text(c.name ?? "")
+								.html()}</div>
 							<div class="text-nowrap d-inline-block overflow-hidden float-end text-end" style="width: 55px;font-feature-settings: tnum;font-variant-numeric: tabular-nums lining-nums;padding-right: 15px;" title="${c.resultText}">${c.resultText}</div>
 						</div>`,
 					);

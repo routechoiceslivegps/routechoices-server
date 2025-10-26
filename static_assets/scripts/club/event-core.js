@@ -272,7 +272,9 @@ L.Control.Grouping = L.Control.extend({
 				for (const ci of k.parts) {
 					out += `<div class="text-nowrap" style="clear:both;width:200px;height:1em">
 						<div class="text-nowrap overflow-hidden float-start d-inline-block text-truncate" style="width:195px;">
-							<span style="color: ${c[ci].color}">&#11044;</span> ${u("<span/>").text(c[ci].name).html()}
+							<span style="color: ${c[ci].color}">&#11044;</span> ${u("<span/>")
+								.text(c[ci].name ?? "")
+								.html()}
 						</div>
 					</div>`;
 				}
@@ -340,7 +342,7 @@ function getRunnerNameMarker(
 		focused ? `padding-bottom: 0px;border-bottom: 4px solid ${color};` : ""
 	}`;
 	const iconHtml = `<span style="${iconStyle}">${u("<span/>")
-		.text(name)
+		.text(name ?? "")
 		.html()}</span>`;
 	const iconClass = `runner-icon runner-icon-${isDark ? "dark" : "light"}${
 		needFlagsEmojiPolyfill ? " flags-polyfill" : ""
@@ -372,7 +374,7 @@ function getRunnerNameMarker(
 function getSplitLineMarker(name, color = "purple") {
 	const iconStyle = `color: ${color};opacity: 0.75;`;
 	const iconHtml = `<span style="${iconStyle}">${u("<span/>")
-		.text(name)
+		.text(name ?? "")
 		.html()}</span>`;
 	const iconClass = "runner-icon runner-icon-dark";
 	const icon = L.divIcon({
