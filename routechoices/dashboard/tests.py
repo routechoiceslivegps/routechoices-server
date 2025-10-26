@@ -990,7 +990,7 @@ class TestDashboard(EssentialDashboardBase):
         self.assertContains(res, "invalid-feedback")
         self.assertContains(res, "Invalid GeoJSON File")
 
-        with open("cypress/fixtures/geojson/invalid.badgeojson", "rb") as fp:
+        with open("cypress/fixtures/geojson/invalid.not-a-geojson", "rb") as fp:
             geojson = SimpleUploadedFile(
                 "route.geojson", fp.read(), content_type="application/json"
             )
