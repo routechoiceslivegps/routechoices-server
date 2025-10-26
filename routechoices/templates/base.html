@@ -70,6 +70,7 @@
                 crossorigin="anonymous"></script>
         <script src="{% static 'scripts/load-local-variables.js' %}?_=2023112700"
                 data-site-version="{{ version }}"
+                data-sentry-dsn="{{ sentry_dsn }}"
                 data-api-root="{% host_url 'api_doc' host 'api' %}"></script>
         {% if analytics_enabled and request.host.name != 'dashboard' %}
             <script defer

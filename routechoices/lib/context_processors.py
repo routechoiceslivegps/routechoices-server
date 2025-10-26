@@ -24,4 +24,5 @@ def site(request):
         "analytics_enabled": bool(getattr(settings, "ANALYTICS_API_KEY")),
         "DEBUG": settings.DEBUG,
         "version": version,
+        "sentry_dsn": settings.get("SENTRY_DSN", ""),
     }
