@@ -18,7 +18,7 @@ from django.conf import settings
 from django.http.response import Http404
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_naive, make_aware
-from PIL import ImageFile
+from PIL import Image, ImageFile
 from user_sessions.templatetags.user_sessions import device as device_name
 
 from routechoices.lib.globalmaptiles import GlobalMercator
@@ -440,6 +440,15 @@ def check_a_record(domain):
 
 def check_dns_records(domain):
     return check_cname_record(domain) or check_a_record(domain)
+
+
+def is_valid_pil_image(data):
+    try:
+        with Image.open(data) as img:
+            img.verify()
+            return True
+    except (IOError, SyntaxError):
+        return False
 
 
 def delete_domain(domain):

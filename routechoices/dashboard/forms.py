@@ -47,6 +47,7 @@ from routechoices.lib.helpers import (
     check_dns_records,
     get_aware_datetime,
     initial_of_name,
+    is_valid_pil_image,
 )
 from routechoices.lib.kmz import extract_ground_overlay_info
 from routechoices.lib.validators import validate_domain_name, validate_nice_slug
@@ -873,15 +874,18 @@ class UploadKmzForm(Form):
                     r.raise_for_status()
                 except Exception:
                     raise ValidationError("File contains an unreachable image URL")
-                file_data = BytesIO(r.content)
+                file_data = r.content
             elif is_compressed:
                 image_path = os.path.abspath(os.path.join(tmp_extract_dir, image_path))
                 if not image_path.startswith(tmp_extract_dir):
                     raise ValidationError("File contains an illegal image path")
-                file_data = open(image_path, "rb")
+                with open(image_path, "rb") as fp:
+                    file_data = fp.read()
             else:
                 raise ValidationError("File contains an illegal image path")
-            image_file = File(file_data)
+            if not is_valid_pil_image(BytesIO(file_data)):
+                continue
+            image_file = File(BytesIO(file_data))
             new_map = Map(
                 name=name,
                 corners_coordinates=corners_coords,
