@@ -189,6 +189,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
                                 f"//{club.slug}.{default_domain}{request.get_full_path()}"
                             )
                         request.club_slug = slug
+                        request.session = {}
                         if request.path != "/":
                             return render(
                                 request, "404.html", status=status.HTTP_404_NOT_FOUND
@@ -206,6 +207,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
             else:
                 club = Club.objects.filter(domain__iexact=raw_host).first()
                 if not club:
+                    request.session = {}
                     return render(
                         request, "404-cname.html", status=status.HTTP_404_NOT_FOUND
                     )
