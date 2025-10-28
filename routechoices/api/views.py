@@ -1932,9 +1932,7 @@ def two_d_rerun_race_status(request):
         "racename": event.name,
         "racestarttime": event.start_date,
         "raceendtime": event.end_date,
-        "mapurl": (
-            f"{event.get_absolute_map_url()}-{map_idx if map_idx != 1 else ''}?.jpg"
-        ),
+        "mapurl": (f"{event.get_absolute_map_url()}-{map_idx}?.jpg"),
         "caltype": "3point",
         "mapw": raster_map.width,
         "maph": raster_map.height,
