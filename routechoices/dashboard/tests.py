@@ -158,27 +158,25 @@ class TestDashboard(EssentialDashboardBase):
 
         res = self.client.post(
             url,
-            {"domain": "live.kiilat.com"},
+            {"domain": "latlong.uk"},
             follow=True,
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertNotContains(res, "invalid-feedback")
         self.club.refresh_from_db()
-        self.assertEqual(self.club.domain, "live.kiilat.com")
+        self.assertEqual(self.club.domain, "latlong.uk")
 
         other_club = Club.objects.create(name="My other Club", slug="otherclub")
         other_club.admins.set([self.user])
         url = "/clubs/otherclub/custom-domain"
         res = self.client.post(
             url,
-            {"domain": "live.kiilat.com"},
+            {"domain": "latlong.uk"},
             follow=True,
         )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertContains(res, "invalid-feedback")
-        self.assertContains(
-            res, "Domain 'live.kiilat.com' already used by another club."
-        )
+        self.assertContains(res, "Domain 'latlong.uk' already used by another club.")
         other_club.refresh_from_db()
         self.assertEqual(other_club.domain, "")
         res = self.client.post(
