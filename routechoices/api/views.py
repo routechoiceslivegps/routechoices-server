@@ -1984,6 +1984,8 @@ def two_d_rerun_race_status(request):
 @api_GET_view
 def two_d_rerun_race_data(request):
     event_id = request.GET.get("eventid")
+    if "/" in event_id:
+        event_id, _ = event_id.split("/", 1)
     if not event_id:
         raise Http404()
     event = get_object_or_404(
