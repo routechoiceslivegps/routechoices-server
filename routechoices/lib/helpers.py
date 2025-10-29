@@ -452,7 +452,9 @@ def is_valid_pil_image(data):
 
 
 def delete_domain(domain):
-    ngx_conf = os.path.join(settings.BASE_DIR, "nginx", "custom_domains", f"{domain}")
+    ngx_conf = os.path.join(
+        settings.BASE_DIR, "nginx", "custom_domains", f"{domain}.conf"
+    )
     crt_file = os.path.join(settings.BASE_DIR, "nginx", "certs", f"{domain}.crt")
     key_file = os.path.join(settings.BASE_DIR, "nginx", "certs", f"{domain}.key")
     act_file = os.path.join(
