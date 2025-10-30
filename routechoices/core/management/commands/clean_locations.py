@@ -1,7 +1,9 @@
 import multiprocessing
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import timedelta
 
+import arrow
 from django.core.management.base import BaseCommand
 from django.db.models import Prefetch
 from django.utils.timezone import now
@@ -16,6 +18,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--force", action="store_true", default=False)
+        parser.add_argument("--since", type=str, required=False)
         parser.add_argument("-w", "--workers", type=int, default=CPU_COUNT)
 
     def handle_device(self, device, until, force):
@@ -26,6 +29,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         force = options["force"]
+        since = options.get("since")
+        date_since = None
+        if since:
+            try:
+                date_since = arrow.get(since).datetime
+            except Exception:
+                self.stderr.write(self.style.ERROR("Invalid since parameter"))
+                sys.exit(1)
+                return
+
         deleted_count = 0
         devices = Device.objects.prefetch_related(
             Prefetch(
@@ -33,6 +46,8 @@ class Command(BaseCommand):
                 queryset=Competitor.objects.select_related("event"),
             )
         ).exclude(_location_count=0)
+        if date_since:
+            devices = devices.filter(modification_date__gte=date_since)
         two_weeks_ago = now() - timedelta(days=14)
         try:
             with ThreadPoolExecutor(max_workers=options.get("workers")) as executor:
