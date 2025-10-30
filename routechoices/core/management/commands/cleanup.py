@@ -1,4 +1,3 @@
-import arrow
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
@@ -23,7 +22,7 @@ class Command(BaseCommand):
         call_command(
             "clean_locations",
             force=True,
-            since=arrow.utcnow().shift(days=-1).format("YYYY-MM-DD"),
+            workers=3,
         )
 
         self.stdout.write("\nRemove unused devices")
