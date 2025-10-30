@@ -45,7 +45,7 @@ class Command(BaseCommand):
                 for future in as_completed(future_to_device):
                     device = future_to_device[future]
                     device_deleted_count = future.result()
-                    if True or device_deleted_count:
+                    if device_deleted_count:
                         self.stdout.write(
                             f"Device {device.aid},"
                             f" removing {device_deleted_count} locations"
