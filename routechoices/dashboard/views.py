@@ -110,7 +110,7 @@ def requires_club_in_session(function):
 
 @login_required
 def home_view(request):
-    return redirect("account_edit_view")
+    return redirect("dashboard_club:select_view")
 
 
 @login_required
