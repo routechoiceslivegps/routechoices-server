@@ -211,7 +211,12 @@ function fetchEvents() {
 					id: e.id,
 					name: `${e.name} - ${e.club.name}`,
 					start_date: e.start_date,
-				}));
+				}))
+				.sort(
+					(a, b) =>
+						new Date(a.start_date) - new Date(b.start_date) ||
+						a.name.localeCompare(b.name),
+				);
 			if (events.length === 0) {
 				document.getElementById("p3").classList.remove("d-none");
 			} else {
