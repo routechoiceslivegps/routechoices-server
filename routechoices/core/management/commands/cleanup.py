@@ -22,7 +22,7 @@ class Command(BaseCommand):
         call_command(
             "clean_locations",
             force=True,
-            workers=3,
+            workers=2,
         )
 
         self.stdout.write("\nRemove unused devices")
