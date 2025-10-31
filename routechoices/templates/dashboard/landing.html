@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load compress static %}
+{% load compress hosts static %}
 {% block extra_head %}
     {% compress css %}
         <link rel="stylesheet"
@@ -18,9 +18,13 @@
                                 <h1>
                                     Hello {{ request.user.username }}! 🙂
                                 </h1>
+                                <div>
+                                    <a href="{% host_url 'account_logout' host 'dashboard' %}"
+                                    class="btn btn-info btn-sm mb-3">Logout <i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+                                </div>
                             </div>
                             <div class="col-12 col-lg-4 mb-lg-0 mb-3">
-                                <h2>Account</h2>
+                                <h2><i class="fa-solid fa-circle-user"></i> Account</h2>
                                 <ul class="list-group list-group-flush">
                                     <li  class="list-group-item">
                                         <a href="{% url 'account_edit_view' %}"><i class="fa-solid fa-user"></i> Your Details</a>
@@ -40,7 +44,7 @@
                                 </ul>
                             </div>
                             <div class="col-12 col-lg-4 mb-lg-0 mb-3 border-start-0 border-lg-start-1">
-                                <h2>Organisations</h2>
+                                <h2><i class="fa-solid fa-house-flag"></i> Organisations</h2>
                                 <ul class="list-group list-group-flush">
                                     {% for club in clubs %}
                                     <li class="list-group-item">
@@ -79,7 +83,7 @@
                                 <div class="mt-2"><a href="{% url 'dashboard_club:select_view' %}">Manage your organisations</a></div>
                             </div>
                             <div class="col-12 col-lg-4 mb-lg-0 mb-3 border-start-0 border-lg-start-1">
-                                <h2>Participations</h2>
+                                <h2><i class="fa-solid fa-trophy"></i> Participations</h2>
                                 <small><b>Latest participations</b></small>
                                 <ul class="list-group list-group-flush">
                                 {% for p in participations %}

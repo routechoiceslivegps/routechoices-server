@@ -12,20 +12,9 @@
         <div class="col-12 mx-auto">
             <div class="card border-0 shadow rounded-3 my-5">
                 <div class="card-body p-4 p-sm-5">
-                    <ul class="nav nav-tabs mb-3">
-                        <li>
-                            <a class="flex-sm-fill text-sm-center nav-link {% if request.path|slice:':9' == '/account/' %}active{% endif %}"
-                               href="{% url 'account_edit_view' %}"><i class="fa-solid fa-circle-user"></i> Account</a>
-                        </li>
-                        <li>
-                            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name|slice:':15' == 'dashboard_club:' %}active{% endif %}"
-                               href="{% url 'dashboard_club:select_view' %}"><i class="fa-solid fa-house-flag"></i> Organisations</a>
-                        </li>
-                        <li>
-                            <a class="flex-sm-fill text-sm-center nav-link {% if request.resolver_match.view_name == 'dashboard_participations_view' %}active{% endif %}"
-                               href="{% url 'dashboard_participations_view' %}"><i class="fa-solid fa-trophy"></i> Participations</a>
-                        </li>
-                    </ul>
+                    <div class="mb-3">
+                        <a href="{% url 'home_view' %}"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+                    </div>
                     <div class="col-12">
                         <div class="row">
                             <div class="col-12">
