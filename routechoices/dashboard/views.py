@@ -110,7 +110,20 @@ def requires_club_in_session(function):
 
 @login_required
 def home_view(request):
-    return redirect("dashboard_club:select_view")
+    participations = request.user.participations.select_related(
+        "event", "event__club", "device"
+    ).order_by("-event__start_date")
+    has_more_participations = participations.count() > 5
+    club_list = Club.objects.filter(admins=request.user)
+    return render(
+        request,
+        "dashboard/landing.html",
+        {
+            "clubs": club_list,
+            "participations": participations[:5],
+            "has_more_participations": has_more_participations,
+        },
+    )
 
 
 @login_required

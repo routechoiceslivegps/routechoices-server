@@ -24,6 +24,12 @@
 	font-display: swap;
 }
 
+@media (min-width: 992px) {
+	.border-lg-start-1 {
+		border-left: 1px var(--bs-border-style) var(--bs-border-color) !important;
+	}
+}
+
 @font-face {
 	font-family: "Atkinson Hyperlegible";
 	font-style: normal;
