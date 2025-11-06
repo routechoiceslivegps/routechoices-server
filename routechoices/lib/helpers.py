@@ -433,7 +433,8 @@ def check_a_record(domain):
 
     answer = data.get("Answer", [])
     for ans in answer:
-        if ans.get("data") == "95.217.56.90" and ans.get("type") == 1:
+        # TODO: Use env variable for setting IP address
+        if ans.get("data") == "95.217.207.162" and ans.get("type") == 1:
             return True
     return False
 
