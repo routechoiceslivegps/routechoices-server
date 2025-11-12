@@ -161,7 +161,7 @@ def deg2rad(deg):
 def get_device_name(ua):
     if ua.startswith("Routechoices-ios-tracker"):
         return "iOS"
-    if ua.startswith("Routechoices%20Watch%20Tracker%20Watch%20App/"):
+    if ua.startswith("Routechoices-watch-tracker/"):
         return "Apple Watch"
     if ua.startswith("Dalvik"):
         return "Android"

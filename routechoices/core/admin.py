@@ -419,9 +419,7 @@ class DeviceBrandFilter(admin.SimpleListFilter):
         if self.value() == "android":
             return queryset.filter(user_agent__startswith="Dalvik/")
         if self.value() == "apple_watch":
-            return queryset.filter(
-                user_agent__startswith="Routechoices%20Watch%20Tracker%20Watch%20App/"
-            )
+            return queryset.filter(user_agent__startswith="Routechoices-watch-tracker/")
         if self.value() == "garmin":
             return queryset.filter(user_agent__startswith="ConnectMobile/")
         if self.value() == "gt06":
