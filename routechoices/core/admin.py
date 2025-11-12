@@ -402,6 +402,7 @@ class DeviceBrandFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         return [
             ("android", "Android"),
+            ("apple_watch", "Apple Watch"),
             ("garmin", "Garmin"),
             ("gt06", "GT06"),
             ("h02", "H02"),
@@ -417,6 +418,10 @@ class DeviceBrandFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() == "android":
             return queryset.filter(user_agent__startswith="Dalvik/")
+        if self.value() == "apple_watch":
+            return queryset.filter(
+                user_agent__startswith="Routechoices%20Watch%20Tracker%20Watch%20App/"
+            )
         if self.value() == "garmin":
             return queryset.filter(user_agent__startswith="ConnectMobile/")
         if self.value() == "gt06":
