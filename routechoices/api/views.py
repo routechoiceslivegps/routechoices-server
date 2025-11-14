@@ -392,11 +392,13 @@ def event_list(request):
     else:
         privacy_arg = {"privacy": PRIVACY_PUBLIC}
 
+    headers = {}
     if request.user.is_authenticated:
         clubs = Club.objects.filter(admins=request.user)
         events = Event.objects.filter(
             Q(**privacy_arg) | Q(club__in=clubs)
         ).select_related("club")
+        headers["Cache-Control"] = "Private"
     else:
         events = Event.objects.filter(**privacy_arg).select_related("club")
 
@@ -436,7 +438,7 @@ def event_list(request):
                 "url": request.build_absolute_uri(event.get_absolute_url()),
             }
         )
-    return Response(output)
+    return Response(output, headers=headers)
 
 
 @swagger_auto_schema(
