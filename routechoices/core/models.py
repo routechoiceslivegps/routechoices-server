@@ -7,7 +7,6 @@ import re
 import socket
 import time
 from datetime import timedelta
-from decimal import Decimal
 from io import BytesIO
 from operator import itemgetter
 from urllib.parse import urlparse
@@ -24,14 +23,15 @@ from dateutil.parser import parse as parse_date
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import LinearRing, Polygon
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import BadRequest, PermissionDenied, ValidationError
 from django.core.files.base import ContentFile, File
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.core.validators import MaxValueValidator, MinValueValidator, validate_slug
 from django.db import models
-from django.db.models import F, Max, Q
-from django.db.models.functions import ExtractMonth, ExtractYear, Upper
+from django.db.models import F, Max, Q, Value
+from django.db.models.functions import Cast, ExtractMonth, ExtractYear, Upper
 from django.db.models.signals import post_delete, pre_delete, pre_save
 from django.dispatch import receiver
 from django.http.response import Http404
@@ -99,6 +99,11 @@ LOCATION_LATITUDE_INDEX = 1
 LOCATION_LONGITUDE_INDEX = 2
 
 END_FREE_OCLUB = parse_date("2026-01-01T00:00:00Z")
+
+
+class StringToArray(models.Func):
+    function = "string_to_array"
+    arity = 2
 
 
 class GPSSeurantaClient:
@@ -507,6 +512,14 @@ class Map(models.Model):
         "eg: 60.519,22.078,60.518,22.115,60.491,22.112,60.492,22.073",
         validators=[validate_corners_coordinates],
     )
+    _corners_coordinates = models.GeneratedField(
+        expression=Cast(
+            StringToArray(F("corners_coordinates"), Value(",")),
+            output_field=ArrayField(models.FloatField()),
+        ),
+        output_field=ArrayField(models.FloatField()),
+        db_persist=True,
+    )
 
     class Meta:
         ordering = ["-creation_date"]
@@ -533,9 +546,7 @@ class Map(models.Model):
 
     @property
     def corners_coordinates_short(self):
-        coords = ",".join(
-            [f"{Decimal(x):.5f}" for x in self.corners_coordinates.split(",")]
-        )
+        coords = ",".join([f"{x:.5f}" for x in self._corners_coordinates])
         return coords
 
     @cached_property
@@ -601,7 +612,7 @@ class Map(models.Model):
 
     @property
     def bound(self):
-        coords = [float(x) for x in self.corners_coordinates.split(",")]
+        coords = self._corners_coordinates
         return {
             "top_left": {"lat": coords[0], "lon": coords[1]},
             "top_right": {"lat": coords[2], "lon": coords[3]},
