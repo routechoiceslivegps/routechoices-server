@@ -628,8 +628,10 @@ def map_gpx_upload_view(request):
             waypoints = form.cleaned_data["gpx_waypoints"]
             try:
                 new_map = Map.from_points(segments, waypoints)
-            except Exception:
-                messages.error(request, "Failed to generate a map from this file")
+            except Exception as e:
+                messages.error(
+                    request, "Failed to generate a map from this file" + str(e)
+                )
             else:
                 new_map.name = form.cleaned_data["gpx_file"].name[:-4]
                 new_map.club = club
@@ -1244,7 +1246,7 @@ def dashboard_map_download(request, map_id, *args, **kwargs):
         file_path,
         filename=(
             f"{raster_map.name}_"
-            f"{raster_map.corners_coordinates_short}_."
+            f"{raster_map.corners_coordinates_string}_."
             f"{mime_type[6:]}"
         ),
         mime=mime_type,

@@ -544,12 +544,6 @@ class Map(models.Model):
         cache.set(cache_key, data, DURATION_ONE_MONTH)
         return data
 
-    @property
-    def corners_coordinates_short(self):
-        return np.array2string(
-            np.array(self._corners_coordinates), separator="_", precision=5
-        )[1:-1]
-
     @cached_property
     def quick_size(self):
         if self.width:
@@ -612,8 +606,21 @@ class Map(models.Model):
         )[:8]
 
     @property
+    def corners_coordinates_array(self):
+        if not self._is_pk_set():
+            return [float(x) for x in self.corners_coordinates.split(",")]
+        else:
+            return self._corners_coordinates
+
+    @property
+    def corners_coordinates_string(self):
+        return np.array2string(
+            np.array(self.corners_coordinates_array), separator="_", precision=5
+        )[1:-1]
+
+    @property
     def bound(self):
-        coords = self._corners_coordinates
+        coords = self.corners_coordinates_array
         return {
             "top_left": {"lat": coords[0], "lon": coords[1]},
             "top_right": {"lat": coords[2], "lon": coords[3]},

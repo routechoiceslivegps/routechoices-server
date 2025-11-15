@@ -1788,7 +1788,7 @@ def event_map_download(request, event_id, index="1", **kwargs):
     resp = serve_image_from_s3(
         request,
         raster_map.image,
-        (f"{event.name} - {title}_" f"{raster_map.corners_coordinates_short}_"),
+        (f"{event.name} - {title}_" f"{raster_map.corners_coordinates_string}_"),
         mime=mime,
     )
     return resp
