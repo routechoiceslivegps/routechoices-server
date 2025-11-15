@@ -2067,6 +2067,22 @@ class Event(models.Model):
         cache.set(cache_key, data_out, DURATION_ONE_MONTH)
         return data_out
 
+    @property
+    def country_code(self):
+        loc = None
+        if self.map:
+            loc = self.map.center
+            # TODO: Analyze runners data
+        if not loc:
+            return None
+        return reverse_geocode.get([loc["lat"], loc["lon"]]).get("country_code")
+
+    @property
+    def country_flag(self):
+        if cc := self.country_code:
+            return flag.flag(cc)
+        return "🌍"
+
 
 class Notice(models.Model):
     modification_date = models.DateTimeField(auto_now=True)
