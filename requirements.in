@@ -47,3 +47,5 @@ setuptools
 sewer @ git+https://github.com/rphlo/sewer@0.8.4b
 tornado
 pyproj
+reverse-geocode
+emoji-country-flag

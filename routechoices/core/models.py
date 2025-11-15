@@ -13,11 +13,13 @@ from urllib.parse import urlparse
 from zipfile import ZipFile
 
 import cv2
+import flag
 import gps_data_codec
 import gpxpy
 import gpxpy.gpx
 import magic
 import numpy as np
+import reverse_geocode
 from allauth.account.models import EmailAddress
 from dateutil.parser import parse as parse_date
 from django.conf import settings
@@ -728,6 +730,17 @@ class Map(models.Model):
     def center(self):
         width, height = self.quick_size
         return self.map_xy_to_wsg84(width / 2, height / 2)
+
+    @property
+    def country_code(self):
+        center = self.center
+        return reverse_geocode.get([center["lat"], center["lon"]]).get("country_code")
+
+    @property
+    def country_flag(self):
+        if cc := self.country_code:
+            return flag.flag(cc)
+        return "🌍"
 
     @property
     def area(self):

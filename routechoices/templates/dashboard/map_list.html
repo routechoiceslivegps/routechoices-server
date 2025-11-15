@@ -48,7 +48,7 @@
                     {% for map in maps %}
                         <tr>
                             <td>
-                                <a href="{% url 'dashboard_club:map:edit_view' map_id=map.aid club_slug=request.club.slug %}">{{ map.name }}</a>
+                                <a href="{% url 'dashboard_club:map:edit_view' map_id=map.aid club_slug=request.club.slug %}">{{ map.country_flag }} {{ map.name }}</a>
                             </td>
                             <td>
                                 {% if map.image %}
