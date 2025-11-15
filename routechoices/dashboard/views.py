@@ -628,10 +628,8 @@ def map_gpx_upload_view(request):
             waypoints = form.cleaned_data["gpx_waypoints"]
             try:
                 new_map = Map.from_points(segments, waypoints)
-            except Exception as e:
-                messages.error(
-                    request, "Failed to generate a map from this file" + str(e)
-                )
+            except Exception:
+                messages.error(request, "Failed to generate a map from this file")
             else:
                 new_map.name = form.cleaned_data["gpx_file"].name[:-4]
                 new_map.club = club
