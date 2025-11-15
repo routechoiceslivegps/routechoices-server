@@ -2072,7 +2072,7 @@ class Event(models.Model):
         loc = None
         if self.map:
             loc = self.map.center
-            # TODO: Analyze runners data
+        # TODO: Analyze runners' data and GeoJSON layer
         if not loc:
             return None
         return reverse_geocode.get([loc["lat"], loc["lon"]]).get("country_code")
