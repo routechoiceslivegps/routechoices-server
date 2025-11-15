@@ -611,7 +611,7 @@ class Map(models.Model):
             f"{self.path}:{self.corners_coordinates}:20230420"
         )[:8]
 
-    @property
+    @cached_property
     def corners_coordinates_array(self):
         if not self._is_pk_set():
             return [float(x) for x in self.corners_coordinates.split(",")]
@@ -624,7 +624,7 @@ class Map(models.Model):
             np.array(self.corners_coordinates_array), separator="_", precision=5
         )[1:-1]
 
-    @property
+    @cached_property
     def bound(self):
         coords = self.corners_coordinates_array
         return {
@@ -711,11 +711,11 @@ class Map(models.Model):
     def matrix_3d_inverse(self):
         return adjugate_matrix(self.matrix_3d)
 
-    @property
+    @cached_property
     def map_xy_to_spherical_mercator(self):
         return lambda x, y: project(self.matrix_3d, x, y)
 
-    @property
+    @cached_property
     def spherical_mercator_to_map_xy(self):
         return lambda x, y: project(self.matrix_3d_inverse, x, y)
 
@@ -752,7 +752,7 @@ class Map(models.Model):
             return flag.flag(cc)
         return "🌍"
 
-    @property
+    @cached_property
     def area(self):
         # Area in m^2
         width, height = self.quick_size
@@ -771,7 +771,7 @@ class Map(models.Model):
             (c + d + e) * (c + d - e) * (c + e - d) * (e + d - c)
         ) ** 0.5 / 4
 
-    @property
+    @cached_property
     def resolution(self):
         """Return map image resolution in pixels/meters"""
         width, height = self.quick_size
@@ -786,7 +786,7 @@ class Map(models.Model):
         r = self.resolution / meters_per_pixel_at_zoom_18
         return math.floor(math.log2(r)) + 18
 
-    @property
+    @cached_property
     def rotation(self):
         width, height = self.quick_size
         tl = self.map_xy_to_spherical_mercator(0, 0)
