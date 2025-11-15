@@ -64,6 +64,7 @@
 						event_id: res.id,
 						name: formData.get("name"),
 						device_id: formData.get("device_id"),
+						start_time: now.toISOString(),
 					},
 					headers: {
 						"X-CSRFToken": window.local.csrfToken,
