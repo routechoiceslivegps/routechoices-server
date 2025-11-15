@@ -515,9 +515,9 @@ class Map(models.Model):
     _corners_coordinates = models.GeneratedField(
         expression=Cast(
             StringToArray(F("corners_coordinates"), Value(",")),
-            output_field=ArrayField(models.FloatField()),
+            output_field=ArrayField(models.FloatField(), size=8),
         ),
-        output_field=ArrayField(models.FloatField()),
+        output_field=ArrayField(models.FloatField(), size=8),
         db_persist=True,
     )
 

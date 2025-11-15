@@ -24,11 +24,11 @@ class Migration(migrations.Migration):
                         models.F("corners_coordinates"), models.Value(",")
                     ),
                     output_field=django.contrib.postgres.fields.ArrayField(
-                        base_field=models.FloatField(), size=None
+                        base_field=models.FloatField(), size=8
                     ),
                 ),
                 output_field=django.contrib.postgres.fields.ArrayField(
-                    base_field=models.FloatField(), size=None
+                    base_field=models.FloatField(), size=8
                 ),
             ),
         ),
