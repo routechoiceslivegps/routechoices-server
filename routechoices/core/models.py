@@ -2082,20 +2082,17 @@ class Event(models.Model):
         loc = None
         if self.map:
             return self.map.country_code
-        elif self.geojson_layer:
-            # TODO: cache based on geojson filename for long time
-            cache_key = f"geojson:{self.geojson_layer.name}:latlon"
+        if self.geojson_layer:
+            cache_key = f"geojson:{self.geojson_layer.name}:country_code"
             if cached := cache.get(cache_key):
                 return cache
             geojson_raw = self.geojson_layer.read()
             geojson = json.loads(geojson_raw)
             pt = get_geojson_coordinates(geojson)
-            if pt:
-                loc = [pt[1], pt[0]]
-                cache.set(cache_key, loc, DURATION_ONE_MONTH)
-        if not loc:
-            return None
-        return reverse_geocode.get(loc).get("country_code")
+            cc = reverse_geocode.get([pt[1], pt[0]]).get("country_code")
+            cache.set(cache_key, cc, DURATION_ONE_MONTH)
+            return cc
+        return None
 
     @cached_property
     def country_name(self):
