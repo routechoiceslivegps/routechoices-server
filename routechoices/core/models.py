@@ -2085,7 +2085,7 @@ class Event(models.Model):
         if self.geojson_layer:
             cache_key = f"geojson:{self.geojson_layer.name}:country_code"
             if cached := cache.get(cache_key):
-                return cache
+                return cached
             geojson_raw = self.geojson_layer.read()
             geojson = json.loads(geojson_raw)
             pt = get_geojson_coordinates(geojson)
