@@ -2081,14 +2081,18 @@ class Event(models.Model):
     def country_code(self):
         loc = None
         if self.map:
-            center = self.map.center
-            loc = [center["lat"], center["lon"]]
+            return self.map.country_code
         elif self.geojson_layer:
+            # TODO: cache based on geojson filename for long time
+            cache_key = f"geojson:{self.geojson_layer.name}:latlon"
+            if cached := cache.get(cache_key):
+                return cache
             geojson_raw = self.geojson_layer.read()
             geojson = json.loads(geojson_raw)
             pt = get_geojson_coordinates(geojson)
             if pt:
                 loc = [pt[1], pt[0]]
+                cache.set(cache_key, loc, DURATION_ONE_MONTH)
         if not loc:
             return None
         return reverse_geocode.get(loc).get("country_code")
