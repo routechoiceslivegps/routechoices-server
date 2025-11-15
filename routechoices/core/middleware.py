@@ -275,7 +275,10 @@ class FilterCountriesIPsMiddleware:
         except Exception:
             country = None
         if country in getattr(settings, "BANNED_COUNTRIES", []):
-            return HttpResponse("Sorry, we block IP addresses from your country.")
+            return HttpResponse(
+                "Sorry, we block IP addresses from your country.",
+                headers={"Cache-Control": "no-cache"},
+            )
         return None
 
 
