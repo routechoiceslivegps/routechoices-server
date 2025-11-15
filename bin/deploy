@@ -6,8 +6,8 @@ PID_FILE=${BASEDIR}/var/tasks.pid
 
 cd $BASEDIR
 PREV_MD5SUM="$(md5sum requirements.txt)"
-git fetch
-git reset --hard ${1:-origin/master}
+git fetch ${1:-origin/master}
+git checkout FETCH_HEAD -- requirements.txt
 source $BASEDIR/env/bin/activate
 NEW_MD5SUM="$(md5sum requirements.txt)"
 if [ "$PREV_MD5SUM" != "$NEW_MD5SUM" ]
@@ -18,6 +18,7 @@ then
   uv pip install --no-cache --requirement requirements.txt
 fi
 doppler secrets download --no-file --format=env 1> ".env"
+git reset --hard ${1:-origin/master}
 ./manage.py collectstatic --noinput
 ./manage.py compress
 ./manage.py migrate --noinput
