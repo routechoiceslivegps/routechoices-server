@@ -546,8 +546,9 @@ class Map(models.Model):
 
     @property
     def corners_coordinates_short(self):
-        coords = ",".join([f"{x:.5f}" for x in self._corners_coordinates])
-        return coords
+        return np.array2string(
+            np.array(self._corners_coordinates), separator=",", precision=5
+        )[1:-1]
 
     @cached_property
     def quick_size(self):
