@@ -5,7 +5,7 @@ BASEDIR=$(dirname $DIR)
 PID_FILE=${BASEDIR}/var/tasks.pid
 
 cd $BASEDIR
-echo "\e[34mComparing requirements\e[0m"
+echo -e "\e[34mComparing requirements\e[0m"
 PREV_MD5SUM="$(md5sum requirements.txt)"
 git fetch
 git checkout -m ${1:-origin/master} requirements.txt
