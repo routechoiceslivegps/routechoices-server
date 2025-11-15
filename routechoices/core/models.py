@@ -2071,11 +2071,12 @@ class Event(models.Model):
     def country_code(self):
         loc = None
         if self.map:
-            loc = self.map.center
+            center = self.map.center
+            loc = [center["lat"], center["lon"]]
         # TODO: Analyze runners' data and GeoJSON layer
         if not loc:
             return None
-        return reverse_geocode.get([loc["lat"], loc["lon"]]).get("country_code")
+        return reverse_geocode.get(loc).get("country_code")
 
     @property
     def country_flag(self):
