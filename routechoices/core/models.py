@@ -19,6 +19,7 @@ import gpxpy
 import gpxpy.gpx
 import magic
 import numpy as np
+import orjson as json
 import reverse_geocode
 from allauth.account.models import EmailAddress
 from dateutil.parser import parse as parse_date
@@ -48,6 +49,7 @@ from routechoices.lib import cache, plausible
 from routechoices.lib.duration_constants import (
     DURATION_ONE_MONTH,
 )
+from routechoices.lib.geojson import get_geojson_coordinates
 from routechoices.lib.globalmaptiles import GlobalMercator
 from routechoices.lib.helpers import (
     adjugate_matrix,
@@ -2073,7 +2075,12 @@ class Event(models.Model):
         if self.map:
             center = self.map.center
             loc = [center["lat"], center["lon"]]
-        # TODO: Analyze runners' data and GeoJSON layer
+        elif self.geojson_layer:
+            geojson_raw = self.geojson_layer.read()
+            geojson = json.loads(geojson_raw)
+            pt = get_geojson_coordinates(geojson)
+            if pt:
+                loc = [pt[1], pt[0]]
         if not loc:
             return None
         return reverse_geocode.get(loc).get("country_code")
