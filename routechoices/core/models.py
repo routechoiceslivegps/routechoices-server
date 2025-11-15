@@ -547,7 +547,7 @@ class Map(models.Model):
     @property
     def corners_coordinates_short(self):
         return np.array2string(
-            np.array(self._corners_coordinates), separator=",", precision=5
+            np.array(self._corners_coordinates), separator="_", precision=5
         )[1:-1]
 
     @cached_property
