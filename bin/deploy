@@ -20,11 +20,16 @@ else
   echo "  No new requirements"
 fi
 source $BASEDIR/env/bin/activate
+echo -e "\e[96mUpdating env variables\e[0m"
 doppler secrets download --no-file --format=env 1> ".env"
+echo "  Done"
+echo -e "\e[96mFetching new code\e[0m"
 git fetch
 git reset --hard ${1:-origin/master}
+echo "  Done"
 ./manage.py collectstatic --noinput
 ./manage.py compress
 ./manage.py migrate --noinput
 ./bin/restart-tornado
 ./bin/reload-django
+echo -e "\e[32mNew version deployed\e[0m"
