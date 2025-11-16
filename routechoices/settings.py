@@ -298,7 +298,7 @@ SWAGGER_SETTINGS = {
             "tokenUrl": "/oauth2/token/",
             "flow": "accessCode",
             "scopes": {
-                "full": "Read and Write data",
+                "all": "Read and Write data",
             },
         },
     }
