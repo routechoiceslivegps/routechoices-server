@@ -5,15 +5,13 @@ BASEDIR=$(dirname $DIR)
 PID_FILE=${BASEDIR}/var/tasks.pid
 
 cd $BASEDIR
-echo -e "\e[36mComparing requirements\e[0m"
+echo -e "\e[96mComparing requirements\e[0m"
 PREV_MD5SUM="$(md5sum requirements.txt)"
-git fetch
 curl -s -O -L https://raw.github.com/routechoiceslivegps/routechoices-server/${1:-master}/requirements.txt
-source $BASEDIR/env/bin/activate
 NEW_MD5SUM="$(md5sum requirements.txt)"
 if [ "$PREV_MD5SUM" != "$NEW_MD5SUM" ]
 then
-  echo "  Instaling new requirements"
+  echo "  Installing new requirements"
   source $BASEDIR/env/bin/activate
   source ~/.cargo/env
   source ~/.local/bin/env
@@ -21,7 +19,9 @@ then
 else
   echo "  No new requirements"
 fi
+source $BASEDIR/env/bin/activate
 doppler secrets download --no-file --format=env 1> ".env"
+git fetch
 git reset --hard ${1:-origin/master}
 ./manage.py collectstatic --noinput
 ./manage.py compress
