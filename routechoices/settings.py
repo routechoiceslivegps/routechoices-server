@@ -287,7 +287,10 @@ USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
-    "SCOPES": {"all": "Read and Write data"}
+    "SCOPES": {
+        "read": "Read your user data",
+        "write": "Write data on your behalf",
+    }
 }
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
@@ -298,8 +301,9 @@ SWAGGER_SETTINGS = {
             "tokenUrl": "/oauth2/token/",
             "flow": "implicit",
             "scopes": {
-                "all": "Read and Write data",
-            },
+                 "read": "Read your user data",
+                 "write": "Write data on your behalf",
+             },
         },
     }
 }
