@@ -296,7 +296,7 @@ SWAGGER_SETTINGS = {
             "type": "oauth2",
             "authorizationUrl": "/oauth2/authorize/",
             "tokenUrl": "/oauth2/token/",
-            "flow": "accessCode",
+            "flow": "implicit",
             "scopes": {
                 "all": "Read and Write data",
             },
