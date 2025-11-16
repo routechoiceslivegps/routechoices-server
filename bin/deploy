@@ -26,10 +26,12 @@ echo "  Done"
 echo -e "\e[96mFetching new code\e[0m"
 git fetch
 git reset --hard ${1:-origin/master}
-echo "  Done"
+echo -e "\e[96mCollecting static files\e[0m"
 ./manage.py collectstatic --noinput
+echo -e "\e[96mCompressing assets\e[0m"
 ./manage.py compress
 ./manage.py migrate --noinput
+echo -e "\e[96mRestart services\e[0m"
 ./bin/restart-tornado
 ./bin/reload-django
-echo -e "\e[32mNew version deployed\e[0m"
+echo -e "\e[92mNew version deployed\e[0m"
