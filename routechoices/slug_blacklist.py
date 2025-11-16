@@ -420,6 +420,7 @@ SLUG_BLACKLIST = [
     "manual",
     "map",
     "map-download",
+    "mapdump",
     "maps",
     "marketing",
     "marketplace",
