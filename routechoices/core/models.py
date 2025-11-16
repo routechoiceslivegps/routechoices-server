@@ -107,9 +107,37 @@ END_FREE_OCLUB = parse_date("2026-01-01T00:00:00Z")
 COUNTRIES = reverse_geocode.GeocodeData()._countries
 
 
+def country_code_at_coords(latlon):
+    return reverse_geocode.get(latlon).get("country_code")
+
+
 class StringToArray(models.Func):
     function = "string_to_array"
     arity = 2
+
+
+class SomewhereOnEarth:
+    @property
+    def earth_coords(self):
+        return None
+
+    @property
+    def country_code(self):
+        if coords := self.earth_coords:
+            return country_code_at_coords(self.earth_coords)
+        return None
+    
+    @property
+    def country_name(self):
+        if cc := self.country_code:
+            return COUNTRIES.get(cc, "")
+        return "Unknown"
+
+    @property
+    def country_flag(self):
+        if cc := self.country_code:
+            return flag.flag(cc)
+        return "🌍"
 
 
 class GPSSeurantaClient:
@@ -486,7 +514,7 @@ CACHED_TILE = 1
 CACHED_BLANK_TILE = 2
 
 
-class Map(models.Model):
+class Map(models.Model, SomewhereOnEarth):
     aid = models.CharField(
         default=random_key,
         max_length=12,
@@ -735,22 +763,10 @@ class Map(models.Model):
         width, height = self.quick_size
         return self.map_xy_to_wsg84(width / 2, height / 2)
 
-    @cached_property
-    def country_code(self):
+    @property
+    def earth_coords(self):
         center = self.center
-        return reverse_geocode.get([center["lat"], center["lon"]]).get("country_code")
-
-    @cached_property
-    def country_name(self):
-        if cc := self.country_code:
-            return COUNTRIES.get(cc, "")
-        return "Unknown"
-
-    @cached_property
-    def country_flag(self):
-        if cc := self.country_code:
-            return flag.flag(cc)
-        return "🌍"
+        return [center["lat"], center["lon"]]
 
     @cached_property
     def area(self):
@@ -1444,7 +1460,7 @@ class EventSet(models.Model):
         }
 
 
-class Event(models.Model):
+class Event(models.Model, SomewhereOnEarth):
     aid = models.CharField(
         default=random_key,
         max_length=12,
@@ -2077,33 +2093,21 @@ class Event(models.Model):
         cache.set(cache_key, data_out, DURATION_ONE_MONTH)
         return data_out
 
-    @cached_property
-    def country_code(self):
+    @property
+    def earth_coords(self):
         if self.map:
-            return self.map.country_code
+            return self.map.earth_coords
         if self.geojson_layer:
-            cache_key = f"geojson:{self.geojson_layer.name}:country_code"
+            cache_key = f"geojson:{self.geojson_layer.name}:coords"
             if cached := cache.get(cache_key):
                 return cached
             geojson_raw = self.geojson_layer.read()
             geojson = json.loads(geojson_raw)
             pt = get_geojson_coordinates(geojson)
-            cc = reverse_geocode.get([pt[1], pt[0]]).get("country_code")
-            cache.set(cache_key, cc, DURATION_ONE_MONTH)
-            return cc
+            coords = [pt[1], pt[0]]
+            cache.set(cache_key, coords, DURATION_ONE_MONTH)
+            return coords
         return None
-
-    @cached_property
-    def country_name(self):
-        if cc := self.country_code:
-            return COUNTRIES.get(cc, "")
-        return "Unknown"
-
-    @cached_property
-    def country_flag(self):
-        if cc := self.country_code:
-            return flag.flag(cc)
-        return "🌍"
 
 
 class Notice(models.Model):
@@ -2132,7 +2136,7 @@ class MapAssignation(models.Model):
         ordering = ["id"]
 
 
-class Device(models.Model):
+class Device(models.Model, SomewhereOnEarth):
     creation_date = models.DateTimeField(auto_now_add=True)
     modification_date = models.DateTimeField(auto_now=True)
     aid = models.CharField(
@@ -2514,6 +2518,12 @@ class Device(models.Model):
             self._last_location_latitude,
             self._last_location_longitude,
         )
+    
+    @property
+    def earth_coords(self):
+        if loc := self.last_location:
+            return [loc[1], loc[2]]
+        return None
 
     @property
     def last_location_datetime(self):
@@ -2676,7 +2686,7 @@ class DeviceClubOwnership(models.Model):
         return f"{self.device.aid} for {self.club.name}"
 
 
-class Competitor(models.Model):
+class Competitor(models.Model, SomewhereOnEarth):
     aid = models.CharField(
         default=random_key,
         max_length=12,
@@ -2809,6 +2819,39 @@ class Competitor(models.Model):
         if not self.tags:
             return []
         return self.tags.split(" ")
+    
+    @property
+    def earth_coords(self):
+        if locs := self.locations:
+            loc = locs[0]
+            return [loc[1], loc[2]]
+        return None
+
+    @property
+    def duration(self):
+        if not self.locations:
+            return None
+        return self.locations[-1][0] - self.locations[0][0]
+
+    @property
+    def distance(self):
+        if not self.locations:
+            return None
+        distance = 0
+        prev_pt = self.locations[0]
+        rad = math.pi / 180
+        for pt in self.locations[1:]:
+            dlat = pt[1] - prev_pt[1]
+            dlon = pt[2] - prev_pt[2]
+            alpha = (
+                math.sin(rad * dlat / 2) ** 2
+                + math.cos(rad * pt[1])
+                * math.cos(rad * prev_pt[1])
+                * math.sin(rad * dlon / 2) ** 2
+            )
+            distance += 12756274 * math.atan2(math.sqrt(alpha), math.sqrt(1 - alpha))
+            prev_pt = pt
+        return distance
 
 
 @receiver([pre_save, post_delete], sender=Competitor)
