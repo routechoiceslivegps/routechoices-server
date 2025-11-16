@@ -2079,7 +2079,6 @@ class Event(models.Model):
 
     @cached_property
     def country_code(self):
-        loc = None
         if self.map:
             return self.map.country_code
         if self.geojson_layer:
