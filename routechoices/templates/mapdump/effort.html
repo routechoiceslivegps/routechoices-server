@@ -1,0 +1,9 @@
+{% extends "mapdump/base.html" %}
+
+{% block content %}
+<h1>{{ event.name }} with {{user.username}}</h1>
+<div>{{ effort.distance }}meters for {{ effort.duration }}seconds</div>
+<div>
+<img alt="Map" src="{% host_url 'md_map_dl_view' host 'api' %}"/>
+</div>
+{% endblock %}
