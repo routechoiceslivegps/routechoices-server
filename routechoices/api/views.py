@@ -455,7 +455,7 @@ def event_list(request):
                         "name": "Halden SK",
                         "slug": "halden-sk",
                         "url": "https://gps.haldensk.no/",
-                        "plan": "PAYING",
+                        "plan": "BASIC_LIVE",
                     },
                     "...",
                 ]
