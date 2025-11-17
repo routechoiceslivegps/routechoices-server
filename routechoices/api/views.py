@@ -2272,8 +2272,10 @@ def md_map_view(request, aid):
 @api_GET_view
 @permission_classes([IsAuthenticated])
 def md_map_dl_view(request, aid):
-    event = get_object_or_404(
-        Event.objects.filter(club__is_personal_page=True).prefetch_related("map"),
+    effort = get_object_or_404(
+        Competitor.objects.filter(
+            event__club__is_personal_page=True
+        ).prefetch_related("event","event__map"),
         aid=aid,
     )
     show_header = request.query_params.get("show_header", False)
@@ -2281,14 +2283,14 @@ def md_map_dl_view(request, aid):
     out_bounds = request.query_params.get("out_bounds", False)
     mime_type = "image/jpeg"
     if show_header or show_route:
-        img = event.mapdump_map_image(show_header, show_route)
+        img = effort.mapdump_map_image(show_header, show_route)
     elif out_bounds:
-        img = event.mapdump_map_image(False, False)
+        img = effort.mapdump_map_image(False, False)
     else:
         return serve_image_from_s3(
             request,
-            event.map.image,
-            event.name,
+            effort.event.map.image,
+            effort.event.name,
             mime=mime_type,
         )
     response = HttpResponse(img, content_type=mime_type)
