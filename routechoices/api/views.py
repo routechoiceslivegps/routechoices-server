@@ -200,30 +200,38 @@ def event_set_creation(request):
             "club_slug": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description="Club Slug",
+                example="halden-sk",
             ),
             "name": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description='Event name. Default to "Untitled + random string"',
+                example="Night-O"
             ),
             "slug": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description="URL path name. Default random",
+                example="night-o"
             ),
             "start_date": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description="Start time (YYYY-MM-DDThh:mm:ssZ). Default to now",
+                example="2025-11-10T20:00:00Z"
             ),
             "end_date": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description=(
                     "End time, must be after the start_date (YYYY-MM-DDThh:mm:ssZ)"
                 ),
+                example="2025-11-10T22:00:00Z"
             ),
             "privacy": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description=(
-                    "Privacy level (PUBLIC, SECRET or PRIVATE). Default to SECRET",
+                    "Privacy level (PUBLIC, SECRET or PRIVATE). Default to SECRET"
                 ),
+                enum=["PUBLIC", "SECRET", "PRIVATE"],
+                example="PUBLIC",
+                default="SECRET",
             ),
             "backdrop": openapi.Schema(
                 type=openapi.TYPE_STRING,
@@ -231,12 +239,16 @@ def event_set_creation(request):
                     f"Backdrop map: one of {', '.join(m[0] for m in MAP_CHOICES)}."
                     " Default blank"
                 ),
+                example="osm",
+                default="blank",
             ),
             "open_registration": openapi.Schema(
                 type=openapi.TYPE_BOOLEAN,
                 description=(
                     "Can public register themselves to the event. Default False"
                 ),
+                example=True,
+                default=False,
             ),
             "open_route_upload": openapi.Schema(
                 type=openapi.TYPE_BOOLEAN,
@@ -244,6 +256,8 @@ def event_set_creation(request):
                     "Can public upload their route to the event from GPS files,"
                     " Default False"
                 ),
+                example=True,
+                default=False,
             ),
         },
         required=["club_slug", "end_date"],
