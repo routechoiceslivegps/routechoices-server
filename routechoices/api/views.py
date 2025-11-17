@@ -2222,30 +2222,41 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = ("username", "first_name", "last_name")
 
 
-class MapdumpEventSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField(source="aid")
-    athlete = UserInfoSerializer(source="club.creator")
-    country = serializers.ReadOnlyField(source="country_code")
-    tz = serializers.ReadOnlyField(source="timezone")
-    start_time = serializers.DateTimeField(required=False, source="start_date")
-    modification_date = serializers.ReadOnlyField()
-    map_size = serializers.ReadOnlyField(source="map.quick_size")
-    map_bounds = serializers.JSONField(source="map.bound")
-    map_url = serializers.ReadOnlyField(source="mapdump_map_url")
+class MapSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Map
+        fields = (
+            "bound",
+            "size",
+        )
 
+
+class EventSerializer(serializers.ModelSerializer):
+    map = MapSerializer()
     class Meta:
         model = Event
+        field = (
+            "name",
+            "map",
+        )
+
+
+class EffortSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(source="aid")
+    event = EventSerializer()
+
+    class Meta:
+        model = Competitor
         fields = (
             "id",
-            "athlete",
             "name",
+            "short_name",
             "start_time",
-            "modification_date",
-            "tz",
-            "country",
-            "map_bounds",
-            "map_size",
-            "map_url",
+            "timezone",
+            "country_code",
+            "distance",
+            "duration",
+            "event",
         )
 
 
@@ -2255,14 +2266,16 @@ class MapdumpEventSerializer(serializers.ModelSerializer):
 )
 @api_GET_view
 @permission_classes([IsAuthenticated])
-def md_map_view(request, aid):
-    event = get_object_or_404(
-        Event.objects.filter(club__is_personal_page=True).prefetch_related(
-            "map", "club__creator"
+def md_effort_view(request, aid):
+    effort = get_object_or_404(
+        Competitor.objects.filter(
+            event__club__is_personal_page=True
+        ).prefetch_related(
+            "event", "event__map", "device",
         ),
         aid=aid,
     )
-    return Response(MapdumpEventSerializer(event).data)
+    return Response(EffortSerializer(effort).data)
 
 
 @swagger_auto_schema(
@@ -2271,11 +2284,13 @@ def md_map_view(request, aid):
 )
 @api_GET_view
 @permission_classes([IsAuthenticated])
-def md_map_dl_view(request, aid):
+def md_map_dl(request, aid):
     effort = get_object_or_404(
         Competitor.objects.filter(
             event__club__is_personal_page=True
-        ).prefetch_related("event","event__map"),
+        ).prefetch_related(
+            "event", "event__map", "device",
+        ),
         aid=aid,
     )
     show_header = request.query_params.get("show_header", False)
@@ -2306,60 +2321,50 @@ def md_map_dl_view(request, aid):
 )
 @api_POST_view
 @permission_classes([IsAuthenticated])
-def md_create_event_view(request):
+def md_create_effort_view(request):
     user = request.user
     club = user.personal_page
     if not club:
         raise PermissionDenied()
 
-    event_name = request.data.get("name")
+    effort_name = request.data.get("name")
 
     map_image_file = request.FILES.get("map_image")
     map_corners_coords = request.data.get("map_image_corners_coords")
-
-    map_aid_suffix = safe64encodedsha(
-        f"{map_image_file.file.getvalue()}:{map_corners_coords}"
-    )[:11]
-
-    event_map, _ = Map.objects.get_or_create(
-        aid=map_aid_suffix,
-        club=club,
+    map = Map(
+        name=f"{effort_name} map"}",
         corners_coordinates=map_corners_coords,
-        defaults={"name": f"{event_name} map"},
     )
-    event_map.image.save("tmp_name", ContentFile(map_image_file.file.getbuffer()))
+    map.image.save(
+        "tmp_name",
+        ContentFile(map_image_file.file.getbuffer()),
+    )
 
     gps_data_raw = request.data.get("gps_data")
     gps_data = json.loads(gps_data_raw)
-    device_aid_suffix = safe64encodedsha(gps_data_raw)[:8]
-    device, _ = Device.objects.get_or_create(
-        aid=f"GPS|{device_aid_suffix}", virtual=True
-    )
+    device = Device(virtual=True)
     device.add_locations(gps_data)
-    gps_data_corrected = device.locations
-    event = Event.objects.create(
-        name=event_name,
-        club=club,
-        start_date=epoch_to_datetime(gps_data_corrected[0][LOCATION_TIMESTAMP_INDEX]),
-        end_date=epoch_to_datetime(gps_data_corrected[-1][LOCATION_TIMESTAMP_INDEX]),
-        map=event_map,
+    device.save()
+    
+    trk_points = device.locations
+    
+    event = Event(
+        name=effort_name,
+        slug=short_random_slug(),
+        start_date=epoch_to_datetime(trk_points[0][0]),
+        end_date=epoch_to_dateime(trk_points[-1][0]),
+        map=map,
     )
-    Competitor.objects.create(
+    event.save()
+
+    effort = Competitor.objects.create(
+        name=user.username,
+        short_name=user.username,
+        user=user,
         event=event,
-        name=user.settings.default_name or user.username,
-        short_name=user.settings.default_short_name or user.username,
         device=device,
     )
     return Response(
-        MapdumpEventSerializer(event).data, status_code=status.HTTP_201_CREATED
+        EffortSerializer(effort).data, status_code=status.HTTP_201_CREATED
     )
 
-
-@swagger_auto_schema(
-    method="get",
-    auto_schema=None,
-)
-@api_GET_view
-@permission_classes([IsAuthenticated])
-def md_feed_view(request):
-    return Http404()
