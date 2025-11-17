@@ -169,6 +169,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
                 "dashboard",
                 "events",
                 "map",
+                "my",
                 "registration",
                 "tiles",
                 "wms",
