@@ -2168,43 +2168,6 @@ def third_party_event_data(request, provider, uid):
     return Response(output)
 
 
-@swagger_auto_schema(
-    method="get",
-    auto_schema=None,
-)
-@api_GET_view
-@permission_classes([IsAuthenticated])
-def md_self_view(request):
-    user = request.user
-    clubs = Club.objects.filter(admins=user, is_personal_page=False)
-    output = {
-        "username": user.username,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "clubs": [{"name": c.name, "slug": c.slug} for c in clubs],
-    }
-    return Response(output)
-
-
-@swagger_auto_schema(
-    method="get",
-    auto_schema=None,
-)
-@api_GET_view
-def md_user_view(request, username):
-    user = get_object_or_404(User, username=username)
-    if not user.has_personal_page:
-        raise Http404()
-    clubs = Club.objects.filter(admins=user, is_personal_page=False)
-    output = {
-        "username": user.username,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "clubs": [{"name": c.name, "slug": c.slug} for c in clubs],
-    }
-    return Response(output)
-
-
 class RelativeURLField(serializers.ReadOnlyField):
     """
     Field that returns a link to the relative url.
@@ -2214,12 +2177,6 @@ class RelativeURLField(serializers.ReadOnlyField):
         request = self.context.get("request")
         url = request and request.build_absolute_uri(value) or ""
         return url
-
-
-class UserInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("username", "first_name", "last_name")
 
 
 class MapSerializer(serializers.ModelSerializer):
@@ -2233,6 +2190,7 @@ class MapSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     map = MapSerializer()
+
     class Meta:
         model = Event
         field = (
@@ -2258,24 +2216,6 @@ class EffortSerializer(serializers.ModelSerializer):
             "duration",
             "event",
         )
-
-
-@swagger_auto_schema(
-    method="get",
-    auto_schema=None,
-)
-@api_GET_view
-@permission_classes([IsAuthenticated])
-def md_effort_view(request, aid):
-    effort = get_object_or_404(
-        Competitor.objects.filter(
-            event__club__is_personal_page=True
-        ).prefetch_related(
-            "event", "event__map", "device",
-        ),
-        aid=aid,
-    )
-    return Response(EffortSerializer(effort).data)
 
 
 @swagger_auto_schema(
