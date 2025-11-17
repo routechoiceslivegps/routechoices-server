@@ -112,13 +112,6 @@ event_param = openapi.Parameter(
     type=openapi.TYPE_STRING,
 )
 
-mine_param = openapi.Parameter(
-    "only_mine",
-    openapi.IN_QUERY,
-    description="Filter weither you own it",
-    type=openapi.TYPE_BOOLEAN,
-)
-
 
 @swagger_auto_schema(
     method="post",
@@ -445,9 +438,8 @@ def event_list(request):
 @swagger_auto_schema(
     method="get",
     operation_id="club_list",
-    operation_description="List all the clubs.",
+    operation_description="List all your clubs.",
     tags=["Clubs"],
-    manual_parameters=[mine_param],
     responses={
         "200": openapi.Response(
             description="Success response",
@@ -457,13 +449,13 @@ def event_list(request):
                         "name": "Kangasala SK",
                         "slug": "ksk",
                         "url": "https://ksk.routechoices.com/",
-                        "owner": False,
+                        "plan": "FREE_TRIAL",
                     },
                     {
                         "name": "Halden SK",
                         "slug": "halden-sk",
                         "url": "https://gps.haldensk.no/",
-                        "owner": True,
+                        "plan": "PAYING",
                     },
                     "...",
                 ]
@@ -472,24 +464,25 @@ def event_list(request):
     },
 )
 @api_GET_view
+@permission_classes([IsAuthenticated])
 def club_list_view(request):
-    only_yours = request.GET.get("only_mine") == "true"
-    clubs = Club.objects.all()
-    owned_clubs = Club.objects.none()
-    if request.user.is_authenticated:
-        owned_clubs = clubs.filter(admins=request.user)
-    if only_yours:
-        clubs = owned_clubs
+    owned_clubs = Club.objects.filter(admins=request.user)
+    clubs = owned_clubs
     output = []
     for club in clubs:
+        # TODO: Set plan in models
+        plan = "NO_PLAN"
+        if club.is_on_free_trial:
+            plan = "FREE_TRIAL"
+        elif club.can_modify_events:
+            plan = "BASIC_LIVE"
         data = {
             "name": club.name,
             "slug": club.slug,
             "url": club.nice_url,
-            "owned": True if only_yours or (club in owned_clubs) else False,
+            "plan": plan,
         }
-        if not only_yours or data["owned"]:
-            output.append(data)
+        output.append(data)
     return Response(output)
 
 
