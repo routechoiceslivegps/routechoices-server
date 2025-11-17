@@ -2238,9 +2238,9 @@ def md_map_dl(request, aid):
     out_bounds = request.query_params.get("out_bounds", False)
     mime_type = "image/jpeg"
     if show_header or show_route:
-        img = effort.mapdump_map_image(show_header, show_route)
+        img = effort.mapdump_effort_image(show_header, show_route)
     elif out_bounds:
-        img = effort.mapdump_map_image(False, False)
+        img = effort.mapdump_effort_image(False, False)
     else:
         return serve_image_from_s3(
             request,
