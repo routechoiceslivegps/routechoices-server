@@ -2829,9 +2829,9 @@ class Competitor(models.Model, SomewhereOnEarth):
 
     @property
     def duration(self):
-        if not self.locations:
-            return None
-        return self.locations[-1][0] - self.locations[0][0]
+        if locs := self.locations:
+            return locs[-1][0] - locs[0][0]
+        return None
 
     @property
     def distance(self):
