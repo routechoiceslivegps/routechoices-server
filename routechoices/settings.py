@@ -301,9 +301,9 @@ SWAGGER_SETTINGS = {
             "tokenUrl": "/oauth2/token/",
             "flow": "implicit",
             "scopes": {
-                 "read": "Read your user data",
-                 "write": "Write data on your behalf",
-             },
+                "read": "Read your user data",
+                "write": "Write data on your behalf",
+            },
         },
     }
 }

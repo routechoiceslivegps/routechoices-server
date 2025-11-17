@@ -126,7 +126,7 @@ class SomewhereOnEarth:
         if coords := self.earth_coords:
             return country_code_at_coords(self.earth_coords)
         return None
-    
+
     @property
     def country_name(self):
         if cc := self.country_code:
@@ -2518,7 +2518,7 @@ class Device(models.Model, SomewhereOnEarth):
             self._last_location_latitude,
             self._last_location_longitude,
         )
-    
+
     @property
     def earth_coords(self):
         if loc := self.last_location:
@@ -2819,7 +2819,7 @@ class Competitor(models.Model, SomewhereOnEarth):
         if not self.tags:
             return []
         return self.tags.split(" ")
-    
+
     @property
     def earth_coords(self):
         if locs := self.locations:

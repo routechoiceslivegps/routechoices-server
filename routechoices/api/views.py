@@ -23,12 +23,11 @@ from django_hosts.resolvers import reverse
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import renderers, status
-from rest_framework.decorators import api_view, throttle_classes, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
-
 
 from routechoices.core.models import (
     EVENT_CACHE_INTERVAL_ARCHIVED,
@@ -205,24 +204,24 @@ def event_set_creation(request):
             "name": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description='Event name. Default to "Untitled + random string"',
-                example="Night-O"
+                example="Night-O",
             ),
             "slug": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description="URL path name. Default random",
-                example="night-o"
+                example="night-o",
             ),
             "start_date": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description="Start time (YYYY-MM-DDThh:mm:ssZ). Default to now",
-                example="2025-11-10T20:00:00Z"
+                example="2025-11-10T20:00:00Z",
             ),
             "end_date": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description=(
                     "End time, must be after the start_date (YYYY-MM-DDThh:mm:ssZ)"
                 ),
-                example="2025-11-10T22:00:00Z"
+                example="2025-11-10T22:00:00Z",
             ),
             "privacy": openapi.Schema(
                 type=openapi.TYPE_STRING,
