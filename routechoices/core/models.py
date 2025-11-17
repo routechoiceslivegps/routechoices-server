@@ -2917,7 +2917,7 @@ class Competitor(models.Model, SomewhereOnEarth):
             try:
                 data_uri = subprocess.check_output(
                     [
-                        f"{os.environ.get("NVM_DIR")}/versions/node/v{os.environ.get("NODE_VERSION")}/bin/node",
+                        "node",
                         "jstools/generate_map.js",
                         map_file.name,
                         self.map.corners_coordinates,
