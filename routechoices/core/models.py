@@ -2917,7 +2917,7 @@ class Competitor(models.Model, SomewhereOnEarth):
             try:
                 data_uri = subprocess.check_output(
                     [
-                        "jstools/generate_map.js",
+                        "./jstools/generate_map.js",
                         map_file.name,
                         self.map.corners_coordinates,
                         track_file.name,
@@ -2925,7 +2925,6 @@ class Competitor(models.Model, SomewhereOnEarth):
                         header_arg,
                         route_arg,
                     ],
-                    stderr=subprocess.STDOUT,
                     cwd=settings.BASE_DIR,
                 )
             except subprocess.CalledProcessError:
