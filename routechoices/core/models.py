@@ -1987,14 +1987,6 @@ class Event(models.Model, SomewhereOnEarth):
     def get_absolute_map_url(self):
         return f"{self.club.nice_url}{self.slug}/map"
 
-    @property
-    def mapdump_map_url(self):
-        return reverse(
-            "md_map_dl_view",
-            host="api",
-            kwargs={"aid": self.aid},
-        )
-
     def get_geojson_url(self):
         return f"{self.club.nice_url}{self.slug}/geojson?v={int_base32(int(self.modification_date.timestamp()))}"
 
@@ -2905,7 +2897,7 @@ class Competitor(models.Model, SomewhereOnEarth):
     def locations_hash(self):
         return shortsafe64encodedsha(self.encoded_data)[:8]
 
-    def mapdump_map_image(self, header=True, route=True):
+    def mapdump_effort_image(self, header=True, route=True):
         header_arg = "1" if header else "0"
         route_arg = "1" if route else "0"
 
