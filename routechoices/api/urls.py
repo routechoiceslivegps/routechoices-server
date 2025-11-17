@@ -253,4 +253,41 @@ urlpatterns = [
         "webhooks/",
         include(("routechoices.webhooks.urls", "webhooks"), namespace="webhooks"),
     ),
+    path(
+        "mapdump",
+        include(
+            [
+                path(
+                    "/self",
+                    views.md_self_view,
+                    name="md_self_view",
+                ),
+                path(
+                    "/feed",
+                    views.md_feed_view,
+                    name="md_feed_view",
+                ),
+                re_path(
+                    r"^\/user\-(?P<username>[0-9a-zA-Z_-]+)$",
+                    views.md_user_view,
+                    name="md_user_view",
+                ),
+                re_path(
+                    r"^\/map\-(?P<aid>[0-9a-zA-Z_-]+)$",
+                    views.md_map_view,
+                    name="md_map_view",
+                ),
+                re_path(
+                    r"^\/map\-(?P<aid>[0-9a-zA-Z_-]+).jpg$",
+                    views.md_map_dl_view,
+                    name="md_map_dl_view",
+                ),
+                path(
+                    "/create_map",
+                    views.md_create_event_view,
+                    name="md_create_event_view",
+                ),
+            ]
+        ),
+    ),
 ]

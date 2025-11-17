@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.contrib.gis.geoip2 import GeoIP2
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.files.base import ContentFile
 from django.db.models import Prefetch, Q
 from django.http import HttpRequest, HttpResponse
 from django.http.response import Http404
@@ -22,13 +23,12 @@ from django.utils.timezone import now
 from django_hosts.resolvers import reverse
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import renderers, status
-from rest_framework.decorators import api_view, throttle_classes, permission_classes
+from rest_framework import renderers, serializers, status
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
-
 
 from routechoices.core.models import (
     EVENT_CACHE_INTERVAL_ARCHIVED,
@@ -205,24 +205,24 @@ def event_set_creation(request):
             "name": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description='Event name. Default to "Untitled + random string"',
-                example="Night-O"
+                example="Night-O",
             ),
             "slug": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description="URL path name. Default random",
-                example="night-o"
+                example="night-o",
             ),
             "start_date": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description="Start time (YYYY-MM-DDThh:mm:ssZ). Default to now",
-                example="2025-11-10T20:00:00Z"
+                example="2025-11-10T20:00:00Z",
             ),
             "end_date": openapi.Schema(
                 type=openapi.TYPE_STRING,
                 description=(
                     "End time, must be after the start_date (YYYY-MM-DDThh:mm:ssZ)"
                 ),
-                example="2025-11-10T22:00:00Z"
+                example="2025-11-10T22:00:00Z",
             ),
             "privacy": openapi.Schema(
                 type=openapi.TYPE_STRING,
@@ -294,7 +294,9 @@ def event_list(request):
         club_slug = request.data.get("club_slug")
         if not club_slug:
             raise ValidationError("club_slug is required")
-        club = Club.objects.filter(admins=request.user, slug__iexact=club_slug).first()
+        club = Club.objects.filter(
+            admins=request.user, slug__iexact=club_slug, is_personal_page=False
+        ).first()
         if not club:
             raise ValidationError("club not found")
         if not club.can_modify_events:
@@ -402,7 +404,7 @@ def event_list(request):
 
     headers = {}
     if request.user.is_authenticated:
-        clubs = Club.objects.filter(admins=request.user)
+        clubs = Club.objects.filter(admins=request.user, is_personal_page=False)
         events = Event.objects.filter(
             Q(**privacy_arg) | Q(club__in=clubs)
         ).select_related("club")
@@ -480,7 +482,7 @@ def event_list(request):
 @api_GET_view
 @permission_classes([IsAuthenticated])
 def club_list_view(request):
-    owned_clubs = Club.objects.filter(admins=request.user)
+    owned_clubs = Club.objects.filter(admins=request.user, is_personal_page=False)
     clubs = owned_clubs
     output = []
     for club in clubs:
@@ -1668,10 +1670,11 @@ def user_search(request):
 @permission_classes([IsAuthenticated])
 def user_view(request):
     user = request.user
-    clubs = Club.objects.filter(admins=user)
+    clubs = Club.objects.filter(admins=user, is_personal_page=False)
     output = {
         "username": user.username,
         "clubs": [{"name": c.name, "slug": c.slug} for c in clubs],
+        "has_mapdump": user.has_personal_page,
     }
     return Response(output)
 
@@ -1742,7 +1745,8 @@ def device_registrations(request, device_id):
 @permission_classes([IsAuthenticated])
 def device_ownership_api_view(request, club_slug, device_id):
     club = get_object_or_404(
-        Club.objects.filter(admins=request.user), slug__iexact=club_slug
+        Club.objects.filter(admins=request.user, is_personal_page=False),
+        slug__iexact=club_slug,
     )
     device = get_object_or_404(Device, aid=device_id, virtual=False)
 
@@ -1864,7 +1868,7 @@ def event_geojson_download(request, event_id):
 @api_GET_HEAD_view
 @permission_classes([IsAuthenticated])
 def map_kmz_download(request, map_id, *args, **kwargs):
-    club_list = Club.objects.filter(admins=request.user)
+    club_list = Club.objects.filter(admins=request.user, is_personal_page=False)
     raster_map = get_object_or_404(Map, aid=map_id, club__in=club_list)
     kmz_data = raster_map.kmz
     response = StreamingHttpRangeResponse(
@@ -2162,3 +2166,198 @@ def third_party_event_data(request, provider, uid):
     cache.set(cache_key, output, 10)
 
     return Response(output)
+
+
+@swagger_auto_schema(
+    method="get",
+    auto_schema=None,
+)
+@api_GET_view
+@permission_classes([IsAuthenticated])
+def md_self_view(request):
+    user = request.user
+    clubs = Club.objects.filter(admins=user, is_personal_page=False)
+    output = {
+        "username": user.username,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "clubs": [{"name": c.name, "slug": c.slug} for c in clubs],
+    }
+    return Response(output)
+
+
+@swagger_auto_schema(
+    method="get",
+    auto_schema=None,
+)
+@api_GET_view
+def md_user_view(request, username):
+    user = get_object_or_404(User, username=username)
+    if not user.has_personal_page:
+        raise Http404()
+    clubs = Club.objects.filter(admins=user, is_personal_page=False)
+    output = {
+        "username": user.username,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "clubs": [{"name": c.name, "slug": c.slug} for c in clubs],
+    }
+    return Response(output)
+
+
+class RelativeURLField(serializers.ReadOnlyField):
+    """
+    Field that returns a link to the relative url.
+    """
+
+    def to_representation(self, value):
+        request = self.context.get("request")
+        url = request and request.build_absolute_uri(value) or ""
+        return url
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username", "first_name", "last_name")
+
+
+class MapdumpEventSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(source="aid")
+    athlete = UserInfoSerializer(source="club.creator")
+    country = serializers.ReadOnlyField(source="country_code")
+    tz = serializers.ReadOnlyField(source="timezone")
+    start_time = serializers.DateTimeField(required=False, source="start_date")
+    modification_date = serializers.ReadOnlyField()
+    map_size = serializers.ReadOnlyField(source="map.quick_size")
+    map_bounds = serializers.JSONField(source="map.bound")
+    map_url = serializers.ReadOnlyField(source="mapdump_map_url")
+
+    class Meta:
+        model = Event
+        fields = (
+            "id",
+            "athlete",
+            "name",
+            "start_time",
+            "modification_date",
+            "tz",
+            "country",
+            "map_bounds",
+            "map_size",
+            "map_url",
+        )
+
+
+@swagger_auto_schema(
+    method="get",
+    auto_schema=None,
+)
+@api_GET_view
+@permission_classes([IsAuthenticated])
+def md_map_view(request, aid):
+    event = get_object_or_404(
+        Event.objects.filter(club__is_personal_page=True).prefetch_related(
+            "map", "club__creator"
+        ),
+        aid=aid,
+    )
+    return Response(MapdumpEventSerializer(event).data)
+
+
+@swagger_auto_schema(
+    method="get",
+    auto_schema=None,
+)
+@api_GET_view
+@permission_classes([IsAuthenticated])
+def md_map_dl_view(request, aid):
+    event = get_object_or_404(
+        Event.objects.filter(club__is_personal_page=True).prefetch_related("map"),
+        aid=aid,
+    )
+    show_header = request.query_params.get("show_header", False)
+    show_route = request.query_params.get("show_route", False)
+    out_bounds = request.query_params.get("out_bounds", False)
+    mime_type = "image/jpeg"
+    if show_header or show_route:
+        img = event.mapdump_map_image(show_header, show_route)
+    elif out_bounds:
+        img = event.mapdump_map_image(False, False)
+    else:
+        return serve_image_from_s3(
+            request,
+            event.map.image,
+            event.name,
+            mime=mime_type,
+        )
+    response = HttpResponse(img, content_type=mime_type)
+    response["Content-Disposition"] = set_content_disposition(
+        f"{event.name}.{mime_type[6:]}", dl=False
+    )
+    return response
+
+
+@swagger_auto_schema(
+    method="post",
+    auto_schema=None,
+)
+@api_POST_view
+@permission_classes([IsAuthenticated])
+def md_create_event_view(request):
+    user = request.user
+    club = user.personal_page
+    if not club:
+        raise PermissionDenied()
+
+    event_name = request.data.get("name")
+
+    map_image_file = request.FILES.get("map_image")
+    map_corners_coords = request.data.get("map_image_corners_coords")
+
+    map_aid_suffix = safe64encodedsha(
+        f"{map_image_file.file.getvalue()}:{map_corners_coords}"
+    )[:11]
+
+    event_map, _ = Map.objects.get_or_create(
+        aid=map_aid_suffix,
+        club=club,
+        corners_coordinates=map_corners_coords,
+        defaults={"name": f"{event_name} map"},
+    )
+    event_map.image.save("tmp_name", ContentFile(map_image_file.file.getbuffer()))
+
+    gps_data_raw = request.data.get("gps_data")
+    gps_data = json.loads(gps_data_raw)
+    device_aid_suffix = safe64encodedsha(gps_data_raw)[:8]
+    device, _ = Device.objects.get_or_create(
+        aid=f"GPS|{device_aid_suffix}", virtual=True
+    )
+    device.add_locations(gps_data)
+    gps_data_corrected = device.locations
+    event = Event.objects.create(
+        name=event_name,
+        club=club,
+        start_date=epoch_to_datetime(gps_data_corrected[0][LOCATION_TIMESTAMP_INDEX]),
+        end_date=epoch_to_datetime(gps_data_corrected[-1][LOCATION_TIMESTAMP_INDEX]),
+        map=event_map,
+    )
+    Competitor.objects.create(
+        event=event,
+        name=user.settings.default_name or user.username,
+        short_name=user.settings.default_short_name or user.username,
+        device=device,
+    )
+    return Response(
+        MapdumpEventSerializer(event).data, status_code=status.HTTP_201_CREATED
+    )
+
+
+@swagger_auto_schema(
+    method="get",
+    auto_schema=None,
+)
+@api_GET_view
+@permission_classes([IsAuthenticated])
+def md_feed_view(request):
+    return Http404()

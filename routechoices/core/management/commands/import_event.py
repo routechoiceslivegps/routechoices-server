@@ -74,7 +74,7 @@ class Command(BaseCommand):
         parser.add_argument("-c", "--club", type=str)
 
     def handle(self, *args, method, **options):
-        club = Club.objects.filter(slug=options["club"]).first()
+        club = Club.objects.filter(slug=options["club"], is_personal_page=False).first()
         if options["club"] and not club:
             self.stderr.write(f"Could not find club {options['club']}")
             return

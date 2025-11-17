@@ -290,6 +290,7 @@ OAUTH2_PROVIDER = {
     "SCOPES": {
         "read": "Read your user data",
         "write": "Write data on your behalf",
+        "mapdump": "Read your information, and to create, edit, and delete maps, gps files, and events on your behalf in order to manage your Digital Online Map Dump.",
     }
 }
 SWAGGER_SETTINGS = {
@@ -301,9 +302,10 @@ SWAGGER_SETTINGS = {
             "tokenUrl": "/oauth2/token/",
             "flow": "implicit",
             "scopes": {
-                 "read": "Read your user data",
-                 "write": "Write data on your behalf",
-             },
+                "read": "Read your user data",
+                "write": "Write data on your behalf",
+                "mapdump": "Read your information, and to create, edit, and delete maps, gps files, and events on your behalf in order to manage your Digital Online Map Dump.",
+            },
         },
     }
 }

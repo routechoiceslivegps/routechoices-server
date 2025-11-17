@@ -116,7 +116,9 @@ class RequestInviteForm(Form):
     club = ModelChoiceField(
         label="Club",
         help_text="Enter the club you want to be added as admin",
-        queryset=Club.objects.filter(forbid_invite_request=False),
+        queryset=Club.objects.filter(
+            forbid_invite_request=False, is_personal_page=False
+        ),
     )
 
     def clean_club(self):

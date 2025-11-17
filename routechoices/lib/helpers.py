@@ -13,12 +13,14 @@ import zoneinfo
 from datetime import datetime
 from math import cos, pi, sin, sqrt
 
+import reverse_geocode
 from curl_cffi import requests
 from django.conf import settings
 from django.http.response import Http404
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_naive, make_aware
 from PIL import Image, ImageFile
+from timezonefinder import TimezoneFinder
 from user_sessions.templatetags.user_sessions import device as device_name
 
 from routechoices.lib.globalmaptiles import GlobalMercator
@@ -26,6 +28,17 @@ from routechoices.lib.random_strings import generate_random_string
 from routechoices.lib.validators import validate_nice_slug
 
 UTC_TZ = zoneinfo.ZoneInfo("UTC")
+
+COUNTRIES = reverse_geocode.GeocodeData()._countries
+TIMEZONEFINDER = TimezoneFinder(in_memory=True)
+
+
+def country_code_at_coords(latlon):
+    return reverse_geocode.get(latlon).get("country_code")
+
+
+def timezone_at_coords(latlon):
+    return TIMEZONEFINDER.timezone_at(lng=latlon[1], lat=latlon[0])
 
 
 def simplify_periods(ps):

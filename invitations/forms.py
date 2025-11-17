@@ -29,7 +29,9 @@ class CleanEmailMixin:
 
         club = self.club
         if not club and self.data.get("club"):
-            club = Club.objects.filter(id=self.data.get("club")).first()
+            club = Club.objects.filter(
+                id=self.data.get("club"), is_personal_page=False
+            ).first()
 
         errors = {
             "already_invited": (
