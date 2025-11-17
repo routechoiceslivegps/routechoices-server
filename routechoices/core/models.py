@@ -411,7 +411,7 @@ Follow our events live or replay them later.
         if self.domain:
             return f"{self.url_protocol}://{self.domain}/"
         if self.is_personal_page:
-            return f"https://mapdu.mp/a/{self.creator.username}"
+            return f"https://my.routechoices.com/{self.creator.username}"
         path = reverse(
             "club_view", host="clubs", host_kwargs={"club_slug": self.slug.lower()}
         )
@@ -1995,52 +1995,6 @@ class Event(models.Model, SomewhereOnEarth):
             kwargs={"aid": self.aid},
         )
 
-    @property
-    def mapdump_track(self):
-        return self.competitors.all().first().locations
-
-    def mapdump_map_image(self, header=True, route=True):
-        header_arg = "1" if header else "0"
-        route_arg = "1" if route else "0"
-
-        cache_key = f"mapdump:{self.map.hash}:{header_arg}:{route_arg}"
-        cached = cache.get(cache_key)
-        if cached:
-            return cached
-        data_uri = None
-        with (
-            tempfile.NamedTemporaryFile() as map_file,
-            tempfile.NamedTemporaryFile() as track_file,
-        ):
-            map_file.write(self.map.data)
-            map_file.flush()
-            track_file.write(json.dumps(self.mapdump_track))
-            track_file.flush()
-            try:
-                data_uri = subprocess.check_output(
-                    [
-                        f"{os.environ.get("NVM_DIR")}/versions/node/v{os.environ.get("NODE_VERSION")}/bin/node",
-                        "jstools/generate_map.js",
-                        map_file.name,
-                        self.map.corners_coordinates,
-                        track_file.name,
-                        self.timezone,
-                        header_arg,
-                        route_arg,
-                    ],
-                    stderr=subprocess.STDOUT,
-                    cwd=settings.BASE_DIR,
-                )
-            except subprocess.CalledProcessError:
-                pass
-            else:
-                header, encoded = data_uri.decode("utf-8").split(",", 1)
-                if header.startswith("data"):
-                    data = base64.b64decode(encoded)
-                    cache.set(cache_key, data, 31 * 24 * 3600)
-                    return data
-        return None
-
     def get_geojson_url(self):
         return f"{self.club.nice_url}{self.slug}/geojson?v={int_base32(int(self.modification_date.timestamp()))}"
 
@@ -2946,6 +2900,53 @@ class Competitor(models.Model, SomewhereOnEarth):
             distance += 12756274 * math.atan2(math.sqrt(alpha), math.sqrt(1 - alpha))
             prev_pt = pt
         return distance
+
+    @property
+    def locations_hash(self):
+        return shortsafe64encodedsha(self.encoded_data)[:8]
+
+    def mapdump_map_image(self, header=True, route=True):
+        header_arg = "1" if header else "0"
+        route_arg = "1" if route else "0"
+
+        cache_key = f"mapdump:{self.event.map.hash}:{self.locations_hash}:{header_arg}:{route_arg}"
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+        data_uri = None
+        with (
+            tempfile.NamedTemporaryFile() as map_file,
+            tempfile.NamedTemporaryFile() as track_file,
+        ):
+            map_file.write(self.event.map.data)
+            map_file.flush()
+            track_file.write(json.dumps(self.locations))
+            track_file.flush()
+            try:
+                data_uri = subprocess.check_output(
+                    [
+                        f"{os.environ.get("NVM_DIR")}/versions/node/v{os.environ.get("NODE_VERSION")}/bin/node",
+                        "jstools/generate_map.js",
+                        map_file.name,
+                        self.map.corners_coordinates,
+                        track_file.name,
+                        self.timezone,
+                        header_arg,
+                        route_arg,
+                    ],
+                    stderr=subprocess.STDOUT,
+                    cwd=settings.BASE_DIR,
+                )
+            except subprocess.CalledProcessError:
+                raise Exception("Internal Tool Error")
+            else:
+                header, encoded = data_uri.decode("utf-8").split(",", 1)
+                if header.startswith("data"):
+                    data = base64.b64decode(encoded)
+                    cache.set(cache_key, data, 31 * 24 * 3600)
+                    return data
+        return None
+
 
 
 @receiver([pre_save, post_delete], sender=Competitor)
