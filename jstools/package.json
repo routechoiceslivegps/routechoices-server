@@ -1,5 +1,5 @@
 {
-	"dependencies": {
+  "dependencies": {
     "canvas": "Automattic/node-canvas#master"
-	}
+  }
 }
