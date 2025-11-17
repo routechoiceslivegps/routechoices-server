@@ -4,7 +4,4 @@
 {% block content %}
 <h1>{{ event.name }} with {{user.username}}</h1>
 <div>{{ effort.distance }}meters for {{ effort.duration }}seconds</div>
-<div>
-<img alt="Map" src="{% host_url 'md_map_dl' host 'api' effort.id %}"/>
-</div>
 {% endblock %}
