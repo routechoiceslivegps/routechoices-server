@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 const fs = require("node:fs");
 const { loadImage } = require("canvas");
 const { drawTrackOnMap } = require("./lib/mapdump");
