@@ -2272,7 +2272,7 @@ def md_create_effort_view(request):
     map_image_file = request.FILES.get("map_image")
     map_corners_coords = request.data.get("map_image_corners_coords")
     map = Map(
-        name=f"{effort_name} map"}",
+        name=f"{effort_name} map",
         corners_coordinates=map_corners_coords,
     )
     map.image.save(
