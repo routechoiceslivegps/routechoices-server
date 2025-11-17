@@ -2917,7 +2917,6 @@ class Competitor(models.Model, SomewhereOnEarth):
             try:
                 data_uri = subprocess.check_output(
                     [
-                        "node",
                         "jstools/generate_map.js",
                         map_file.name,
                         self.map.corners_coordinates,
