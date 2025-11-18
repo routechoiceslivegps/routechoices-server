@@ -25,7 +25,7 @@ import orjson as json
 from allauth.account.models import EmailAddress
 from dateutil.parser import parse as parse_date
 from django.conf import settings
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.gis.geos import LinearRing, Polygon
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import BadRequest, PermissionDenied, ValidationError
@@ -538,6 +538,7 @@ User.personal_page = property(get_user_personal_page)
 User.has_personal_page = property(has_user_personal_page)
 AnonymousUser.personal_page = None
 AnonymousUser.has_personal_page = False
+
 
 def map_upload_path(instance=None, file_name=None):
     tmp_path = ["maps"]
@@ -1626,6 +1627,7 @@ class Event(models.Model, SomewhereOnEarth):
         help_text='A <a href="//www.routechoices.com/guide/geojson" taget="_blank" rel="nofollow noopener">GeoJSON CSS</a> file.',
         storage=OverwriteImageStorage(aws_s3_bucket_name=settings.AWS_S3_BUCKET),
     )
+    freezed_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ["-start_date", "name"]
@@ -1688,6 +1690,17 @@ class Event(models.Model, SomewhereOnEarth):
             or not self.club.admins.filter(id=user.id).exists()
         ):
             raise PermissionDenied()
+
+    def freeze(self, save=True):
+        self.freezed_at = now()
+        if save:
+            self.save()
+
+    def freezed(self):
+        return self.freezed and self.freezed_at < now()
+
+    def can_edit(self, user=None):
+        return self.club.can_modify_events and not self.freezed
 
     @classmethod
     def get_by_url(cls, url):
@@ -2936,7 +2949,6 @@ class Competitor(models.Model, SomewhereOnEarth):
                     cache.set(cache_key, data, 31 * 24 * 3600)
                     return data
         return None
-
 
 
 @receiver([pre_save, post_delete], sender=Competitor)
