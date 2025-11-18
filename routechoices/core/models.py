@@ -25,7 +25,7 @@ import orjson as json
 from allauth.account.models import EmailAddress
 from dateutil.parser import parse as parse_date
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.gis.geos import LinearRing, Polygon
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import BadRequest, PermissionDenied, ValidationError
@@ -537,7 +537,8 @@ def get_user_personal_page(user):
 
 User.personal_page = property(get_user_personal_page)
 User.has_personal_page = property(has_user_personal_page)
-
+AnonymousUser.personal_page = None
+AnonymousUser.has_personal_page = False
 
 def map_upload_path(instance=None, file_name=None):
     tmp_path = ["maps"]
