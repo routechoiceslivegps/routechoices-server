@@ -56,7 +56,6 @@ from routechoices.lib.duration_constants import (
     DURATION_ONE_MINUTE,
 )
 from routechoices.lib.helpers import (
-    epoch_to_dateime,
     epoch_to_datetime,
     get_image_mime_from_request,
     git_master_hash,
@@ -1461,7 +1460,7 @@ def locations_api_gw(request):
     device_id = str(device_id)
     if re.match(r"^[0-9]+$", device_id):
         if secret_provided not in settings.POST_LOCATION_SECRETS and (
-            not request.user.is_authenticated or not request.user.is_staff
+            not request.user.is_authenticated or not request.user.is_superuser
         ):
             raise PermissionDenied(
                 "Authentication Failed. Only validated apps are allowed"
@@ -1606,7 +1605,7 @@ def create_device_id(request):
         return Response(
             {"status": "ok", "device_id": device.aid, "imei": imei}, status=status_code
         )
-    if not request.user.is_authenticated or not request.user.is_staff:
+    if not request.user.is_authenticated or not request.user.is_superuser:
         raise PermissionDenied(
             "Authentication Failed, Only validated apps can create new device IDs"
         )
@@ -1948,20 +1947,20 @@ def two_d_rerun_race_status(request):
         "maph": raster_map.height,
         "calibration": [
             [
-                raster_map.bound["top_left"]["lon"],
-                raster_map.bound["top_left"]["lat"],
+                raster_map.bound[0].longitude,
+                raster_map.bound[0].latitude,
                 0,
                 0,
             ],
             [
-                raster_map.bound["top_right"]["lon"],
-                raster_map.bound["top_right"]["lat"],
+                raster_map.bound[1].longitude,
+                raster_map.bound[1].latitude,
                 raster_map.width,
                 0,
             ],
             [
-                raster_map.bound["bottom_left"]["lon"],
-                raster_map.bound["bottom_left"]["lat"],
+                raster_map.bound[2].longitude,
+                raster_map.bound[2].latitude,
                 0,
                 raster_map.height,
             ],
@@ -2254,7 +2253,7 @@ def md_create_effort_view(request):
         name=effort_name,
         slug=short_random_slug(),
         start_date=epoch_to_datetime(trk_points[0][0]),
-        end_date=epoch_to_dateime(trk_points[-1][0]),
+        end_date=epoch_to_datetime(trk_points[-1][0]),
         map=map,
     )
     event.save()

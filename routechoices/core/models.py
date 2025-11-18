@@ -55,6 +55,7 @@ from routechoices.lib.helpers import (
     XYMeters,
     adjugate_matrix,
     avg_angles,
+    calibration_string_from_wgs84_bound,
     country_code_at_coords,
     delete_domain,
     distance_between_locations,
@@ -672,53 +673,27 @@ class Map(models.Model, SomewhereOnEarth):
     @property
     def bound(self):
         vals = self.calibration_values
-        return (
-            Wgs84Coordinate(vals[0], vals[1]),
-            Wgs84Coordinate(vals[2], vals[3]),
-            Wgs84Coordinate(vals[4], vals[5]),
-            Wgs84Coordinate(vals[6], vals[7]),
-        )
+        return [Wgs84Coordinate(vals[0 + i * 2 : 2 + i * 2]) for i in range(4)]
 
-    @property
-    def size(self):
-        width, height = self.quick_size
-        return {"width": width, "height": height}
+    @bound.setter
+    def bound(self, value):
+        calibration_string_from_wgs84_bound(value)
 
     @property
     def min_lon(self):
-        return min(
-            self.bound["top_left"]["lon"],
-            self.bound["bottom_left"]["lon"],
-            self.bound["bottom_right"]["lon"],
-            self.bound["top_right"]["lon"],
-        )
+        return min([c.longitude for c in self.bound])
 
     @property
     def max_lon(self):
-        return max(
-            self.bound["top_left"]["lon"],
-            self.bound["bottom_left"]["lon"],
-            self.bound["bottom_right"]["lon"],
-            self.bound["top_right"]["lon"],
-        )
+        return max([c.longitude for c in self.bound])
 
     @property
     def min_lat(self):
-        return min(
-            self.bound["top_left"]["lat"],
-            self.bound["bottom_left"]["lat"],
-            self.bound["bottom_right"]["lat"],
-            self.bound["top_right"]["lat"],
-        )
+        return min([c.latitude for c in self.bound])
 
     @property
     def max_lat(self):
-        return max(
-            self.bound["top_left"]["lat"],
-            self.bound["bottom_left"]["lat"],
-            self.bound["bottom_right"]["lat"],
-            self.bound["top_right"]["lat"],
-        )
+        return max([c.latitude for c in self.bound])
 
     @property
     def max_xy(self):
@@ -2319,51 +2294,6 @@ class Device(models.Model, SomewhereOnEarth):
         deleted_location_count = location_count - len(valid_locs)
         if deleted_location_count:
             self.add_locations(valid_locs, reset=True, save=save)
-
-    def archive(self, /, *, until, save=False):
-        last_start = None
-
-        periods_used = self.get_active_periods()
-        periods_used_till_limit = []
-        for period in periods_used:
-            end = period[1]
-            if end < until:
-                periods_used_till_limit.append(period)
-
-        if periods_used_till_limit:
-            last_start = periods_used_till_limit[-1][0]
-        periods_to_gather = periods_used_till_limit[:-1]
-
-        locs_to_archive = self.get_locations_over_periods(periods_to_gather)
-
-        if locs_to_archive:
-            archive_dev = Device(
-                aid=f"{short_random_key()}_ARC",
-                virtual=True,
-            )
-            arc_reference = DeviceArchiveReference(tracker=self, archive=archive_dev)
-            archive_dev.add_locations(locs_to_archive, save=False)
-            modified_competitors = [
-                c for c in self.competitor_set.all() if c.start_time < last_start
-            ]
-
-            for competitor in modified_competitors:
-                competitor.device = archive_dev
-
-            left_locations, _ = self.get_locations_between_dates(
-                last_start,
-                self.last_location_datetime,
-            )
-            self.add_locations(left_locations, reset=True, save=False)
-
-            if save:
-                archive_dev.save()
-                arc_reference.save()
-                for competitor in modified_competitors:
-                    competitor.save()
-                self.save()
-            return archive_dev
-        return None
 
     def get_locations_over_periods(self, periods):
         locs = []

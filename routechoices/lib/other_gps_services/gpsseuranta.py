@@ -87,17 +87,14 @@ class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
         map_obj = Map()
         map_obj.width = size[0]
         map_obj.height = size[1]
-        cal_pts_array = (float(val) for val in calibration_string.split("|"))
-        geo_points = (
-            Wgs84Coordinate(cal_pts_array[1], cal_pts_array[0]),
-            Wgs84Coordinate(cal_pts_array[5], cal_pts_array[4]),
-            Wgs84Coordinate(cal_pts_array[9], cal_pts_array[8]),
-        )
-        image_points = (
-            Point(cal_pts_array[2], cal_pts_array[3]),
-            Point(cal_pts_array[6], cal_pts_array[7]),
-            Point(cal_pts_array[10], cal_pts_array[11]),
-        )
+        cal_pts_array = [float(val) for val in calibration_string.split("|")]
+        geo_points = [
+            Wgs84Coordinate(cal_pts_array[1 + i * 3], cal_pts_array[i * 4])
+            for i in range(3)
+        ]
+        image_points = [
+            Point(cal_pts_array[2 + i * 4], cal_pts_array[3 + i * 4]) for i in range(3)
+        ]
         bound = wgs84_bound_from_3_ref_points(geo_points, image_points, size)
         map_obj.bound = bound
         return map_obj
