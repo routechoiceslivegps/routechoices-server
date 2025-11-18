@@ -84,7 +84,6 @@ from routechoices.lib.validators import (
     validate_domain_name,
     validate_domain_slug,
     validate_emails,
-    validate_esn,
     validate_imei,
     validate_latitude,
     validate_longitude,
@@ -2980,54 +2979,20 @@ class FrontPageFeedback(models.Model):
         return f"Feedback from {self.name} ({self.club_name})"
 
 
-class UserSettings(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    default_device = models.ForeignKey(
-        Device,
-        related_name="default_user_set",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
-    default_name = models.CharField(max_length=64, null=True, blank=True)
-    default_short_name = models.CharField(max_length=32, null=True, blank=True)
-
-    class Meta:
-        verbose_name = "user settings"
-        verbose_name_plural = "user settings"
-
-
-User.settings = property(lambda u: UserSettings.objects.get_or_create(user=u)[0])
-
-
-class SpotFeed(models.Model):
-    feed_id = models.CharField(
-        max_length=64,
-        unique=True,
-    )
-    last_fetched = models.DateTimeField(blank=True, null=True)
-
-    def __str__(self):
-        return self.feed_id
-
-
-class SpotDevice(models.Model):
+class DeviceSharingPeriod(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
-    messenger_id = models.CharField(
-        max_length=32,
-        unique=True,
-        validators=[
-            validate_esn,
-        ],
+    modification_date = models.DateTimeField(auto_now=True)
+    device = models.ForeignKey(Device, related_name="sharing", on_delete=models.CASCADE)
+    club = models.ForeignKey(
+        Club, related_name="shared_devices", on_delete=models.CASCADE
     )
-    device = models.OneToOneField(
-        Device, related_name="spot_device", on_delete=models.CASCADE
-    )
+    from_date = models.DateTimeField(auto_now_add=True)
+    until_date = models.DateTimeField()
 
     class Meta:
-        ordering = ["messenger_id"]
-        verbose_name = "spot device"
-        verbose_name_plural = "spot devices"
+        ordering = ["-until_date"]
+        verbose_name = "Tracker Sharing Period"
+        verbose_name_plural = "Trackers Sharing Periods"
 
     def __str__(self):
-        return self.messenger_id
+        return f"Tracker <{self.device}> sharing to Org <{self.club.slug}> from {self.from_date} until {self.until_date}"
