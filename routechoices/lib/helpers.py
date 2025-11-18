@@ -3,7 +3,6 @@ import hashlib
 import math
 import os
 import os.path
-import random
 import re
 import secrets
 import struct
@@ -38,16 +37,16 @@ class Point:
     x = None
     y = None
 
-    def __init__(self, first_arg, second_arg=None):
-        if second_arg is not None:
-            x, y = [first_arg, second_arg]
-        elif isinstance(first_arg, Point):
-            x, y = first_arg.xy
-        elif isinstance(first_arg, tuple) or isinstance(first_arg, list):
-            x, y = first_arg
-        elif isinstance(first_arg, dict):
-            x = first_arg.get("x")
-            y = first_arg.get("y")
+    def __init__(self, val, *args):
+        if len(args) == 1:
+            x, y = [val, args[0]]
+        elif isinstance(val, Point):
+            x, y = val.xy
+        elif isinstance(val, tuple) or isinstance(val, list):
+            x, y = val
+        elif isinstance(val, dict):
+            x = val.get("x")
+            y = val.get("y")
         else:
             raise ValueError()
         self.x = x
@@ -268,39 +267,42 @@ def solve_affine_matrix(matrix):
     return [x, y, z]
 
 
-def derive_affine_transform(ref_1_points, ref_2_points):
-    epsilon = 1e-15
-    for i in range(3):
-        sign = -1 if random.random() < 0.5 else 1
-        ref_1_points[i].x += sign * epsilon
-        ref_1_points[i].y += sign * epsilon
+def flatten(something):
+    if isinstance(something, (list, tuple, set, range)):
+        for sub in something:
+            yield from flatten(sub)
+    else:
+        yield something
 
-    x_coefs = solve_affine_matrix(
-        (
-            ref_2_points[0].x,
-            ref_2_points[0].y,
-            ref_1_points[0].x,
-            ref_2_points[1].x,
-            ref_2_points[1].y,
-            ref_1_points[1].x,
-            ref_2_points[2].x,
-            ref_2_points[2].y,
-            ref_1_points[2].x,
+
+def derive_affine_transform(ref_a_points, ref_b_points):
+    matrix_x = list(
+        flatten(
+            list(
+                (
+                    ref_b_points[i].x,
+                    ref_b_points[i].y,
+                    ref_a_points[i].x,
+                )
+                for i in range(3)
+            )
         )
     )
-    y_coefs = solve_affine_matrix(
-        (
-            ref_2_points[0].x,
-            ref_2_points[0].y,
-            ref_1_points[0].y,
-            ref_2_points[1].x,
-            ref_2_points[1].y,
-            ref_1_points[1].y,
-            ref_2_points[2].x,
-            ref_2_points[2].y,
-            ref_1_points[2].y,
+    matrix_y = list(
+        flatten(
+            list(
+                (
+                    ref_b_points[i].x,
+                    ref_b_points[i].y,
+                    ref_a_points[i].x,
+                )
+                for i in range(3)
+            )
         )
     )
+    print(matrix_x)
+    x_coefs = solve_affine_matrix(matrix_x)
+    y_coefs = solve_affine_matrix(matrix_y)
 
     def transform(xy):
         x, y = Point(xy).xy
@@ -312,12 +314,12 @@ def derive_affine_transform(ref_1_points, ref_2_points):
 
 
 def wgs84_bound_from_3_ref_points(coords, image_points, image_size):
-    coords_xy_meters = (val.xy_meters for val in coords)
+    print(coords)
+    coords_xy_meters = list((val.xy_meters for val in coords))
     image_xy_to_meters = derive_affine_transform(coords_xy_meters, image_points)
 
     def image_xy_to_wgs84(xy):
-        mxy = image_xy_to_meters(Point(xy))
-        return mxy.wgs84_coordinate
+        return XYMeters(image_xy_to_meters(Point(xy))).wgs84_coordinate
 
     width, height = image_size
     return (
@@ -610,17 +612,17 @@ class Wgs84Coordinate:
     latitude = None
     longitude = None
 
-    def __init__(self, first_arg, second_arg=None):
-        if second_arg is not None:
-            lat, lon = (first_arg, second_arg)
-        elif isinstance(first_arg, Wgs84Coordinate):
-            lat, lon = first_arg.latlon
-        elif isinstance(first_arg, XYMeters):
-            lat, lon = first_arg.wgs84_coordinate
-        if isinstance(first_arg, tuple) or isinstance(first_arg, list):
-            lat, lon = first_arg
-        elif isinstance(first_arg, dict):
-            lat, lon = (first_arg.get("x"), first_arg.get("y"))
+    def __init__(self, val, *args):
+        if len(args) == 1:
+            lat, lon = val, args[0]
+        elif isinstance(val, Wgs84Coordinate):
+            lat, lon = val.latlon
+        elif isinstance(val, XYMeters):
+            lat, lon = val.wgs84_coordinate
+        elif isinstance(val, tuple) or isinstance(val, list):
+            lat, lon = val
+        elif isinstance(val, dict):
+            lat, lon = (val.get("x"), val.get("y"))
         else:
             raise ValueError()
 
@@ -629,7 +631,7 @@ class Wgs84Coordinate:
 
     @property
     def latlon(self):
-        return (self.latitude, self.longitude)
+        return self.latitude, self.longitude
 
     @property
     def xy_meters(self):

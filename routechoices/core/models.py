@@ -677,7 +677,7 @@ class Map(models.Model, SomewhereOnEarth):
 
     @bound.setter
     def bound(self, value):
-        calibration_string_from_wgs84_bound(value)
+        self.calibration_string = calibration_string_from_wgs84_bound(value)
 
     @property
     def min_lon(self):
@@ -732,7 +732,7 @@ class Map(models.Model, SomewhereOnEarth):
         return adjugate_matrix(self.matrix_3d)
 
     @cached_property
-    def map_xy_to_spherical_mercator(self):
+    def map_xy_to_spherical_mercator(self, xy):
         return lambda xy: XYMeters(project(self.matrix_3d, xy))
 
     @cached_property
@@ -746,8 +746,8 @@ class Map(models.Model, SomewhereOnEarth):
             return image_xy.round(5)
         return image_xy
 
-    def map_xy_to_wsg84(self, x, y):
-        xy_meters = self.map_xy_to_spherical_mercator(x, y)
+    def map_xy_to_wsg84(self, xy):
+        xy_meters = self.map_xy_to_spherical_mercator(xy)
         return xy_meters.wgs84_coordinate
 
     @property
@@ -791,27 +791,31 @@ class Map(models.Model, SomewhereOnEarth):
         r = self.resolution / meters_per_pixel_at_zoom_18
         return math.floor(math.log2(r)) + 18
 
+    @property
+    def corners_xy(self):
+        width, height = self.quick_size
+        return ((0, 0), (width, 0), (width, height), (0, height))
+
     @cached_property
     def rotation(self):
         width, height = self.quick_size
-        tl = self.map_xy_to_spherical_mercator(0, 0)
-        tr = self.map_xy_to_spherical_mercator(width, 0)
-        br = self.map_xy_to_spherical_mercator(width, height)
-        bl = self.map_xy_to_spherical_mercator(0, height)
+        tl, tr, br, bl = (corner.xy_meters for corner in self.bound)
 
-        rot_vert_left = (
-            (math.atan2(tl[1] - bl[1], tl[0] - bl[0]) - math.pi / 2) * 180 / math.pi
-        )
-        rot_vert_right = (
-            (math.atan2(tr[1] - br[1], tr[0] - br[0]) - math.pi / 2) * 180 / math.pi
-        )
-        rot_vert = (avg_angles(rot_vert_left, rot_vert_right)) % 360
+        left_diff = Point(tl.x - bl.x, tl.y - bl.y)
+        right_diff = Point(tr.x - br.x, tr.y - br.y)
+        top_diff = Point(tl.x - tr.x, tl.y - tr.y)
+        bottom_diff = Point(br.x - bl.x, br.y - bl.y)
 
-        rot_hori_top = (math.atan2(tr[1] - tl[1], tr[0] - tl[0])) * 180 / math.pi
-        rot_hori_bottom = (math.atan2(br[1] - bl[1], br[0] - bl[0])) * 180 / math.pi
-        rot_hori = avg_angles(rot_hori_top, rot_hori_bottom) % 360
+        left_rot = (math.atan2(*left_diff.xy) - math.pi / 2) * 180 / math.pi
+        right_rot = (math.atan2(*right_diff.xy) - math.pi / 2) * 180 / math.pi
 
-        return round(avg_angles(rot_vert, rot_hori), 2)
+        top_rot = (math.atan2(*top_diff)) * 180 / math.pi
+        bottom_rot = (math.atan2(bottom_diff.xy)) * 180 / math.pi
+
+        vertical_rot = (avg_angles(left_rot, right_rot)) % 360
+        horizontal_rot = avg_angles(top_rot, bottom_rot) % 360
+
+        return round(avg_angles(vertical_rot, horizontal_rot), 2)
 
     @property
     def north_declination(self):

@@ -84,19 +84,24 @@ class GpsSeurantaNet(ThirdPartyTrackingSolutionWithProxy):
         if not size or not calibration_string:
             return None
 
-        map_obj = Map()
-        map_obj.width = size[0]
-        map_obj.height = size[1]
-        cal_pts_array = [float(val) for val in calibration_string.split("|")]
-        geo_points = [
-            Wgs84Coordinate(cal_pts_array[1 + i * 3], cal_pts_array[i * 4])
+        calibration_values = [float(val) for val in calibration_string.split("|")]
+        print(calibration_values)
+        wgs84_coords = list(
+            Wgs84Coordinate((calibration_values[1 + i * 4], calibration_values[i * 4]))
             for i in range(3)
-        ]
-        image_points = [
-            Point(cal_pts_array[2 + i * 4], cal_pts_array[3 + i * 4]) for i in range(3)
-        ]
-        bound = wgs84_bound_from_3_ref_points(geo_points, image_points, size)
-        map_obj.bound = bound
+        )
+        print(wgs84_coords)
+        image_points = list(
+            Point((calibration_values[2 + i * 4], calibration_values[3 + i * 4]))
+            for i in range(3)
+        )
+
+        width, height = size
+        map_obj = Map(
+            width=width,
+            height=height,
+        )
+        map_obj.bound = wgs84_bound_from_3_ref_points(wgs84_coords, image_points, size)
         return map_obj
 
     def get_competitor_devices_data(self, event):
