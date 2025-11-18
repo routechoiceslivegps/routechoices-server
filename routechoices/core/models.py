@@ -2919,7 +2919,7 @@ class Competitor(models.Model, SomewhereOnEarth):
                     [
                         "./jstools/generate_map.js",
                         map_file.name,
-                        self.map.corners_coordinates,
+                        self.event.map.corners_coordinates,
                         track_file.name,
                         self.timezone,
                         header_arg,
