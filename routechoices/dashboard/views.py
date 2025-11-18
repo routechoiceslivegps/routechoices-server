@@ -1245,7 +1245,7 @@ def dashboard_map_download(request, map_id, *args, **kwargs):
         file_path,
         filename=(
             f"{raster_map.name}_"
-            f"{raster_map.corners_coordinates_string}_."
+            f"{raster_map.calibration_string_for_naming}_."
             f"{mime_type[6:]}"
         ),
         mime=mime_type,

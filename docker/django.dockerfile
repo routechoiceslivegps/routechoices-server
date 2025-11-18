@@ -50,16 +50,5 @@ EXPOSE 2000
 ENV DJANGO_SETTINGS_MODULE=routechoices.settings
 
 RUN DATABASE_URL="sqlite://:memory:" python manage.py collectstatic --noinput
-
-ENV NODE_VERSION=25.2.1
-RUN apt install -y curl
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-ENV NVM_DIR=/root/.nvm
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-RUN "/root/.nvm/versions/node/v${NODE_VERSION}/bin/npm" install --global pnpm
-RUN pnpm install -C jstools
 #RUN chown -R app:app /app
 #USER app

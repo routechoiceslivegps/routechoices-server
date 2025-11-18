@@ -816,7 +816,7 @@ class EventApiTestCase(EssentialApiBase):
         raster_map = Map.objects.create(
             club=club,
             name="Test map",
-            corners_coordinates=(
+            calibration_string=(
                 "61.45075,24.18994,61.44656,24.24721,"
                 "61.42094,24.23851,61.42533,24.18156"
             ),
@@ -888,7 +888,7 @@ class EventApiTestCase(EssentialApiBase):
 
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertNotEqual(res.data["competitors"][0]["encoded_data"], "")
+        self.assertNotEqual(res.data["competitors"][0]["locations_encoded"], "")
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
         res = self.client.get(url)
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
@@ -900,7 +900,7 @@ class EventApiTestCase(EssentialApiBase):
         res = self.client.get(f"{url}/{key}")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIsNone(res.headers.get("X-Cache-Hit"))
-        self.assertNotEqual(res.data["competitors"][0]["encoded_data"], "")
+        self.assertNotEqual(res.data["competitors"][0]["locations_encoded"], "")
         self.assertEqual(res.data["partial"], True)
         res = self.client.get(f"{url}/{key}")
         self.assertEqual(res.headers.get("X-Cache-Hit"), "1")
