@@ -1462,7 +1462,7 @@ def locations_api_gw(request):
     device_id = str(device_id)
     if re.match(r"^[0-9]+$", device_id):
         if secret_provided not in settings.POST_LOCATION_SECRETS and (
-            not request.user.is_authenticated or request.user.username != "apps"
+            not request.user.is_authenticated or not request.user.is_staff
         ):
             raise PermissionDenied(
                 "Authentication Failed. Only validated apps are allowed"
@@ -1607,7 +1607,7 @@ def create_device_id(request):
         return Response(
             {"status": "ok", "device_id": device.aid, "imei": imei}, status=status_code
         )
-    if not request.user.is_authenticated or request.user.username != "apps":
+    if not request.user.is_authenticated or not request.user.is_staff:
         raise PermissionDenied(
             "Authentication Failed, Only validated apps can create new device IDs"
         )
