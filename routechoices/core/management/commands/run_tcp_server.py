@@ -4,8 +4,6 @@ import sys
 from django.core.management.base import BaseCommand
 from tornado.ioloop import IOLoop
 
-from routechoices.lib import tcp_protocols
-
 
 def sigterm_handler(_signo, _stack_frame):
     # Raises SystemExit(0):
@@ -30,7 +28,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         for slug, name, port in SUPPORTED_PORT:
             parser.add_argument(
-                f"--{slug}-port", nargs="?", type=int, help=f"{name} Port"
+                f"--{slug}_port", nargs="?", type=int, help=f"{name} Port"
             )
 
     def handle(self, *args, **options):
@@ -38,7 +36,10 @@ class Command(BaseCommand):
         signal.signal(signal.SIGTERM, sigterm_handler)
         for slug, name, port in SUPPORTED_PORT:
             if port := options.get(f"{slug}_port"):
-                server = tcp_protocols.getattr(name).Server()
+                protocol_lib = __import__(
+                    f"routechoices.lib.tcp_protocols.{slug}", fromlist=[slug]
+                )
+                server = protocol_lib.TCPServer()
                 server.listen(options.get("{name}_port"), reuse_port=True)
                 servers.add((slug, server))
                 print(f"Listening protocol {name} on port {port}", flush=True)
