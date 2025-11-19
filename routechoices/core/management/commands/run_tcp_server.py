@@ -37,10 +37,11 @@ class Command(BaseCommand):
         servers = set()
         signal.signal(signal.SIGTERM, sigterm_handler)
         for slug, name, port in SUPPORTED_PORT:
-            if options.get(f"{slug}_port"):
+            if port := options.get(f"{slug}_port"):
                 server = tcp_protocols.getattr(name).Server()
                 server.listen(options.get("{name}_port"), reuse_port=True)
                 servers.add((slug, server))
+                print(f"Listening protocol {name} on port {port}", flush=True)
         try:
             print("Start listening TCP data...", flush=True)
             IOLoop.current().start()
