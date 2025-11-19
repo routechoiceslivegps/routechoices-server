@@ -6,7 +6,6 @@ from tornado.ioloop import IOLoop
 
 
 def sigterm_handler(_signo, _stack_frame):
-    # Raises SystemExit(0):
     sys.exit(0)
 
 

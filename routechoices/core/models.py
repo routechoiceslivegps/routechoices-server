@@ -147,7 +147,7 @@ class SomewhereOnEarth:
         return "🌍"
 
 
-class GPSSeurantaClient:
+class GPSSeurantaNetClient:
     def connect(self):
         if not settings.GPSSEURANTA_SERVER_ADDR:
             return
@@ -170,7 +170,7 @@ class GPSSeurantaClient:
                 break
 
 
-gpsseuranta_client = GPSSeurantaClient()
+gps_seuranta_net_client = GPSSeurantaNetClient()
 
 
 def logo_upload_path(instance=None, file_name=None):
@@ -2428,7 +2428,7 @@ class Device(models.Model, SomewhereOnEarth):
             for archived_event_affected in archived_events_affected:
                 archived_event_affected.invalidate_cache()
             if self.should_relay_to_gpsseuranta:
-                gpsseuranta_client.send(f"rc{self.aid}", added_locs)
+                gps_seuranta_net_client.send(f"rc{self.aid}", added_locs)
         elif save:
             self.save()
 
