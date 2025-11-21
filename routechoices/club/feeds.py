@@ -28,7 +28,7 @@ class ClubLiveEventsFeed(Feed):
     feed_type = RssXslFeed
 
     def get_object(self, request, *args, **kwargs):
-        return Club.objects.get(slug__iexact=request.club_slug)
+        return Club.objects.get(slug__iexact=request.club_slug, is_personal_page=False)
 
     def title(self, obj):
         return f"Latest Events by {obj.name}"

@@ -100,6 +100,7 @@ This email is to let you know that we have now deleted your inactive Routechoice
             .filter(
                 upgraded=False,
                 frontpage_featured=False,
+                is_personal_page=False,
             )
             .order_by("last_login")
         )

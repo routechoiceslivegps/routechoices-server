@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.contrib.gis.geoip2 import GeoIP2
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.files.base import ContentFile
 from django.db.models import Prefetch, Q
 from django.http import HttpRequest, HttpResponse
 from django.http.response import Http404
@@ -22,7 +23,7 @@ from django.utils.timezone import now
 from django_hosts.resolvers import reverse
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import renderers, status
+from rest_framework import renderers, serializers, status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -293,7 +294,9 @@ def event_list(request):
         club_slug = request.data.get("club_slug")
         if not club_slug:
             raise ValidationError("club_slug is required")
-        club = Club.objects.filter(admins=request.user, slug__iexact=club_slug).first()
+        club = Club.objects.filter(
+            admins=request.user, slug__iexact=club_slug, is_personal_page=False
+        ).first()
         if not club:
             raise ValidationError("club not found")
         if not club.can_modify_events:
@@ -401,7 +404,7 @@ def event_list(request):
 
     headers = {}
     if request.user.is_authenticated:
-        clubs = Club.objects.filter(admins=request.user)
+        clubs = Club.objects.filter(admins=request.user, is_personal_page=False)
         events = Event.objects.filter(
             Q(**privacy_arg) | Q(club__in=clubs)
         ).select_related("club")
@@ -479,7 +482,7 @@ def event_list(request):
 @api_GET_view
 @permission_classes([IsAuthenticated])
 def club_list_view(request):
-    owned_clubs = Club.objects.filter(admins=request.user)
+    owned_clubs = Club.objects.filter(admins=request.user, is_personal_page=False)
     clubs = owned_clubs
     output = []
     for club in clubs:
@@ -1459,7 +1462,7 @@ def locations_api_gw(request):
     device_id = str(device_id)
     if re.match(r"^[0-9]+$", device_id):
         if secret_provided not in settings.POST_LOCATION_SECRETS and (
-            not request.user.is_authenticated or request.user.username != "apps"
+            not request.user.is_authenticated or not request.user.is_staff
         ):
             raise PermissionDenied(
                 "Authentication Failed. Only validated apps are allowed"
@@ -1604,7 +1607,7 @@ def create_device_id(request):
         return Response(
             {"status": "ok", "device_id": device.aid, "imei": imei}, status=status_code
         )
-    if not request.user.is_authenticated or request.user.username != "apps":
+    if not request.user.is_authenticated or not request.user.is_staff:
         raise PermissionDenied(
             "Authentication Failed, Only validated apps can create new device IDs"
         )
@@ -1667,10 +1670,11 @@ def user_search(request):
 @permission_classes([IsAuthenticated])
 def user_view(request):
     user = request.user
-    clubs = Club.objects.filter(admins=user)
+    clubs = Club.objects.filter(admins=user, is_personal_page=False)
     output = {
         "username": user.username,
         "clubs": [{"name": c.name, "slug": c.slug} for c in clubs],
+        "has_mapdump": user.has_personal_page,
     }
     return Response(output)
 
@@ -1741,7 +1745,8 @@ def device_registrations(request, device_id):
 @permission_classes([IsAuthenticated])
 def device_ownership_api_view(request, club_slug, device_id):
     club = get_object_or_404(
-        Club.objects.filter(admins=request.user), slug__iexact=club_slug
+        Club.objects.filter(admins=request.user, is_personal_page=False),
+        slug__iexact=club_slug,
     )
     device = get_object_or_404(Device, aid=device_id, virtual=False)
 
@@ -1863,7 +1868,7 @@ def event_geojson_download(request, event_id):
 @api_GET_HEAD_view
 @permission_classes([IsAuthenticated])
 def map_kmz_download(request, map_id, *args, **kwargs):
-    club_list = Club.objects.filter(admins=request.user)
+    club_list = Club.objects.filter(admins=request.user, is_personal_page=False)
     raster_map = get_object_or_404(Map, aid=map_id, club__in=club_list)
     kmz_data = raster_map.kmz
     response = StreamingHttpRangeResponse(
@@ -2161,3 +2166,145 @@ def third_party_event_data(request, provider, uid):
     cache.set(cache_key, output, 10)
 
     return Response(output)
+
+
+class RelativeURLField(serializers.ReadOnlyField):
+    """
+    Field that returns a link to the relative url.
+    """
+
+    def to_representation(self, value):
+        request = self.context.get("request")
+        url = request and request.build_absolute_uri(value) or ""
+        return url
+
+
+class MapSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Map
+        fields = (
+            "bound",
+            "size",
+        )
+
+
+class EventSerializer(serializers.ModelSerializer):
+    map = MapSerializer()
+
+    class Meta:
+        model = Event
+        field = (
+            "name",
+            "map",
+        )
+
+
+class EffortSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(source="aid")
+    event = EventSerializer()
+
+    class Meta:
+        model = Competitor
+        fields = (
+            "id",
+            "name",
+            "short_name",
+            "start_time",
+            "timezone",
+            "country_code",
+            "distance",
+            "duration",
+            "event",
+        )
+
+
+@swagger_auto_schema(
+    method="get",
+    auto_schema=None,
+)
+@api_GET_view
+@permission_classes([IsAuthenticated])
+def md_map_dl(request, aid):
+    effort = get_object_or_404(
+        Competitor.objects.filter(
+            event__club__is_personal_page=True
+        ).prefetch_related(
+            "event", "event__map", "device",
+        ),
+        aid=aid,
+    )
+    show_header = request.query_params.get("show_header", False)
+    show_route = request.query_params.get("show_route", False)
+    out_bounds = request.query_params.get("out_bounds", False)
+    mime_type = "image/jpeg"
+    if show_header or show_route:
+        img = effort.mapdump_effort_image(show_header, show_route)
+    elif out_bounds:
+        img = effort.mapdump_effort_image(False, False)
+    else:
+        return serve_image_from_s3(
+            request,
+            effort.event.map.image,
+            effort.event.name,
+            mime=mime_type,
+        )
+    response = HttpResponse(img, content_type=mime_type)
+    response["Content-Disposition"] = set_content_disposition(
+        f"{event.name}.{mime_type[6:]}", dl=False
+    )
+    return response
+
+
+@swagger_auto_schema(
+    method="post",
+    auto_schema=None,
+)
+@api_POST_view
+@permission_classes([IsAuthenticated])
+def md_create_effort_view(request):
+    user = request.user
+    club = user.personal_page
+    if not club:
+        raise PermissionDenied()
+
+    effort_name = request.data.get("name")
+
+    map_image_file = request.FILES.get("map_image")
+    map_corners_coords = request.data.get("map_image_corners_coords")
+    map = Map(
+        name=f"{effort_name} map",
+        corners_coordinates=map_corners_coords,
+    )
+    map.image.save(
+        "tmp_name",
+        ContentFile(map_image_file.file.getbuffer()),
+    )
+
+    gps_data_raw = request.data.get("gps_data")
+    gps_data = json.loads(gps_data_raw)
+    device = Device(virtual=True)
+    device.add_locations(gps_data)
+    device.save()
+    
+    trk_points = device.locations
+    
+    event = Event(
+        name=effort_name,
+        slug=short_random_slug(),
+        start_date=epoch_to_datetime(trk_points[0][0]),
+        end_date=epoch_to_dateime(trk_points[-1][0]),
+        map=map,
+    )
+    event.save()
+
+    effort = Competitor.objects.create(
+        name=user.username,
+        short_name=user.username,
+        user=user,
+        event=event,
+        device=device,
+    )
+    return Response(
+        EffortSerializer(effort).data, status_code=status.HTTP_201_CREATED
+    )
+

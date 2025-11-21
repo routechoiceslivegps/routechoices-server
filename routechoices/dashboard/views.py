@@ -76,6 +76,7 @@ def requires_club_in_session(function):
 
         club = get_object_or_404(
             Club,
+            is_personal_page=False,
             slug__iexact=club_slug,
             admins=request.user,
         )
@@ -114,7 +115,7 @@ def home_view(request):
         "event", "event__club", "device"
     ).order_by("-event__start_date")
     has_more_participations = participations.count() > 5
-    club_list = Club.objects.filter(admins=request.user)
+    club_list = Club.objects.filter(admins=request.user, is_personal_page=False)
     return render(
         request,
         "dashboard/landing.html",
@@ -200,7 +201,7 @@ def club_request_invite_view(request):
 
 @login_required
 def club_select_view(request):
-    club_list = Club.objects.filter(admins=request.user)
+    club_list = Club.objects.filter(admins=request.user, is_personal_page=False)
 
     paginator = Paginator(club_list, DEFAULT_PAGE_SIZE)
     page = request.GET.get("page")

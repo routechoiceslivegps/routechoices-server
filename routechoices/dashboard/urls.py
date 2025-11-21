@@ -74,7 +74,7 @@ urlpatterns = [
         ),
     ),
     path(
-        "clubs/",
+        "orgs/",
         include(
             (
                 [

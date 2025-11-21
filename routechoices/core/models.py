@@ -5,6 +5,8 @@ import math
 import os.path
 import re
 import socket
+import subprocess
+import tempfile
 import time
 from datetime import timedelta
 from io import BytesIO
@@ -20,11 +22,10 @@ import gpxpy.gpx
 import magic
 import numpy as np
 import orjson as json
-import reverse_geocode
 from allauth.account.models import EmailAddress
 from dateutil.parser import parse as parse_date
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.gis.geos import LinearRing, Polygon
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import BadRequest, PermissionDenied, ValidationError
@@ -52,8 +53,10 @@ from routechoices.lib.duration_constants import (
 from routechoices.lib.geojson import get_geojson_coordinates
 from routechoices.lib.globalmaptiles import GlobalMercator
 from routechoices.lib.helpers import (
+    COUNTRIES,
     adjugate_matrix,
     avg_angles,
+    country_code_at_coords,
     delete_domain,
     distance_latlon,
     epoch_to_datetime,
@@ -71,6 +74,7 @@ from routechoices.lib.helpers import (
     simplify_line,
     simplify_periods,
     time_base32,
+    timezone_at_coords,
 )
 from routechoices.lib.jxl import register_jxl_opener
 from routechoices.lib.storages import OverwriteImageStorage
@@ -104,12 +108,6 @@ LOCATION_LONGITUDE_INDEX = 2
 
 END_FREE_OCLUB = parse_date("2026-01-01T00:00:00Z")
 
-COUNTRIES = reverse_geocode.GeocodeData()._countries
-
-
-def country_code_at_coords(latlon):
-    return reverse_geocode.get(latlon).get("country_code")
-
 
 class StringToArray(models.Func):
     function = "string_to_array"
@@ -124,7 +122,13 @@ class SomewhereOnEarth:
     @property
     def country_code(self):
         if coords := self.earth_coords:
-            return country_code_at_coords(self.earth_coords)
+            return country_code_at_coords(coords)
+        return None
+
+    @property
+    def timezone(self):
+        if coords := self.earth_coords:
+            return timezone_at_coords(coords)
         return None
 
     @property
@@ -227,6 +231,7 @@ class Club(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+    is_personal_page = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
     modification_date = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=255, unique=True)
@@ -340,7 +345,7 @@ Follow our events live or replay them later.
                     self.analytics_site = ""
 
         self.slug = self.slug.lower()
-        if not self.analytics_site:
+        if not self.is_personal_page and not self.analytics_site:
             analytics_site, created = plausible.create_shared_link(
                 self.analytics_domain, self.name
             )
@@ -369,6 +374,7 @@ Follow our events live or replay them later.
             self.free_trial_active
             and not (self.o_club and now() < END_FREE_OCLUB)
             and not (self.upgraded and not self.subscription_paused)
+            and not self.is_personal_page
         )
 
     @property
@@ -404,6 +410,8 @@ Follow our events live or replay them later.
     def nice_url(self):
         if self.domain:
             return f"{self.url_protocol}://{self.domain}/"
+        if self.is_personal_page:
+            return f"https://my.routechoices.com/{self.creator.username}"
         path = reverse(
             "club_view", host="clubs", host_kwargs={"club_slug": self.slug.lower()}
         )
@@ -491,13 +499,46 @@ def delete_club_receiver(sender, instance, using, **kwargs):
 
 def can_user_create_club(user):
     user_free_clubs_count = Club.objects.filter(
-        upgraded=False, admins__id=user.id
+        upgraded=False, admins__id=user.id, is_personal_page=False
     ).count()
     return user_free_clubs_count == 0
 
 
 User.add_to_class("can_create_club", property(can_user_create_club))
 
+
+def create_user_personal_page(user):
+    club, created = Club.objects.get_or_create(
+        creator=user,
+        is_personal_page=True,
+        defaults={
+            "slug": random_key(),
+            "name": f"{user.username}'s Map Dump",
+        },
+    )
+    if created:
+        club.admins.set([user])
+    return club
+
+
+def has_user_personal_page(user):
+    return Club.objects.filter(
+        creator=user,
+        is_personal_page=True,
+    ).exists()
+
+
+def get_user_personal_page(user):
+    return Club.objects.filter(
+        creator=user,
+        is_personal_page=True,
+    ).first()
+
+
+User.personal_page = property(get_user_personal_page)
+User.has_personal_page = property(has_user_personal_page)
+AnonymousUser.personal_page = None
+AnonymousUser.has_personal_page = False
 
 def map_upload_path(instance=None, file_name=None):
     tmp_path = ["maps"]
@@ -1647,7 +1688,7 @@ class Event(models.Model, SomewhereOnEarth):
             not user.is_authenticated
             or not self.club.admins.filter(id=user.id).exists()
         ):
-            raise PermissionDenied
+            raise PermissionDenied()
 
     @classmethod
     def get_by_url(cls, url):
@@ -2852,6 +2893,51 @@ class Competitor(models.Model, SomewhereOnEarth):
             distance += 12756274 * math.atan2(math.sqrt(alpha), math.sqrt(1 - alpha))
             prev_pt = pt
         return distance
+
+    @property
+    def locations_hash(self):
+        return shortsafe64encodedsha(self.encoded_data)[:8]
+
+    def mapdump_effort_image(self, header=True, route=True):
+        header_arg = "1" if header else "0"
+        route_arg = "1" if route else "0"
+
+        cache_key = f"mapdump:{self.event.map.hash}:{self.locations_hash}:{header_arg}:{route_arg}"
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+        data_uri = None
+        with (
+            tempfile.NamedTemporaryFile() as map_file,
+            tempfile.NamedTemporaryFile() as track_file,
+        ):
+            map_file.write(self.event.map.data)
+            map_file.flush()
+            track_file.write(json.dumps(self.locations))
+            track_file.flush()
+            try:
+                data_uri = subprocess.check_output(
+                    [
+                        "./jstools/generate_map.js",
+                        map_file.name,
+                        self.event.map.corners_coordinates,
+                        track_file.name,
+                        self.timezone,
+                        header_arg,
+                        route_arg,
+                    ],
+                    cwd=settings.BASE_DIR,
+                )
+            except subprocess.CalledProcessError:
+                raise Exception("Internal Tool Error")
+            else:
+                header, encoded = data_uri.decode("utf-8").split(",", 1)
+                if header.startswith("data"):
+                    data = base64.b64decode(encoded)
+                    cache.set(cache_key, data, 31 * 24 * 3600)
+                    return data
+        return None
+
 
 
 @receiver([pre_save, post_delete], sender=Competitor)

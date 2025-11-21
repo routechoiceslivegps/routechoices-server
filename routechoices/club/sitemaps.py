@@ -15,7 +15,11 @@ class DynamicViewSitemap(Sitemap):
         return ""
 
     def items(self):
-        club_root = Club.objects.filter(slug=self.club_slug).first().nice_url
+        club_root = (
+            Club.objects.filter(slug=self.club_slug, is_personal_page=False)
+            .first()
+            .nice_url
+        )
         club_root = re.sub(r"^https?://", "", club_root)
 
         events = Event.objects.filter(

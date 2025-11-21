@@ -169,6 +169,7 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
                 "dashboard",
                 "events",
                 "map",
+                "my",
                 "registration",
                 "tiles",
                 "wms",
@@ -178,11 +179,14 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
                 if cached_slug := cache.get(cache_key):
                     club_slug = cached_slug
                 else:
-                    club_exists = Club.objects.filter(slug__iexact=slug).exists()
+                    club_exists = Club.objects.filter(
+                        slug__iexact=slug, is_personal_page=False
+                    ).exists()
                     if not club_exists:
                         club = Club.objects.filter(
                             slug_changed_from__iexact=slug,
                             slug_changed_at__gt=arrow.now().shift(hours=-72).datetime,
+                            is_personal_page=False,
                         ).first()
                         if club:
                             return redirect(
@@ -205,7 +209,9 @@ class HostsRequestMiddleware(HostsBaseMiddleware):
             if cached_slug := cache.get(cache_key):
                 club_slug = cached_slug
             else:
-                club = Club.objects.filter(domain__iexact=raw_host).first()
+                club = Club.objects.filter(
+                    domain__iexact=raw_host, is_personal_page=False
+                ).first()
                 if not club:
                     request.session = {}
                     return render(

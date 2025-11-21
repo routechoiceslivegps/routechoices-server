@@ -10,7 +10,9 @@ class Command(BaseCommand):
         parser.add_argument("club_slug", nargs=1, type=str)
 
     def handle(self, *args, **options):
-        club = Club.objects.filter(slug=options.get("club_slug")[0]).first()
+        club = Club.objects.filter(
+            slug=options.get("club_slug")[0], is_personal_page=False
+        ).first()
         if not club:
             self.stderr.write(f"No such club: {options.get('club_slug')[0]}")
             return
